@@ -1,10 +1,9 @@
 import logging
-from typing import Tuple
 
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
 
-from covid_bot.subscription_manager import SubscriptionManager
+from subscription_manager import SubscriptionManager
 from covid_data import CovidData
 
 '''
