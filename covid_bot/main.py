@@ -134,11 +134,11 @@ class TelegramBot(object):
         possible_rs = self.data.find_rs(location)
         if not possible_rs:
             message = "Es wurde keine Ort mit dem Namen " + location + " gefunden!"
-        elif 1 < len(possible_rs) <= 10:
+        elif 1 < len(possible_rs) <= 15:
             message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden:\n"
             message += ", ".join(list(map(lambda t: t[1], possible_rs)))
         else:
-            message = "Mit deinem Suchbegriff wurden mehr als 10 Orte gefunden, bitte versuche spezifischer zu sein."
+            message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
 
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text=message)
