@@ -1,5 +1,10 @@
-.api_key
 venv/*
 .idea/*
-data.csv
 *__pycache__*
+
+# Telegram API Key
+.api_key
+
+# Generated files
+*.json
+data.csv
