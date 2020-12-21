@@ -13,10 +13,10 @@ class CovidData(object):
             for row in reader:
                 # TODO: Compare to have earliest data
                 self.last_update = row['last_update']
-                self.data[row['AGS']] = {'name': row['county'], 'nice_name': row['GEN'], 'prefix': row['BEZ'],
+                self.data[row['RS']] = {'name': row['county'], 'nice_name': row['GEN'], 'prefix': row['BEZ'],
                                          '7day': row['cases7_per_100k_txt']}
 
-    def find_ags(self, search_str: str) -> List[Tuple[str, str]]:
+    def find_rs(self, search_str: str) -> List[Tuple[str, str]]:
         search_str = search_str.lower()
         results = []
         for key, value in self.data.items():
@@ -27,13 +27,13 @@ class CovidData(object):
                 results.append((key, value['name']))
         return results
 
-    def get_ags_name(self, ags: str) -> str:
-        if ags in self.data:
-            return self.data[ags]['name']
-        return ags
+    def get_rs_name(self, rs: str) -> str:
+        if rs in self.data:
+            return self.data[rs]['name']
+        return rs
 
-    def get_7day_incidence(self, ags: str) -> str:
-        return self.data.get(ags)['7day']
+    def get_7day_incidence(self, rs: str) -> str:
+        return self.data.get(rs)['7day']
 
     def get_last_update(self) -> str:
         return self.last_update

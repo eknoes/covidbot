@@ -20,25 +20,25 @@ class SubscriptionManager(object):
         else:
             self.data = dict()
 
-    def add_subscription(self, chat_id: int, ags: str) -> bool:
+    def add_subscription(self, chat_id: int, rs: str) -> bool:
         if str(chat_id) not in self.data or self.data[str(chat_id)] is None:
             self.data[str(chat_id)] = []
 
-        if ags in self.data[str(chat_id)]:
+        if rs in self.data[str(chat_id)]:
             return False
         else:
-            self.data[str(chat_id)].append(ags)
+            self.data[str(chat_id)].append(rs)
             self._save()
             return True
 
-    def rm_subscription(self, chat_id: int, ags: str) -> bool:
+    def rm_subscription(self, chat_id: int, rs: str) -> bool:
         if str(chat_id) not in self.data:
             return False
         
-        if ags not in self.data[str(chat_id)]:
+        if rs not in self.data[str(chat_id)]:
             return False
 
-        self.data[str(chat_id)].remove(ags)
+        self.data[str(chat_id)].remove(rs)
         self._save()
         return True
     

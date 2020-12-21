@@ -58,11 +58,11 @@ class TelegramBot(object):
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
         if entity != "":
-            possible_ags = self.data.find_ags(entity)
-            if len(possible_ags) == 1:
-                ags, county = possible_ags[0]
+            possible_rs = self.data.find_rs(entity)
+            if len(possible_rs) == 1:
+                rs, county = possible_rs[0]
                 message = "Die Inzidenz der letzten 7 Tage / 100.000 Einwohner beträgt:\n"
-                message += county + ": " + self.data.get_7day_incidence(ags)
+                message += county + ": " + self.data.get_7day_incidence(rs)
                 context.bot.send_message(chat_id=update.effective_chat.id,
                                          text=message)
             else:
@@ -73,10 +73,10 @@ class TelegramBot(object):
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
         if entity != "":
-            possible_ags = self.data.find_ags(entity)
-            if len(possible_ags) == 1:
-                ags, county = possible_ags[0]
-                if self.manager.add_subscription(update.effective_chat.id, ags):
+            possible_rs = self.data.find_rs(entity)
+            if len(possible_rs) == 1:
+                rs, county = possible_rs[0]
+                if self.manager.add_subscription(update.effective_chat.id, rs):
                     message = "Dein Abonnement für " + county + " wurde erstellt."
                 else:
                     message = "Du hast " + county + " bereits abonniert."
@@ -91,10 +91,10 @@ class TelegramBot(object):
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
         if entity != "":
-            possible_ags = self.data.find_ags(entity)
-            if len(possible_ags) == 1:
-                ags, county = possible_ags[0]
-                if self.manager.rm_subscription(update.effective_chat.id, ags):
+            possible_rs = self.data.find_rs(entity)
+            if len(possible_rs) == 1:
+                rs, county = possible_rs[0]
+                if self.manager.rm_subscription(update.effective_chat.id, rs):
                     message = "Dein Abonnement für " + county + " wurde beendet."
                 else:
                     message = "Du hast " + county + " nicht abonniert."
@@ -109,7 +109,7 @@ class TelegramBot(object):
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
         subscriptions = self.manager.get_subscriptions(update.effective_chat.id)
         if len(subscriptions) > 0:
-            data = map(lambda x: self.data.get_ags_name(x) + ": " + self.data.get_7day_incidence(x), subscriptions)
+            data = map(lambda x: self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x), subscriptions)
             message = "Die 7 Tage Inzidenz / 100.000 Einwohner beträgt:\n\n" + "\n".join(data) + "\n\n" \
                       "Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " + self.data.get_last_update()
         else:
@@ -121,7 +121,7 @@ class TelegramBot(object):
         if subscriptions is None or len(subscriptions) == 0:
             message = "Du hast aktuell keine Orte abonniert. Mit /abo kannst du Orte abonnieren, bspw. /abo Dresden"
         else:
-            counties = map(self.data.get_ags_name, subscriptions)
+            counties = map(self.data.get_rs_name, subscriptions)
             message = "Du hast aktuell " + str(len(subscriptions)) + " Orte abonniert: \n" + ", ".join(counties)
         context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
@@ -131,12 +131,12 @@ class TelegramBot(object):
         be identified :return: (bool, str): Boolean shows whether identifier was found, str is then identifier.
         Otherwise it is a message that should be sent to the user
         """
-        possible_ags = self.data.find_ags(location)
-        if not possible_ags:
+        possible_rs = self.data.find_rs(location)
+        if not possible_rs:
             message = "Es wurde keine Ort mit dem Namen " + location + " gefunden!"
-        elif 1 < len(possible_ags) <= 10:
+        elif 1 < len(possible_rs) <= 10:
             message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden:\n"
-            message += ", ".join(list(map(lambda t: t[1], possible_ags)))
+            message += ", ".join(list(map(lambda t: t[1], possible_rs)))
         else:
             message = "Mit deinem Suchbegriff wurden mehr als 10 Orte gefunden, bitte versuche spezifischer zu sein."
 
