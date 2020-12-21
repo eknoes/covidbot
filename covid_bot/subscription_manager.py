@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from typing import Dict, List, Set
 
@@ -15,7 +16,7 @@ class SubscriptionManager(object):
         if os.path.isfile(self.file):
             with open(self.file, "r") as f:
                 self.data = json.load(f)
-                print("Loaded Data: " + str(self.data))
+                logging.debug("Loaded Data: " + str(self.data))
         else:
             self.data = dict()
 
@@ -51,5 +52,5 @@ class SubscriptionManager(object):
     
     def _save(self) -> None:
         with open(self.file, "w") as f:
-            print("Saving Data: " + str(self.data))
+            logging.debug("Saving Data: " + str(self.data))
             json.dump(self.data, f)

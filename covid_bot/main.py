@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 from telegram import Update
@@ -63,7 +64,6 @@ class TelegramBot(object):
                 ags, county = possible_ags[0]
                 message = "Die Inzidenz der letzten 7 Tage / 100.000 Einwohner beträgt:\n"
                 message += county + ": " + self.data.get_7day_incidence(ags)
-
                 context.bot.send_message(chat_id=update.effective_chat.id,
                                          text=message)
             else:
@@ -160,6 +160,8 @@ class TelegramBot(object):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        level=logging.INFO, filename="bot.log")
     # Initialize Data
     data = CovidData("data.csv")
     manager = SubscriptionManager("user.json")
