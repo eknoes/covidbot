@@ -24,34 +24,34 @@ class SubscriptionManager(object):
             self._data = dict()
             self._last_update = None
 
-    def add_subscription(self, chat_id: int, rs: str) -> bool:
-        if str(chat_id) not in self._data or self._data[str(chat_id)] is None:
-            self._data[str(chat_id)] = []
+    def add_subscription(self, chat_id: str, rs: str) -> bool:
+        if chat_id not in self._data or self._data[chat_id] is None:
+            self._data[chat_id] = []
 
-        if rs in self._data[str(chat_id)]:
+        if rs in self._data[chat_id]:
             return False
         else:
-            self._data[str(chat_id)].append(rs)
+            self._data[chat_id].append(rs)
             self._save()
             return True
 
-    def rm_subscription(self, chat_id: int, rs: str) -> bool:
-        if str(chat_id) not in self._data:
+    def rm_subscription(self, chat_id: str, rs: str) -> bool:
+        if chat_id not in self._data:
             return False
         
-        if rs not in self._data[str(chat_id)]:
+        if rs not in self._data[chat_id]:
             return False
 
-        self._data[str(chat_id)].remove(rs)
-        if not self._data[str(chat_id)]:
-            del self._data[str(chat_id)]
+        self._data[chat_id].remove(rs)
+        if not self._data[chat_id]:
+            del self._data[chat_id]
         self._save()
         return True
     
-    def get_subscriptions(self, chat_id: int) -> Optional[set[str]]:
-        if str(chat_id) not in self._data:
+    def get_subscriptions(self, chat_id: str) -> Optional[set[str]]:
+        if chat_id not in self._data:
             return None
-        return set(self._data[str(chat_id)])
+        return set(self._data[chat_id])
     
     def get_subscribers(self) -> List[int]:
         return list(map(int, self._data.keys()))
