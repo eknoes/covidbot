@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from covid_data import CovidData
 from subscription_manager import SubscriptionManager
@@ -123,7 +123,7 @@ class CovidBot(object):
         return ("Dieser Befehl wurde nicht verstanden. Nutze /hilfe um einen Überblick über die Funktionen"
                 "zu bekommen!")
 
-    def update(self) -> Optional[list[Tuple[str, str]]]:
+    def update(self) -> Optional[List[Tuple[str, str]]]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived

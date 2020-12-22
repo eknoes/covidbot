@@ -48,7 +48,7 @@ class SubscriptionManager(object):
         self._save()
         return True
     
-    def get_subscriptions(self, chat_id: str) -> Optional[set[str]]:
+    def get_subscriptions(self, chat_id: str) -> Optional[Set[str]]:
         if chat_id not in self._data:
             return None
         return set(self._data[chat_id])
