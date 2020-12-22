@@ -1,25 +1,49 @@
+import codecs
 import csv
-from typing import Tuple, List, Dict
+import logging
+import os
+from typing import Tuple, List, Dict, Union
+
+import requests
 
 
 class CovidData(object):
-    data: Dict[str, Dict[str, str]]
-    last_update: str
+    RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
+    RKI_BL_CSV = "https://opendata.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0.csv"
+    _data: Dict[str, Dict[str, str]]
+    _last_update: str
 
-    def __init__(self, filename: str) -> None:
-        self.data = dict()
-        with open(filename, "r") as rki_csv:
-            reader = csv.DictReader(rki_csv)
-            for row in reader:
-                # TODO: Compare to have earliest data
-                self.last_update = row['last_update']
-                self.data[row['RS']] = {'name': row['county'], 'nice_name': row['GEN'], 'prefix': row['BEZ'],
-                                         '7day': row['cases7_per_100k_txt']}
+    def __init__(self, filename: str = None) -> None:
+        self._data = dict()
+        if filename is None or not os.path.isfile(filename):
+            logging.debug("No data file provided, fetching current data...")
+            self.check_for_update()
+        else:
+            with open(filename, "r") as rki_csv:
+                logging.debug("Reading from Data file")
+                reader = csv.DictReader(rki_csv)
+                self._init_data(reader)
+
+    def _init_data(self, reader: csv.DictReader) -> None:
+        self._data = {}
+        logging.info("Initializing with new data")
+        for row in reader:
+            # TODO: Compare to have earliest data
+            self._last_update = row['last_update']
+
+            self._data[row['RS']] = {'name': row['county'], 'nice_name': row['GEN'],
+                                     '7day': row['cases7_per_100k_txt']}
+
+            # Gather Bundesland data
+            if row['BL_ID'] not in self._data:
+                self._data[row['BL_ID']] = {'name': row['BL'], 'nice_name': row['BL'],
+                                            '7day': "{0:.2f}".format(float(row['cases7_bl_per_100k'])).replace(".",
+                                                                                                               ",")}
 
     def find_rs(self, search_str: str) -> List[Tuple[str, str]]:
         search_str = search_str.lower()
         results = []
-        for key, value in self.data.items():
+        for key, value in self._data.items():
             if value['name'].lower() == search_str:
                 return [(key, value['name'])]
 
@@ -28,12 +52,25 @@ class CovidData(object):
         return results
 
     def get_rs_name(self, rs: str) -> str:
-        if rs in self.data:
-            return self.data[rs]['name']
+        if rs in self._data:
+            return self._data[rs]['name']
         return rs
 
     def get_7day_incidence(self, rs: str) -> str:
-        return self.data.get(rs)['7day']
+        return self._data.get(rs)['7day']
 
     def get_last_update(self) -> str:
-        return self.last_update
+        return self._last_update
+
+    def check_for_update(self) -> bool:
+        logging.info("Start Updating data")
+        # TODO: Provide If-Not-Modified since
+        r = requests.get(self.RKI_LK_CSV)
+        if r.status_code == 200:
+            rki_data = codecs.decode(r.content, "utf-8").splitlines()
+            reader = csv.DictReader(rki_data)
+            self._init_data(reader)
+            return True
+        else:
+            logging.warning("RKI CSV Response Status Code is " + str(r.status_code))
+            return False

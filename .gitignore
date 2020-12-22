@@ -9,3 +9,4 @@ venv/*
 *.json
 data.csv
 *.log
+/covid_bot/tests/current_test.csv
