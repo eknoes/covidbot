@@ -65,21 +65,23 @@ class Bot(object):
         subscriptions = self.manager.get_subscriptions(userid)
         if len(subscriptions) > 0:
             message = "Es sind neue Inzidenzwerte verfügbar!\n\n"
-            data = map(lambda x: self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x), subscriptions)
+            data = map(lambda x: "• " + self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x),
+                       subscriptions)
             message += "Die 7 Tage Inzidenz / 100.000 Einwohner beträgt:\n\n" + "\n".join(data) + "\n\n" \
-                                                                                                  "Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " + self.data.get_last_update().strftime(
-                "%d.%m.%Y, %H:%M Uhr")
+                       "<i>Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom "\
+                       + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
         else:
-            message = "Du hast aktuell keine Abonemments!"
+            message = "Du hast aktuell keine Abonnements!"
         return message
 
     def get_overview(self, userid: str) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
         if subscriptions is None or len(subscriptions) == 0:
-            message = "Du hast aktuell keine Orte abonniert. Mit /abo kannst du Orte abonnieren, bspw. /abo Dresden"
+            message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
+                      "bspw. <code>/abo Dresden</code> "
         else:
             counties = map(self.data.get_rs_name, subscriptions)
-            message = "Du hast aktuell " + str(len(subscriptions)) + " Orte abonniert: \n" + ", ".join(counties)
+            message = "Du hast aktuell <b>" + str(len(subscriptions)) + "</b> Orte abonniert: \n" + ", ".join(counties)
         return message
 
     def _handle_wrong_county_key(self, location: str) -> str:
@@ -90,10 +92,10 @@ class Bot(object):
         """
         possible_rs = self.data.find_rs(location)
         if not possible_rs:
-            message = "Es wurde keine Ort mit dem Namen " + location + " gefunden!"
+            message = "Es wurde <b>keine<b> Ort mit dem Namen " + location + " gefunden!"
         elif 1 < len(possible_rs) <= 15:
             message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden:\n"
-            message += ", ".join(list(map(lambda t: t[1], possible_rs)))
+            message += "\n".join(list(map(lambda t: "• " + t[1], possible_rs)))
         else:
             message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
 
@@ -105,7 +107,7 @@ class Bot(object):
 
     @staticmethod
     def unknown_action() -> str:
-        return ("Dieser Befehl wurde nicht verstanden. Nutze /hilfe um einen Überblick über die Funktionen"
+        return ("Dieser Befehl wurde nicht verstanden. Nutze <code>/hilfe</code> um einen Überblick über die Funktionen"
                 "zu bekommen!")
 
     def update(self) -> Optional[List[Tuple[str, str]]]:

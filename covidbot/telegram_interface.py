@@ -54,25 +54,25 @@ class TelegramInterface(object):
 
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
-        update.message.reply_text(self._bot.get_current(entity))
+        update.message.reply_html(self._bot.get_current(entity))
         self.log.debug("Someone called /ort")
 
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
-        update.message.reply_text(self._bot.subscribe(str(update.effective_chat.id), entity))
+        update.message.reply_html(self._bot.subscribe(str(update.effective_chat.id), entity))
         self.log.debug("Someone called /abo" + entity)
 
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
-        update.message.reply_text(self._bot.unsubscribe(str(update.effective_chat.id), entity))
+        update.message.reply_html(self._bot.unsubscribe(str(update.effective_chat.id), entity))
         self.log.debug("Someone called /beende" + entity)
 
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_text(self._bot.get_report(str(update.effective_chat.id)))
+        update.message.reply_html(self._bot.get_report(str(update.effective_chat.id)))
         self.log.debug("Someone called /bericht")
 
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_text(self._bot.unknown_action())
+        update.message.reply_html(self._bot.unknown_action())
         self.log.info("Someone called an unknown action: " + update.message.text)
 
     def updateHandler(self, context: CallbackContext) -> None:
