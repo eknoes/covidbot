@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from unittest import TestCase
 
 from covidbot.bot import Bot
@@ -16,7 +17,7 @@ class CovidBotTest(TestCase):
         bot.subscribe("testuser", "Berlin")
         bot.subscribe("testuser2", "Hannover")
         self.assertEqual([], bot.update(), "Without new data no reports should be generated")
-        man.set_last_update("yesterday")
+        man.set_last_update(datetime(year=2019,month=12,day=1))
         self.assertEqual(2, len(bot.update()), "New data should trigger 2 updates")
         self.assertEqual([], bot.update(), "Without new data no reports should be generated")
         del bot

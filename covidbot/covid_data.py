@@ -2,6 +2,7 @@ import codecs
 import csv
 import logging
 import os
+from datetime import datetime
 from typing import Tuple, List, Dict
 
 import requests
@@ -11,26 +12,28 @@ class CovidData(object):
     RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
 
     _data: Dict[str, Dict[str, str]]
-    _last_update: str
+    _last_update: datetime
+    log = logging.getLogger(__name__)
 
     def __init__(self, filename: str = None) -> None:
         self._data = dict()
-        self._last_update = "none"
+        self._last_update = datetime(2020, 1, 1)
         if filename is None or not os.path.isfile(filename):
-            logging.debug("No data file provided, fetching current data...")
+            self.log.debug("No data file provided, fetching current data...")
             self.fetch_current_data()
         else:
             with open(filename, "r") as rki_csv:
-                logging.debug("Reading from Data file")
+                self.log.debug("Reading from Data file")
                 reader = csv.DictReader(rki_csv)
                 self._init_data(reader)
 
     def _init_data(self, reader: csv.DictReader) -> None:
         self._data = {}
-        logging.info("Initializing with new data")
+        self.log.debug("Initializing data")
         for row in reader:
-            # TODO: Compare to have earliest data
-            self._last_update = row['last_update']
+            updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr")
+            if self._last_update is None or self._last_update < updated:
+                self._last_update = updated
 
             self._data[row['RS']] = {'name': row['county'], 'nice_name': row['GEN'],
                                      '7day': row['cases7_per_100k_txt']}
@@ -60,21 +63,23 @@ class CovidData(object):
     def get_7day_incidence(self, rs: str) -> str:
         return self._data.get(rs)['7day']
 
-    def get_last_update(self) -> str:
+    def get_last_update(self) -> datetime:
         return self._last_update
 
     def fetch_current_data(self) -> bool:
-        logging.info("Start Updating data")
+        self.log.info("Start Updating data")
         # TODO: Provide If-Not-Modified since
-        r = requests.get(self.RKI_LK_CSV)
+        header = {"If-Modified-Since": self._last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
+        r = requests.get(self.RKI_LK_CSV, headers=header)
         if r.status_code == 200:
             old_update = self._last_update
             rki_data = codecs.decode(r.content, "utf-8").splitlines()
             reader = csv.DictReader(rki_data)
             self._init_data(reader)
-            if old_update != self._last_update:
+            if old_update < self._last_update:
                 return True
+        elif r.status_code == 304:
+            self.log.info("RKI has no new data")
         else:
-            logging.warning("RKI CSV Response Status Code is " + str(r.status_code))
-        logging.info("No new data")
+            self.log.warning("RKI CSV Response Status Code is " + str(r.status_code))
         return False

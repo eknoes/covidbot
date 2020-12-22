@@ -10,6 +10,7 @@ class Bot(object):
     manager: SubscriptionManager
 
     def __init__(self, covid_data: CovidData, subscription_manager: SubscriptionManager):
+        self.log = logging.getLogger(__name__)
         self.data = covid_data
         self.manager = subscription_manager
 
@@ -66,7 +67,8 @@ class Bot(object):
             message = "Es sind neue Inzidenzwerte verfügbar!\n\n"
             data = map(lambda x: self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x), subscriptions)
             message += "Die 7 Tage Inzidenz / 100.000 Einwohner beträgt:\n\n" + "\n".join(data) + "\n\n" \
-                                                                                                  "Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " + self.data.get_last_update()
+                                                                                                  "Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " + self.data.get_last_update().strftime(
+                "%d.%m.%Y, %H:%M Uhr")
         else:
             message = "Du hast aktuell keine Abonemments!"
         return message
@@ -113,9 +115,9 @@ class Bot(object):
         :rtype: Optional[list[Tuple[str, str]]]
         :return: List of (userid, message)
         """
-        logging.debug("Checking for new data")
-        if self.data.get_last_update() != self.manager.get_last_update():
-            logging.info("New COVID19 data available from " + self.data.get_last_update())
+        self.log.debug("Checking for new data")
+        if self.manager.get_last_update() is None or self.data.get_last_update() > self.manager.get_last_update():
+            self.log.info("New COVID19 data available from " + self.data.get_last_update().isoformat())
             result = []
             for subscriber in self.manager.get_subscribers():
                 result.append((subscriber, self.get_report(subscriber)))

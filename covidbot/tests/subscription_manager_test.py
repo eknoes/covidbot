@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from unittest import TestCase
 
 from covidbot.subscription_manager import SubscriptionManager
@@ -17,8 +18,8 @@ class SubscriptionManagerTest(TestCase):
         manager.rm_subscription(str(1), "test")
         self.assertEqual(None, manager.get_subscriptions(str(1)))
         self.assertIsNone(manager.get_last_update(), "last_update should be None if initialized empty")
-        manager.set_last_update("Today")
-        self.assertEqual("Today", manager.get_last_update(), "last_update should be changed after set_last_update")
+        manager.set_last_update(datetime(year=2020,month=1,day=1))
+        self.assertEqual(datetime(year=2020,month=1,day=1), manager.get_last_update(), "last_update should be changed after set_last_update")
 
     def test_persistence(self):
         if os.path.isfile("testuser_empty.json"):
@@ -30,11 +31,12 @@ class SubscriptionManagerTest(TestCase):
         manager.add_subscription(str(2), "test2")
         manager.add_subscription(str(4), "removed")
         manager.rm_subscription(str(4), "removed")
-        manager.set_last_update("Today")
+        manager.set_last_update(datetime(year=2020,month=1,day=1))
         del manager
 
         manager = SubscriptionManager("testuser_empty.json")
         self.assertEqual({"test1"}, manager.get_subscriptions(str(1)), "Should save persistently")
         self.assertEqual({"test1"}, manager.get_subscriptions(str(3)), "Should save persistently")
         self.assertEqual({"test2"}, manager.get_subscriptions(str(2)), "Should save persistently")
+        self.assertEqual(datetime(year=2020,month=1,day=1), manager.get_last_update(), "Should save persistently")
         self.assertIsNone(manager.get_subscriptions(str(4)), "Should remove persistently")

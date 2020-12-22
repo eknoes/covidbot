@@ -1,14 +1,18 @@
 import json
 import logging
 import os
+from datetime import datetime
 from typing import Dict, List, Set, Union, Optional
+
+from covidbot.utils import serialize_datetime, unserialize_datetime
 
 
 class SubscriptionManager(object):
     _file: str
     # json modules stores ints as strings, so we have to convert the chat_ids everytime
     _data: Dict[str, List[str]]
-    _last_update: Union[str, None]
+    _last_update: Union[datetime, None]
+    log = logging.getLogger(__name__)
 
     def __init__(self, file: str):
         self._file = file
@@ -17,8 +21,8 @@ class SubscriptionManager(object):
             with open(self._file, "r") as f:
                 data = json.load(f)
                 self._data = data['subscriptions']
-                self._last_update = data['last_update']
-                logging.debug("Loaded Data: " + str(self._data))
+                self._last_update = unserialize_datetime(data['last_update'])
+                self.log.debug("Loaded Data: " + str(self._data))
         else:
             self._data = dict()
             self._last_update = None
@@ -55,14 +59,14 @@ class SubscriptionManager(object):
     def get_subscribers(self) -> List[str]:
         return list(self._data.keys())
 
-    def set_last_update(self, last_update: str) -> None:
+    def set_last_update(self, last_update: datetime) -> None:
         self._last_update = last_update
         self._save()
 
-    def get_last_update(self) -> str:
+    def get_last_update(self) -> Union[None, datetime]:
         return self._last_update
 
     def _save(self) -> None:
         with open(self._file, "w") as f:
-            logging.debug("Saving Data: " + str(self._data))
-            json.dump({"subscriptions": self._data, "last_update": self._last_update}, f)
+            self.log.debug("Saving Data: " + str(self._data))
+            json.dump({"subscriptions": self._data, "last_update": self._last_update}, f, default=serialize_datetime)
