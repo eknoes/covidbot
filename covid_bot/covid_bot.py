@@ -1,10 +1,8 @@
 import logging
+from typing import Optional, Tuple
 
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
-
-from subscription_manager import SubscriptionManager
 from covid_data import CovidData
+from subscription_manager import SubscriptionManager
 
 
 class CovidBot(object):
@@ -82,8 +80,9 @@ class CovidBot(object):
     def get_report(self, userid: str) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
         if len(subscriptions) > 0:
+            message = "Es sind neue Inzidenzwerte verfügbar!\n\n"
             data = map(lambda x: self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x), subscriptions)
-            message = "Die 7 Tage Inzidenz / 100.000 Einwohner beträgt:\n\n" + "\n".join(data) + "\n\n" \
+            message += "Die 7 Tage Inzidenz / 100.000 Einwohner beträgt:\n\n" + "\n".join(data) + "\n\n" \
                                                                                                  "Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " + self.data.get_last_update()
         else:
             message = "Du hast aktuell keine Abonemments!"
@@ -121,6 +120,25 @@ class CovidBot(object):
 
     @staticmethod
     def unknown_action() -> str:
-        return (
-            "Dieser Befehl wurde nicht verstanden. Nutze /hilfe um einen Überblick über die Funktionen"
-            "zu bekommen!")
+        return ("Dieser Befehl wurde nicht verstanden. Nutze /hilfe um einen Überblick über die Funktionen"
+                "zu bekommen!")
+
+    def update(self) -> Optional[list[Tuple[str, str]]]:
+        """
+        Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
+        arrived
+        :rtype: Optional[list[Tuple[str, str]]]
+        :return: List of (userid, message)
+        """
+        logging.debug("Checking for new data")
+        if self.data.get_last_update() != self.manager.get_last_update():
+            logging.info("New Data arrived, generating reports")
+            result = []
+            for subscriber in self.manager.get_subscribers():
+                result.append((subscriber, self.get_report(subscriber)))
+            self.manager.set_last_update(self.data.get_last_update())
+            return result
+
+        if self.data.fetch_current_data():
+            return self.update()
+        return []

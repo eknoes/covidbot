@@ -9,15 +9,16 @@ import requests
 
 class CovidData(object):
     RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
-    RKI_BL_CSV = "https://opendata.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0.csv"
+
     _data: Dict[str, Dict[str, str]]
     _last_update: str
 
     def __init__(self, filename: str = None) -> None:
         self._data = dict()
+        self._last_update = "none"
         if filename is None or not os.path.isfile(filename):
             logging.debug("No data file provided, fetching current data...")
-            self.check_for_update()
+            self.fetch_current_data()
         else:
             with open(filename, "r") as rki_csv:
                 logging.debug("Reading from Data file")
@@ -62,15 +63,18 @@ class CovidData(object):
     def get_last_update(self) -> str:
         return self._last_update
 
-    def check_for_update(self) -> bool:
+    def fetch_current_data(self) -> bool:
         logging.info("Start Updating data")
         # TODO: Provide If-Not-Modified since
         r = requests.get(self.RKI_LK_CSV)
         if r.status_code == 200:
+            old_update = self._last_update
             rki_data = codecs.decode(r.content, "utf-8").splitlines()
             reader = csv.DictReader(rki_data)
             self._init_data(reader)
-            return True
+            if old_update != self._last_update:
+                return True
         else:
             logging.warning("RKI CSV Response Status Code is " + str(r.status_code))
-            return False
+        logging.info("No new data")
+        return False

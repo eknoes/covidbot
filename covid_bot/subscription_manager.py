@@ -53,8 +53,8 @@ class SubscriptionManager(object):
             return None
         return set(self._data[chat_id])
     
-    def get_subscribers(self) -> List[int]:
-        return list(map(int, self._data.keys()))
+    def get_subscribers(self) -> List[str]:
+        return list(self._data.keys())
     
     def set_last_update(self, last_update: str) -> None:
         self._last_update = last_update

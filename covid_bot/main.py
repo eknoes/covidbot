@@ -16,6 +16,7 @@ beende - Widerrufe Abonnement
 bericht - Aktueller Bericht
 '''
 
+
 class TelegramBot(object):
     _bot: CovidBot
 
@@ -35,6 +36,7 @@ class TelegramBot(object):
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
+        self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_text(self._bot.get_help(update.effective_user.first_name))
@@ -59,6 +61,15 @@ class TelegramBot(object):
 
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_text(self._bot.unknown_action())
+
+    def updateHandler(self, context: CallbackContext) -> None:
+        messages = self._bot.update()
+        if not messages:
+            return
+
+        for userid, message in messages:
+            context.bot.send_message(chat_id=userid, text=message)
+            logging.info("Sent report to " + userid)
 
     def run(self):
         self.updater.start_polling()

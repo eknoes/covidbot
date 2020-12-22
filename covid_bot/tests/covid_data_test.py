@@ -14,9 +14,9 @@ class CovidDataTest(TestCase):
         shutil.copy2("testdata.csv", "current_test.csv")
         data = CovidData("current_test.csv")
         self.assertEqual("21.12.2020, 00:00 Uhr", data.get_last_update())
-        data.check_for_update()
+        data.fetch_current_data()
         self.assertNotEqual("21.12.2020, 00:00 Uhr", data.get_last_update(), "CovidData should update itself")
         
-    def test_init_online(self):
+    def test_no_update_current_data(self):
         data = CovidData()
-        self.assertTrue(data.get_last_update(), "First Update should be true")
+        self.assertTrue(data.fetch_current_data(), "Do not update if data has not changed")
