@@ -59,7 +59,7 @@ class Bot(object):
                 return self._handle_wrong_county_key(county_key)
 
         else:
-            self._handle_no_input()
+            return self._handle_no_input()
 
     def get_report(self, userid: str) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
