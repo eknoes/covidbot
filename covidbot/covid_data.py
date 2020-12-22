@@ -2,7 +2,7 @@ import codecs
 import csv
 import logging
 import os
-from typing import Tuple, List, Dict, Union
+from typing import Tuple, List, Dict
 
 import requests
 

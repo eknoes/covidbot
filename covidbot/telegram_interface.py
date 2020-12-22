@@ -3,9 +3,7 @@ import logging
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
 
-from covid_bot import CovidBot
-from subscription_manager import SubscriptionManager
-from covid_data import CovidData
+from covidbot.bot import Bot
 
 '''
 Telegram Aktionen:
@@ -17,17 +15,13 @@ bericht - Aktueller Bericht
 '''
 
 
-class TelegramBot(object):
-    _bot: CovidBot
+class TelegramInterface(object):
+    _bot: Bot
 
-    def __init__(self, bot: CovidBot):
+    def __init__(self, bot: Bot, api_key: str):
         self._bot = bot
 
-        # Initialize Telegram
-        with open(".api_key", "r") as f:
-            key = f.readline()
-
-        self.updater = Updater(key)
+        self.updater = Updater(api_key)
 
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
         self.updater.dispatcher.add_handler(CommandHandler('start', self.helpHandler))
@@ -38,8 +32,22 @@ class TelegramBot(object):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
         self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
 
-    def helpHandler(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_text(self._bot.get_help(update.effective_user.first_name))
+    @staticmethod
+    def helpHandler(update: Update, context: CallbackContext) -> None:
+        update.message.reply_markdown_v2(f'Hallo {update.effective_user.first_name},\n'
+                                         f'über diesen Bot kannst du die vom RKI bereitgestellten Covid-Daten abonnieren.\n\n'
+                                         f'Mit der `/abo` Aktion kannst du die Zahlen für einen Ort '
+                                         f'abonnieren. Probiere bspw. `/abo Berlin` aus. '
+                                         f'Mit der `/beende` Aktion kannst du dieses Abonnement widerrufen. '
+                                         f'Du bekommst dann täglich deinen persönlichen Tagesbericht direkt nach '
+                                         f'Veröffentlichung neuer Zahlen. Möchtest du den aktuellen Bericht abrufen, '
+                                         f'ist dies mit `/bericht` möglich.\n\n '
+                                         f'\n\n'
+                                         f'Aktuelle Zahlen bekommst du mit `/ort`, bspw. `/ort Berlin`.'
+                                         f'\n\n'
+                                         f'Mehr Informationen zu diesem Bot findest du hier: '
+                                         f'https://github.com/eknoes/covid-bot\n\n'
+                                         f'Diesen Hilfetext erhältst du über `/hilfe`.')
 
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
@@ -74,11 +82,3 @@ class TelegramBot(object):
     def run(self):
         self.updater.start_polling()
         self.updater.idle()
-
-
-if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        level=logging.INFO, filename="bot.log")
-    # Initialize Data
-    bot = TelegramBot(CovidBot(CovidData("data.csv"), SubscriptionManager("user.json")))
-    bot.run()

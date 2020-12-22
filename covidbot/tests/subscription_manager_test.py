@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from covid_bot.subscription_manager import SubscriptionManager
+from covidbot.subscription_manager import SubscriptionManager
 
 
 class SubscriptionManagerTest(TestCase):
@@ -9,9 +9,9 @@ class SubscriptionManagerTest(TestCase):
         if os.path.isfile("testuser_empty.json"):
             os.remove("testuser_empty.json")
 
-        manager = SubscriptionManager("testuser_empty.json")#
+        manager = SubscriptionManager("testuser_empty.json")  #
         self.assertEqual([], manager.get_subscribers(), "Subscribers of new list should be empty")
-        
+
         manager.add_subscription(str(1), "test")
         self.assertIn("test", manager.get_subscriptions(str(1)), "Subscribers should have a subscription")
         manager.rm_subscription(str(1), "test")
@@ -19,7 +19,7 @@ class SubscriptionManagerTest(TestCase):
         self.assertIsNone(manager.get_last_update(), "last_update should be None if initialized empty")
         manager.set_last_update("Today")
         self.assertEqual("Today", manager.get_last_update(), "last_update should be changed after set_last_update")
-    
+
     def test_persistence(self):
         if os.path.isfile("testuser_empty.json"):
             os.remove("testuser_empty.json")

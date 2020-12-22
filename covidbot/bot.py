@@ -1,34 +1,17 @@
 import logging
 from typing import Optional, Tuple, List
 
-from covid_data import CovidData
-from subscription_manager import SubscriptionManager
+from covidbot.subscription_manager import SubscriptionManager
+from covidbot.covid_data import CovidData
 
 
-class CovidBot(object):
+class Bot(object):
     data: CovidData
     manager: SubscriptionManager
 
     def __init__(self, covid_data: CovidData, subscription_manager: SubscriptionManager):
         self.data = covid_data
         self.manager = subscription_manager
-
-    @staticmethod
-    def get_help(name: str) -> str:
-        return (f'Hallo {name},\n'
-                f'über diesen Bot kannst du die vom RKI bereitgestellten Covid-Daten abonnieren.\n\n'
-                f'Mit der /abo Aktion kannst du die Zahlen für einen Ort '
-                f'abonnieren. Probiere bspw. /abo Heidelberg aus. '
-                f'Mit der /beende Aktion kannst du dieses Abonnement widerrufen. '
-                f'Du bekommst dann täglich deinen persönlichen Tagesbericht direkt nach '
-                f'Veröffentlichung neuer Zahlen. Möchtest du den aktuellen Bericht abrufen, '
-                f'ist dies mit /bericht möglich.\n\n '
-                f'\n\n'
-                f'Aktuelle Zahlen bekommst du mit der /ort Aktion, bspw. /ort Heidelberg.'
-                f'\n\n'
-                f'Mehr Informationen zu diesem Bot findest du hier: '
-                f'https://github.com/eknoes/covid-bot\n\n'
-                f'Diesen Hilfetext erhältst du über /hilfe.')
 
     def get_current(self, county_key: str) -> str:
         if county_key != "":
@@ -83,7 +66,7 @@ class CovidBot(object):
             message = "Es sind neue Inzidenzwerte verfügbar!\n\n"
             data = map(lambda x: self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x), subscriptions)
             message += "Die 7 Tage Inzidenz / 100.000 Einwohner beträgt:\n\n" + "\n".join(data) + "\n\n" \
-                                                                                                 "Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " + self.data.get_last_update()
+                                                                                                  "Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " + self.data.get_last_update()
         else:
             message = "Du hast aktuell keine Abonemments!"
         return message
@@ -132,7 +115,7 @@ class CovidBot(object):
         """
         logging.debug("Checking for new data")
         if self.data.get_last_update() != self.manager.get_last_update():
-            logging.info("New Data arrived, generating reports")
+            logging.info("New COVID19 data available from " + self.data.get_last_update())
             result = []
             for subscriber in self.manager.get_subscribers():
                 result.append((subscriber, self.get_report(subscriber)))
