@@ -19,7 +19,7 @@ class Bot(object):
             possible_rs = self.data.find_rs(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
-                message = "Die Inzidenz der letzten 7 Tage / 100.000 Einwohner beträgt:\n"
+                message = "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen) beträgt:\n"
                 message += county + ": " + self.data.get_7day_incidence(rs)
                 return message
             else:
@@ -67,7 +67,7 @@ class Bot(object):
             message = "Es sind neue Inzidenzwerte verfügbar!\n\n"
             data = map(lambda x: "• " + self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x),
                        subscriptions)
-            message += "Die 7 Tage Inzidenz / 100.000 Einwohner beträgt:\n\n" + "\n".join(data) + "\n\n" \
+            message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen) beträgt:\n\n" + "\n".join(data) + "\n\n" \
                        "<i>Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom "\
                        + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
         else:
