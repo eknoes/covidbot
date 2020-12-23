@@ -1,6 +1,6 @@
 import logging
 
-from telegram import Update
+from telegram import Update, ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
 
 from covidbot.bot import Bot
@@ -82,7 +82,7 @@ class TelegramInterface(object):
             return
 
         for userid, message in messages:
-            context.bot.send_message(chat_id=userid, text=message)
+            context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
             self.log.info("Sent report to " + userid)
 
     def run(self):
