@@ -10,7 +10,7 @@ Telegram Aktionen:
 hilfe - Infos zur Benutzung
 ort - Aktuelle Zahlen für den Ort
 abo - Abonniere Ort
-beende - Widerrufe Abonnement 
+beende - Widerrufe Abonnement
 bericht - Aktueller Bericht
 '''
 

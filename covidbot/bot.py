@@ -103,7 +103,7 @@ class Bot(object):
 
     @staticmethod
     def _handle_no_input() -> str:
-        return f'Diese Aktion benötigt eine Ortsangabe.'
+        return 'Diese Aktion benötigt eine Ortsangabe.'
 
     @staticmethod
     def unknown_action() -> str:

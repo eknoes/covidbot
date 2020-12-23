@@ -41,7 +41,7 @@ class CovidData(object):
             # Gather Bundesland data
             if row['BL_ID'] not in self._data:
                 self._data[row['BL_ID']] = {'name': row['BL'], 'nice_name': row['BL'],
-                                            '7day': "{0:.2f}".format(float(row['cases7_bl_per_100k'])).replace(".",
+                                            '7day': "{0:.2f}".format(float(row['cases7_bl_per_100k'])).replace("."
                                                                                                                ",")}
 
     def find_rs(self, search_str: str) -> List[Tuple[str, str]]:
