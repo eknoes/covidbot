@@ -10,6 +10,7 @@ import requests
 
 class CovidData(object):
     RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
+    DIVI_INTENSIVREGISTER_CSV = "https://opendata.arcgis.com/datasets/8fc79b6cf7054b1b80385bda619f39b8_0.csv"
 
     _data: Dict[str, Dict[str, str]]
     _last_update: datetime
@@ -41,7 +42,7 @@ class CovidData(object):
             # Gather Bundesland data
             if row['BL_ID'] not in self._data:
                 self._data[row['BL_ID']] = {'name': row['BL'], 'nice_name': row['BL'],
-                                            '7day': "{0:.2f}".format(float(row['cases7_bl_per_100k'])).replace("."
+                                            '7day': "{0:.2f}".format(float(row['cases7_bl_per_100k'])).replace(".",
                                                                                                                ",")}
 
     def find_rs(self, search_str: str) -> List[Tuple[str, str]]:
@@ -68,10 +69,10 @@ class CovidData(object):
 
     def fetch_current_data(self) -> bool:
         self.log.info("Start Updating data")
-        # TODO: Provide If-Not-Modified since
         header = {"If-Modified-Since": self._last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
         r = requests.get(self.RKI_LK_CSV, headers=header)
         if r.status_code == 200:
+            self.log.info("Got RKI Data, checking if new")
             old_update = self._last_update
             rki_data = codecs.decode(r.content, "utf-8").splitlines()
             reader = csv.DictReader(rki_data)
