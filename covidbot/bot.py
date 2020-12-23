@@ -68,8 +68,8 @@ class Bot(object):
             data = map(lambda x: "• " + self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x),
                        subscriptions)
             message += "Die 7 Tage Inzidenz / 100.000 Einwohner beträgt:\n\n" + "\n".join(data) + "\n\n" \
-                       "<i>Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom "\
-                       + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
+                       "__Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom "\
+                       + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "__"
         else:
             message = "Du hast aktuell keine Abonnements!"
         return message
