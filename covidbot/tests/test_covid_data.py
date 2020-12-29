@@ -23,3 +23,8 @@ class CovidDataTest(TestCase):
     def test_no_update_current_data(self):
         data = CovidData()
         self.assertFalse(data.fetch_current_data(), "Do not update if data has not changed")
+
+    def test_brd(self):
+        data = CovidData()
+        self.assertIsNotNone(data.get_covid_data(data.COUNTRY_ID_DE))
+        self.assertEqual([(data.COUNTRY_ID_DE, "Bundesrepublik Deutschland")], data.find_rs("Bundesrepublik Deutschland"))

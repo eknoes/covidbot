@@ -19,8 +19,11 @@ class Bot(object):
             possible_rs = self.data.find_rs(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
-                message = "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen) beträgt:\n"
-                message += county + ": " + self.data.get_7day_incidence(rs)
+                current_data = self.data.get_covid_data(rs)
+                message = "<b>" + current_data.name + "</b>\n"
+                message += "Neuinfektionen: " + str(current_data.new_cases) + "\n"
+                message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
+                           + str(current_data.incidence)
                 return message
             else:
                 return self._handle_wrong_county_key(county_key)
@@ -64,11 +67,14 @@ class Bot(object):
     def get_report(self, userid: str) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
         if len(subscriptions) > 0:
-            message = "Es sind neue Inzidenzwerte verfügbar!\n\n"
-            data = map(lambda x: "• " + self.data.get_rs_name(x) + ": " + self.data.get_7day_incidence(x),
-                       subscriptions)
-            message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen) beträgt:\n\n" + "\n".join(data) + "\n\n" \
-                       "<i>Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom "\
+            message = "Das RKI meldet neue Daten!\n\n"
+            message += "Insgesamt wurden " + str(self.data.get_covid_data(CovidData.COUNTRY_ID_DE).new_cases) \
+                       + " Neuinfektionen gemeldet.\n\n"
+            data = map(lambda district: "• " + district.name + ": " + str(district.incidence)
+                                        + " (" + str(district.new_cases) + " Neuinfektionen)",
+                       map(lambda rs: self.data.get_covid_data(rs), subscriptions))
+            message += "\n".join(data) + "\n\n" \
+                       + "<i>Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " \
                        + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
         else:
             message = "Du hast aktuell keine Abonnements!"
