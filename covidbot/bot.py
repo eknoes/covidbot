@@ -23,7 +23,9 @@ class Bot(object):
                 message = "<b>" + current_data.name + "</b>\n"
                 message += "Neuinfektionen: " + str(current_data.new_cases) + "\n"
                 message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
-                           + str(current_data.incidence)
+                           + self._format_incidence(current_data.incidence) + "\n\n"
+                message += "Seit Beginn der Pandemie gab es " + str(current_data.total_cases) + " Infektionen und " \
+                           + str(current_data.total_deaths) + " Todesfälle mit COVID19 in " + current_data.name
                 return message
             else:
                 return self._handle_wrong_county_key(county_key)
@@ -68,9 +70,9 @@ class Bot(object):
         subscriptions = self.manager.get_subscriptions(userid)
         if len(subscriptions) > 0:
             message = "Das RKI meldet neue Daten!\n\n"
-            message += "Insgesamt wurden " + str(self.data.get_covid_data(CovidData.COUNTRY_ID_DE).new_cases) \
+            message += "Insgesamt wurden " + str(self.data.get_country_data().new_cases) \
                        + " Neuinfektionen gemeldet.\n\n"
-            data = map(lambda district: "• " + district.name + ": " + str(district.incidence)
+            data = map(lambda district: "• " + district.name + ": " + self._format_incidence(district.incidence)
                                         + " (" + str(district.new_cases) + " Neuinfektionen)",
                        map(lambda rs: self.data.get_covid_data(rs), subscriptions))
             message += "\n".join(data) + "\n\n" \
@@ -125,7 +127,7 @@ class Bot(object):
         """
         self.log.debug("Checking for new data")
         if self.manager.get_last_update() is None or self.data.get_last_update() > self.manager.get_last_update():
-            self.log.info("New COVID19 data available from " + self.data.get_last_update().isoformat())
+            self.log.info("New COVID19 data available from " + str(self.data.get_last_update()))
             result = []
             for subscriber in self.manager.get_subscribers():
                 result.append((subscriber, self.get_report(subscriber)))
@@ -135,3 +137,7 @@ class Bot(object):
         if self.data.fetch_current_data():
             return self.update()
         return []
+
+    @staticmethod
+    def _format_incidence(incidence: float) -> str:
+        return "{0:.2f}".format(float(incidence)).replace(".", ",")

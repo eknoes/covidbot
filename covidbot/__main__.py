@@ -12,7 +12,10 @@ logging.getLogger().addHandler(logging.StreamHandler())
 
 # Initialize Data
 with open(".api_key", "r") as f:
-    key = f.readline()
+    key = f.readline().rstrip("\n")
 
-bot = TelegramInterface(Bot(CovidData(), SubscriptionManager("user.json")), api_key=key)
+with open(".db_password", "r") as f:
+    password = f.readline().rstrip("\n")
+data = CovidData(db_user="covid_bot", db_password=password, db_name="covid_bot_db")
+bot = TelegramInterface(Bot(data, SubscriptionManager("user.json")), api_key=key)
 bot.run()

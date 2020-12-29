@@ -12,7 +12,7 @@ class CovidBotTest(TestCase):
         if os.path.isfile("covidbot/tests/testuser_empty.json"):
             os.remove("covidbot/tests/testuser_empty.json")
         man = SubscriptionManager("covidbot/tests/testuser_empty.json")
-        bot = Bot(CovidData(), man)
+        bot = Bot(CovidData(db_user="covidbot", db_password="covidbot", db_name="covid_db"), man)
         self.assertEqual([], bot.update(), "Empty subscribers should generate empty update list")
         bot.subscribe("testuser", "Berlin")
         bot.subscribe("testuser2", "Hannover")
@@ -23,5 +23,6 @@ class CovidBotTest(TestCase):
         del bot
 
         # Test persistence
-        bot = Bot(CovidData(), SubscriptionManager("covidbot/tests/testuser_empty.json"))
+        bot = Bot(CovidData(db_user="covidbot", db_password="covidbot", db_name="covid_db"),
+                  SubscriptionManager("covidbot/tests/testuser_empty.json"))
         self.assertEqual([], bot.update(), "After recreation no update should be triggerd")
