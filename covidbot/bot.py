@@ -21,11 +21,12 @@ class Bot(object):
                 rs, county = possible_rs[0]
                 current_data = self.data.get_covid_data(rs)
                 message = "<b>" + current_data.name + "</b>\n"
-                message += "Neuinfektionen: " + str(current_data.new_cases) + "\n"
+                message += "Neuinfektionen: " + str(current_data.new_cases)\
+                           + " (gesamt: " + str(current_data.total_cases) + "\n"
+                message += "Neue Todesfälle: " + str(current_data.new_deaths)\
+                           + " (gesamt: " + str(current_data.total_deaths) + "\n"
                 message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
-                           + self._format_incidence(current_data.incidence) + "\n\n"
-                message += "Seit Beginn der Pandemie gab es " + str(current_data.total_cases) + " Infektionen und " \
-                           + str(current_data.total_deaths) + " Todesfälle mit COVID19 in " + current_data.name
+                           + self._format_incidence(current_data.incidence)
                 return message
             else:
                 return self._handle_wrong_county_key(county_key)
@@ -68,18 +69,18 @@ class Bot(object):
 
     def get_report(self, userid: str) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
+        country = self.data.get_country_data()
+        message = "Das RKI meldet neue Daten!\n\n"
+        message += "Insgesamt wurden " + str(country.new_cases) \
+                   + " Neuinfektionen und " + str(country.new_deaths) + " Todesfälle gemeldet.\n\n"
         if len(subscriptions) > 0:
-            message = "Das RKI meldet neue Daten!\n\n"
-            message += "Insgesamt wurden " + str(self.data.get_country_data().new_cases) \
-                       + " Neuinfektionen gemeldet.\n\n"
             data = map(lambda district: "• " + district.name + ": " + self._format_incidence(district.incidence)
                                         + " (" + str(district.new_cases) + " Neuinfektionen)",
                        map(lambda rs: self.data.get_covid_data(rs), subscriptions))
-            message += "\n".join(data) + "\n\n" \
-                       + "<i>Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " \
-                       + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
-        else:
-            message = "Du hast aktuell keine Abonnements!"
+            message += "\n".join(data) + "\n\n"
+        message += "<i>Daten vom Robert Koch-Institut (RKI), dl-de/by-2-0 vom " \
+                   + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
+
         return message
 
     def get_overview(self, userid: str) -> str:
