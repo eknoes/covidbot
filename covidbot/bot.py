@@ -22,9 +22,9 @@ class Bot(object):
                 current_data = self.data.get_covid_data(rs)
                 message = "<b>" + current_data.name + "</b>\n"
                 message += "Neuinfektionen: " + str(current_data.new_cases)\
-                           + " (gesamt: " + str(current_data.total_cases) + "\n"
+                           + " (gesamt: " + str(current_data.total_cases) + ")\n"
                 message += "Neue Todesfälle: " + str(current_data.new_deaths)\
-                           + " (gesamt: " + str(current_data.total_deaths) + "\n"
+                           + " (gesamt: " + str(current_data.total_deaths) + ")\n"
                 message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
                            + self._format_incidence(current_data.incidence)
                 return message
