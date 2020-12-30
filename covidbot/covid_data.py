@@ -124,7 +124,7 @@ class CovidData(object):
                 data_yesterday = cursor.fetchone()
                 if data_yesterday is not None:
                     current_data.new_cases = current_data.total_cases - data_yesterday['total_cases']
-                    current_data.new_deaths = current_data.total_cases - data_yesterday['total_deaths']
+                    current_data.new_deaths = current_data.total_deaths - data_yesterday['total_deaths']
 
                 return current_data
 
@@ -142,7 +142,7 @@ class CovidData(object):
                 data_yesterday = cursor.fetchone()
                 if data_yesterday is not None:
                     country_data.new_cases = country_data.total_cases - data_yesterday['total_cases']
-                    country_data.new_deaths = country_data.total_cases - data_yesterday['total_deaths']
+                    country_data.new_deaths = country_data.total_deaths - data_yesterday['total_deaths']
 
         return country_data
 
