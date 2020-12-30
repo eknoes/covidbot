@@ -39,7 +39,8 @@ class CovidData(object):
         with self._connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute('CREATE TABLE IF NOT EXISTS counties '
-                               '(rs INTEGER PRIMARY KEY, name TEXT, UNIQUE(rs, name))')
+                               '(rs INTEGER PRIMARY KEY, name TEXT, type VARCHAR(30), parent INTEGER,'
+                               'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION, UNIQUE(rs, name))')
                 cursor.execute('''CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date TIMESTAMP,
                  total_cases INT, incidence FLOAT, total_deaths INT,
                  FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))''')
@@ -66,23 +67,31 @@ class CovidData(object):
                 if updated == last_update:
                     continue
 
-            covid_data.append((int(row['RS']), updated, int(row['cases']), float(row['cases7_per_100k']),
-                               int(row['deaths'])))
-            rs_data.append((int(row['RS']), row['county']))
-
             # Gather Bundesland data
             if row['BL_ID'] not in added_bl:
                 covid_data.append(
-                    (int(row['BL_ID']), updated, int(row['cases']), float(row['cases7_bl_per_100k']),
-                     int(row['deaths'])))
-                rs_data.append((int(row['BL_ID']), row['BL']))
+                    (int(row['BL_ID']), updated, None, float(row['cases7_bl_per_100k']),
+                     None))
+                rs_data.append((int(row['BL_ID']), row['BL'], 'BL', None))
                 added_bl.add(row['BL_ID'])
+
+            covid_data.append((int(row['RS']), updated, int(row['cases']), float(row['cases7_per_100k']),
+                               int(row['deaths'])))
+            rs_data.append((int(row['RS']), row['county'], row['BEZ'], int(row['BL_ID'])))
 
         with self._connection as conn:
             with conn.cursor() as cursor:
-                cursor.executemany('INSERT INTO counties (rs, name) VALUES (%s, %s) ON CONFLICT DO NOTHING', rs_data)
+                cursor.executemany('INSERT INTO counties (rs, name, type, parent) VALUES (%s, %s, %s, %s) '
+                                   'ON CONFLICT(rs) DO UPDATE SET type=EXCLUDED.type, parent=EXCLUDED.parent',
+                                   rs_data)
                 cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
                  VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING''', covid_data)
+                # Update Bundesländer
+                cursor.execute('''UPDATE covid_data 
+                SET total_deaths = subquery.total_deaths, total_cases = subquery.total_cases 
+                FROM (SELECT parent, date, SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths
+                FROM covid_data JOIN counties c on c.rs = covid_data.rs GROUP BY parent, date) as subquery
+                WHERE covid_data.date=subquery.date AND rs=parent''')
 
     def find_rs(self, search_str: str) -> List[Tuple[str, str]]:
         search_str = search_str.lower()
@@ -124,7 +133,8 @@ class CovidData(object):
         with self._connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, date "
-                               "FROM covid_data GROUP BY date ORDER BY date DESC LIMIT 2")
+                               "FROM covid_data JOIN counties c on c.rs = covid_data.rs "
+                               "WHERE c.type != 'BL' GROUP BY date ORDER BY date DESC LIMIT 2")
                 data = cursor.fetchone()
                 country_data.total_cases = data['total_cases']
                 country_data.total_deaths = data['total_deaths']
