@@ -21,13 +21,14 @@ class Bot(object):
                 rs, county = possible_rs[0]
                 current_data = self.data.get_covid_data(rs)
                 message = "<b>" + current_data.name + "</b>\n\n"
-                message += "Neuinfektionen (seit gestern): " + str(current_data.new_cases)\
-                           + " (gesamt: " + str(current_data.total_cases) + ")\n"
-                message += "Neue Todesfälle (seit gestern): " + str(current_data.new_deaths)\
-                           + " (gesamt: " + str(current_data.total_deaths) + ")\n"
+                message += "Neuinfektionen (seit gestern): " + self._format_int(current_data.new_cases)\
+                           + " (gesamt: " + self._format_int(current_data.total_cases) + ")\n"
+                message += "Neue Todesfälle (seit gestern): " + self._format_int(current_data.new_deaths)\
+                           + " (gesamt: " + self._format_int(current_data.total_deaths) + ")\n"
                 message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
-                           + self._format_incidence(current_data.incidence) + ")\n"
-                message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>'
+                           + self._format_incidence(current_data.incidence) + ")\n\n"
+                message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen ' \
+                           'findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>\n'
                 message += "<i>Stand: " \
                    + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
                 return message
@@ -75,14 +76,15 @@ class Bot(object):
         country = self.data.get_country_data()
         message = "<b>Corona-Bericht vom " \
                    + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</b>\n\n"
-        message += "Insgesamt wurden bundesweit" + str(country.new_cases) \
-                   + " Neuinfektionen und " + str(country.new_deaths) + " Todesfälle gemeldet.\n\n"
+        message += "Insgesamt wurden bundesweit " + self._format_int(country.new_cases) \
+                   + " Neuinfektionen und " + self._format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
         if len(subscriptions) > 0:
             data = map(lambda district: "• " + district.name + ": " + self._format_incidence(district.incidence)
-                                        + " (" + str(district.new_cases) + " Neuinfektionen)",
+                                        + " (" + self._format_int(district.new_cases) + " Neuinfektionen)",
                        map(lambda rs: self.data.get_covid_data(rs), subscriptions))
             message += "\n".join(data) + "\n\n"
-        message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>'
+        message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
+                   ' im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>'
 
         return message
 
@@ -145,3 +147,7 @@ class Bot(object):
     @staticmethod
     def _format_incidence(incidence: float) -> str:
         return "{0:.2f}".format(float(incidence)).replace(".", ",")
+
+    @staticmethod
+    def _format_int(number: int) -> str:
+        return "{:,}".format(number).replace(",", ".")
