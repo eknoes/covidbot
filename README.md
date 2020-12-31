@@ -1,6 +1,6 @@
 # Telegram COVID-19 Bot
 Dies ist ein Telegrambot, der aktuelle COVID-19 Zahlen für verschiedene Orte bereitstellt.
-Es können mehrere Orte und Bundesländer abonniert werden können, sodass bei neuen RKI Zahlen eine Zusammenfassung mit den relevanten Orten bereitgestellt wird.
+Es können mehrere Orte und Bundesländer abonniert werden können, sodass bei neuen Zahlen des Robert-Koch-Instituts (RKI) eine Zusammenfassung mit den relevanten Orten bereitgestellt wird.
 Der aktuelle Prototyp läuft unter [@CovidInzidenzBot](https://t.me/CovidInzidenzBot) und ist Work in Progress.
 
 ## Features
@@ -15,3 +15,7 @@ Die aktuelle Version kann man unter [@CovidInzidenzBot](https://t.me/CovidInzide
 
 Für einen eigenen Telegrambot muss der Telegram API Key unter `.api_key` hinterlegt werden.
 Danach kann er über `python3 -m covidbot` gestartet werden.
+
+## Credits
+Die Daten werden von der offiziellen Schnittstelle des RKI für [https://hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0](Landkreise) und [https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0](Bundesländer) abgerufen und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0.
+Weitere Informationen sind auch im [https://corona.rki.de/](Dashbord des RKI) sowie dem [https://npgeo-corona-npgeo-de.hub.arcgis.com/](NPGEO Corona Hub 2020) zu finden.
