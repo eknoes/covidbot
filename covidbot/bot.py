@@ -80,7 +80,7 @@ class Bot(object):
                    + " Neuinfektionen und " + self._format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
         if len(subscriptions) > 0:
             data = map(lambda district: "• " + district.name + ": " + self._format_incidence(district.incidence)
-                                        + " (" + self._format_int(district.new_cases) + " Neuinfektionen)",
+                                        + " (" + self._format_int(district.new_cases) + " Neuinfektionen, " + self._format_int(district.new_deaths) + " Todesfälle)",
                        map(lambda rs: self.data.get_covid_data(rs), subscriptions))
             message += "\n".join(data) + "\n\n"
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
