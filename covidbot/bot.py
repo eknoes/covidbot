@@ -21,12 +21,12 @@ class Bot(object):
                 rs, county = possible_rs[0]
                 current_data = self.data.get_covid_data(rs)
                 message = "<b>" + current_data.name + "</b>\n\n"
-                message += "Neuinfektionen (seit gestern): " + self._format_int(current_data.new_cases)\
-                           + " (gesamt: " + self._format_int(current_data.total_cases) + ")\n"
-                message += "Neue Todesfälle (seit gestern): " + self._format_int(current_data.new_deaths)\
-                           + " (gesamt: " + self._format_int(current_data.total_deaths) + ")\n"
                 message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
                            + self._format_incidence(current_data.incidence) + "\n\n"
+                message += "Neuinfektionen (seit gestern): " + self._format_int(current_data.new_cases) + "\n"
+                message += "Infektionen seit Ausbruch der Pandemie: " + self._format_int(current_data.total_cases) + "\n\n"
+                message += "Neue Todesfälle (seit gestern): " + self._format_int(current_data.new_deaths) + "\n"
+                message += "Todesfälle seit Ausbruch der Pandemie: " + self._format_int(current_data.total_deaths) + "\n\n"
                 message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen ' \
                            'findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>\n'
                 message += "<i>Stand: " \
