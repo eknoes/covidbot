@@ -150,4 +150,5 @@ class Bot(object):
 
     @staticmethod
     def _format_int(number: int) -> str:
-        return "{:,}".format(number).replace(",", ".")
+        if number is not None:
+            return "{:,}".format(number).replace(",", ".")
