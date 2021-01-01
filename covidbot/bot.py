@@ -26,7 +26,7 @@ class Bot(object):
                 message += "Neue Todesfälle (seit gestern): " + self._format_int(current_data.new_deaths)\
                            + " (gesamt: " + self._format_int(current_data.total_deaths) + ")\n"
                 message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
-                           + self._format_incidence(current_data.incidence) + ")\n\n"
+                           + self._format_incidence(current_data.incidence) + "\n\n"
                 message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen ' \
                            'findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>\n'
                 message += "<i>Stand: " \
@@ -78,6 +78,7 @@ class Bot(object):
                    + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</b>\n\n"
         message += "Insgesamt wurden bundesweit " + self._format_int(country.new_cases) \
                    + " Neuinfektionen und " + self._format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
+        message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):\n"
         if len(subscriptions) > 0:
             data = map(lambda district: "• " + district.name + ": " + self._format_incidence(district.incidence)
                                         + " (" + self._format_int(district.new_cases) + " Neuinfektionen)",
