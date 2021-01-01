@@ -147,9 +147,12 @@ class Bot(object):
 
     @staticmethod
     def _format_incidence(incidence: float) -> str:
-        return "{0:.2f}".format(float(incidence)).replace(".", ",")
+        if incidence is not None:
+            return "{0:.2f}".format(float(incidence)).replace(".", ",")
+        return "Keine Daten"
 
     @staticmethod
     def _format_int(number: int) -> str:
         if number is not None:
             return "{:,}".format(number).replace(",", ".")
+        return "Keine Daten"
