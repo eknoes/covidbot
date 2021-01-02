@@ -88,12 +88,18 @@ class Bot(object):
                 message += "<b>Inzidenz >" + str(key) + ":</b>\n"
                 data = map(lambda district: "• " + district.name + ": " + self.format_incidence(district.incidence)
                                             + " (" + self.format_int(district.new_cases) + " Neuinfektionen, " +
-                                            self.format_int(district.new_deaths) + " Todesfälle)", grouped_districts[key])
+                                            self.format_int(district.new_deaths) + " Todesfälle)",
+                           self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>'
 
         return message
+
+    @staticmethod
+    def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
+        districts.sort(key=lambda d: d.name)
+        return districts
 
     @staticmethod
     def group_districts(districts: List[DistrictData]) -> Dict[int, List[DistrictData]]:

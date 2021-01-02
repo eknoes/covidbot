@@ -69,3 +69,11 @@ class TestBot(TestCase):
 
     def test_group_districts_empty(self):
         self.assertIsInstance(self.bot.group_districts([]), dict)
+
+    def test_sort_districts(self):
+        districts = [DistrictData(incidence=0, name="A"), DistrictData(incidence=0, name="C"), DistrictData(incidence=0, name="B")]
+        actual_names = list(map(lambda d: d.name, self.bot.sort_districts(districts)))
+
+        self.assertEqual("A", actual_names[0], "Districts should be sorted alphabetically")
+        self.assertEqual("B", actual_names[1], "Districts should be sorted alphabetically")
+        self.assertEqual("C", actual_names[2], "Districts should be sorted alphabetically")
