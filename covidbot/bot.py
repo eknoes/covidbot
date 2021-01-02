@@ -1,8 +1,9 @@
+import itertools
 import logging
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 
 from covidbot.subscription_manager import SubscriptionManager
-from covidbot.covid_data import CovidData
+from covidbot.covid_data import CovidData, DistrictData
 
 
 class Bot(object):
@@ -22,15 +23,17 @@ class Bot(object):
                 current_data = self.data.get_covid_data(rs)
                 message = "<b>" + current_data.name + "</b>\n\n"
                 message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
-                           + self._format_incidence(current_data.incidence) + "\n\n"
-                message += "Neuinfektionen (seit gestern): " + self._format_int(current_data.new_cases) + "\n"
-                message += "Infektionen seit Ausbruch der Pandemie: " + self._format_int(current_data.total_cases) + "\n\n"
-                message += "Neue Todesfälle (seit gestern): " + self._format_int(current_data.new_deaths) + "\n"
-                message += "Todesfälle seit Ausbruch der Pandemie: " + self._format_int(current_data.total_deaths) + "\n\n"
+                           + self.format_incidence(current_data.incidence) + "\n\n"
+                message += "Neuinfektionen (seit gestern): " + self.format_int(current_data.new_cases) + "\n"
+                message += "Infektionen seit Ausbruch der Pandemie: " + self.format_int(
+                    current_data.total_cases) + "\n\n"
+                message += "Neue Todesfälle (seit gestern): " + self.format_int(current_data.new_deaths) + "\n"
+                message += "Todesfälle seit Ausbruch der Pandemie: " + self.format_int(
+                    current_data.total_deaths) + "\n\n"
                 message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen ' \
                            'findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>\n'
                 message += "<i>Stand: " \
-                   + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
+                           + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
                 return message
             else:
                 return self._handle_wrong_county_key(county_key)
@@ -75,19 +78,53 @@ class Bot(object):
         subscriptions = self.manager.get_subscriptions(userid)
         country = self.data.get_country_data()
         message = "<b>Corona-Bericht vom " \
-                   + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</b>\n\n"
-        message += "Insgesamt wurden bundesweit " + self._format_int(country.new_cases) \
-                   + " Neuinfektionen und " + self._format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
-        message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):\n"
+                  + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</b>\n\n"
+        message += "Insgesamt wurden bundesweit " + self.format_int(country.new_cases) \
+                   + " Neuinfektionen und " + self.format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
         if len(subscriptions) > 0:
-            data = map(lambda district: "• " + district.name + ": " + self._format_incidence(district.incidence)
-                                        + " (" + self._format_int(district.new_cases) + " Neuinfektionen, " + self._format_int(district.new_deaths) + " Todesfälle)",
-                       map(lambda rs: self.data.get_covid_data(rs), subscriptions))
-            message += "\n".join(data) + "\n\n"
+            message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):\n\n"
+            grouped_districts = self.group_districts(list(map(lambda rs: self.data.get_covid_data(rs), subscriptions)))
+            for key in grouped_districts:
+                message += "<b>Inzidenz >" + str(key) + ":</b>\n"
+                data = map(lambda district: "• " + district.name + ": " + self.format_incidence(district.incidence)
+                                            + " (" + self.format_int(district.new_cases) + " Neuinfektionen, " +
+                                            self.format_int(district.new_deaths) + " Todesfälle)", grouped_districts[key])
+                message += "\n".join(data) + "\n\n"
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>'
 
         return message
+
+    @staticmethod
+    def group_districts(districts: List[DistrictData]) -> Dict[int, List[DistrictData]]:
+        """
+        Groups a list of districts according to incidence thresholds
+        :param districts: List of Districts
+        :rtype: Dict[int, List[DistrictData]]: Districts grouped by thresholds, e.g. {0: [], 35: [], 50: [], 100: [], 200: []
+        """
+        result = dict()
+        groups = [200, 100, 50, 35, 0]
+        already_sorted = []
+        for group in groups:
+            for district in districts:
+                already_sorted = list(itertools.chain.from_iterable(result.values()))
+
+                if district not in already_sorted and district.incidence > group:
+                    if group not in result:
+                        result[group] = []
+
+                    result[group].append(district)
+
+        # Add remaining to 0-group
+        if len(districts) != len(already_sorted):
+            if 0 not in result:
+                result[0] = []
+
+            for d in districts:
+                if d not in already_sorted:
+                    result[0].append(d)
+
+        return result
 
     def get_overview(self, userid: str) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
@@ -146,13 +183,13 @@ class Bot(object):
         return []
 
     @staticmethod
-    def _format_incidence(incidence: float) -> str:
+    def format_incidence(incidence: float) -> str:
         if incidence is not None:
             return "{0:.2f}".format(float(incidence)).replace(".", ",")
         return "Keine Daten"
 
     @staticmethod
-    def _format_int(number: int) -> str:
+    def format_int(number: int) -> str:
         if number is not None:
             return "{:,}".format(number).replace(",", ".")
         return "Keine Daten"
