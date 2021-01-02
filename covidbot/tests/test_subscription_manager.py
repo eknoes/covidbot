@@ -1,4 +1,5 @@
 import os
+import shutil
 from datetime import datetime
 from unittest import TestCase
 
@@ -6,39 +7,46 @@ from covidbot.subscription_manager import SubscriptionManager
 
 
 class SubscriptionManagerTest(TestCase):
+    TESTFILE = "covidbot/tests/testuser_empty.json"
+    ORIG_TESTFILE = "testuser_empty.json"
+
+    def setUp(self) -> None:
+        if os.path.isfile(self.TESTFILE):
+            os.remove(self.TESTFILE)
+
+        shutil.copy2(self.ORIG_TESTFILE, self.TESTFILE)
+
+        self.manager = SubscriptionManager(self.TESTFILE)
+
+    def tearDown(self) -> None:
+        del self.manager
+        
     def test_all(self):
-        if os.path.isfile("covidbot/tests/testuser_empty.json"):
-            os.remove("covidbot/tests/testuser_empty.json")
+        self.assertEqual([], self.manager.get_subscribers(), "Subscribers of new list should be empty")
 
-        manager = SubscriptionManager("covidbot/tests/testuser_empty.json")  #
-        self.assertEqual([], manager.get_subscribers(), "Subscribers of new list should be empty")
-
-        manager.add_subscription(str(1), "test")
-        self.assertIn("test", manager.get_subscriptions(str(1)), "Subscribers should have a subscription")
-        manager.rm_subscription(str(1), "test")
-        self.assertEqual(None, manager.get_subscriptions(str(1)))
-        self.assertIsNone(manager.get_last_update(), "last_update should be None if initialized empty")
-        manager.set_last_update(datetime(year=2020, month=1, day=1))
-        self.assertEqual(datetime(year=2020, month=1, day=1), manager.get_last_update(),
+        self.manager.add_subscription(str(1), "test")
+        self.assertIn("test", self.manager.get_subscriptions(str(1)), "Subscribers should have a subscription")
+        self.manager.rm_subscription(str(1), "test")
+        self.assertEqual(None, self.manager.get_subscriptions(str(1)))
+        self.assertIsNone(self.manager.get_last_update(), "last_update should be None if initialized empty")
+        self.manager.set_last_update(datetime(year=2020, month=1, day=1))
+        self.assertEqual(datetime(year=2020, month=1, day=1), self.manager.get_last_update(),
                          "last_update should be changed "
                          "after set_last_update")
 
     def test_persistence(self):
-        if os.path.isfile("covidbot/tests/testuser_empty.json"):
-            os.remove("covidbot/tests/testuser_empty.json")
+        self.manager.add_subscription(str(1), "test1")
+        self.manager.add_subscription(str(3), "test1")
+        self.manager.add_subscription(str(2), "test2")
+        self.manager.add_subscription(str(4), "removed")
+        self.manager.rm_subscription(str(4), "removed")
+        self.manager.set_last_update(datetime(year=2020, month=1, day=1))
+        
+        del self.manager
+        self.manager = SubscriptionManager(self.TESTFILE)
 
-        manager = SubscriptionManager("covidbot/tests/testuser_empty.json")
-        manager.add_subscription(str(1), "test1")
-        manager.add_subscription(str(3), "test1")
-        manager.add_subscription(str(2), "test2")
-        manager.add_subscription(str(4), "removed")
-        manager.rm_subscription(str(4), "removed")
-        manager.set_last_update(datetime(year=2020, month=1, day=1))
-        del manager
-
-        manager = SubscriptionManager("covidbot/tests/testuser_empty.json")
-        self.assertEqual({"test1"}, manager.get_subscriptions(str(1)), "Should save persistently")
-        self.assertEqual({"test1"}, manager.get_subscriptions(str(3)), "Should save persistently")
-        self.assertEqual({"test2"}, manager.get_subscriptions(str(2)), "Should save persistently")
-        self.assertEqual(datetime(year=2020, month=1, day=1), manager.get_last_update(), "Should save persistently")
-        self.assertIsNone(manager.get_subscriptions(str(4)), "Should remove persistently")
+        self.assertEqual({"test1"}, self.manager.get_subscriptions(str(1)), "Should save persistently")
+        self.assertEqual({"test1"}, self.manager.get_subscriptions(str(3)), "Should save persistently")
+        self.assertEqual({"test2"}, self.manager.get_subscriptions(str(2)), "Should save persistently")
+        self.assertEqual(datetime(year=2020, month=1, day=1), self.manager.get_last_update(), "Should save persistently")
+        self.assertIsNone(self.manager.get_subscriptions(str(4)), "Should remove persistently")

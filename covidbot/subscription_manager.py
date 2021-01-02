@@ -8,10 +8,10 @@ from covidbot.utils import serialize_datetime, unserialize_datetime
 
 
 class SubscriptionManager(object):
-    _file: str
+    _file: str = None
     # json modules stores ints as strings, so we have to convert the chat_ids everytime
-    _data: Dict[str, List[str]]
-    _last_update: Union[datetime, None]
+    _data: Dict[str, List[str]] = dict()
+    _last_update: Union[datetime, None] = None
     log = logging.getLogger(__name__)
 
     def __init__(self, file: str):
@@ -23,9 +23,6 @@ class SubscriptionManager(object):
                 self._data = data['subscriptions']
                 self._last_update = unserialize_datetime(data['last_update'])
                 self.log.debug("Loaded Data: " + str(self._data))
-        else:
-            self._data = dict()
-            self._last_update = None
 
     def add_subscription(self, chat_id: str, rs: str) -> bool:
         if chat_id not in self._data or self._data[chat_id] is None:

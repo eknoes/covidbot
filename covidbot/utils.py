@@ -1,4 +1,5 @@
 from datetime import datetime, date
+from typing import Optional
 
 
 def serialize_datetime(obj: object) -> str:
@@ -7,5 +8,7 @@ def serialize_datetime(obj: object) -> str:
     raise TypeError("Type %s not serializable" % type(obj))
 
 
-def unserialize_datetime(datestring: str) -> datetime:
+def unserialize_datetime(datestring: str) -> Optional[datetime]:
+    if datestring is None:
+        return None
     return datetime.fromisoformat(datestring)

@@ -27,9 +27,9 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_USER: covidbot
-          POSTGRES_PASSWORD: covidbot
-          POSTGRES_DB: covid_db
+          POSTGRES_USER: covid_bot
+          POSTGRES_PASSWORD: covid_bot
+          POSTGRES_DB: covid_test_db
         ports:
           - 5432:5432
         options: >-
