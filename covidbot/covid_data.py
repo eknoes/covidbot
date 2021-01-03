@@ -15,6 +15,7 @@ from psycopg2.extras import DictCursor
 @dataclass
 class DistrictData:
     name: str
+    type: Union[str, None] = None
     incidence: Union[float, None] = None
     new_cases: Union[int, None] = None
     new_deaths: Union[int, None] = None
@@ -72,17 +73,19 @@ class CovidData(object):
                 covid_data.append(
                     (int(row['BL_ID']), updated, None, float(row['cases7_bl_per_100k']),
                      None))
-                rs_data.append((int(row['BL_ID']), row['BL'], 'BL', None))
+                rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', None))
                 added_bl.add(row['BL_ID'])
 
             covid_data.append((int(row['RS']), updated, int(row['cases']), float(row['cases7_per_100k']),
                                int(row['deaths'])))
-            rs_data.append((int(row['RS']), row['county'], row['BEZ'], int(row['BL_ID'])))
+            rs_data.append((int(row['RS']), self.clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
+                            row['BEZ'], int(row['BL_ID'])))
 
         with self._connection as conn:
             with conn.cursor() as cursor:
                 cursor.executemany('INSERT INTO counties (rs, name, type, parent) VALUES (%s, %s, %s, %s) '
-                                   'ON CONFLICT(rs) DO UPDATE SET type=EXCLUDED.type, parent=EXCLUDED.parent',
+                                   'ON CONFLICT(rs) DO UPDATE '
+                                   'SET type=EXCLUDED.type, parent=EXCLUDED.parent, name=EXCLUDED.name',
                                    rs_data)
                 cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
                  VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING''', covid_data)
@@ -92,6 +95,12 @@ class CovidData(object):
                 FROM (SELECT parent, date, SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths
                 FROM covid_data JOIN counties c on c.rs = covid_data.rs GROUP BY parent, date) as subquery
                 WHERE covid_data.date=subquery.date AND rs=parent''')
+
+    @staticmethod
+    def clean_district_name(name: str) -> Optional[str]:
+        if name is not None and name.count(" ") > 0:
+            return " ".join(name.split(" ")[1:])
+        return name
 
     def find_rs(self, search_str: str) -> List[Tuple[str, str]]:
         search_str = search_str.lower()
