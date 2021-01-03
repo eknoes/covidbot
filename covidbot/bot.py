@@ -90,7 +90,7 @@ class Bot(object):
             if len(subscribed_bls) > 0:
                 message += "<b>Bundesländer</b>\n"
                 data = map(lambda district: "• " + self.format_district_data(district),
-                           self.sort_districts(subscribed_bls[key]))
+                           self.sort_districts(subscribed_bls))
                 message += "\n".join(data) + "\n\n"
 
             grouped_districts = self.group_districts(subscribed_cities)
