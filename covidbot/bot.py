@@ -89,7 +89,8 @@ class Bot(object):
             subscribed_cities = list(filter(lambda d: d.type != "Bundesland", subscription_data))
             if len(subscribed_bls) > 0:
                 message += "<b>Bundesländer</b>\n"
-                data = map(lambda district: "• " + self.format_district_data(district), subscribed_bls)
+                data = map(lambda district: "• " + self.format_district_data(district),
+                           self.sort_districts(subscribed_bls))
                 message += "\n".join(data) + "\n\n"
 
             grouped_districts = self.group_districts(subscribed_cities)
