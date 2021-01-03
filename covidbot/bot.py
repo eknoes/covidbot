@@ -78,7 +78,7 @@ class Bot(object):
         subscriptions = self.manager.get_subscriptions(userid)
         country = self.data.get_country_data()
         message = "<b>Corona-Bericht vom " \
-                  + self.data.get_last_update().strftime("%d.%m %Y") + "</b>\n\n"
+                  + self.data.get_last_update().strftime("%d.%m.%Y") + "</b>\n\n"
         message += "Insgesamt wurden bundesweit " + self.format_int(country.new_cases) \
                    + " Neuinfektionen und " + self.format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
         if len(subscriptions) > 0:
