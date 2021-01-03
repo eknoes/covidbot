@@ -125,9 +125,11 @@ class CovidData(object):
     def get_covid_data(self, rs: str) -> Optional[DistrictData]:
         with self._connection as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SELECT * FROM covid_data WHERE rs=%s ORDER BY date DESC LIMIT 2', [int(rs)])
+                cursor.execute('SELECT total_cases, total_deaths, incidence, name, type '
+                               'FROM covid_data JOIN counties c on c.rs = covid_data.rs WHERE covid_data.rs=%s '
+                               'ORDER BY date DESC LIMIT 2', [int(rs)])
                 d = cursor.fetchone()
-                current_data = DistrictData(name=self.get_rs_name(d['rs']), incidence=d['incidence'],
+                current_data = DistrictData(name=d['name'], incidence=d['incidence'], type=d['type'],
                                             total_cases=d['total_cases'],
                                             total_deaths=d['total_deaths'], new_cases=None, new_deaths=None)
                 data_yesterday = cursor.fetchone()

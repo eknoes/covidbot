@@ -83,18 +83,30 @@ class Bot(object):
                    + " Neuinfektionen und " + self.format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
         if len(subscriptions) > 0:
             message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):\n\n"
-            grouped_districts = self.group_districts(list(map(lambda rs: self.data.get_covid_data(rs), subscriptions)))
+            # Split Bundeslaender from other
+            subscription_data = list(map(lambda rs: self.data.get_covid_data(rs), subscriptions))
+            subscribed_bls = list(filter(lambda d: d.type == "Bundesland", subscription_data))
+            subscribed_cities = list(filter(lambda d: d.type != "Bundesland", subscription_data))
+            if len(subscribed_bls) > 0:
+                message += "<b>Bundesländer</b>\n"
+                data = map(lambda district: "• " + self.format_district_data(district), subscribed_bls)
+                message += "\n".join(data) + "\n\n"
+
+            grouped_districts = self.group_districts(subscribed_cities)
             for key in grouped_districts:
                 message += "<b>Inzidenz >" + str(key) + ":</b>\n"
-                data = map(lambda district: "• " + district.name + ": " + self.format_incidence(district.incidence)
-                                            + " (" + self.format_int(district.new_cases) + " Neuinfektionen, " +
-                                            self.format_int(district.new_deaths) + " Todesfälle)",
+                data = map(lambda district: "• " + self.format_district_data(district),
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>'
 
         return message
+
+    def format_district_data(self, district: DistrictData) -> str:
+        return district.name + ": " + self.format_incidence(district.incidence)\
+               + " (" + self.format_int(district.new_cases) + " Neuinfektionen, "\
+               + self.format_int(district.new_deaths) + " Todesfälle)"
 
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
