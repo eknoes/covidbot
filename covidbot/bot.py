@@ -80,9 +80,9 @@ class Bot(object):
         message = "<b>Corona-Bericht vom " \
                   + self.data.get_last_update().strftime("%d.%m.%Y") + "</b>\n\n"
         message += "Insgesamt wurden bundesweit " + self.format_int(country.new_cases) \
-                   + " Neuinfektionen und " + self.format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
+                   + " Neuinfektionen und " + self.format_int(country.new_deaths) + " Todesfälle gemeldet.\n"
         if len(subscriptions) > 0:
-            message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):\n\n"
+            message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen in den vergangenen 7 Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten Orte wie folgt aus:\n\n"
             # Split Bundeslaender from other
             subscription_data = list(map(lambda rs: self.data.get_covid_data(rs), subscriptions))
             subscribed_bls = list(filter(lambda d: d.type == "Bundesland", subscription_data))
@@ -94,7 +94,8 @@ class Bot(object):
 
             grouped_districts = self.group_districts(subscribed_cities)
             for key in grouped_districts:
-                message += "<b>Inzidenz >" + str(key) + ":</b>\n"
+                message += "<b>Städte und Landkreise</b>\n"
+                message += "Inzidenz >" + str(key) + ":\n"
                 data = map(lambda district: "• " + self.format_district_data(district),
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
