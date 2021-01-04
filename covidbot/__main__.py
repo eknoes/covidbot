@@ -2,7 +2,7 @@ import logging
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.subscription_manager import FileBasedSubscriptionManager
 from covidbot.telegram_interface import TelegramInterface
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,5 +17,5 @@ with open(".api_key", "r") as f:
 with open(".db_password", "r") as f:
     password = f.readline().rstrip("\n")
 data = CovidData(db_user="covid_bot", db_password=password, db_name="covid_bot_db")
-bot = TelegramInterface(Bot(data, SubscriptionManager("user.json")), api_key=key)
+bot = TelegramInterface(Bot(data, FileBasedSubscriptionManager("user.json")), api_key=key)
 bot.run()

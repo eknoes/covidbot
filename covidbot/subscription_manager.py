@@ -4,10 +4,59 @@ import os
 from datetime import datetime
 from typing import Dict, List, Set, Union, Optional
 
+from psycopg2._psycopg import connection
+
 from covidbot.utils import serialize_datetime, unserialize_datetime
 
 
 class SubscriptionManager(object):
+    connection: connection
+
+    def __init__(self, db_connection: connection):
+        self.connection = db_connection
+        self._create_db()
+
+    def _create_db(self):
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
+                               '(user_id INTEGER, rs INTEGER, added DATE DEFAULT now(), '
+                               'UNIQUE(user_id, rs))')
+
+    def add_subscription(self, user_id: int, rs: int) -> bool:
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('INSERT INTO subscriptions (user_id, rs) VALUES (%s, %s) '
+                               'ON CONFLICT DO NOTHING', [user_id, rs])
+                if cursor.rowcount == 1:
+                    return True
+        return False
+
+    def rm_subscription(self, user_id: int, rs: int) -> bool:
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('DELETE FROM subscriptions WHERE user_id=%s AND rs=%s', [user_id, rs])
+                if cursor.rowcount == 1:
+                    return True
+        return False
+
+    def get_subscriptions(self, user_id: int) -> Optional[List[int]]:
+        result = []
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT rs FROM subscriptions WHERE user_id=%s', [user_id])
+                for row in cursor.fetchall():
+                    result.append(row['rs'])
+        return result
+
+    def delete_user(self, user_id: int) -> bool:
+        pass
+
+    def get_all_user(self) -> List[int]:
+        pass
+
+
+class FileBasedSubscriptionManager(object):
     _file: str = None
     # json modules stores ints as strings, so we have to convert the chat_ids everytime
     _data: Dict[str, List[str]] = dict()

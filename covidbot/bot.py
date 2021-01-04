@@ -2,15 +2,15 @@ import itertools
 import logging
 from typing import Optional, Tuple, List, Dict
 
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.subscription_manager import FileBasedSubscriptionManager
 from covidbot.covid_data import CovidData, DistrictData
 
 
 class Bot(object):
     data: CovidData
-    manager: SubscriptionManager
+    manager: FileBasedSubscriptionManager
 
-    def __init__(self, covid_data: CovidData, subscription_manager: SubscriptionManager):
+    def __init__(self, covid_data: CovidData, subscription_manager: FileBasedSubscriptionManager):
         self.log = logging.getLogger(__name__)
         self.data = covid_data
         self.manager = subscription_manager

@@ -1,52 +1,48 @@
-import os
-import shutil
-from datetime import datetime
 from unittest import TestCase
+
+import psycopg2
+from psycopg2.extras import DictCursor
+from psycopg2._psycopg import connection
 
 from covidbot.subscription_manager import SubscriptionManager
 
 
-class SubscriptionManagerTest(TestCase):
-    TESTFILE = "covidbot/tests/testuser_empty.json"
-    ORIG_TESTFILE = "testuser_empty.json"
+class TestSubscriptionManager(TestCase):
+    conn: connection
 
     def setUp(self) -> None:
-        if os.path.isfile(self.TESTFILE):
-            os.remove(self.TESTFILE)
+        self.conn = psycopg2.connect(dbname="covid_test_db", user="covid_bot", password="covid_bot", port=5432,
+                                            host='localhost', cursor_factory=DictCursor)
+        self.manager = SubscriptionManager(self.conn)
+        with self.conn as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("TRUNCATE TABLE subscriptions;")
 
-        shutil.copy2(self.ORIG_TESTFILE, self.TESTFILE)
-
-        self.manager = SubscriptionManager(self.TESTFILE)
 
     def tearDown(self) -> None:
         del self.manager
-        
-    def test_all(self):
-        self.assertEqual([], self.manager.get_subscribers(), "Subscribers of new list should be empty")
+        self.conn.close()
 
-        self.manager.add_subscription(str(1), "test")
-        self.assertIn("test", self.manager.get_subscriptions(str(1)), "Subscribers should have a subscription")
-        self.manager.rm_subscription(str(1), "test")
-        self.assertEqual(None, self.manager.get_subscriptions(str(1)))
-        self.assertIsNone(self.manager.get_last_update(), "last_update should be None if initialized empty")
-        self.manager.set_last_update(datetime(year=2020, month=1, day=1))
-        self.assertEqual(datetime(year=2020, month=1, day=1), self.manager.get_last_update(),
-                         "last_update should be changed "
-                         "after set_last_update")
+    def test_add_subscription(self):
+        self.assertTrue(self.manager.add_subscription(1, 1), "Adding a non-existing subscription should return true")
+        self.assertFalse(self.manager.add_subscription(1, 1), "Adding an existing subscription should return false")
 
-    def test_persistence(self):
-        self.manager.add_subscription(str(1), "test1")
-        self.manager.add_subscription(str(3), "test1")
-        self.manager.add_subscription(str(2), "test2")
-        self.manager.add_subscription(str(4), "removed")
-        self.manager.rm_subscription(str(4), "removed")
-        self.manager.set_last_update(datetime(year=2020, month=1, day=1))
-        
-        del self.manager
-        self.manager = SubscriptionManager(self.TESTFILE)
+    def test_rm_subscription(self):
+        self.manager.add_subscription(1, 1)
+        self.assertTrue(self.manager.rm_subscription(1, 1), "Removing a non-existing subscription should return true")
+        self.assertFalse(self.manager.rm_subscription(1, 1), "Removing an existing subscription should return false")
 
-        self.assertEqual({"test1"}, self.manager.get_subscriptions(str(1)), "Should save persistently")
-        self.assertEqual({"test1"}, self.manager.get_subscriptions(str(3)), "Should save persistently")
-        self.assertEqual({"test2"}, self.manager.get_subscriptions(str(2)), "Should save persistently")
-        self.assertEqual(datetime(year=2020, month=1, day=1), self.manager.get_last_update(), "Should save persistently")
-        self.assertIsNone(self.manager.get_subscriptions(str(4)), "Should remove persistently")
+    def test_get_subscriptions(self):
+        self.manager.add_subscription(1, 1)
+        self.manager.add_subscription(1, 2)
+        self.manager.add_subscription(2, 1)
+
+        self.assertListEqual([1, 2], self.manager.get_subscriptions(1))
+        self.assertListEqual([1], self.manager.get_subscriptions(2))
+        self.assertListEqual([], self.manager.get_subscriptions(3), "A non existing user should not have subscriptions")
+
+    def test_delete_user(self):
+        self.fail()
+
+    def test_get_all_user(self):
+        self.fail()

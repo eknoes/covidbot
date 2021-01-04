@@ -2,10 +2,10 @@ from unittest import TestCase
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, DistrictData
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.subscription_manager import FileBasedSubscriptionManager
 
 
-class SubscriptionManagerNoFile(SubscriptionManager):
+class SubscriptionManagerNoFile(FileBasedSubscriptionManager):
     """
     Mock class of a memory-based subscription manager
     """
