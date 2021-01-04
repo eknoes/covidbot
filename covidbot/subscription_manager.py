@@ -64,7 +64,9 @@ class SubscriptionManager(object):
 
     def migrate_from(self, old_manager: FileBasedSubscriptionManager):
         for subscriber in old_manager.get_subscribers():
+            print(f"Migrate user_id {subscriber}")
             for subscription in old_manager.get_subscriptions(subscriber):
+                print(f"Add subscription for {subscription}")
                 self.add_subscription(int(subscriber), subscription)
 
 
