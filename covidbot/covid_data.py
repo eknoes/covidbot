@@ -145,7 +145,7 @@ class CovidData(object):
             with conn.cursor() as cursor:
                 cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, date "
                                "FROM covid_data JOIN counties c on c.rs = covid_data.rs "
-                               "WHERE c.type != 'BL' GROUP BY date ORDER BY date DESC LIMIT 2")
+                               "WHERE c.type != 'Bundesland' GROUP BY date ORDER BY date DESC LIMIT 2")
                 data = cursor.fetchone()
                 country_data.total_cases = data['total_cases']
                 country_data.total_deaths = data['total_deaths']

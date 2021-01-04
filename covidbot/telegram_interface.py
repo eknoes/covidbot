@@ -1,6 +1,8 @@
 import logging
 
+import telegram
 from telegram import Update, ParseMode
+from telegram.error import BadRequest
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
 
 from covidbot.bot import Bot
@@ -88,3 +90,13 @@ class TelegramInterface(object):
     def run(self):
         self.updater.start_polling()
         self.updater.idle()
+
+    def send_correction_message(self, msg):
+        for subscriber in self._bot.manager.get_subscribers():
+            try:
+                self.updater.bot.send_message(subscriber, msg, parse_mode=telegram.ParseMode.HTML)
+                self.updater.bot.send_message(subscriber, self._bot.get_report(subscriber),
+                                              parse_mode=telegram.ParseMode.HTML)
+                logging.info(f"Sent correction message to {str(subscriber)}")
+            except BadRequest as error:
+                logging.warning(f"Could not send message to {str(subscriber)}: {str(error)}")
