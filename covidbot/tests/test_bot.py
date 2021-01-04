@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, DistrictData
-from covidbot.subscription_manager import FileBasedSubscriptionManager
+from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 
 
 class SubscriptionManagerNoFile(FileBasedSubscriptionManager):

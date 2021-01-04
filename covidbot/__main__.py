@@ -2,7 +2,7 @@ import logging
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
-from covidbot.subscription_manager import FileBasedSubscriptionManager
+from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 from covidbot.telegram_interface import TelegramInterface
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

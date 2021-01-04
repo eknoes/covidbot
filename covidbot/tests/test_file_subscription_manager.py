@@ -3,7 +3,7 @@ import shutil
 from datetime import datetime
 from unittest import TestCase
 
-from covidbot.subscription_manager import FileBasedSubscriptionManager
+from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 
 
 class SubscriptionManagerTest(TestCase):

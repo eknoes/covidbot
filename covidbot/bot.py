@@ -2,7 +2,7 @@ import itertools
 import logging
 from typing import Optional, Tuple, List, Dict
 
-from covidbot.subscription_manager import FileBasedSubscriptionManager
+from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 from covidbot.covid_data import CovidData, DistrictData
 
 
