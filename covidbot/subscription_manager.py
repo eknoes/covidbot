@@ -16,11 +16,11 @@ class SubscriptionManager(object):
     def _create_db(self):
         with self.connection as conn:
             with conn.cursor() as cursor:
+                cursor.execute('CREATE TABLE IF NOT EXISTS bot_user '
+                               '(user_id INTEGER PRIMARY KEY, last_update TIMESTAMP DEFAULT NULL)')
                 cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                                '(user_id INTEGER, rs INTEGER, added DATE DEFAULT now(), '
                                'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
-                cursor.execute('CREATE TABLE IF NOT EXISTS bot_user '
-                               '(user_id INTEGER PRIMARY KEY, last_update TIMESTAMP DEFAULT NULL)')
 
     def add_subscription(self, user_id: int, rs: int) -> bool:
         with self.connection as conn:
