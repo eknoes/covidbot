@@ -18,8 +18,7 @@ class TestSubscriptionManager(TestCase):
         self.manager = SubscriptionManager(self.conn)
         with self.conn as conn:
             with conn.cursor() as cursor:
-                cursor.execute("TRUNCATE TABLE subscriptions;")
-                cursor.execute("TRUNCATE TABLE bot_user;")
+                cursor.execute("TRUNCATE TABLE bot_user CASCADE;")
 
     def tearDown(self) -> None:
         del self.manager

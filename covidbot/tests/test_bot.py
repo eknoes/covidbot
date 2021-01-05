@@ -32,8 +32,7 @@ class TestBot(TestCase):
                        self.man)
         with self.conn as conn:
             with conn.cursor() as cursor:
-                cursor.execute("TRUNCATE bot_user")
-                cursor.execute("TRUNCATE subscriptions")
+                cursor.execute("TRUNCATE bot_user CASCADE")
 
     def tearDown(self) -> None:
         del self.bot
