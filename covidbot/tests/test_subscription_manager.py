@@ -73,11 +73,16 @@ class TestSubscriptionManager(TestCase):
         old_manager.add_subscription(1, 2)
         old_manager.add_subscription(2, 1)
 
+        last_update = datetime.now()
+        old_manager.set_last_update(last_update)
+
         self.manager.migrate_from(old_manager)
 
         self.assertCountEqual([1, 2], self.manager.get_all_user(), "All users should be migrated")
         self.assertCountEqual([1, 2], self.manager.get_subscriptions(1), "All users should be migrated")
         self.assertCountEqual([1], self.manager.get_subscriptions(2), "All users should be migrated")
+        self.assertEqual(last_update, self.manager.get_last_update(1), "last_update should be migrated")
+        self.assertEqual(last_update, self.manager.get_last_update(2), "last_update should be migrated")
 
     def test_last_update(self):
         self.manager.add_subscription(1, 1)

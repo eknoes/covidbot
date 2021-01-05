@@ -78,6 +78,7 @@ class SubscriptionManager(object):
             for subscription in old_manager.get_subscriptions(subscriber):
                 print(f"Add subscription for {subscription}")
                 self.add_subscription(int(subscriber), subscription)
+                self.set_last_update(int(subscriber), old_manager.get_last_update())
 
     def set_last_update(self, user_id: int, date: datetime):
         with self.connection as conn:
