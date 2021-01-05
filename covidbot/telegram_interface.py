@@ -61,7 +61,7 @@ class TelegramInterface(object):
 
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
-        update.message.reply_html(self._bot.subscribe(str(update.effective_chat.id), entity))
+        update.message.reply_html(self._bot.subscribe(update.effective_chat.id, entity))
         self.log.debug("Someone called /abo" + entity)
 
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
@@ -70,7 +70,7 @@ class TelegramInterface(object):
         self.log.debug("Someone called /beende" + entity)
 
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_html(self._bot.get_report(str(update.effective_chat.id)))
+        update.message.reply_html(self._bot.get_report(update.effective_chat.id))
         self.log.debug("Someone called /bericht")
 
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
@@ -85,14 +85,14 @@ class TelegramInterface(object):
 
         for userid, message in messages:
             context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
-            self.log.info("Sent report to " + userid)
+            self.log.info(f"Sent report to {userid}")
 
     def run(self):
         self.updater.start_polling()
         self.updater.idle()
 
     def send_correction_message(self, msg):
-        for subscriber in self._bot.manager.get_subscribers():
+        for subscriber in self._bot.manager.get_all_user():
             try:
                 self.updater.bot.send_message(subscriber, msg, parse_mode=telegram.ParseMode.HTML)
                 self.updater.bot.send_message(subscriber, self._bot.get_report(subscriber),

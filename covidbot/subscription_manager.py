@@ -1,69 +1,95 @@
-import json
-import logging
-import os
 from datetime import datetime
-from typing import Dict, List, Set, Union, Optional
+from typing import List, Optional
 
-from covidbot.utils import serialize_datetime, unserialize_datetime
+from psycopg2._psycopg import connection
+
+from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 
 
 class SubscriptionManager(object):
-    _file: str = None
-    # json modules stores ints as strings, so we have to convert the chat_ids everytime
-    _data: Dict[str, List[str]] = dict()
-    _last_update: Union[datetime, None] = None
-    log = logging.getLogger(__name__)
+    connection: connection
 
-    def __init__(self, file: str):
-        self._file = file
+    def __init__(self, db_connection: connection):
+        self.connection = db_connection
+        self._create_db()
 
-        if os.path.isfile(self._file):
-            with open(self._file, "r") as f:
-                data = json.load(f)
-                self._data = data['subscriptions']
-                self._last_update = unserialize_datetime(data['last_update'])
-                self.log.debug("Loaded Data: " + str(self._data))
+    def _create_db(self):
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('CREATE TABLE IF NOT EXISTS bot_user '
+                               '(user_id INTEGER PRIMARY KEY, last_update TIMESTAMP DEFAULT NULL)')
+                cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
+                               '(user_id INTEGER, rs INTEGER, added DATE DEFAULT now(), '
+                               'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
 
-    def add_subscription(self, chat_id: str, rs: str) -> bool:
-        if chat_id not in self._data or self._data[chat_id] is None:
-            self._data[chat_id] = []
+    def add_subscription(self, user_id: int, rs: int) -> bool:
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('INSERT INTO bot_user (user_id) VALUES (%s) '
+                               'ON CONFLICT DO NOTHING', [user_id])
+                cursor.execute('INSERT INTO subscriptions (user_id, rs) VALUES (%s, %s) '
+                               'ON CONFLICT DO NOTHING', [user_id, rs])
+                if cursor.rowcount == 1:
+                    return True
+        return False
 
-        if rs in self._data[chat_id]:
-            return False
-        else:
-            self._data[chat_id].append(rs)
-            self._save()
-            return True
+    def rm_subscription(self, user_id: int, rs: int) -> bool:
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('DELETE FROM subscriptions WHERE user_id=%s AND rs=%s', [user_id, rs])
+                if cursor.rowcount == 0:
+                    return False
 
-    def rm_subscription(self, chat_id: str, rs: str) -> bool:
-        if chat_id not in self._data:
-            return False
+                if len(self.get_subscriptions(user_id)) == 0:
+                    self.delete_user(user_id)
 
-        if rs not in self._data[chat_id]:
-            return False
+                return True
 
-        self._data[chat_id].remove(rs)
-        if not self._data[chat_id]:
-            del self._data[chat_id]
-        self._save()
-        return True
+    def get_subscriptions(self, user_id: int) -> Optional[List[int]]:
+        result = []
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT rs FROM subscriptions WHERE user_id=%s', [user_id])
+                for row in cursor.fetchall():
+                    result.append(row['rs'])
+        return result
 
-    def get_subscriptions(self, chat_id: str) -> Optional[Set[str]]:
-        if chat_id not in self._data:
-            return None
-        return set(self._data[chat_id])
+    def delete_user(self, user_id: int) -> bool:
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('DELETE FROM subscriptions WHERE user_id=%s', [user_id])
+                cursor.execute('DELETE FROM bot_user WHERE user_id=%s', [user_id])
+                if cursor.rowcount > 0:
+                    return True
+        return False
 
-    def get_subscribers(self) -> List[str]:
-        return list(self._data.keys())
+    def get_all_user(self) -> List[int]:
+        result = []
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT user_id FROM bot_user')
+                for row in cursor.fetchall():
+                    result.append(row['user_id'])
+        return result
 
-    def set_last_update(self, last_update: datetime) -> None:
-        self._last_update = last_update
-        self._save()
+    def migrate_from(self, old_manager: FileBasedSubscriptionManager):
+        for subscriber in old_manager.get_subscribers():
+            print(f"Migrate user_id {subscriber}")
+            for subscription in old_manager.get_subscriptions(subscriber):
+                print(f"Add subscription for {subscription}")
+                self.add_subscription(int(subscriber), subscription)
 
-    def get_last_update(self) -> Union[None, datetime]:
-        return self._last_update
+    def set_last_update(self, user_id: int, date: datetime):
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("UPDATE bot_user SET last_update=%s WHERE user_id=%s", [date, user_id])
 
-    def _save(self) -> None:
-        with open(self._file, "w") as f:
-            self.log.debug("Saving Data: " + str(self._data))
-            json.dump({"subscriptions": self._data, "last_update": self._last_update}, f, default=serialize_datetime)
+    def get_last_update(self, user_id: int) -> Optional[datetime]:
+        with self.connection as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT last_update FROM bot_user WHERE user_id=%s", [user_id])
+                row = cursor.fetchone()
+                if row is not None and 'last_update' in row:
+                    return row['last_update']
+
+

@@ -1,11 +1,15 @@
 from unittest import TestCase
 
+import psycopg2
+from psycopg2.extras import DictCursor
+
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, DistrictData
+from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 from covidbot.subscription_manager import SubscriptionManager
 
 
-class SubscriptionManagerNoFile(SubscriptionManager):
+class SubscriptionManagerNoFile(FileBasedSubscriptionManager):
     """
     Mock class of a memory-based subscription manager
     """
@@ -21,16 +25,23 @@ class SubscriptionManagerNoFile(SubscriptionManager):
 class TestBot(TestCase):
 
     def setUp(self) -> None:
-        self.man = SubscriptionManagerNoFile()
-        self.bot = Bot(CovidData(db_user="covid_bot", db_password="covid_bot", db_name="covid_test_db"), self.man)
+        self.conn = psycopg2.connect(dbname="covid_test_db", user="covid_bot", password="covid_bot", port=5432,
+                                     host='localhost', cursor_factory=DictCursor)
+        self.man = SubscriptionManager(self.conn)
+        self.bot = Bot(CovidData(db_user="covid_bot", db_password="covid_bot", db_name="covid_test_db"),
+                       self.man)
+        with self.conn as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("TRUNCATE bot_user CASCADE")
 
     def tearDown(self) -> None:
         del self.bot
         del self.man
+        self.conn.close()
 
     def test_update_with_subscribers(self):
-        self.bot.subscribe("testuser", "Berlin")
-        self.bot.subscribe("testuser2", "Hessen")
+        self.bot.subscribe(1, "Berlin")
+        self.bot.subscribe(2, "Hessen")
         self.assertEqual(2, len(self.bot.update()), "New data should trigger 2 updates")
         self.assertEqual([], self.bot.update(), "Without new data no reports should be generated")
 
@@ -53,7 +64,7 @@ class TestBot(TestCase):
                      DistrictData(incidence=101, name="101Incidence"), DistrictData(incidence=201, name="201Incidence")]
         actual = self.bot.group_districts(districts)
 
-        in_group_0 = list(map(lambda x: x.name,actual[0]))
+        in_group_0 = list(map(lambda x: x.name, actual[0]))
         self.assertIn("0Incidence", in_group_0, "District should be grouped in district <= 35")
         self.assertIn("35Incidence", in_group_0, "District should be grouped in district <= 35")
         self.assertEqual(actual[35][0].name, "36Incidence", "District should be grouped in 35 < district <= 50")
@@ -71,7 +82,8 @@ class TestBot(TestCase):
         self.assertIsInstance(self.bot.group_districts([]), dict)
 
     def test_sort_districts(self):
-        districts = [DistrictData(incidence=0, name="A"), DistrictData(incidence=0, name="C"), DistrictData(incidence=0, name="B")]
+        districts = [DistrictData(incidence=0, name="A"), DistrictData(incidence=0, name="C"),
+                     DistrictData(incidence=0, name="B")]
         actual_names = list(map(lambda d: d.name, self.bot.sort_districts(districts)))
 
         self.assertEqual("A", actual_names[0], "Districts should be sorted alphabetically")
