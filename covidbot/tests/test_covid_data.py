@@ -1,4 +1,3 @@
-import shutil
 from unittest import TestCase
 
 from covidbot.covid_data import CovidData

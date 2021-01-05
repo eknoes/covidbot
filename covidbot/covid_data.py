@@ -102,7 +102,7 @@ class CovidData(object):
             return " ".join(name.split(" ")[1:])
         return name
 
-    def find_rs(self, search_str: str) -> List[Tuple[str, str]]:
+    def find_rs(self, search_str: str) -> List[Tuple[int, str]]:
         search_str = search_str.lower()
         results = []
         with self._connection as conn:
@@ -116,18 +116,18 @@ class CovidData(object):
                         results.append((row['rs'], row['name']))
         return results
 
-    def get_rs_name(self, rs: str) -> str:
+    def get_rs_name(self, rs: int) -> str:
         with self._connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute('SELECT name FROM counties WHERE rs=%s', [int(rs)])
                 return cursor.fetchone()['name']
 
-    def get_covid_data(self, rs: str) -> Optional[DistrictData]:
+    def get_covid_data(self, rs: int) -> Optional[DistrictData]:
         with self._connection as conn:
             with conn.cursor() as cursor:
                 cursor.execute('SELECT total_cases, total_deaths, incidence, name, type '
                                'FROM covid_data JOIN counties c on c.rs = covid_data.rs WHERE covid_data.rs=%s '
-                               'ORDER BY date DESC LIMIT 2', [int(rs)])
+                               'ORDER BY date DESC LIMIT 2', [rs])
                 d = cursor.fetchone()
                 current_data = DistrictData(name=d['name'], incidence=d['incidence'], type=d['type'],
                                             total_cases=d['total_cases'],

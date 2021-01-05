@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest import TestCase
 
 import psycopg2
@@ -18,6 +19,7 @@ class TestSubscriptionManager(TestCase):
         with self.conn as conn:
             with conn.cursor() as cursor:
                 cursor.execute("TRUNCATE TABLE subscriptions;")
+                cursor.execute("TRUNCATE TABLE bot_user;")
 
     def tearDown(self) -> None:
         del self.manager
@@ -77,3 +79,12 @@ class TestSubscriptionManager(TestCase):
         self.assertCountEqual([1, 2], self.manager.get_all_user(), "All users should be migrated")
         self.assertCountEqual([1, 2], self.manager.get_subscriptions(1), "All users should be migrated")
         self.assertCountEqual([1], self.manager.get_subscriptions(2), "All users should be migrated")
+
+    def test_last_update(self):
+        self.manager.add_subscription(1, 1)
+        self.assertIsNone(self.manager.get_last_update(1), "Before an update, last_update should be None")
+        expected = datetime.now()
+        self.manager.set_last_update(1, expected)
+        self.assertEqual(expected, self.manager.get_last_update(1))
+        self.manager.delete_user(1)
+        self.assertIsNone(self.manager.get_last_update(1), "last_update of an deleted user should be None")

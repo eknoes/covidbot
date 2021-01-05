@@ -2,15 +2,15 @@ import itertools
 import logging
 from typing import Optional, Tuple, List, Dict
 
-from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 from covidbot.covid_data import CovidData, DistrictData
+from covidbot.subscription_manager import SubscriptionManager
 
 
 class Bot(object):
     data: CovidData
-    manager: FileBasedSubscriptionManager
+    manager: SubscriptionManager
 
-    def __init__(self, covid_data: CovidData, subscription_manager: FileBasedSubscriptionManager):
+    def __init__(self, covid_data: CovidData, subscription_manager: SubscriptionManager):
         self.log = logging.getLogger(__name__)
         self.data = covid_data
         self.manager = subscription_manager
@@ -40,7 +40,7 @@ class Bot(object):
         else:
             return self._handle_no_input()
 
-    def subscribe(self, userid: str, county_key: str) -> str:
+    def subscribe(self, userid: int, county_key: str) -> str:
         if county_key != "":
             possible_rs = self.data.find_rs(county_key)
             if len(possible_rs) == 1:
@@ -62,7 +62,7 @@ class Bot(object):
             possible_rs = self.data.find_rs(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
-                if self.manager.rm_subscription(userid, rs):
+                if self.manager.rm_subscription(int(userid), rs):
                     message = "Dein Abonnement für " + county + " wurde beendet."
                 else:
                     message = "Du hast " + county + " nicht abonniert."
@@ -74,7 +74,7 @@ class Bot(object):
         else:
             return self._handle_no_input()
 
-    def get_report(self, userid: str) -> str:
+    def get_report(self, userid: int) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
         country = self.data.get_country_data()
         message = "<b>Corona-Bericht vom " \
@@ -147,7 +147,7 @@ class Bot(object):
 
         return result
 
-    def get_overview(self, userid: str) -> str:
+    def get_overview(self, userid: int) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
         if subscriptions is None or len(subscriptions) == 0:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
@@ -183,7 +183,7 @@ class Bot(object):
         return ("Dieser Befehl wurde nicht verstanden. Nutze <code>/hilfe</code> um einen Überblick über die Funktionen"
                 "zu bekommen!")
 
-    def update(self) -> Optional[List[Tuple[str, str]]]:
+    def update(self) -> Optional[List[Tuple[int, str]]]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
@@ -191,17 +191,20 @@ class Bot(object):
         :return: List of (userid, message)
         """
         self.log.debug("Checking for new data")
-        if self.manager.get_last_update() is None or self.data.get_last_update() > self.manager.get_last_update():
-            self.log.info("New COVID19 data available from " + str(self.data.get_last_update()))
-            result = []
-            for subscriber in self.manager.get_subscribers():
+        self.log.info("New COVID19 data available from " + str(self.data.get_last_update()))
+        result = []
+        data_update = self.data.get_last_update()
+        for subscriber in self.manager.get_all_user():
+            user_last_update = self.manager.get_last_update(subscriber)
+            if user_last_update is None or user_last_update < data_update:
                 result.append((subscriber, self.get_report(subscriber)))
-            self.manager.set_last_update(self.data.get_last_update())
+                self.manager.set_last_update(subscriber, self.data.get_last_update())
+        if len(result) > 0:
             return result
 
         if self.data.fetch_current_data():
             return self.update()
-        return []
+        return result
 
     @staticmethod
     def format_incidence(incidence: float) -> str:
