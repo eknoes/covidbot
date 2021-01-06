@@ -1,4 +1,5 @@
 import logging
+import time
 
 import telegram
 from telegram import Update, ParseMode
@@ -85,9 +86,15 @@ class TelegramInterface(object):
         if not messages:
             return
 
+        # Avoid flood limits of 30 messages / second
+        messages_sent = 0
         for userid, message in messages:
+            if messages_sent > 0 and messages_sent % 25 == 0:
+                self.log.info("Sleep for one second to avoid flood limits")
+                time.sleep(1.0)
             context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
             self.log.info(f"Sent report to {userid}")
+            messages_sent += 1
 
     def run(self):
         self.updater.start_polling()
