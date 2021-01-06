@@ -1,7 +1,9 @@
+import configparser
 import logging
 import argparse
 
 import psycopg2
+from psycopg2._psycopg import connection
 from psycopg2.extras import DictCursor
 
 from covidbot.bot import Bot
@@ -10,35 +12,23 @@ from covidbot.file_based_subscription_manager import FileBasedSubscriptionManage
 from covidbot.subscription_manager import SubscriptionManager
 from covidbot.telegram_interface import TelegramInterface
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO, filename="bot.log")
-# Also write to stderr
-logging.getLogger().addHandler(logging.StreamHandler())
 
-# Add arguments
+def parse_config(config_file: str):
+    cfg = configparser.ConfigParser()
+    cfg.read(config_file)
+    return cfg
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--message', help='Do not start the bot but send a message to all users', action='store_true')
-parser.add_argument('--migrate', help='Do not start the bot but migrate users from file-based manager to database',
-                    action='store_true')
-args = parser.parse_args()
 
-# Initialize Data
-with open(".api_key", "r") as f:
-    key = f.readline().rstrip("\n")
+def get_connection(cfg) -> connection:
+    return psycopg2.connect(dbname=cfg['DATABASE'].get('DATABASE'),
+                            user=cfg['DATABASE'].get('USER'),
+                            password=cfg['DATABASE'].get('PASSWORD'),
+                            port=cfg['DATABASE'].get('PORT'),
+                            host=cfg['DATABASE'].get('HOST', 'localhost'),
+                            cursor_factory=DictCursor)
 
-with open(".db_password", "r") as f:
-    password = f.readline().rstrip("\n")
 
-conn = psycopg2.connect(dbname="covid_bot_db", user="covid_bot", password=password, port=5432,
-                        host='localhost', cursor_factory=DictCursor)
-
-data = CovidData(conn)
-user_manager = SubscriptionManager(conn)
-bot = TelegramInterface(Bot(data, user_manager), api_key=key)
-
-if args.message:
-    print()
+def send_correction_report(bot: TelegramInterface):
     if input("If you want to sent a correction message with the current report to all users, press Y: ") != "Y":
         exit(0)
 
@@ -55,10 +45,40 @@ if args.message:
     print(f"\n\n{msg}\n\n")
     if input("Press Y to send this message: ") == "Y":
         bot.send_correction_message(msg)
-elif args.migrate:
-    file_manager = FileBasedSubscriptionManager("user.json")
-    user_manager.migrate_from(file_manager)
-else:
-    bot.run()
 
-conn.close()
+
+# Setup logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO, filename="bot.log")
+# Also write to stderr
+logging.getLogger().addHandler(logging.StreamHandler())
+
+if __name__ == "__main__":
+    # Parse Arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--message', help='Do not start the bot but send a message to all users',
+                        action='store_true')
+    parser.add_argument('--migrate',
+                        help='Do not start the bot but migrate users from file-based manager to database',
+                        action='store_true')
+    args = parser.parse_args()
+    config = parse_config("config.ini")
+    api_key = config['TELEGRAM'].get('API_KEY')
+
+    conn = get_connection(config)
+    data = CovidData(conn)
+    user_manager = SubscriptionManager(conn)
+    telegram_bot = TelegramInterface(Bot(data, user_manager), api_key=api_key)
+
+    if args is None:
+        telegram_bot.run()
+    elif args.message:
+        send_correction_report(telegram_bot)
+    elif args.migrate:
+        file_manager = FileBasedSubscriptionManager("user.json")
+        user_manager.migrate_from(file_manager)
+    else:
+        telegram_bot.run()
+
+    conn.close()
+

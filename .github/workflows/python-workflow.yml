@@ -31,7 +31,7 @@ jobs:
           POSTGRES_PASSWORD: covid_bot
           POSTGRES_DB: covid_test_db
         ports:
-          - 5432:5432
+          - 5432:5434
         options: >-
           --health-cmd pg_isready
           --health-interval 10s

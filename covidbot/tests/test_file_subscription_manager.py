@@ -8,7 +8,7 @@ from covidbot.file_based_subscription_manager import FileBasedSubscriptionManage
 
 class SubscriptionManagerTest(TestCase):
     TESTFILE = "covidbot/tests/testuser_empty.json"
-    ORIG_TESTFILE = "testuser_empty.json"
+    ORIG_TESTFILE = "resources/testuser_empty.json"
 
     def setUp(self) -> None:
         if os.path.isfile(self.TESTFILE):

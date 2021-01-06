@@ -1,10 +1,9 @@
 from datetime import datetime
 from unittest import TestCase
 
-import psycopg2
-from psycopg2.extras import DictCursor
 from psycopg2._psycopg import connection
 
+from covidbot.__main__ import parse_config, get_connection
 from covidbot.subscription_manager import SubscriptionManager
 from covidbot.tests.test_file_subscription_manager import SubscriptionManagerTest
 
@@ -12,9 +11,16 @@ from covidbot.tests.test_file_subscription_manager import SubscriptionManagerTes
 class TestSubscriptionManager(TestCase):
     conn: connection
 
+    @classmethod
+    def setUpClass(cls) -> None:
+        cfg = parse_config("resources/config.unittest.ini")
+        cls.conn = get_connection(cfg)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.conn.close()
+
     def setUp(self) -> None:
-        self.conn = psycopg2.connect(dbname="covid_test_db", user="covid_bot", password="covid_bot", port=5432,
-                                     host='localhost', cursor_factory=DictCursor)
         self.manager = SubscriptionManager(self.conn)
         with self.conn as conn:
             with conn.cursor() as cursor:
@@ -22,7 +28,6 @@ class TestSubscriptionManager(TestCase):
 
     def tearDown(self) -> None:
         del self.manager
-        self.conn.close()
 
     def test_add_subscription(self):
         self.assertTrue(self.manager.add_subscription(1, 1), "Adding a non-existing subscription should return true")

@@ -2,9 +2,8 @@ venv/*
 .idea/*
 *__pycache__*
 
-# Secrets
-.api_key
-.db_password
+# Secret configuration
+config.ini
 
 # Generated files
 user.json

@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-import psycopg2
-from psycopg2.extras import DictCursor
+from psycopg2._psycopg import connection
 
+from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, DistrictData
 from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
@@ -23,10 +23,18 @@ class SubscriptionManagerNoFile(FileBasedSubscriptionManager):
 
 
 class TestBot(TestCase):
+    conn: connection
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cfg = parse_config("resources/config.unittest.ini")
+        cls.conn = get_connection(cfg)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.conn.close()
 
     def setUp(self) -> None:
-        self.conn = psycopg2.connect(dbname="covid_test_db", user="covid_bot", password="covid_bot", port=5432,
-                                     host='localhost', cursor_factory=DictCursor)
         self.man = SubscriptionManager(self.conn)
         self.bot = Bot(CovidData(self.conn),
                        self.man)
@@ -37,7 +45,6 @@ class TestBot(TestCase):
     def tearDown(self) -> None:
         del self.bot
         del self.man
-        self.conn.close()
 
     def test_update_with_subscribers(self):
         self.bot.subscribe(1, "Berlin")
