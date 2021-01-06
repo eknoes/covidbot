@@ -28,7 +28,7 @@ class TestBot(TestCase):
         self.conn = psycopg2.connect(dbname="covid_test_db", user="covid_bot", password="covid_bot", port=5432,
                                      host='localhost', cursor_factory=DictCursor)
         self.man = SubscriptionManager(self.conn)
-        self.bot = Bot(CovidData(db_user="covid_bot", db_password="covid_bot", db_name="covid_test_db"),
+        self.bot = Bot(CovidData(self.conn),
                        self.man)
         with self.conn as conn:
             with conn.cursor() as cursor:

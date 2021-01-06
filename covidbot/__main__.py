@@ -33,7 +33,7 @@ with open(".db_password", "r") as f:
 conn = psycopg2.connect(dbname="covid_bot_db", user="covid_bot", password=password, port=5432,
                         host='localhost', cursor_factory=DictCursor)
 
-data = CovidData(db_user="covid_bot", db_password=password, db_name="covid_bot_db")
+data = CovidData(conn)
 user_manager = SubscriptionManager(conn)
 bot = TelegramInterface(Bot(data, user_manager), api_key=key)
 
@@ -60,3 +60,5 @@ elif args.migrate:
     user_manager.migrate_from(file_manager)
 else:
     bot.run()
+
+conn.close()

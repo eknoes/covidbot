@@ -30,9 +30,8 @@ class CovidData(object):
     _connection: connection
     log = logging.getLogger(__name__)
 
-    def __init__(self, db_user: str, db_password: str, db_name: str, db_port: int = 5432) -> None:
-        self._connection = psycopg2.connect(dbname=db_name, user=db_user, password=db_password, port=db_port,
-                                            host='localhost', cursor_factory=DictCursor)
+    def __init__(self, connection: connection) -> None:
+        self._connection = connection
         self._create_tables()
         self.fetch_current_data()
 

@@ -56,7 +56,8 @@ class TelegramInterface(object):
 
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
-        update.message.reply_html(self._bot.get_current(entity))
+        message = self._bot.get_current(entity)
+        update.message.reply_html(message)
         self.log.debug("Someone called /ort")
 
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
