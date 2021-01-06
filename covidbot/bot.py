@@ -165,7 +165,7 @@ class Bot(object):
         """
         possible_rs = self.data.find_rs(location)
         if not possible_rs:
-            message = "Es wurde <b>keine<b> Ort mit dem Namen " + location + " gefunden!"
+            message = "Es wurde <b>keine</b> Ort mit dem Namen " + location + " gefunden!"
         elif 1 < len(possible_rs) <= 15:
             message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden:\n"
             message += "\n".join(list(map(lambda t: "• " + t[1], possible_rs)))
