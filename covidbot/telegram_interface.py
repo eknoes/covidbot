@@ -2,7 +2,7 @@ import logging
 
 import telegram
 from telegram import Update, ParseMode
-from telegram.error import BadRequest
+from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, NetworkError, ChatMigrated
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
 
 from covidbot.bot import Bot
@@ -33,6 +33,7 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
+        self.updater.dispatcher.add_error_handler(self.error_callback)
         self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
@@ -101,3 +102,18 @@ class TelegramInterface(object):
                 logging.info(f"Sent correction message to {str(subscriber)}")
             except BadRequest as error:
                 logging.warning(f"Could not send message to {str(subscriber)}: {str(error)}")
+
+    def error_callback(self, update: Update, context: CallbackContext):
+        try:
+            raise context.error
+        except Unauthorized:
+            logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}")
+            self._bot.manager.delete_user(update.message.chat_id)
+        except BadRequest:
+            logging.warning(f"TelegramError: BadRequest: {update.message.text}")
+        except TimedOut:
+            logging.warning(f"TelegramError: TimedOut sending {update.message.text}")
+        except NetworkError:
+            logging.warning(f"TelegramError: NetworkError while sending {update.message.text}")
+        except TelegramError as e:
+            logging.warning(f"TelegramError: {e}")
