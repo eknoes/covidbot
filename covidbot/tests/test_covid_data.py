@@ -27,6 +27,10 @@ class CovidDataTest(TestCase):
     def test_find_ags(self):
         self.assertEqual(2, len(self.data.find_rs("Kassel")), "2 Entities should be found for Kassel")
         self.assertEqual(1, len(self.data.find_rs("Berlin")), "Exact match should be chosen")
+        self.assertEqual(1, len(self.data.find_rs("Kassel Stadt")), "Kassel Stadt should match SK Kassel")
+        self.assertEqual(1, len(self.data.find_rs("Stadt Kassel")), "Stadt Kassel should match SK Kassel")
+        self.assertEqual(1, len(self.data.find_rs("Kassel Land")), "Kassel Land should match LK Kassel")
+        self.assertEqual(1, len(self.data.find_rs("Bundesland Hessen")), "Exact match should be chosen")
 
     def test_self_update(self):
         self.assertIsNotNone(self.data.get_last_update(), "Covid Data should fetch data")

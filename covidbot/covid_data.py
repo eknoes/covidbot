@@ -103,16 +103,17 @@ class CovidData(object):
 
     def find_rs(self, search_str: str) -> List[Tuple[int, str]]:
         search_str = search_str.lower()
+        search_str = search_str.replace(" ", "%")
         results = []
         with self._connection as conn:
             with conn.cursor() as cursor:
-                cursor.execute('SELECT rs, name FROM counties WHERE LOWER(name) LIKE %s', ['%' + search_str + '%'])
+                cursor.execute('SELECT rs, name FROM counties WHERE LOWER(name) LIKE %s OR '
+                               'concat(LOWER(type), LOWER(name)) LIKE %s',
+                               ['%' + search_str + '%', '%' + search_str + '%'])
                 for row in cursor.fetchall():
-                    if row['name'].lower() == search_str:
+                    if row['name'].lower() == search_str.replace("%", " "):
                         return [(row['rs'], row['name'])]
-
-                    if row['name'].lower().find(search_str) >= 0:
-                        results.append((row['rs'], row['name']))
+                    results.append((row['rs'], row['name']))
         return results
 
     def get_rs_name(self, rs: int) -> str:
