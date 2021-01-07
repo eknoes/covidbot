@@ -114,8 +114,8 @@ class TelegramInterface(object):
                     buttons.append([InlineKeyboardButton("Starte Abo",
                                                          callback_data=self.CALLBACK_CMD_SUBSCRIBE + locations[0][1])])
                 markup = InlineKeyboardMarkup(buttons)
-                query.edit_message_text(f"Möchtest du dein Abonnement von {locations[0][1]} bearbeiten oder nur die "
-                                        f"aktuellen Zahlen erhalten?", reply_markup=markup)
+                query.edit_message_text(f"Möchtest du dein Abonnement von {locations[0][1]} beenden oder nur den "
+                                        f"aktuellen Bericht erhalten?", reply_markup=markup)
             else:
                 query.edit_message_text("Sorry, dies sollte nicht passieren")
         elif query.data.startswith(self.CALLBACK_CMD_REPORT):
