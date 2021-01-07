@@ -1,10 +1,11 @@
 import logging
 import time
+from enum import Enum
 
 import telegram
-from telegram import Update, ParseMode
+from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, NetworkError, ChatMigrated
-from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 from covidbot.bot import Bot
 
@@ -22,6 +23,11 @@ class TelegramInterface(object):
     _bot: Bot
     log = logging.getLogger(__name__)
 
+    CALLBACK_CMD_SUBSCRIBE = "subscribe"
+    CALLBACK_CMD_UNSUBSCRIBE = "unsubscribe"
+    CALLBACK_CMD_CHOOSE_ACTION = "choose"
+    CALLBACK_CMD_REPORT = "report"
+
     def __init__(self, bot: Bot, api_key: str):
         self._bot = bot
 
@@ -34,6 +40,8 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
+        self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
         self.updater.dispatcher.add_error_handler(self.error_callback)
         self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
 
@@ -79,6 +87,58 @@ class TelegramInterface(object):
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.unknown_action())
         self.log.info("Someone called an unknown action: " + update.message.text)
+
+    def callbackHandler(self, update: Update, context: CallbackContext) -> None:
+        query = update.callback_query
+        query.answer()
+        if query.data.startswith(self.CALLBACK_CMD_SUBSCRIBE):
+            district = query.data[len(self.CALLBACK_CMD_SUBSCRIBE):]
+            query.edit_message_text(self._bot.subscribe(update.effective_chat.id, district), parse_mode=telegram.ParseMode.HTML)
+        elif query.data.startswith(self.CALLBACK_CMD_UNSUBSCRIBE):
+            district = query.data[len(self.CALLBACK_CMD_UNSUBSCRIBE):]
+            query.edit_message_text(self._bot.unsubscribe(update.effective_chat.id, district),
+                                    parse_mode=telegram.ParseMode.HTML)
+        elif query.data.startswith(self.CALLBACK_CMD_CHOOSE_ACTION):
+            district = query.data[len(self.CALLBACK_CMD_CHOOSE_ACTION):]
+
+            locations = self._bot.data.find_rs(district)
+            if locations is None or len(locations) == 0:
+                return
+
+            if len(locations) == 1:
+                buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + locations[0][1])]]
+                if locations[0][0] in self._bot.manager.get_subscriptions(update.effective_chat.id):
+                    buttons.append([InlineKeyboardButton("Beende Abo",
+                                                         callback_data=self.CALLBACK_CMD_UNSUBSCRIBE + locations[0][1])])
+                else:
+                    buttons.append([InlineKeyboardButton("Starte Abo",
+                                                         callback_data=self.CALLBACK_CMD_SUBSCRIBE + locations[0][1])])
+                markup = InlineKeyboardMarkup(buttons)
+                query.edit_message_text(f"Möchtest du dein Abonnement von {locations[0][1]} bearbeiten oder nur die "
+                                        f"aktuellen Zahlen erhalten?", reply_markup=markup)
+            else:
+                query.edit_message_text("Sorry, dies sollte nicht passieren")
+        elif query.data.startswith(self.CALLBACK_CMD_REPORT):
+            district = query.data[len(self.CALLBACK_CMD_REPORT):]
+            query.edit_message_text(self._bot.get_current(district), parse_mode=telegram.ParseMode.HTML)
+
+    def directMessageHandler(self, update: Update, context: CallbackContext) -> None:
+        direct_message = update.message.text
+        locations = self._bot.data.find_rs(direct_message)
+        if locations is None or len(locations) == 0:
+            update.message.reply_html("Die Ortsangabe konnte leider nicht gefunden werden! "
+                                      "Hilfe zur Benutzung des Bots gibts über <cod>/hilfe</code>")
+
+        if len(locations) == 1:
+            markup = InlineKeyboardMarkup([
+                [InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + locations[0][1])],
+                [InlineKeyboardButton("Abonnieren", callback_data=self.CALLBACK_CMD_SUBSCRIBE + locations[0][1])]])
+        else:
+            buttons = []
+            for rs, county in locations:
+                buttons.append([InlineKeyboardButton(county, callback_data=self.CALLBACK_CMD_CHOOSE_ACTION + county)])
+            markup = InlineKeyboardMarkup(buttons)
+        update.message.reply_text("Bitte wähle einen Ort:", reply_markup=markup)
 
     def updateHandler(self, context: CallbackContext) -> None:
         self.log.info("Check for data update")
