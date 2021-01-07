@@ -1,10 +1,8 @@
+import argparse
 import configparser
 import logging
-import argparse
 
-import psycopg2
-from psycopg2._psycopg import connection
-from psycopg2.extras import DictCursor
+from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
@@ -19,13 +17,12 @@ def parse_config(config_file: str):
     return cfg
 
 
-def get_connection(cfg) -> connection:
-    return psycopg2.connect(dbname=cfg['DATABASE'].get('DATABASE'),
-                            user=cfg['DATABASE'].get('USER'),
-                            password=cfg['DATABASE'].get('PASSWORD'),
-                            port=cfg['DATABASE'].get('PORT'),
-                            host=cfg['DATABASE'].get('HOST', 'localhost'),
-                            cursor_factory=DictCursor)
+def get_connection(cfg) -> MySQLConnection:
+    return connect(database=cfg['DATABASE'].get('DATABASE'),
+                   user=cfg['DATABASE'].get('USER'),
+                   password=cfg['DATABASE'].get('PASSWORD'),
+                   port=cfg['DATABASE'].get('PORT'),
+                   host=cfg['DATABASE'].get('HOST', 'localhost'))
 
 
 def send_correction_report(bot: TelegramInterface):
@@ -65,20 +62,17 @@ if __name__ == "__main__":
     config = parse_config("config.ini")
     api_key = config['TELEGRAM'].get('API_KEY')
 
-    conn = get_connection(config)
-    data = CovidData(conn)
-    user_manager = SubscriptionManager(conn)
-    telegram_bot = TelegramInterface(Bot(data, user_manager), api_key=api_key)
+    with get_connection(config) as conn:
+        data = CovidData(conn)
+        user_manager = SubscriptionManager(conn)
+        telegram_bot = TelegramInterface(Bot(data, user_manager), api_key=api_key)
 
-    if args is None:
-        telegram_bot.run()
-    elif args.message:
-        send_correction_report(telegram_bot)
-    elif args.migrate:
-        file_manager = FileBasedSubscriptionManager("user.json")
-        user_manager.migrate_from(file_manager)
-    else:
-        telegram_bot.run()
-
-    conn.close()
-
+        if args is None:
+            telegram_bot.run()
+        elif args.message:
+            send_correction_report(telegram_bot)
+        elif args.migrate:
+            file_manager = FileBasedSubscriptionManager("user.json")
+            user_manager.migrate_from(file_manager)
+        else:
+            telegram_bot.run()

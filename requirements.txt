@@ -7,7 +7,8 @@ decorator==4.4.2
 flake8==3.8.4
 idna==2.10
 mccabe==0.6.1
-psycopg2==2.8.6
+mysql-connector-python==8.0.22
+protobuf==3.14.0
 pycodestyle==2.6.0
 pycparser==2.20
 pyflakes==2.2.0

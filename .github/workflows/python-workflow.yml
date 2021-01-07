@@ -24,19 +24,14 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     services:
-      postgres:
-        image: postgres
+      mysql:
+        image: mysql
         env:
-          POSTGRES_USER: covid_bot
-          POSTGRES_PASSWORD: covid_bot
-          POSTGRES_DB: covid_test_db
+          MYSQL_ROOT_PASSWORD: covid_bot
+          MYSQL_DATABASE: covid_test_db
         ports:
-          - 5434:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          - 3307:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
