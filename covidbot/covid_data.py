@@ -25,16 +25,16 @@ class CovidData(object):
     RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
     DIVI_INTENSIVREGISTER_CSV = "https://opendata.arcgis.com/datasets/8fc79b6cf7054b1b80385bda619f39b8_0.csv"
 
-    _connection: MySQLConnection
+    connection: MySQLConnection
     log = logging.getLogger(__name__)
 
     def __init__(self, connection: MySQLConnection) -> None:
-        self._connection = connection
+        self.connection = connection
         self._create_tables()
         self.fetch_current_data()
 
     def _create_tables(self):
-        with self._connection.cursor(dictionary=True) as cursor:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS counties '
                            '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30), parent INTEGER,'
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
@@ -43,6 +43,7 @@ class CovidData(object):
                 'CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date TIMESTAMP NULL DEFAULT NULL,'
                 'total_cases INT, incidence FLOAT, total_deaths INT,'
                 'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
+            self.connection.commit()
 
     def add_data(self, filename: str):
         if filename is None:
@@ -79,7 +80,7 @@ class CovidData(object):
             rs_data.append((int(row['RS']), self.clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
                             row['BEZ'], int(row['BL_ID'])))
 
-        with self._connection.cursor(dictionary=True) as cursor:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.executemany('INSERT INTO counties (rs, county_name, type, parent) VALUES (%s, %s, %s, %s) '
                                'ON DUPLICATE KEY UPDATE '
                                'type=type, parent=parent, county_name=county_name',
@@ -92,6 +93,7 @@ class CovidData(object):
             FROM covid_data JOIN counties c on c.rs = covid_data.rs GROUP BY parent, date) as subquery
             SET covid_data.total_deaths = subquery.total_deaths, covid_data.total_cases = subquery.total_cases
             WHERE covid_data.date=subquery.date AND covid_data.rs=parent''')
+            self.connection.commit()
 
     @staticmethod
     def clean_district_name(county_name: str) -> Optional[str]:
@@ -103,7 +105,7 @@ class CovidData(object):
         search_str = search_str.lower()
         search_str = search_str.replace(" ", "%")
         results = []
-        with self._connection.cursor(dictionary=True) as cursor:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT rs, county_name FROM counties WHERE LOWER(county_name) LIKE %s OR '
                            'concat(LOWER(type), LOWER(county_name)) LIKE %s',
                            ['%' + search_str + '%', '%' + search_str + '%'])
@@ -114,12 +116,12 @@ class CovidData(object):
         return results
 
     def get_rs_name(self, rs: int) -> str:
-        with self._connection.cursor(dictionary=True) as cursor:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [int(rs)])
             return cursor.fetchone()['county_name']
 
     def get_covid_data(self, rs: int) -> Optional[DistrictData]:
-        with self._connection.cursor(dictionary=True) as cursor:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT total_cases, total_deaths, incidence, county_name, type '
                            'FROM covid_data JOIN counties c on c.rs = covid_data.rs WHERE covid_data.rs=%s '
                            'ORDER BY date DESC LIMIT 2', [rs])
@@ -136,7 +138,7 @@ class CovidData(object):
 
     def get_country_data(self) -> DistrictData:
         country_data = DistrictData(name="Bundesrepublik Deutschland")
-        with self._connection.cursor(dictionary=True) as cursor:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, date "
                            "FROM covid_data JOIN counties c on c.rs = covid_data.rs "
                            "WHERE c.type != 'Bundesland' GROUP BY date ORDER BY date DESC LIMIT 2")
@@ -152,7 +154,7 @@ class CovidData(object):
         return country_data
 
     def get_last_update(self) -> Union[datetime, None]:
-        with self._connection.cursor(dictionary=True) as cursor:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data')
             result = cursor.fetchone()
             return result['last_updated']

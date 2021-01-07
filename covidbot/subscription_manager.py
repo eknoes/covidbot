@@ -17,6 +17,7 @@ class SubscriptionManager(object):
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
+            self.connection.commit()
 
     def add_subscription(self, user_id: int, rs: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -24,6 +25,7 @@ class SubscriptionManager(object):
                            'ON DUPLICATE KEY UPDATE user_id=user_id', [user_id])
             cursor.execute('INSERT INTO subscriptions (user_id, rs) VALUES (%s, %s) '
                            'ON DUPLICATE KEY UPDATE user_id=user_id', [user_id, rs])
+            self.connection.commit()
             if cursor.rowcount == 1:
                 return True
         return False
@@ -31,6 +33,7 @@ class SubscriptionManager(object):
     def rm_subscription(self, user_id: int, rs: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('DELETE FROM subscriptions WHERE user_id=%s AND rs=%s', [user_id, rs])
+            self.connection.commit()
             if cursor.rowcount == 0:
                 return False
 
@@ -51,6 +54,7 @@ class SubscriptionManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('DELETE FROM subscriptions WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM bot_user WHERE user_id=%s', [user_id])
+            self.connection.commit()
             if cursor.rowcount > 0:
                 return True
         return False
@@ -66,6 +70,7 @@ class SubscriptionManager(object):
     def set_last_update(self, user_id: int, date: datetime):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET last_update=%s WHERE user_id=%s", [date, user_id])
+            self.connection.commit()
 
     def get_last_update(self, user_id: int) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:

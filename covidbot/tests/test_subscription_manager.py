@@ -6,6 +6,7 @@ from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.subscription_manager import SubscriptionManager
 
+
 class TestSubscriptionManager(TestCase):
     conn: MySQLConnection
 
