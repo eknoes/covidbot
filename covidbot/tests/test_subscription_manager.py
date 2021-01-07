@@ -1,7 +1,7 @@
 from datetime import datetime
 from unittest import TestCase
 
-from psycopg2._psycopg import connection
+from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.subscription_manager import SubscriptionManager
@@ -9,7 +9,7 @@ from covidbot.tests.test_file_subscription_manager import SubscriptionManagerTes
 
 
 class TestSubscriptionManager(TestCase):
-    conn: connection
+    conn: MySQLConnection
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -22,9 +22,10 @@ class TestSubscriptionManager(TestCase):
 
     def setUp(self) -> None:
         self.manager = SubscriptionManager(self.conn)
-        with self.conn as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("TRUNCATE TABLE bot_user CASCADE;")
+        with self.conn.cursor(dictionary=True) as cursor:
+            cursor.execute("TRUNCATE subscriptions")
+            # noinspection SqlWithoutWhere
+            cursor.execute("DELETE FROM bot_user")
 
     def tearDown(self) -> None:
         del self.manager

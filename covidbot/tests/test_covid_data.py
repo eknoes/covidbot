@@ -1,13 +1,13 @@
 from unittest import TestCase
 
-from psycopg2._psycopg import connection
+from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import CovidData
 
 
 class CovidDataTest(TestCase):
-    conn: connection
+    conn: MySQLConnection
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -35,7 +35,10 @@ class CovidDataTest(TestCase):
     def test_self_update(self):
         self.assertIsNotNone(self.data.get_last_update(), "Covid Data should fetch data")
 
-    def test_no_update_current_data(self):
+    def test_update(self):
+        with self.conn.cursor() as cursor:
+            cursor.execute("TRUNCATE covid_data")
+        self.assertTrue(self.data.fetch_current_data(), "Do update if newer data is available")
         self.assertFalse(self.data.fetch_current_data(), "Do not update if data has not changed")
 
     def test_brd(self):
