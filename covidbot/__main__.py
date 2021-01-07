@@ -6,7 +6,6 @@ from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
-from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 from covidbot.subscription_manager import SubscriptionManager
 from covidbot.telegram_interface import TelegramInterface
 
@@ -55,9 +54,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--message', help='Do not start the bot but send a message to all users',
                         action='store_true')
-    parser.add_argument('--migrate',
-                        help='Do not start the bot but migrate users from file-based manager to database',
-                        action='store_true')
     args = parser.parse_args()
     config = parse_config("config.ini")
     api_key = config['TELEGRAM'].get('API_KEY')
@@ -71,8 +67,5 @@ if __name__ == "__main__":
             telegram_bot.run()
         elif args.message:
             send_correction_report(telegram_bot)
-        elif args.migrate:
-            file_manager = FileBasedSubscriptionManager("user.json")
-            user_manager.migrate_from(file_manager)
         else:
             telegram_bot.run()

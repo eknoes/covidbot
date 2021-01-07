@@ -3,9 +3,6 @@ from typing import List, Optional
 
 from mysql.connector import MySQLConnection
 
-from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
-
-
 class SubscriptionManager(object):
     connection: MySQLConnection
 
@@ -65,14 +62,6 @@ class SubscriptionManager(object):
             for row in cursor.fetchall():
                 result.append(row['user_id'])
         return result
-
-    def migrate_from(self, old_manager: FileBasedSubscriptionManager):
-        for subscriber in old_manager.get_subscribers():
-            print(f"Migrate user_id {subscriber}")
-            for subscription in old_manager.get_subscriptions(subscriber):
-                print(f"Add subscription for {subscription}")
-                self.add_subscription(int(subscriber), subscription)
-                self.set_last_update(int(subscriber), old_manager.get_last_update())
 
     def set_last_update(self, user_id: int, date: datetime):
         with self.connection.cursor(dictionary=True) as cursor:

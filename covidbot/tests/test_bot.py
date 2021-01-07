@@ -5,21 +5,7 @@ from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, DistrictData
-from covidbot.file_based_subscription_manager import FileBasedSubscriptionManager
 from covidbot.subscription_manager import SubscriptionManager
-
-
-class SubscriptionManagerNoFile(FileBasedSubscriptionManager):
-    """
-    Mock class of a memory-based subscription manager
-    """
-
-    # noinspection PyMissingConstructor
-    def __init__(self):
-        pass
-
-    def _save(self):
-        pass
 
 
 class TestBot(TestCase):
