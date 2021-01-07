@@ -39,7 +39,7 @@ class CovidData(object):
                            '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30), parent INTEGER,'
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
                            'UNIQUE(rs, county_name))')
-            cursor.execute('''CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date TIMESTAMP,
+            cursor.execute('''CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date TIMESTAMP DEFAULT NULL,
              total_cases INT, incidence FLOAT, total_deaths INT,
              FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))''')
 
@@ -62,7 +62,7 @@ class CovidData(object):
         for row in reader:
             updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr")
             if last_update is not None:
-                if updated == last_update:
+                if updated >= last_update:
                     continue
 
             # Gather Bundesland data

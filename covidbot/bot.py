@@ -191,7 +191,7 @@ class Bot(object):
         :return: List of (userid, message)
         """
         self.log.debug("Checking for new data")
-        self.log.info("New COVID19 data available from " + str(self.data.get_last_update()))
+        self.log.info("Current COVID19 data from " + str(self.data.get_last_update()))
         result = []
         data_update = self.data.get_last_update()
         for subscriber in self.manager.get_all_user():

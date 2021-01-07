@@ -35,7 +35,10 @@ class CovidDataTest(TestCase):
     def test_self_update(self):
         self.assertIsNotNone(self.data.get_last_update(), "Covid Data should fetch data")
 
-    def test_no_update_current_data(self):
+    def test_update(self):
+        with self.conn.cursor() as cursor:
+            cursor.execute("TRUNCATE covid_data")
+        self.assertTrue(self.data.fetch_current_data(), "Do update if newer data is available")
         self.assertFalse(self.data.fetch_current_data(), "Do not update if data has not changed")
 
     def test_brd(self):
