@@ -24,8 +24,8 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     services:
-      mysql:
-        image: mysql
+      mariadb:
+        image: mariadb:10.3
         env:
           MYSQL_ROOT_PASSWORD: covid_bot
           MYSQL_DATABASE: covid_test_db

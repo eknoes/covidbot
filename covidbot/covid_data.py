@@ -39,9 +39,10 @@ class CovidData(object):
                            '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30), parent INTEGER,'
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
                            'UNIQUE(rs, county_name))')
-            cursor.execute('''CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date TIMESTAMP DEFAULT NULL,
-             total_cases INT, incidence FLOAT, total_deaths INT,
-             FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))''')
+            cursor.execute(
+                'CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date TIMESTAMP NULL DEFAULT NULL,'
+                'total_cases INT, incidence FLOAT, total_deaths INT,'
+                'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
 
     def add_data(self, filename: str):
         if filename is None:
