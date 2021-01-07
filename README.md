@@ -13,7 +13,7 @@ Der aktuelle Prototyp läuft unter [@CovidInzidenzBot](https://t.me/CovidInziden
 ## Installation
 Die aktuelle Version kann man unter [@CovidInzidenzBot](https://t.me/CovidInzidenzBot) benutzen.
 
-Für einen eigenen Telegrambot muss der Telegram API Key unter `.api_key` hinterlegt werden.
+Für einen eigenen Telegrambot muss die Konfiguration von `resources/config.default.ini` nach `config.ini` kopiert und ausgefüllt werden.
 Danach kann er über `python3 -m covidbot` gestartet werden.
 
 ## Credits
@@ -36,7 +36,7 @@ Wir verwenden die folgenden Bibliotheken:
 * [flake8](https://gitlab.com/pycqa/flake8), MIT License (MIT), Copyright (c) 2021 Tarek Ziade
 * [idna](https://github.com/kjd/idna), BSD License (BSD-3-Clause), Copyright (c) 2021 Kim Davies
 * [mccabe](https://github.com/pycqa/mccabe), MIT License (Expat license), Copyright (c) 2021 Ian Cordasco
-* [psycopg2](https://psycopg.org/), GNU Library or Lesser General Public License (LGPL) (LGPL with exceptions), Copyright (c) 2021 Federico Di Gregorio
+* [mysql-connector-python](https://dev.mysql.com/doc/connector-python/en/), GNU General Public License (GPL) (GNU GPLv2 (with FOSS License Exception)),  Copyright © 2012, 2021, Oracle and/or its affiliates
 * [pycodestyle](https://pycodestyle.readthedocs.io/), MIT License (Expat license), Copyright (c) 2021 Johann C. Rocholl
 * [pycparser](https://github.com/eliben/pycparser), BSD License (BSD), Copyright (c) 2021 Eli Bendersky
 * [pyflakes](https://github.com/PyCQA/pyflakes), MIT License (MIT), Copyright (c) 2021 A lot of people
