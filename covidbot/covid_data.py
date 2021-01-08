@@ -64,7 +64,7 @@ class CovidData(object):
         for row in reader:
             updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr")
             if last_update is not None:
-                if updated >= last_update:
+                if updated <= last_update:
                     continue
 
             # Gather Bundesland data
