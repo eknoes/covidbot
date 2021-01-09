@@ -93,52 +93,54 @@ class TelegramInterface(object):
         query.answer()
         if query.data.startswith(self.CALLBACK_CMD_SUBSCRIBE):
             district = query.data[len(self.CALLBACK_CMD_SUBSCRIBE):]
-            query.edit_message_text(self._bot.subscribe(update.effective_chat.id, district), parse_mode=telegram.ParseMode.HTML)
+            query.edit_message_text(self._bot.subscribe(update.effective_chat.id, district),
+                                    parse_mode=telegram.ParseMode.HTML)
         elif query.data.startswith(self.CALLBACK_CMD_UNSUBSCRIBE):
             district = query.data[len(self.CALLBACK_CMD_UNSUBSCRIBE):]
             query.edit_message_text(self._bot.unsubscribe(update.effective_chat.id, district),
                                     parse_mode=telegram.ParseMode.HTML)
         elif query.data.startswith(self.CALLBACK_CMD_CHOOSE_ACTION):
             district = query.data[len(self.CALLBACK_CMD_CHOOSE_ACTION):]
-
-            locations = self._bot.data.find_rs(district)
-            if locations is None or len(locations) == 0:
-                return
-
-            if len(locations) == 1:
-                buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + locations[0][1])]]
-                if locations[0][0] in self._bot.manager.get_subscriptions(update.effective_chat.id):
-                    buttons.append([InlineKeyboardButton("Beende Abo",
-                                                         callback_data=self.CALLBACK_CMD_UNSUBSCRIBE + locations[0][1])])
-                else:
-                    buttons.append([InlineKeyboardButton("Starte Abo",
-                                                         callback_data=self.CALLBACK_CMD_SUBSCRIBE + locations[0][1])])
-                markup = InlineKeyboardMarkup(buttons)
-                query.edit_message_text(f"Möchtest du dein Abonnement von {locations[0][1]} beenden oder nur den "
-                                        f"aktuellen Bericht erhalten?", reply_markup=markup)
+            text, markup = self.genButtonMessage(district, update.effective_chat.id)
+            if markup is not None:
+                query.edit_message_text(text, reply_markup=markup)
             else:
-                query.edit_message_text("Sorry, dies sollte nicht passieren")
+                query.edit_message_text(text)
         elif query.data.startswith(self.CALLBACK_CMD_REPORT):
             district = query.data[len(self.CALLBACK_CMD_REPORT):]
             query.edit_message_text(self._bot.get_current(district), parse_mode=telegram.ParseMode.HTML)
 
     def directMessageHandler(self, update: Update, context: CallbackContext) -> None:
-        direct_message = update.message.text
-        locations = self._bot.data.find_rs(direct_message)
-        if locations is None or len(locations) == 0:
-            update.message.reply_html("Die Ortsangabe konnte leider nicht gefunden werden! "
-                                      "Hilfe zur Benutzung des Bots gibts über <cod>/hilfe</code>")
+        text, markup = self.genButtonMessage(update.message.text, update.effective_chat.id)
+        if markup is None:
+            update.message.reply_html(text)
+        update.message.reply_text(text, reply_markup=markup)
 
-        if len(locations) == 1:
-            markup = InlineKeyboardMarkup([
-                [InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + locations[0][1])],
-                [InlineKeyboardButton("Abonnieren", callback_data=self.CALLBACK_CMD_SUBSCRIBE + locations[0][1])]])
+    def genButtonMessage(self, county: str, user_id: int) -> (str, InlineKeyboardMarkup):
+        locations = self._bot.data.find_rs(county)
+        if locations is None or len(locations) == 0:
+            return (f"Die Ortsangabe {county} konnte leider nicht zugeordnet werden! "
+                    "Hilfe zur Benutzung des Bots gibts über <cod>/hilfe</code>", None)
+        elif len(locations) == 1:
+            buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + locations[0][1])]]
+            if locations[0][0] in self._bot.manager.get_subscriptions(user_id):
+                buttons.append([InlineKeyboardButton("Beende Abo",
+                                                     callback_data=self.CALLBACK_CMD_UNSUBSCRIBE + locations[0][
+                                                         1])])
+                verb = "beenden"
+            else:
+                buttons.append([InlineKeyboardButton("Starte Abo",
+                                                     callback_data=self.CALLBACK_CMD_SUBSCRIBE + locations[0][1])])
+                verb = "starten"
+            markup = InlineKeyboardMarkup(buttons)
+            return (f"Möchtest du dein Abo von {locations[0][1]} {verb} oder nur den aktuellen Bericht erhalten?",
+                    markup)
         else:
             buttons = []
             for rs, county in locations:
                 buttons.append([InlineKeyboardButton(county, callback_data=self.CALLBACK_CMD_CHOOSE_ACTION + county)])
             markup = InlineKeyboardMarkup(buttons)
-        update.message.reply_text("Bitte wähle einen Ort:", reply_markup=markup)
+            return "Bitte wähle einen Ort:", markup
 
     def updateHandler(self, context: CallbackContext) -> None:
         self.log.info("Check for data update")
