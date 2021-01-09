@@ -119,13 +119,14 @@ class TelegramInterface(object):
         text, markup = self.genButtonMessage(update.message.text, update.effective_chat.id)
         if markup is None:
             update.message.reply_html(text)
-        update.message.reply_text(text, reply_markup=markup)
+        else:
+            update.message.reply_text(text, reply_markup=markup, parse_mode=ParseMode.HTML)
 
     def genButtonMessage(self, county: str, user_id: int) -> (str, InlineKeyboardMarkup):
         locations = self._bot.data.find_rs(county)
         if locations is None or len(locations) == 0:
             return (f"Die Ortsangabe {county} konnte leider nicht zugeordnet werden! "
-                    "Hilfe zur Benutzung des Bots gibts über <cod>/hilfe</code>", None)
+                    "Hilfe zur Benutzung des Bots gibts über <code>/hilfe</code>", None)
         elif len(locations) == 1:
             buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + locations[0][1])]]
             if locations[0][0] in self._bot.manager.get_subscriptions(user_id):
