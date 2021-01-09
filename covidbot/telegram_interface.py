@@ -187,11 +187,11 @@ class TelegramInterface(object):
         except Unauthorized:
             logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}")
             self._bot.manager.delete_user(update.message.chat_id)
-        except BadRequest:
-            logging.warning(f"TelegramError: BadRequest: {update.message.text}")
-        except TimedOut:
-            logging.warning(f"TelegramError: TimedOut sending {update.message.text}")
-        except NetworkError:
-            logging.warning(f"TelegramError: NetworkError while sending {update.message.text}")
+        except BadRequest as e:
+            logging.warning(f"TelegramError: BadRequest: {update.message.text}: {e}")
+        except TimedOut as e:
+            logging.warning(f"TelegramError: TimedOut sending {update.message.text}: {e}")
+        except NetworkError as e:
+            logging.warning(f"TelegramError: NetworkError while sending {update.message.text}: {e}")
         except TelegramError as e:
             logging.warning(f"TelegramError: {e}")
