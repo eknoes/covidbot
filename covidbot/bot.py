@@ -210,7 +210,7 @@ class Bot(object):
         message = f"Aktuell nutzen {self.manager.get_total_user()} Personen diesen Bot.\n\n" \
                   f"Die drei beliebtesten Städte sind:\n"
         for county in self.manager.get_ranked_subscriptions()[:3]:
-            message += f"• {county[0]} Abonnenten: {county[1]}\n"
+            message += f"• {county[0]} Abonnent:innen: {county[1]}\n"
         return message
 
     @staticmethod
