@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from mysql.connector import MySQLConnection
+
 
 class SubscriptionManager(object):
     connection: MySQLConnection
@@ -78,3 +79,22 @@ class SubscriptionManager(object):
             row = cursor.fetchone()
             if row is not None and 'last_update' in row:
                 return row['last_update']
+
+    def get_total_user(self) -> int:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user")
+            row = cursor.fetchone()
+            if row is not None and 'user_num' in row:
+                return row['user_num']
+            return 0
+
+    def get_ranked_subscriptions(self) -> List[Tuple[int, str]]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT COUNT(subscriptions.user_id) as subscribers, c.county_name FROM subscriptions "
+                           "JOIN counties c on subscriptions.rs = c.rs GROUP BY c.county_name "
+                           "ORDER BY subscribers DESC LIMIT 3")
+            result = []
+            for row in cursor.fetchall():
+                result.append((row['subscribers'], row['county_name']))
+            result.sort(key=lambda x: x[0], reverse=True)
+            return result

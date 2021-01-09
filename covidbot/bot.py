@@ -206,6 +206,13 @@ class Bot(object):
             return self.update()
         return result
 
+    def get_statistic(self) -> str:
+        message = f"Aktuell nutzen {self.manager.get_total_user()} Personen diesen Bot.\n\n" \
+                  f"Die drei beliebtesten Städte sind:\n"
+        for county in self.manager.get_ranked_subscriptions()[:3]:
+            message += f"• {county[0]} Abonnenten: {county[1]}\n"
+        return message
+
     @staticmethod
     def format_incidence(incidence: float) -> str:
         if incidence is not None:

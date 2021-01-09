@@ -77,3 +77,24 @@ class TestSubscriptionManager(TestCase):
         self.assertEqual(expected, self.manager.get_last_update(1))
         self.manager.delete_user(1)
         self.assertIsNone(self.manager.get_last_update(1), "last_update of an deleted user should be None")
+
+    def test_statistic(self):
+        self.assertEqual(self.manager.get_total_user(), 0, "get_total_user should return 0 if no users are present")
+
+        self.manager.add_subscription(1, 1)
+        self.manager.add_subscription(1, 2)
+        self.manager.add_subscription(2, 1)
+        self.manager.add_subscription(3, 1)
+
+        with self.conn.cursor() as cursor:
+            cursor.execute("DELETE FROM covid_data")
+            cursor.execute("DELETE FROM counties WHERE parent IS NOT NULL")
+            cursor.execute("DELETE FROM counties")
+            cursor.executemany("INSERT INTO counties (rs, county_name) VALUES (%s, %s)", [(1, "Test1"), (2, "Test2")])
+        self.assertEqual(self.manager.get_total_user(), 3, "get_total_user should return the number of users")
+        self.assertEqual(len(self.manager.get_ranked_subscriptions()), 2, "len(get_ranked_subscriptions) should return "
+                                                                          "the number of subscribed counties")
+        self.assertCountEqual(self.manager.get_ranked_subscriptions(), [(3, "Test1"), (1, "Test2")],
+                              "get_ranked_subscriptions should return a ranking of subscriptions")
+        self.assertEqual(self.manager.get_ranked_subscriptions()[0], (3, "Test1"),
+                         "get_ranked_subscriptions result should be sorted")

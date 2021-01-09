@@ -39,6 +39,7 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
@@ -60,7 +61,9 @@ class TelegramInterface(object):
                                   f'entsprechenden Ort und wähle dann "Beende Abo" aus.'
                                   f'\n\n'
                                   f'Außerdem kannst du mit dem Befehl /bericht deinen Tagesbericht und mit /abo eine '
-                                  f'Übersicht über deine aktuellen Abonnements einsehen.\n\n'
+                                  f'Übersicht über deine aktuellen Abonnements einsehen.\n'
+                                  f'Über den /statistik Befehl erhältst du eine kurzse Nutzungsstatistik über diesen '
+                                  f'Bot.\n\n'
                                   f'Mehr Informationen zu diesem Bot findest du hier: '
                                   f'https://github.com/eknoes/covid-bot\n\n'
                                   f'Diesen Hilfetext erhältst du über /hilfe.')
@@ -159,6 +162,9 @@ class TelegramInterface(object):
             context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
             self.log.info(f"Sent report to {userid}")
             messages_sent += 1
+
+    def statHandler(self, update: Update, context: CallbackContext) -> None:
+        update.message.reply_html(self._bot.get_statistic())
 
     def run(self):
         self.updater.start_polling()
