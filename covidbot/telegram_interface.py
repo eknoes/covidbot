@@ -47,8 +47,8 @@ class TelegramInterface(object):
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(f'Hallo {update.effective_user.first_name},\n'
-                                  f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten COVID19-Daten '
-                                  f'anzeigen lassen und sie dauerhaft abonnieren.\n\n '
+                                  f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
+                                  f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
                                   f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
                                   f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/Landkreis sein. '
                                   f'Wenn Du auf "Starte Abo" klickst, erhältst du '
@@ -57,8 +57,10 @@ class TelegramInterface(object):
                                   f'erhältst Du die Informationen über den Ort nur einmalig. '
                                   f'\n\n'
                                   f'Möchtest Du ein Abonnement beenden, schicke eine Nachricht mit dem '
-                                  f'entsprechenden Ort und wähle dann "Beende Abo" aus. '
+                                  f'entsprechenden Ort und wähle dann "Beende Abo" aus.'
                                   f'\n\n'
+                                  f'Außerdem kannst du mit dem Befehl /bericht deinen Tagesbericht und mit /abo eine '
+                                  f'Übersicht über deine aktuellen Abonnements einsehen.\n\n'
                                   f'Mehr Informationen zu diesem Bot findest du hier: '
                                   f'https://github.com/eknoes/covid-bot\n\n'
                                   f'Diesen Hilfetext erhältst du über /hilfe.')
