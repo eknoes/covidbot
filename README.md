@@ -22,4 +22,4 @@ Weitere Informationen sind auch im [Dashboard des RKI](https://corona.rki.de/) s
 
 Auf welche Dienste wir im Übrigen noch zugreifen, kannst Du unter [Credits](https://github.com/eknoes/covid-bot/wiki/Credits) im Wiki einsehen.
 
-[Datenschutzerklärung](https://github.com/eknoes/covid-bot/wiki/Datenschutz) | [Impressum](Impressum)
+[Datenschutzerklärung](https://github.com/eknoes/covid-bot/wiki/Datenschutz) | [Impressum](https://github.com/eknoes/covid-bot/wiki/Impressum)
