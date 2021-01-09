@@ -47,21 +47,21 @@ class TelegramInterface(object):
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(f'Hallo {update.effective_user.first_name},\n'
-                                  f'über diesen Bot kannst du die vom RKI bereitgestellten COVID19-Daten '
-                                  f'abonnieren.\n\n '
-                                  f'Mit der <code>/abo</code> Aktion kannst du die Zahlen für einen Ort '
-                                  f'abonnieren. Probiere bspw. <code>/abo Berlin</code> aus. '
-                                  f'Mit der <code>/beende</code> Aktion kannst du dieses Abonnement widerrufen. '
-                                  f'Du bekommst dann täglich deinen persönlichen Tagesbericht direkt nach '
-                                  f'Veröffentlichung neuer Zahlen. Möchtest du den aktuellen Bericht abrufen, '
-                                  f'ist dies mit <code>/bericht</code> möglich.\n\n '
+                                  f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten COVID19-Daten '
+                                  f'anzeigen lassen und sie dauerhaft abonnieren.\n\n '
+                                  f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
+                                  f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/Landkreis sein. '
+                                  f'Wenn Du auf "Starte Abo" klickst, erhältst du '
+                                  f'jeden Morgen deinen persönlichen Tagesbericht mit den von dir '
+                                  f'abonnierten Orten. Wählst du "Bericht" aus, '
+                                  f'erhältst Du die Informationen über den Ort nur einmalig. '
                                   f'\n\n'
-                                  f'Aktuelle Zahlen bekommst du mit <code>/ort</code>, bspw. <code>/ort '
-                                  f'Berlin</code>. '
+                                  f'Möchtest Du ein Abonnement beenden, schicke eine Nachricht mit dem '
+                                  f'entsprechenden Ort und wähle dann "Beende Abo" aus. '
                                   f'\n\n'
                                   f'Mehr Informationen zu diesem Bot findest du hier: '
                                   f'https://github.com/eknoes/covid-bot\n\n'
-                                  f'Diesen Hilfetext erhältst du über <code>/hilfe</code>.')
+                                  f'Diesen Hilfetext erhältst du über /hilfe.')
         self.log.debug("Someone called /hilfe")
 
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
