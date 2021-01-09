@@ -16,6 +16,7 @@ ort - Aktuelle Zahlen für den Ort
 abo - Abonniere Ort
 beende - Widerrufe Abonnement
 bericht - Aktueller Bericht
+statistik - Nutzungsstatistik
 '''
 
 
