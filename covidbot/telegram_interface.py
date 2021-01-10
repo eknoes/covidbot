@@ -18,6 +18,7 @@ abo - Abonniere Ort
 beende - Widerrufe Abonnement
 bericht - Aktueller Bericht
 statistik - Nutzungsstatistik
+datenschutz - Datenschutzerklärung
 loeschmich - Lösche alle Daten
 '''
 

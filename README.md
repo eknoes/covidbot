@@ -14,6 +14,9 @@ Außerdem gibt es diese Befehle:
 * `/beende $1`: Beende Abonnement für `$1`
 * `/bericht`: Zeige den aktuellen Bericht mit der Coronainzidenz
 * `/statistik`: Nutzungsstatistik
+* `/datenschutz`: Datenschutzerklärung
+* `/loeschmich`: Lösche alle Daten
+
 
 ## Installation
 Die aktuelle Version kann man unter [@CovidInzidenzBot](https://t.me/CovidInzidenzBot) benutzen.
