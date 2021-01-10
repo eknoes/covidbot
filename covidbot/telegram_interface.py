@@ -1,6 +1,7 @@
 import logging
 import time
 from enum import Enum
+from typing import Tuple, Optional
 
 import telegram
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
@@ -8,6 +9,7 @@ from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, Ne
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 from covidbot.bot import Bot
+from covidbot.location_service import LocationService
 
 '''
 Telegram Aktionen:
@@ -22,6 +24,7 @@ statistik - Nutzungsstatistik
 
 class TelegramInterface(object):
     _bot: Bot
+    _location_service: LocationService
     log = logging.getLogger(__name__)
 
     CALLBACK_CMD_SUBSCRIBE = "subscribe"
@@ -31,7 +34,7 @@ class TelegramInterface(object):
 
     def __init__(self, bot: Bot, api_key: str):
         self._bot = bot
-
+        self._location_service = LocationService('resources/germany_rs.geojson')
         self.updater = Updater(api_key)
 
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
@@ -42,6 +45,7 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.location, self.locationHandler))
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
         self.updater.dispatcher.add_error_handler(self.error_callback)
@@ -123,31 +127,50 @@ class TelegramInterface(object):
         else:
             update.message.reply_text(text, reply_markup=markup, parse_mode=ParseMode.HTML)
 
-    def genButtonMessage(self, county: str, user_id: int) -> (str, InlineKeyboardMarkup):
+    def genButtonMessage(self, county: str, user_id: int) -> Tuple[str, Optional[InlineKeyboardMarkup]]:
         locations = self._bot.data.find_rs(county)
         if locations is None or len(locations) == 0:
             return (f"Die Ortsangabe {county} konnte leider nicht zugeordnet werden! "
                     "Hilfe zur Benutzung des Bots gibts über <code>/hilfe</code>", None)
         elif len(locations) == 1:
-            buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + locations[0][1])]]
-            if locations[0][0] in self._bot.manager.get_subscriptions(user_id):
-                buttons.append([InlineKeyboardButton("Beende Abo",
-                                                     callback_data=self.CALLBACK_CMD_UNSUBSCRIBE + locations[0][
-                                                         1])])
-                verb = "beenden"
-            else:
-                buttons.append([InlineKeyboardButton("Starte Abo",
-                                                     callback_data=self.CALLBACK_CMD_SUBSCRIBE + locations[0][1])])
-                verb = "starten"
-            markup = InlineKeyboardMarkup(buttons)
-            return (f"Möchtest du dein Abo von {locations[0][1]} {verb} oder nur den aktuellen Bericht erhalten?",
-                    markup)
+            return self.genSingleBtn(locations[0][0], user_id)
         else:
             buttons = []
             for rs, county in locations:
                 buttons.append([InlineKeyboardButton(county, callback_data=self.CALLBACK_CMD_CHOOSE_ACTION + county)])
             markup = InlineKeyboardMarkup(buttons)
             return "Bitte wähle einen Ort:", markup
+
+    def genSingleBtn(self, rs: int, user_id: int) -> Tuple[str, InlineKeyboardMarkup]:
+        name = self._bot.data.get_rs_name(rs)
+        buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + name)]]
+        if rs in self._bot.manager.get_subscriptions(user_id):
+            buttons.append([InlineKeyboardButton("Beende Abo",
+                                                 callback_data=self.CALLBACK_CMD_UNSUBSCRIBE + name)])
+            verb = "beenden"
+        else:
+            buttons.append([InlineKeyboardButton("Starte Abo",
+                                                 callback_data=self.CALLBACK_CMD_SUBSCRIBE + name)])
+            verb = "starten"
+        markup = InlineKeyboardMarkup(buttons)
+        return (f"Möchtest du dein Abo von {name} {verb} oder nur den aktuellen Bericht erhalten?",
+                markup)
+
+    def locationHandler(self, update: Update, context: CallbackContext) -> None:
+        if update.message.location is None:
+            return
+
+        rs = self._location_service.find_rs(update.message.location.longitude, update.message.location.latitude)
+        if rs is None:
+            update.message.reply_html(f"Leider konnte kein Ort in den RKI Corona Daten zu deinem Standort gefunden "
+                                      f"werden. Bitte beachte, dass Daten nur für Orte innerhalb Deutschlands "
+                                      f"verfügbar sind.")
+        else:
+            text, markup = self.genSingleBtn(rs, update.effective_chat.id)
+            if markup is None:
+                update.message.reply_html(text)
+            else:
+                update.message.reply_text(text, reply_markup=markup, parse_mode=ParseMode.HTML)
 
     def updateHandler(self, context: CallbackContext) -> None:
         self.log.info("Check for data update")
