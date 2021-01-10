@@ -56,6 +56,7 @@ class TelegramInterface(object):
                                   f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
                                   f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
                                   f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. '
+                                  f'Du kannst auch einen Standort senden.'
                                   f'Wenn Du auf "Starte Abo" klickst, erhältst du '
                                   f'jeden Morgen deinen persönlichen Tagesbericht mit den von dir '
                                   f'abonnierten Orten. Wählst du "Bericht" aus, '
