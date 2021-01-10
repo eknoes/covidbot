@@ -18,6 +18,7 @@ abo - Abonniere Ort
 beende - Widerrufe Abonnement
 bericht - Aktueller Bericht
 statistik - Nutzungsstatistik
+loeschmich - Lösche alle Daten
 '''
 
 
@@ -27,6 +28,8 @@ class TelegramInterface(object):
     log = logging.getLogger(__name__)
 
     CALLBACK_CMD_SUBSCRIBE = "subscribe"
+    CALLBACK_CMD_DELETEME = "deleteme"
+    CALLBACK_CMD_NODELETE = "donotdelete"
     CALLBACK_CMD_UNSUBSCRIBE = "unsubscribe"
     CALLBACK_CMD_CHOOSE_ACTION = "choose"
     CALLBACK_CMD_REPORT = "report"
@@ -38,6 +41,8 @@ class TelegramInterface(object):
 
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('loeschmich', self.deleteHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('datenschutz', self.privacyHandler))
         self.updater.dispatcher.add_handler(CommandHandler('start', self.helpHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
         self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
@@ -72,14 +77,29 @@ class TelegramInterface(object):
                                   f'Bot.\n\n'
                                   f'Mehr Informationen zu diesem Bot findest du hier: '
                                   f'https://github.com/eknoes/covid-bot\n\n'
-                                  f'Diesen Hilfetext erhältst du über /hilfe.')
+                                  f'Diesen Hilfetext erhältst du über /hilfe, Datenschutzinformationen über '
+                                  f'/datenschutz.')
         self.log.debug("Someone called /hilfe")
+
+    @staticmethod
+    def privacyHandler(update: Update, context: CallbackContext) -> None:
+        update.message.reply_html("Unsere Datenschutzerklärung findest du hier: "
+                                  "https://github.com/eknoes/covid-bot/wiki/Datenschutz\n\n"
+                                  "Außerdem kannst du mit dem Befehl /loeschmich alle deine bei uns gespeicherten "
+                                  "Daten löschen.")
+
 
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
         message = self._bot.get_current(entity)
         update.message.reply_html(message)
         self.log.debug("Someone called /ort")
+
+    def deleteHandler(self, update: Update, context: CallbackContext) -> None:
+        markup = InlineKeyboardMarkup([[InlineKeyboardButton("Ja, alle meine Daten löschen",
+                                                             callback_data=self.CALLBACK_CMD_DELETEME)],
+                                       [InlineKeyboardButton("Nein", callback_data=self.CALLBACK_CMD_NODELETE)]])
+        update.message.reply_html("Sollen alle deine Abonnements und Daten gelöscht werden?", reply_markup=markup)
 
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
@@ -125,6 +145,10 @@ class TelegramInterface(object):
         elif query.data.startswith(self.CALLBACK_CMD_REPORT):
             district = query.data[len(self.CALLBACK_CMD_REPORT):]
             query.edit_message_text(self._bot.get_current(district), parse_mode=telegram.ParseMode.HTML)
+        elif query.data.startswith(self.CALLBACK_CMD_DELETEME):
+            query.edit_message_text(self._bot.delete_user(update.effective_chat.id), parse_mode=telegram.ParseMode.HTML)
+        elif query.data.startswith(self.CALLBACK_CMD_NODELETE):
+            query.delete_message()
 
     def directMessageHandler(self, update: Update, context: CallbackContext) -> None:
         text, markup = self.genButtonMessage(update.message.text, update.effective_chat.id)

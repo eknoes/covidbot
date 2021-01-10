@@ -106,6 +106,11 @@ class Bot(object):
 
         return message
 
+    def delete_user(self, user_id: int) -> str:
+        if self.manager.delete_user(user_id):
+            return "Deine Daten wurden erfolgreich gelöscht."
+        return "Zu deinem Account sind keine Daten vorhanden."
+
     def format_district_data(self, district: DistrictData) -> str:
         return district.name + ": " + self.format_incidence(district.incidence)\
                + " (" + self.format_int(district.new_cases) + " Neuinfektionen, "\
