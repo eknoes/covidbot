@@ -1,6 +1,5 @@
 import logging
 import time
-from enum import Enum
 from typing import Tuple, Optional
 
 import telegram
