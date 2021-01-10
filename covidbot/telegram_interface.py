@@ -36,6 +36,7 @@ class TelegramInterface(object):
         self._location_service = LocationService('resources/germany_rs.geojson')
         self.updater = Updater(api_key)
 
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
         self.updater.dispatcher.add_handler(CommandHandler('start', self.helpHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
@@ -97,6 +98,11 @@ class TelegramInterface(object):
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.unknown_action())
         self.log.info("Someone called an unknown action: " + update.message.text)
+
+    def editedMessageHandler(self, update: Update, context: CallbackContext) -> None:
+        update.message = update.edited_message
+        update.edited_message = None
+        self.updater.dispatcher.process_update(update)
 
     def callbackHandler(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
