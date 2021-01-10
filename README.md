@@ -4,11 +4,16 @@ Es können mehrere Orte und Bundesländer abonniert werden können, sodass bei n
 Der aktuelle Prototyp läuft unter [@CovidInzidenzBot](https://t.me/CovidInzidenzBot) und ist Work in Progress.
 
 ## Features
+Du kannst einfach eine Nachricht mit dem Stadt-/Landkreis, Bundesland oder einem Standort an den Bot senden.
+Dann erhälst du eine Liste mit möglichen Orten oder Aktionen, bspw. "Bericht" für die aktuellen Daten oder "Starte Abo" um diesen zu abonnieren.
+
+Außerdem gibt es diese Befehle:
 * `/hilfe` bzw. `/start`: Überblick über die Befehle
 * `/ort $1`: Aktuelle Daten für `$1`
 * `/abo $1`: Abonniere tägliche Daten für `$1`
 * `/beende $1`: Beende Abonnement für `$1`
 * `/bericht`: Zeige den aktuellen Bericht mit der Coronainzidenz
+* `/statistik`: Nutzungsstatistik
 
 ## Installation
 Die aktuelle Version kann man unter [@CovidInzidenzBot](https://t.me/CovidInzidenzBot) benutzen.
