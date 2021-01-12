@@ -3,6 +3,7 @@ import time
 from typing import Tuple, Optional
 
 import telegram
+from mysql.connector import OperationalError
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, NetworkError, ChatMigrated
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
@@ -240,13 +241,16 @@ class TelegramInterface(object):
         try:
             raise context.error
         except Unauthorized:
-            logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}")
+            logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}", exc_info=context.error)
             self._bot.manager.delete_user(update.message.chat_id)
         except BadRequest as e:
-            logging.warning(f"TelegramError: BadRequest: {update.message.text}: {e}")
+            logging.warning(f"TelegramError: BadRequest: {update.message.text}", exc_info=context.error)
         except TimedOut as e:
-            logging.warning(f"TelegramError: TimedOut sending {update.message.text}: {e}")
+            logging.warning(f"TelegramError: TimedOut sending {update.message.text}", exc_info=context.error)
         except NetworkError as e:
-            logging.warning(f"TelegramError: NetworkError while sending {update.message.text}: {e}")
+            logging.warning(f"TelegramError: NetworkError while sending {update.message.text}", exc_info=context.error)
         except TelegramError as e:
-            logging.warning(f"TelegramError: {e}")
+            logging.warning(f"TelegramError", exc_info=context.error)
+        except OperationalError as e:
+            logging.error(f"MySQL Operational error! Exiting.", exc_info=context.error)
+            self.updater.stop()
