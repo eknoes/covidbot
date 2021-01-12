@@ -90,7 +90,6 @@ class TelegramInterface(object):
                                   "Außerdem kannst du mit dem Befehl /loeschmich alle deine bei uns gespeicherten "
                                   "Daten löschen.")
 
-
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         entity = " ".join(context.args)
         message = self._bot.get_current(entity)
