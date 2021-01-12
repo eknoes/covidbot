@@ -213,7 +213,7 @@ class Bot(object):
 
     def get_statistic(self) -> str:
         message = f"Aktuell nutzen {self.manager.get_total_user()} Personen diesen Bot.\n\n" \
-                  f"Die fünf beliebtesten Städte sind:\n"
+                  f"Die fünf beliebtesten Orte sind:\n"
         for county in self.manager.get_ranked_subscriptions()[:5]:
             message += f"• {county[0]} Abonnements: {county[1]}\n"
         return message
