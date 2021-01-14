@@ -136,6 +136,28 @@ class CovidData(object):
 
             return current_data
 
+    def get_covid_data_history(self, rs: int, histamount: int) -> Optional[List[DistrictData]]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT total_cases, total_deaths, incidence, county_name, type '
+                           'FROM covid_data JOIN counties c on c.rs = covid_data.rs WHERE covid_data.rs=%s '
+                           'ORDER BY date DESC LIMIT 2', [rs])
+            d = cursor.fetchone()
+            
+            covid_data_list = []
+            covid_data_list.append(DistrictData(name=d['county_name'], incidence=d['incidence'], type=d['type'],
+                                        total_cases=d['total_cases'],
+                                        total_deaths=d['total_deaths'], new_cases=None, new_deaths=None))
+            data_yesterday = cursor.fetchone()
+            if data_yesterday is not None:
+                current_data.new_cases = current_data.total_cases - data_yesterday['total_cases']
+                current_data.new_deaths = current_data.total_deaths - data_yesterday['total_deaths']
+                d = data_yesterday
+                covid_data_list.append(DistrictData(name=d['county_name'], incidence=d['incidence'], type=d['type'],
+                                        total_cases=d['total_cases'],
+                                        total_deaths=d['total_deaths'], new_cases=None, new_deaths=None))
+            
+            return covid_data_list
+
     def get_country_data(self) -> DistrictData:
         country_data = DistrictData(name="Bundesrepublik Deutschland")
         with self.connection.cursor(dictionary=True) as cursor:
