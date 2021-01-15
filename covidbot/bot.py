@@ -3,6 +3,7 @@ import itertools
 import logging
 import datetime
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from typing import Optional, Tuple, List, Dict
 
 from covidbot.covid_data import CovidData, DistrictData
@@ -53,9 +54,12 @@ class Bot(object):
                 for day_data in history_data:
                     y.append(day_data.incidence)                
                 x = [datetime.datetime.now() - datetime.timedelta(days=i) for i in range(len(y))]
+                fig,ax1 = plt.subplots()
+                ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d %B'))
+                plt.xticks(x)
                 plt.plot(x,y)
                 plt.gcf().autofmt_xdate()
-                plt.title("Inzidenzwert")
+                plt.title("Inzidenzwerte der letzten " + str(len(y)) + " Tage")
                 buf = BytesIO()
                 plt.savefig(buf, format='JPEG')
                 buf.seek(0)
