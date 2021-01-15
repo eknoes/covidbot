@@ -95,8 +95,7 @@ class TelegramInterface(object):
         entity = " ".join(context.args)
         message = self._bot.get_current(entity)
         update.message.reply_html(message)
-        update.message.reply_html(self._bot.get_current(entity))
-        context.bot.send_photo(update.effective_chat.id, photo=self._bot.get_current_pic(entity),  caption=message,parse_mode=telegram.constants.PARSEMODE_HTML)
+        context.bot.send_photo(update.effective_chat.id, photo=self._bot.get_incidence_graph(entity),  caption=message, parse_mode=telegram.constants.PARSEMODE_HTML)
         self.log.debug("Someone called /ort")
 
     def deleteHandler(self, update: Update, context: CallbackContext) -> None:

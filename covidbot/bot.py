@@ -43,15 +43,15 @@ class Bot(object):
         else:
             return self._handle_no_input()
             
-    def get_current_pic(self, county_key: str) -> Optional[BytesIO]:
+    def get_incidence_graph(self, county_key: str) -> Optional[BytesIO]:
         if county_key != "":
             possible_rs = self.data.find_rs(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
-                current_data = self.data.get_covid_data_history(rs, 10)
-                message = "<b>" + current_data[0].name + "</b>\n\n"
-                message += self.format_incidence(current_data[0].incidence)
-                y = [ current_data[0].incidence , 200]
+                history_data = self.data.get_covid_data_history(rs, 10)
+                y = []
+                for day_data in history_data:
+                    y.append(day_data.incidence)                
                 x = [datetime.datetime.now() - datetime.timedelta(days=i) for i in range(len(y))]
                 plt.plot(x,y)
                 plt.gcf().autofmt_xdate()
@@ -59,6 +59,7 @@ class Bot(object):
                 buf = BytesIO()
                 plt.savefig(buf, format='JPEG')
                 buf.seek(0)
+                plt.clf()
                 return buf
             else:
                 return None
