@@ -213,15 +213,6 @@ class CovidData(object):
                 else:
                     country_data.deaths_trend = TrendValue.SAME
 
-                if not previous_data['incidence'] or not current_data['incidence']:
-                    country_data.incidence_trend = None
-                elif previous_data['incidence'] < current_data['incidence']:
-                    country_data.incidence_trend = TrendValue.UP
-                elif previous_data['incidence'] > current_data['incidence']:
-                    country_data.incidence_trend = TrendValue.DOWN
-                else:
-                    country_data.incidence_trend = TrendValue.SAME
-
         return country_data
 
     def get_last_update(self) -> Optional[datetime]:
