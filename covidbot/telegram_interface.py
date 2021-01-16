@@ -1,11 +1,13 @@
+import html
+import json
 import logging
 import time
+import traceback
 from typing import Tuple, Optional
 
 import telegram
-from mysql.connector import OperationalError
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, NetworkError, ChatMigrated
+from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, NetworkError
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 from covidbot.bot import Bot
@@ -28,6 +30,7 @@ class TelegramInterface(object):
     _bot: Bot
     _location_service: LocationService
     log = logging.getLogger(__name__)
+    dev_chat_id: int
 
     CALLBACK_CMD_SUBSCRIBE = "subscribe"
     CALLBACK_CMD_DELETEME = "deleteme"
@@ -36,7 +39,8 @@ class TelegramInterface(object):
     CALLBACK_CMD_CHOOSE_ACTION = "choose"
     CALLBACK_CMD_REPORT = "report"
 
-    def __init__(self, bot: Bot, api_key: str):
+    def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
+        self.dev_chat_id = dev_chat_id
         self._bot = bot
         self._location_service = LocationService('resources/germany_rs.geojson')
         self.updater = Updater(api_key)
@@ -237,19 +241,39 @@ class TelegramInterface(object):
                 logging.warning(f"Could not send message to {str(subscriber)}: {str(error)}")
 
     def error_callback(self, update: Update, context: CallbackContext):
-        try:
-            raise context.error
-        except Unauthorized:
+        # noinspection PyBroadException
+        if context.error is Unauthorized:
             logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}", exc_info=context.error)
             self._bot.manager.delete_user(update.message.chat_id)
-        except BadRequest as e:
+        elif context.error is BadRequest:
             logging.warning(f"TelegramError: BadRequest: {update.message.text}", exc_info=context.error)
-        except TimedOut as e:
+        elif context.error is TimedOut:
             logging.warning(f"TelegramError: TimedOut sending {update.message.text}", exc_info=context.error)
-        except NetworkError as e:
+        elif context.error is NetworkError:
             logging.warning(f"TelegramError: NetworkError while sending {update.message.text}", exc_info=context.error)
-        except TelegramError as e:
+        elif context.error is TelegramError:
             logging.warning(f"TelegramError", exc_info=context.error)
-        except OperationalError as e:
-            logging.error(f"MySQL Operational error! Exiting.", exc_info=context.error)
+        else:
+            # Stop on all other exceptions
+            logging.error(f"Non-Telegram Exception. Exiting!", exc_info=context.error)
             self.updater.stop()
+
+            # Try to send non Telegram Exceptions to maintainer
+            try:
+                tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
+                tb_string = ''.join(tb_list)
+
+                message = [
+                    f'An exception was raised while handling an update!\n',
+                    f'<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}'
+                    f'</pre>\n\n',
+                    f'<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n',
+                    f'<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n',
+                    f'<pre>{html.escape(tb_string)}</pre>'
+                ]
+
+                # Finally, send the message
+                for line in message:
+                    context.bot.send_message(chat_id=self.dev_chat_id, text=line, parse_mode=ParseMode.HTML)
+            except Exception as e:
+                self.log.error("Can't send error to developers", exc_info=e)

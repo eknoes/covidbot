@@ -61,7 +61,7 @@ if __name__ == "__main__":
     with get_connection(config) as conn:
         data = CovidData(conn)
         user_manager = SubscriptionManager(conn)
-        telegram_bot = TelegramInterface(Bot(data, user_manager), api_key=api_key)
+        telegram_bot = TelegramInterface(Bot(data, user_manager), api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
         if args is None:
             telegram_bot.run()
