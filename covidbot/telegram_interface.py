@@ -164,7 +164,13 @@ class TelegramInterface(object):
 
     def genButtonMessage(self, county: str, user_id: int) -> Tuple[str, Optional[InlineKeyboardMarkup]]:
         locations = self._bot.data.find_rs(county)
-        if locations is None or len(locations) == 0:
+        if not locations:
+            possible_rs = self._location_service.find_location(county)
+            locations = []
+            for rs in possible_rs:
+                locations.append((rs, self._bot.data.get_rs_name(rs)))
+
+        if not locations:
             return (f"Die Ortsangabe {county} konnte leider nicht zugeordnet werden! "
                     "Hilfe zur Benutzung des Bots gibts über <code>/hilfe</code>", None)
         elif len(locations) == 1:
