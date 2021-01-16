@@ -20,16 +20,16 @@ class TrendValue(Enum):
 @dataclass
 class DistrictData:
     name: str
-    date: datetime
-    type: Union[str, None] = None
-    incidence: Union[float, None] = None
+    date: Optional[datetime] = None
+    type: Optional[str] = None
+    incidence: Optional[float] = None
     incidence_trend: Optional[TrendValue] = None
-    new_cases: Union[int, None] = None
+    new_cases: Optional[int] = None
     cases_trend: Optional[TrendValue] = None
-    new_deaths: Union[int, None] = None
+    new_deaths: Optional[int] = None
     deaths_trend: Optional[TrendValue] = None
-    total_cases: Union[int, None] = None
-    total_deaths: Union[int, None] = None
+    total_cases: Optional[int] = None
+    total_deaths: Optional[int] = None
 
 
 class CovidData(object):
@@ -185,7 +185,7 @@ class CovidData(object):
     def get_country_data(self) -> DistrictData:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, "
-                           "SUM(new_cases) as new_cases, SUM(new_deaths) as new_deaths "
+                           "SUM(new_cases) as new_cases, SUM(new_deaths) as new_deaths, DATE(date) as date "
                            "FROM covid_data_calculated "
                            "WHERE type != 'Bundesland' GROUP BY DATE(date) ORDER BY date DESC LIMIT 2")
             current_data = cursor.fetchone()
@@ -224,7 +224,7 @@ class CovidData(object):
 
         return country_data
 
-    def get_last_update(self) -> Union[datetime, None]:
+    def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data_calculated')
             result = cursor.fetchone()
