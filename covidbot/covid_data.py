@@ -189,9 +189,10 @@ class CovidData(object):
                            "FROM covid_data_calculated "
                            "WHERE type != 'Bundesland' GROUP BY DATE(date) ORDER BY date DESC LIMIT 2")
             current_data = cursor.fetchone()
-            country_data = DistrictData(name="Bundesrepublik Deutschland", date=current_data['date'])
-            country_data.total_cases = current_data['total_cases']
-            country_data.total_deaths = current_data['total_deaths']
+            country_data = DistrictData(name="Bundesrepublik Deutschland",
+                                        total_cases=current_data['total_cases'],
+                                        total_deaths=current_data['total_deaths'], new_cases=current_data['new_cases'],
+                                        new_deaths=current_data['new_deaths'], date=current_data['date'])
 
             previous_data = cursor.fetchone()
             if previous_data:

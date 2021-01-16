@@ -86,8 +86,8 @@ class Bot(object):
         subscriptions = self.manager.get_subscriptions(userid)
         country = self.data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n" \
-                  "Insgesamt wurden bundesweit {new_cases} {new_cases_trend} Neuinfektionen und " \
-                  "{new_deaths} {new_deaths_trend} Todesfälle gemeldet.\n\n"
+                  "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
+                  "{new_deaths} Todesfälle {new_deaths_trend} gemeldet.\n\n"
         message = message.format(date=self.data.get_last_update().strftime("%d.%m.%Y"),
                                  new_cases=self.format_int(country.new_cases),
                                  new_cases_trend=self.format_data_trend(country.cases_trend),
