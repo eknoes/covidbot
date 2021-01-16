@@ -20,6 +20,7 @@ class TrendValue(Enum):
 @dataclass
 class DistrictData:
     name: str
+    date: datetime
     type: Union[str, None] = None
     incidence: Union[float, None] = None
     incidence_trend: Optional[TrendValue] = None
@@ -149,10 +150,10 @@ class CovidData(object):
             district = DistrictData(name=current_data['county_name'], incidence=current_data['incidence'],
                                     type=current_data['type'], total_cases=current_data['total_cases'],
                                     total_deaths=current_data['total_deaths'], new_cases=current_data['new_cases'],
-                                    new_deaths=current_data['new_deaths'])
+                                    new_deaths=current_data['new_deaths'], date=current_data['date'])
             previous_data = cursor.fetchone()
-            if previous_data is not None:
-                if not previous_data['new_cases']:
+            if previous_data:
+                if not previous_data['new_cases'] or not current_data['new_cases']:
                     district.cases_trend = None
                 elif previous_data['new_cases'] < current_data['new_cases']:
                     district.cases_trend = TrendValue.UP
@@ -161,7 +162,7 @@ class CovidData(object):
                 else:
                     district.cases_trend = TrendValue.SAME
 
-                if not previous_data['new_deaths']:
+                if not previous_data['new_deaths'] or not current_data['new_deaths']:
                     district.deaths_trend = None
                 elif previous_data['new_deaths'] < current_data['new_deaths']:
                     district.deaths_trend = TrendValue.UP
@@ -170,11 +171,11 @@ class CovidData(object):
                 else:
                     district.deaths_trend = TrendValue.SAME
 
-                if not previous_data['incidence_trend']:
+                if not previous_data['incidence'] or not current_data['incidence']:
                     district.incidence_trend = None
-                elif previous_data['incidence_trend'] < current_data['incidence_trend']:
+                elif previous_data['incidence'] < current_data['incidence']:
                     district.incidence_trend = TrendValue.UP
-                elif previous_data['incidence_trend'] > current_data['incidence_trend']:
+                elif previous_data['incidence'] > current_data['incidence']:
                     district.incidence_trend = TrendValue.DOWN
                 else:
                     district.incidence_trend = TrendValue.SAME
@@ -182,41 +183,41 @@ class CovidData(object):
             return district
 
     def get_country_data(self) -> DistrictData:
-        country_data = DistrictData(name="Bundesrepublik Deutschland")
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, "
                            "SUM(new_cases) as new_cases, SUM(new_deaths) as new_deaths "
                            "FROM covid_data_calculated "
                            "WHERE type != 'Bundesland' GROUP BY DATE(date) ORDER BY date DESC LIMIT 2")
-            data = cursor.fetchone()
-            country_data.total_cases = data['total_cases']
-            country_data.total_deaths = data['total_deaths']
+            current_data = cursor.fetchone()
+            country_data = DistrictData(name="Bundesrepublik Deutschland", date=current_data['date'])
+            country_data.total_cases = current_data['total_cases']
+            country_data.total_deaths = current_data['total_deaths']
 
             previous_data = cursor.fetchone()
-            if previous_data is not None:
-                if not previous_data['new_cases']:
+            if previous_data:
+                if not previous_data['new_cases'] or not current_data['new_cases']:
                     country_data.cases_trend = None
-                elif previous_data['new_cases'] < data['new_cases']:
+                elif previous_data['new_cases'] < current_data['new_cases']:
                     country_data.cases_trend = TrendValue.UP
-                elif previous_data['new_cases'] > data['new_cases']:
+                elif previous_data['new_cases'] > current_data['new_cases']:
                     country_data.cases_trend = TrendValue.DOWN
                 else:
                     country_data.cases_trend = TrendValue.SAME
 
-                if not previous_data['new_deaths']:
+                if not previous_data['new_deaths'] or not current_data['new_deaths']:
                     country_data.deaths_trend = None
-                elif previous_data['new_deaths'] < data['new_deaths']:
+                elif previous_data['new_deaths'] < current_data['new_deaths']:
                     country_data.deaths_trend = TrendValue.UP
-                elif previous_data['new_deaths'] > data['new_deaths']:
+                elif previous_data['new_deaths'] > current_data['new_deaths']:
                     country_data.deaths_trend = TrendValue.DOWN
                 else:
                     country_data.deaths_trend = TrendValue.SAME
 
-                if not previous_data['incidence_trend']:
+                if not previous_data['incidence'] or not current_data['incidence']:
                     country_data.incidence_trend = None
-                elif previous_data['incidence_trend'] < data['incidence_trend']:
+                elif previous_data['incidence'] < current_data['incidence']:
                     country_data.incidence_trend = TrendValue.UP
-                elif previous_data['incidence_trend'] > data['incidence_trend']:
+                elif previous_data['incidence'] > current_data['incidence']:
                     country_data.incidence_trend = TrendValue.DOWN
                 else:
                     country_data.incidence_trend = TrendValue.SAME

@@ -2,7 +2,7 @@ import itertools
 import logging
 from typing import Optional, Tuple, List, Dict
 
-from covidbot.covid_data import CovidData, DistrictData
+from covidbot.covid_data import CovidData, DistrictData, TrendValue
 from covidbot.subscription_manager import SubscriptionManager
 
 
@@ -21,19 +21,27 @@ class Bot(object):
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
                 current_data = self.data.get_covid_data(rs)
-                message = "<b>" + current_data.name + "</b>\n\n"
-                message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen): " \
-                           + self.format_incidence(current_data.incidence) + "\n\n"
-                message += "Neuinfektionen (seit gestern): " + self.format_int(current_data.new_cases) + "\n"
-                message += "Infektionen seit Ausbruch der Pandemie: " + self.format_int(
-                    current_data.total_cases) + "\n\n"
-                message += "Neue Todesfälle (seit gestern): " + self.format_int(current_data.new_deaths) + "\n"
-                message += "Todesfälle seit Ausbruch der Pandemie: " + self.format_int(
-                    current_data.total_deaths) + "\n\n"
-                message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen ' \
-                           'findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>\n'
-                message += "<i>Stand: " \
-                           + self.data.get_last_update().strftime("%d.%m.%Y, %H:%M Uhr") + "</i>"
+                message = "<b>{district_name}</b>\n\n" \
+                          "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):" \
+                          " {incidence} {incidence_trend}\n\n" \
+                          "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
+                          "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
+                          "Neue Todesfälle (seit gestern): {new_deaths} {new_deaths_trend}\n" \
+                          "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n" \
+                          "<i>Stand: {date}</i>\n" \
+                          "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
+                          "findest Du im <a href='https://corona.rki.de/'>Dashboard des RKI</a></i>\n"
+                message = message.format(
+                    district_name=current_data.name,
+                    incidence=self.format_incidence(current_data.incidence),
+                    incidence_trend=self.format_data_trend(current_data.incidence_trend),
+                    new_cases=self.format_int(current_data.new_cases),
+                    new_cases_trend=self.format_data_trend(current_data.cases_trend),
+                    total_cases=self.format_int(current_data.total_cases),
+                    new_deaths=self.format_int(current_data.new_deaths),
+                    new_deaths_trend=self.format_data_trend(current_data.deaths_trend),
+                    total_deaths=self.format_int(current_data.total_deaths),
+                    date=current_data.date.strftime("%d.%m.%Y"))
                 return message
             else:
                 return self._handle_wrong_county_key(county_key)
@@ -112,8 +120,8 @@ class Bot(object):
         return "Zu deinem Account sind keine Daten vorhanden."
 
     def format_district_data(self, district: DistrictData) -> str:
-        return district.name + ": " + self.format_incidence(district.incidence)\
-               + " (" + self.format_int(district.new_cases) + " Neuinfektionen, "\
+        return district.name + ": " + self.format_incidence(district.incidence) \
+               + " (" + self.format_int(district.new_cases) + " Neuinfektionen, " \
                + self.format_int(district.new_deaths) + " Todesfälle)"
 
     @staticmethod
@@ -229,3 +237,14 @@ class Bot(object):
         if number is not None:
             return "{:,}".format(number).replace(",", ".")
         return "Keine Daten"
+
+    @staticmethod
+    def format_data_trend(value: TrendValue) -> str:
+        if value == TrendValue.UP:
+            return "↗"
+        elif value == TrendValue.SAME:
+            return "➡"
+        elif value == TrendValue.DOWN:
+            return "↘"
+        else:
+            return ""
