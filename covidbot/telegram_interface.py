@@ -256,7 +256,6 @@ class TelegramInterface(object):
         else:
             # Stop on all other exceptions
             logging.error(f"Non-Telegram Exception. Exiting!", exc_info=context.error)
-            self.updater.stop()
 
             # Try to send non Telegram Exceptions to maintainer
             try:
@@ -279,3 +278,5 @@ class TelegramInterface(object):
                         self.log.warning("Can't send message to developers!")
             except Exception as e:
                 self.log.error("Can't send error to developers", exc_info=e)
+
+            self.updater.stop()
