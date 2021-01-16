@@ -85,10 +85,14 @@ class Bot(object):
     def get_report(self, userid: int) -> str:
         subscriptions = self.manager.get_subscriptions(userid)
         country = self.data.get_country_data()
-        message = "<b>Corona-Bericht vom " \
-                  + self.data.get_last_update().strftime("%d.%m.%Y") + "</b>\n\n"
-        message += "Insgesamt wurden bundesweit " + self.format_int(country.new_cases) \
-                   + " Neuinfektionen und " + self.format_int(country.new_deaths) + " Todesfälle gemeldet.\n\n"
+        message = "<b>Corona-Bericht vom {date}</b>\n\n" \
+                  "Insgesamt wurden bundesweit {new_cases} {new_cases_trend} Neuinfektionen und " \
+                  "{new_deaths} {new_death_trend} Todesfälle gemeldet.\n\n"
+        message = message.format(date=self.data.get_last_update().strftime("%d.%m.%Y"),
+                                 new_cases=self.format_int(country.new_cases),
+                                 new_cases_trend=self.format_data_trend(country.cases_trend),
+                                 new_deaths=self.format_int(country.new_deaths),
+                                 new_deaths_trend=self.format_data_trend(country.deaths_trend))
         if len(subscriptions) > 0:
             message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen in den vergangenen 7 " \
                        "Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten " \
@@ -120,9 +124,12 @@ class Bot(object):
         return "Zu deinem Account sind keine Daten vorhanden."
 
     def format_district_data(self, district: DistrictData) -> str:
-        return district.name + ": " + self.format_incidence(district.incidence) \
-               + " (" + self.format_int(district.new_cases) + " Neuinfektionen, " \
-               + self.format_int(district.new_deaths) + " Todesfälle)"
+        return "{name}: {incidence} {incidence_trend} ({new_cases} Neuinfektionen, {new_deaths} Todesfälle)" \
+                .format(name=district.name,
+                        incidence=self.format_incidence(district.incidence),
+                        incidence_trend=self.format_data_trend(district.incidence_trend),
+                        new_cases=self.format_int(district.new_cases),
+                        new_deaths=self.format_int(district.new_deaths))
 
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
