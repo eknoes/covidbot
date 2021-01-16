@@ -4,10 +4,17 @@ import logging
 import os
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from typing import Tuple, List, Union, Optional
 
 import requests
 from mysql.connector import MySQLConnection
+
+
+class TrendValue(Enum):
+    UP = 0
+    SAME = 1
+    DOWN = 2
 
 
 @dataclass
@@ -15,8 +22,11 @@ class DistrictData:
     name: str
     type: Union[str, None] = None
     incidence: Union[float, None] = None
+    incidence_trend: Optional[TrendValue] = None
     new_cases: Union[int, None] = None
+    cases_trend: Optional[TrendValue] = None
     new_deaths: Union[int, None] = None
+    deaths_trend: Optional[TrendValue] = None
     total_cases: Union[int, None] = None
     total_deaths: Union[int, None] = None
 
@@ -39,10 +49,22 @@ class CovidData(object):
                            '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30), parent INTEGER,'
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
                            'UNIQUE(rs, county_name))')
+            # Raw Data
             cursor.execute(
                 'CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date TIMESTAMP NULL DEFAULT NULL,'
                 'total_cases INT, incidence FLOAT, total_deaths INT,'
                 'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
+
+            cursor.execute('CREATE OR REPLACE VIEW covid_data_calculated AS '
+                           'SELECT c.rs, c.county_name, c.type, covid_data.date, '
+                           'covid_data.total_cases, covid_data.total_cases - y.total_cases as new_cases, '
+                           'covid_data.total_deaths, covid_data.total_deaths - y.total_deaths as new_deaths, '
+                           'covid_data.incidence '
+                           'FROM covid_data '
+                           'LEFT JOIN covid_data y on y.rs = covid_data.rs AND '
+                           'DATE(y.date) = subdate(date(covid_data.date), 1) '
+                           'LEFT JOIN counties c on c.rs = covid_data.rs '
+                           'ORDER BY covid_data.date DESC')
             self.connection.commit()
 
     def add_data(self, filename: str):
@@ -122,40 +144,88 @@ class CovidData(object):
 
     def get_covid_data(self, rs: int) -> Optional[DistrictData]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT total_cases, total_deaths, incidence, county_name, type '
-                           'FROM covid_data JOIN counties c on c.rs = covid_data.rs WHERE covid_data.rs=%s '
-                           'ORDER BY date DESC LIMIT 2', [rs])
-            d = cursor.fetchone()
-            current_data = DistrictData(name=d['county_name'], incidence=d['incidence'], type=d['type'],
-                                        total_cases=d['total_cases'],
-                                        total_deaths=d['total_deaths'], new_cases=None, new_deaths=None)
-            data_yesterday = cursor.fetchone()
-            if data_yesterday is not None:
-                current_data.new_cases = current_data.total_cases - data_yesterday['total_cases']
-                current_data.new_deaths = current_data.total_deaths - data_yesterday['total_deaths']
+            cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT 2', [rs])
+            current_data = cursor.fetchone()
+            district = DistrictData(name=current_data['county_name'], incidence=current_data['incidence'],
+                                    type=current_data['type'], total_cases=current_data['total_cases'],
+                                    total_deaths=current_data['total_deaths'], new_cases=current_data['new_cases'],
+                                    new_deaths=current_data['new_deaths'])
+            previous_data = cursor.fetchone()
+            if previous_data is not None:
+                if not previous_data['new_cases']:
+                    district.cases_trend = None
+                elif previous_data['new_cases'] < current_data['new_cases']:
+                    district.cases_trend = TrendValue.UP
+                elif previous_data['new_cases'] > current_data['new_cases']:
+                    district.cases_trend = TrendValue.DOWN
+                else:
+                    district.cases_trend = TrendValue.SAME
 
-            return current_data
+                if not previous_data['new_deaths']:
+                    district.deaths_trend = None
+                elif previous_data['new_deaths'] < current_data['new_deaths']:
+                    district.deaths_trend = TrendValue.UP
+                elif previous_data['new_deaths'] > current_data['new_deaths']:
+                    district.deaths_trend = TrendValue.DOWN
+                else:
+                    district.deaths_trend = TrendValue.SAME
+
+                if not previous_data['incidence_trend']:
+                    district.incidence_trend = None
+                elif previous_data['incidence_trend'] < current_data['incidence_trend']:
+                    district.incidence_trend = TrendValue.UP
+                elif previous_data['incidence_trend'] > current_data['incidence_trend']:
+                    district.incidence_trend = TrendValue.DOWN
+                else:
+                    district.incidence_trend = TrendValue.SAME
+
+            return district
 
     def get_country_data(self) -> DistrictData:
         country_data = DistrictData(name="Bundesrepublik Deutschland")
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, date "
-                           "FROM covid_data JOIN counties c on c.rs = covid_data.rs "
-                           "WHERE c.type != 'Bundesland' GROUP BY date ORDER BY date DESC LIMIT 2")
+            cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, "
+                           "SUM(new_cases) as new_cases, SUM(new_deaths) as new_deaths "
+                           "FROM covid_data_calculated "
+                           "WHERE type != 'Bundesland' GROUP BY DATE(date) ORDER BY date DESC LIMIT 2")
             data = cursor.fetchone()
             country_data.total_cases = data['total_cases']
             country_data.total_deaths = data['total_deaths']
 
-            data_yesterday = cursor.fetchone()
-            if data_yesterday is not None:
-                country_data.new_cases = country_data.total_cases - data_yesterday['total_cases']
-                country_data.new_deaths = country_data.total_deaths - data_yesterday['total_deaths']
+            previous_data = cursor.fetchone()
+            if previous_data is not None:
+                if not previous_data['new_cases']:
+                    country_data.cases_trend = None
+                elif previous_data['new_cases'] < data['new_cases']:
+                    country_data.cases_trend = TrendValue.UP
+                elif previous_data['new_cases'] > data['new_cases']:
+                    country_data.cases_trend = TrendValue.DOWN
+                else:
+                    country_data.cases_trend = TrendValue.SAME
+
+                if not previous_data['new_deaths']:
+                    country_data.deaths_trend = None
+                elif previous_data['new_deaths'] < data['new_deaths']:
+                    country_data.deaths_trend = TrendValue.UP
+                elif previous_data['new_deaths'] > data['new_deaths']:
+                    country_data.deaths_trend = TrendValue.DOWN
+                else:
+                    country_data.deaths_trend = TrendValue.SAME
+
+                if not previous_data['incidence_trend']:
+                    country_data.incidence_trend = None
+                elif previous_data['incidence_trend'] < data['incidence_trend']:
+                    country_data.incidence_trend = TrendValue.UP
+                elif previous_data['incidence_trend'] > data['incidence_trend']:
+                    country_data.incidence_trend = TrendValue.DOWN
+                else:
+                    country_data.incidence_trend = TrendValue.SAME
 
         return country_data
 
     def get_last_update(self) -> Union[datetime, None]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data')
+            cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data_calculated')
             result = cursor.fetchone()
             return result['last_updated']
 
