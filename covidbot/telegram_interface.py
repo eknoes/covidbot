@@ -1,6 +1,8 @@
 import html
 import json
 import logging
+import os
+import signal
 import time
 import traceback
 from typing import Tuple, Optional
@@ -61,6 +63,7 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
         self.updater.dispatcher.add_error_handler(self.error_callback)
         self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
+        self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(f'Hallo {update.effective_user.first_name},\n'
@@ -248,17 +251,18 @@ class TelegramInterface(object):
 
     def error_callback(self, update: Update, context: CallbackContext):
         # noinspection PyBroadException
-        if context.error is Unauthorized:
+        if isinstance(context.error, Unauthorized):
             logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}", exc_info=context.error)
             self._bot.manager.delete_user(update.message.chat_id)
-        elif context.error is BadRequest:
-            logging.warning(f"TelegramError: BadRequest: {update.message.text}", exc_info=context.error)
-        elif context.error is TimedOut:
-            logging.warning(f"TelegramError: TimedOut sending {update.message.text}", exc_info=context.error)
-        elif context.error is NetworkError:
-            logging.warning(f"TelegramError: NetworkError while sending {update.message.text}", exc_info=context.error)
-        elif context.error is TelegramError:
-            logging.warning(f"TelegramError", exc_info=context.error)
+        elif isinstance(context.error, BadRequest):
+            logging.warning(f"TelegramError: BadRequest: {str(context.chat_data)}", exc_info=context.error)
+        elif isinstance(context.error, TimedOut):
+            logging.warning(f"TelegramError: TimedOut sending {str(context.chat_data)}", exc_info=context.error)
+        elif isinstance(context.error, NetworkError):
+            logging.warning(f"TelegramError: NetworkError while sending {str(context.chat_data)}",
+                            exc_info=context.error)
+        elif isinstance(context.error, TelegramError):
+            logging.warning(f"TelegramError: While sending {context.chat_data}", exc_info=context.error)
         else:
             # Stop on all other exceptions
             logging.error(f"Non-Telegram Exception. Exiting!", exc_info=context.error)
@@ -269,7 +273,7 @@ class TelegramInterface(object):
                 tb_string = ''.join(tb_list)
 
                 message = [
-                    f'An exception was raised while handling an update!\n',
+                    f'<b>An exception was raised while handling an update! A manual restart may be required!</b>\n',
                     f'<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}'
                     f'</pre>\n\n',
                     f'<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n',
@@ -285,4 +289,5 @@ class TelegramInterface(object):
             except Exception as e:
                 self.log.error("Can't send error to developers", exc_info=e)
 
-            self.updater.stop()
+            # Stop bot
+            os.kill(os.getpid(), signal.SIGINT)
