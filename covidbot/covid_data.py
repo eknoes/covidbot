@@ -174,11 +174,11 @@ class CovidData(object):
                 logging.warning(f"No more data available for RS{rs}, requested {include_past_days + 1} days "
                                 f"but can just provide {len(results)} days")
 
-            if include_past_days == 0:
-                return results[0]
-            elif not results:
+            if not results:
                 return None
-            
+            elif include_past_days == 0:
+                return results[0]
+
             return results
 
     def get_country_data(self) -> DistrictData:
