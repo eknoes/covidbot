@@ -5,6 +5,7 @@ import os
 import signal
 import time
 import traceback
+
 from typing import Tuple, Optional
 
 import telegram
@@ -54,6 +55,7 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('start', self.helpHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
         self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('grafik', self.graphicHandler))
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
@@ -102,6 +104,16 @@ class TelegramInterface(object):
         message = self._bot.get_current(entity)
         update.message.reply_html(message)
         self.log.debug("Someone called /ort")
+
+    def graphicHandler(self, update: Update, context: CallbackContext):
+        entity = " ".join(context.args)
+        message = self._bot.get_current(entity)
+        graph = self._bot.get_new_infection_graph(entity)
+        if graph:
+            context.bot.send_photo(update.effective_chat.id, photo=graph, caption=message,
+                                   parse_mode=telegram.constants.PARSEMODE_HTML)
+        else:
+            update.message.reply_html(message)
 
     def deleteHandler(self, update: Update, context: CallbackContext) -> None:
         markup = InlineKeyboardMarkup([[InlineKeyboardButton("Ja, alle meine Daten löschen",
