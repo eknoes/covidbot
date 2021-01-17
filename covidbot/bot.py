@@ -57,7 +57,7 @@ class Bot(object):
             possible_rs = self.data.search_district_by_name(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
-                history_data = self.data.get_district_history(rs, 14)
+                history_data = self.data.get_district_data(rs, include_past_days=14)
                 y = []
                 for day_data in history_data:
                     y.append(day_data.new_cases)

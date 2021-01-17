@@ -5,7 +5,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Union
 
 import requests
 from mysql.connector import MySQLConnection
@@ -144,40 +144,42 @@ class CovidData(object):
             cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [int(rs)])
             return cursor.fetchone()['county_name']
 
-    def get_district_data(self, rs: int, past_days=0, with_trend=True) -> Optional[DistrictData]:
+    def get_district_data(self, rs: int, include_past_days=0, subtract_days=0) \
+            -> Optional[Union[DistrictData, List[DistrictData]]]:
+        """
+        Fetches the Covid19 data for a certain district for today.
+        :param rs: ID of the district
+        :param include_past_days: Provide history data. If > 0 will return List[DistrictData] with len = today + past_days
+        :param subtract_days: Do not fetch for today, but for today - subtract_days
+        :return: DistrictData or List[DistrictData]
+        """
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT %s,1',
-                           [rs, past_days])
-            current_data = cursor.fetchone()
-            if not current_data:
-                return None
+            cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT %s,%s',
+                           [rs, subtract_days, include_past_days + 2])
 
-            district = DistrictData(name=current_data['county_name'], incidence=current_data['incidence'],
-                                    type=current_data['type'], total_cases=current_data['total_cases'],
-                                    total_deaths=current_data['total_deaths'], new_cases=current_data['new_cases'],
-                                    new_deaths=current_data['new_deaths'], date=current_data['date'])
-            if with_trend:
-                yesterday = self.get_district_data(rs, past_days + 1, False)
-                district = self.fill_trend(district, yesterday)
+            results = []
+            for record in cursor.fetchall():
+                results.append(DistrictData(name=record['county_name'], incidence=record['incidence'],
+                                            type=record['type'], total_cases=record['total_cases'],
+                                            total_deaths=record['total_deaths'], new_cases=record['new_cases'],
+                                            new_deaths=record['new_deaths'], date=record['date']))
 
-            return district
+            for i in range(len(results) - 1):
+                results[i] = self.fill_trend(results[i], results[i + 1])
 
-    def get_district_history(self, rs: int, days_in_past: int) -> Optional[List[DistrictData]]:
-        history_data = []
-        for day in range(0, days_in_past):
-            data = self.get_district_data(rs, day, with_trend=False)
-            if data:
-                history_data.append(data)
+            # Remove the one fetched for trend data if it exists
+            if len(results) == include_past_days + 2:
+                results.pop()
             else:
-                logging.warning(f"No more data available for RS{rs}, requested {days_in_past} days "
-                                f"but can just provide {day} days")
-                break
-        
-        # Fill trend
-        for i in range(len(history_data)-1):
-            history_data[i] = self.fill_trend(history_data[i], history_data[i + 1])
+                logging.warning(f"No more data available for RS{rs}, requested {include_past_days + 1} days "
+                                f"but can just provide {len(results)} days")
 
-        return history_data
+            if len(results) == 1:
+                return results[0]
+            elif not results:
+                return None
+            
+            return results
 
     def get_country_data(self) -> DistrictData:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -195,12 +197,13 @@ class CovidData(object):
             if previous_data:
                 yesterday = DistrictData(name="Bundesrepublik Deutschland",
                                          total_cases=previous_data['total_cases'],
-                                         total_deaths=previous_data['total_deaths'], new_cases=previous_data['new_cases'],
+                                         total_deaths=previous_data['total_deaths'],
+                                         new_cases=previous_data['new_cases'],
                                          new_deaths=previous_data['new_deaths'], date=previous_data['date'])
                 country_data = self.fill_trend(country_data, yesterday)
 
         return country_data
-    
+
     @staticmethod
     def fill_trend(today: DistrictData, yesterday: DistrictData) -> DistrictData:
         if yesterday:
