@@ -84,11 +84,12 @@ class CovidData(object):
         rs_data = []
         added_bl = set()
         last_update = self.get_last_update()
+        now = datetime.now()
         for row in reader:
             updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr")
-            if last_update is not None:
-                if updated <= last_update:
-                    continue
+            if last_update and updated <= last_update or now < updated:
+                # Do not take data from future, important for testing
+                continue
 
             # Gather Bundesland data
             if row['BL_ID'] not in added_bl:
@@ -232,7 +233,7 @@ class CovidData(object):
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data_calculated')
+            cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data')
             result = cursor.fetchone()
             return result['last_updated']
 
