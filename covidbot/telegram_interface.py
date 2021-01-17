@@ -178,12 +178,12 @@ class TelegramInterface(object):
             update.message.reply_text(text, reply_markup=markup, parse_mode=ParseMode.HTML)
 
     def genButtonMessage(self, county: str, user_id: int) -> Tuple[str, Optional[InlineKeyboardMarkup]]:
-        locations = self._bot.data.find_rs(county)
+        locations = self._bot.data.search_district_by_name(county)
         if not locations:
             possible_rs = self._location_service.find_location(county)
             locations = []
             for rs in possible_rs:
-                locations.append((rs, self._bot.data.get_rs_name(rs)))
+                locations.append((rs, self._bot.data.get_district_name(rs)))
 
         if not locations:
             return (f"Die Ortsangabe {county} konnte leider nicht zugeordnet werden! "
@@ -198,7 +198,7 @@ class TelegramInterface(object):
             return "Bitte wähle einen Ort:", markup
 
     def genSingleBtn(self, rs: int, user_id: int) -> Tuple[str, InlineKeyboardMarkup]:
-        name = self._bot.data.get_rs_name(rs)
+        name = self._bot.data.get_district_name(rs)
         buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + name)]]
         if rs in self._bot.manager.get_subscriptions(user_id):
             buttons.append([InlineKeyboardButton("Beende Abo",

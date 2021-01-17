@@ -21,10 +21,10 @@ class Bot(object):
 
     def get_current(self, county_key: str) -> str:
         if county_key != "":
-            possible_rs = self.data.find_rs(county_key)
+            possible_rs = self.data.search_district_by_name(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
-                current_data = self.data.get_covid_data(rs)
+                current_data = self.data.get_district_data(rs)
                 message = "<b>{district_name}</b>\n\n" \
                           "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):" \
                           " {incidence} {incidence_trend}\n\n" \
@@ -51,21 +51,21 @@ class Bot(object):
                 return self._handle_wrong_county_key(county_key)
         else:
             return self._handle_no_input()
-            
+
     def get_new_infection_graph(self, county_key: str) -> Optional[BytesIO]:
         if county_key != "":
-            possible_rs = self.data.find_rs(county_key)
+            possible_rs = self.data.search_district_by_name(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
-                history_data = self.data.get_covid_data_history(rs, 14)
+                history_data = self.data.get_district_history(rs, 14)
                 y = []
                 for day_data in history_data:
                     y.append(day_data.new_cases)
                 x = [datetime.datetime.now() - datetime.timedelta(days=i) for i in range(len(y))]
-                fig,ax1 = plt.subplots()
+                fig, ax1 = plt.subplots()
                 ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d %B'))
                 plt.xticks(x)
-                plt.plot(x,y)
+                plt.plot(x, y)
                 plt.gcf().autofmt_xdate()
                 plt.title("Neuinfektionen der letzten " + str(len(y)) + " Tage")
                 buf = BytesIO()
@@ -80,7 +80,7 @@ class Bot(object):
 
     def subscribe(self, userid: int, county_key: str) -> str:
         if county_key != "":
-            possible_rs = self.data.find_rs(county_key)
+            possible_rs = self.data.search_district_by_name(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
                 if self.manager.add_subscription(userid, rs):
@@ -97,7 +97,7 @@ class Bot(object):
 
     def unsubscribe(self, userid: str, county_key: str) -> str:
         if county_key != "":
-            possible_rs = self.data.find_rs(county_key)
+            possible_rs = self.data.search_district_by_name(county_key)
             if len(possible_rs) == 1:
                 rs, county = possible_rs[0]
                 if self.manager.rm_subscription(int(userid), rs):
@@ -128,7 +128,7 @@ class Bot(object):
                        "Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten " \
                        "Orte wie folgt aus:\n\n"
             # Split Bundeslaender from other
-            subscription_data = list(map(lambda rs: self.data.get_covid_data(rs), subscriptions))
+            subscription_data = list(map(lambda rs: self.data.get_district_data(rs), subscriptions))
             subscribed_bls = list(filter(lambda d: d.type == "Bundesland", subscription_data))
             subscribed_cities = list(filter(lambda d: d.type != "Bundesland", subscription_data))
             if len(subscribed_bls) > 0:
@@ -155,11 +155,11 @@ class Bot(object):
 
     def format_district_data(self, district: DistrictData) -> str:
         return "{name}: {incidence} {incidence_trend} ({new_cases} Neuinfektionen, {new_deaths} Todesfälle)" \
-                .format(name=district.name,
-                        incidence=self.format_incidence(district.incidence),
-                        incidence_trend=self.format_data_trend(district.incidence_trend),
-                        new_cases=self.format_int(district.new_cases),
-                        new_deaths=self.format_int(district.new_deaths))
+            .format(name=district.name,
+                    incidence=self.format_incidence(district.incidence),
+                    incidence_trend=self.format_data_trend(district.incidence_trend),
+                    new_cases=self.format_int(district.new_cases),
+                    new_deaths=self.format_int(district.new_deaths))
 
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
@@ -203,7 +203,7 @@ class Bot(object):
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
                       "bspw. <code>/abo Dresden</code> "
         else:
-            counties = map(self.data.get_rs_name, subscriptions)
+            counties = map(self.data.get_district_name, subscriptions)
             message = "Du hast aktuell <b>" + str(len(subscriptions)) + "</b> Orte abonniert: \n" + ", ".join(counties)
         return message
 
@@ -213,7 +213,7 @@ class Bot(object):
         be identified :return: (bool, str): Boolean shows whether identifier was found, str is then identifier.
         Otherwise it is a message that should be sent to the user
         """
-        possible_rs = self.data.find_rs(location)
+        possible_rs = self.data.search_district_by_name(location)
         if not possible_rs:
             message = "Es wurde <b>keine</b> Ort mit dem Namen " + location + " gefunden!"
         elif 1 < len(possible_rs) <= 15:

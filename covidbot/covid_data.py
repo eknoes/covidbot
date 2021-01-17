@@ -5,7 +5,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Tuple, List, Union, Optional
+from typing import Tuple, List, Optional
 
 import requests
 from mysql.connector import MySQLConnection
@@ -125,7 +125,7 @@ class CovidData(object):
             return " ".join(county_name.split(" ")[1:])
         return county_name
 
-    def find_rs(self, search_str: str) -> List[Tuple[int, str]]:
+    def search_district_by_name(self, search_str: str) -> List[Tuple[int, str]]:
         search_str = search_str.lower()
         search_str = search_str.replace(" ", "%")
         results = []
@@ -139,63 +139,45 @@ class CovidData(object):
                 results.append((row['rs'], row['county_name']))
         return results
 
-    def get_rs_name(self, rs: int) -> str:
+    def get_district_name(self, rs: int) -> str:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [int(rs)])
             return cursor.fetchone()['county_name']
 
-    def get_covid_data(self, rs: int) -> Optional[DistrictData]:
+    def get_district_data(self, rs: int, past_days=0, with_trend=True) -> Optional[DistrictData]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT 2', [rs])
+            cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT %s,1',
+                           [rs, past_days])
             current_data = cursor.fetchone()
+            if not current_data:
+                return None
+
             district = DistrictData(name=current_data['county_name'], incidence=current_data['incidence'],
                                     type=current_data['type'], total_cases=current_data['total_cases'],
                                     total_deaths=current_data['total_deaths'], new_cases=current_data['new_cases'],
                                     new_deaths=current_data['new_deaths'], date=current_data['date'])
-            previous_data = cursor.fetchone()
-            if previous_data:
-                if not previous_data['new_cases'] or not current_data['new_cases']:
-                    district.cases_trend = None
-                elif previous_data['new_cases'] < current_data['new_cases']:
-                    district.cases_trend = TrendValue.UP
-                elif previous_data['new_cases'] > current_data['new_cases']:
-                    district.cases_trend = TrendValue.DOWN
-                else:
-                    district.cases_trend = TrendValue.SAME
-
-                if not previous_data['new_deaths'] or not current_data['new_deaths']:
-                    district.deaths_trend = None
-                elif previous_data['new_deaths'] < current_data['new_deaths']:
-                    district.deaths_trend = TrendValue.UP
-                elif previous_data['new_deaths'] > current_data['new_deaths']:
-                    district.deaths_trend = TrendValue.DOWN
-                else:
-                    district.deaths_trend = TrendValue.SAME
-
-                if not previous_data['incidence'] or not current_data['incidence']:
-                    district.incidence_trend = None
-                elif previous_data['incidence'] < current_data['incidence']:
-                    district.incidence_trend = TrendValue.UP
-                elif previous_data['incidence'] > current_data['incidence']:
-                    district.incidence_trend = TrendValue.DOWN
-                else:
-                    district.incidence_trend = TrendValue.SAME
+            if with_trend:
+                yesterday = self.get_district_data(rs, past_days + 1, False)
+                district = self.fill_trend(district, yesterday)
 
             return district
 
-    def get_covid_data_history(self, rs: int, days_in_past: int) -> Optional[List[DistrictData]]:
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s '
-                           'ORDER BY date DESC LIMIT %s', [rs, days_in_past])
-            history_data = []
-            d = cursor.fetchone()
-            while d is not None:
-                current_data = DistrictData(name=d['county_name'], incidence=d['incidence'], type=d['type'],
-                                            total_cases=d['total_cases'], new_cases=d['new_cases'],
-                                            total_deaths=d['total_deaths'], new_deaths=d['new_deaths'], date=d['date'])
-                history_data.append(current_data)
-                d = cursor.fetchone()
-            return history_data
+    def get_district_history(self, rs: int, days_in_past: int) -> Optional[List[DistrictData]]:
+        history_data = []
+        for day in range(0, days_in_past):
+            data = self.get_district_data(rs, day, with_trend=False)
+            if data:
+                history_data.append(data)
+            else:
+                logging.warning(f"No more data available for RS{rs}, requested {days_in_past} days "
+                                f"but can just provide {day} days")
+                break
+        
+        # Fill trend
+        for i in range(len(history_data)-1):
+            history_data[i] = self.fill_trend(history_data[i], history_data[i + 1])
+
+        return history_data
 
     def get_country_data(self) -> DistrictData:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -208,28 +190,47 @@ class CovidData(object):
                                         total_cases=current_data['total_cases'],
                                         total_deaths=current_data['total_deaths'], new_cases=current_data['new_cases'],
                                         new_deaths=current_data['new_deaths'], date=current_data['date'])
-
             previous_data = cursor.fetchone()
-            if previous_data:
-                if not previous_data['new_cases'] or not current_data['new_cases']:
-                    country_data.cases_trend = None
-                elif previous_data['new_cases'] < current_data['new_cases']:
-                    country_data.cases_trend = TrendValue.UP
-                elif previous_data['new_cases'] > current_data['new_cases']:
-                    country_data.cases_trend = TrendValue.DOWN
-                else:
-                    country_data.cases_trend = TrendValue.SAME
 
-                if not previous_data['new_deaths'] or not current_data['new_deaths']:
-                    country_data.deaths_trend = None
-                elif previous_data['new_deaths'] < current_data['new_deaths']:
-                    country_data.deaths_trend = TrendValue.UP
-                elif previous_data['new_deaths'] > current_data['new_deaths']:
-                    country_data.deaths_trend = TrendValue.DOWN
-                else:
-                    country_data.deaths_trend = TrendValue.SAME
+            if previous_data:
+                yesterday = DistrictData(name="Bundesrepublik Deutschland",
+                                         total_cases=previous_data['total_cases'],
+                                         total_deaths=previous_data['total_deaths'], new_cases=previous_data['new_cases'],
+                                         new_deaths=previous_data['new_deaths'], date=previous_data['date'])
+                country_data = self.fill_trend(country_data, yesterday)
 
         return country_data
+    
+    @staticmethod
+    def fill_trend(today: DistrictData, yesterday: DistrictData) -> DistrictData:
+        if yesterday:
+            if not yesterday.new_cases or not today.new_cases:
+                today.cases_trend = None
+            elif yesterday.new_cases < today.new_cases:
+                today.cases_trend = TrendValue.UP
+            elif yesterday.new_cases > today.new_cases:
+                today.cases_trend = TrendValue.DOWN
+            else:
+                today.cases_trend = TrendValue.SAME
+
+            if not yesterday.new_deaths or not today.new_deaths:
+                today.deaths_trend = None
+            elif yesterday.new_deaths < today.new_deaths:
+                today.deaths_trend = TrendValue.UP
+            elif yesterday.new_deaths > today.new_deaths:
+                today.deaths_trend = TrendValue.DOWN
+            else:
+                today.deaths_trend = TrendValue.SAME
+
+            if not yesterday.incidence or not today.incidence:
+                today.incidence_trend = None
+            elif yesterday.incidence < today.incidence:
+                today.incidence_trend = TrendValue.UP
+            elif yesterday.incidence > today.incidence:
+                today.incidence_trend = TrendValue.DOWN
+            else:
+                today.incidence_trend = TrendValue.SAME
+        return today
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:

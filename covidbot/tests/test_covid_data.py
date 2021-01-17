@@ -3,7 +3,7 @@ from unittest import TestCase
 from freezegun import freeze_time
 from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import CovidData
+from covidbot.covid_data import CovidData, DistrictData, TrendValue
 
 
 class CovidDataTest(TestCase):
@@ -38,12 +38,14 @@ class CovidDataTest(TestCase):
         del self.data
 
     def test_find_ags(self):
-        self.assertEqual(2, len(self.data.find_rs("Kassel")), "2 Entities should be found for Kassel")
-        self.assertEqual(1, len(self.data.find_rs("Berlin")), "Exact match should be chosen")
-        self.assertEqual(1, len(self.data.find_rs("Kassel Stadt")), "Kassel Stadt should match SK Kassel")
-        self.assertEqual(1, len(self.data.find_rs("Stadt Kassel")), "Stadt Kassel should match SK Kassel")
-        self.assertEqual(1, len(self.data.find_rs("Kassel Land")), "Kassel Land should match LK Kassel")
-        self.assertEqual(1, len(self.data.find_rs("Bundesland Hessen")), "Exact match should be chosen")
+        self.assertEqual(2, len(self.data.search_district_by_name("Kassel")), "2 Entities should be found for Kassel")
+        self.assertEqual(1, len(self.data.search_district_by_name("Berlin")), "Exact match should be chosen")
+        self.assertEqual(1, len(self.data.search_district_by_name("Kassel Stadt")),
+                         "Kassel Stadt should match SK Kassel")
+        self.assertEqual(1, len(self.data.search_district_by_name("Stadt Kassel")),
+                         "Stadt Kassel should match SK Kassel")
+        self.assertEqual(1, len(self.data.search_district_by_name("Kassel Land")), "Kassel Land should match LK Kassel")
+        self.assertEqual(1, len(self.data.search_district_by_name("Bundesland Hessen")), "Exact match should be chosen")
 
     def test_update(self):
         with self.conn.cursor() as cursor:
@@ -59,15 +61,41 @@ class CovidDataTest(TestCase):
             self.assertEqual(item[1], self.data.clean_district_name(item[0]),
                              "Clean name of " + item[0] + " should be " + item[1])
 
+    def test_get_district_data(self):
+        data = self.data.get_district_data(11)
+
+        self.assertIsNotNone(data, "Data for District#11 must be available")
+        self.assertIsNotNone(data.new_cases, "New Cases for today must be available")
+        self.assertIsNotNone(data.new_deaths, "New Deaths for today must be available")
+        self.assertIsNotNone(data.incidence, "Incidence for today must be available")
+        self.assertIsNotNone(data.cases_trend, "Trend for today must be available")
+        self.assertIsNotNone(data.deaths_trend, "Trend for today must be available")
+        self.assertIsNotNone(data.incidence_trend, "Trend for today must be available")
+
+        yesterday = self.data.get_district_data(11, 1)
+        self.assertIsNotNone(yesterday, "Data for District#11 from yesterday must be available")
+
+        long_time_ago = self.data.get_district_data(11, 9999)
+        self.assertIsNone(long_time_ago, "get_district_data should return None for non-existing entries")
+
+    def test_fill_trend(self):
+        today = DistrictData("Test1", new_cases=5, new_deaths=5, incidence=5)
+        yesterday = DistrictData("Test1", new_cases=5, new_deaths=6, incidence=4)
+
+        trend_d1 = self.data.fill_trend(today, yesterday)
+        self.assertEqual(TrendValue.UP, trend_d1.incidence_trend)
+        self.assertEqual(TrendValue.SAME, trend_d1.cases_trend)
+        self.assertEqual(TrendValue.DOWN, trend_d1.deaths_trend)
+
     def test_country_data(self):
         # Test if number calculation is correct
         data = self.data.get_country_data()
-        
+
         self.assertIsNotNone(self.data.get_country_data())
         self.assertEqual(18678, data.new_cases, "New Cases on 16.01.2020 should be 18,678 for Germany")
         self.assertEqual(980, data.new_deaths, "New Deaths on 16.01.2020 should be 980 for Germany")
-    
+
     def test_get_covid_data_history(self):
-        history = self.data.get_covid_data_history(1, 14)
+        history = self.data.get_district_history(1, 14)
 
         self.assertEqual(14, len(history), "GetCovidDataHistory should return 14 DistrictData")
