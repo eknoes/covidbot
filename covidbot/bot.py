@@ -248,7 +248,7 @@ class Bot(object):
             user_last_update = self.manager.get_last_update(subscriber)
             if user_last_update is None or user_last_update < data_update:
                 result.append((subscriber, self.get_report(subscriber)))
-                self.manager.set_last_update(subscriber, self.data.get_last_update())
+                self.manager.set_last_update(subscriber, data_update)
         if len(result) > 0:
             return result
 

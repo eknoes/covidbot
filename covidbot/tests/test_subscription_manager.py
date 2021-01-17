@@ -71,7 +71,8 @@ class TestSubscriptionManager(TestCase):
 
     def test_last_update(self):
         self.manager.add_subscription(1, 1)
-        self.assertIsNone(self.manager.get_last_update(1), "Before an update, last_update should be None")
+        self.assertEqual(datetime.today().date(), self.manager.get_last_update(1).date(),
+                         "After user creation, last_update should be the current day")
         expected = datetime.now()
         self.manager.set_last_update(1, expected)
         self.assertEqual(expected, self.manager.get_last_update(1))
