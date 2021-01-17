@@ -174,7 +174,7 @@ class CovidData(object):
                 logging.warning(f"No more data available for RS{rs}, requested {include_past_days + 1} days "
                                 f"but can just provide {len(results)} days")
 
-            if len(results) == 1:
+            if include_past_days == 0:
                 return results[0]
             elif not results:
                 return None

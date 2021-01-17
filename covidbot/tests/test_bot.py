@@ -4,7 +4,7 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.bot import Bot
+from covidbot.bot import Bot, UserDistrictActions
 from covidbot.covid_data import CovidData, DistrictData
 from covidbot.user_manager import UserManager
 
@@ -44,6 +44,19 @@ class TestBot(TestCase):
 
     def test_update_no_subscribers(self):
         self.assertEqual([], self.bot.update(), "Empty subscribers should generate empty update list")
+
+    def test_no_user(self):
+        self.assertIsNotNone(self.bot.get_overview(1), "A not yet existing user should get an overview over their "
+                                                       "subscriptions")
+        self.assertIsNotNone(self.bot.get_graphical_report(1), "A not yet existing user should get a graphical report")
+        self.assertIsNotNone(self.bot.get_district_report(1), "A not yet existing user should get a district report")
+        self.assertIsNotNone(self.bot.find_district_id_from_geolocation(3.0, 2.0), "A not yet existing user should "
+                                                                                   "be able to query for a location")
+        self.assertIsNotNone(self.bot.find_district_id("Berlin"), "A not yet existing user should be able to query for "
+                                                                  "a location")
+        self.assertIsNotNone(self.bot.get_report(1), "A not yet existing user should be able to query for a report")
+        self.assertIsNotNone(self.bot.get_possible_actions(1, 2), "A not yet existing user should be able to query for "
+                                                                  "possible actions")
 
     def test_format_int(self):
         expected = "1.121"
@@ -86,3 +99,17 @@ class TestBot(TestCase):
         self.assertEqual("A", actual_names[0], "Districts should be sorted alphabetically")
         self.assertEqual("B", actual_names[1], "Districts should be sorted alphabetically")
         self.assertEqual("C", actual_names[2], "Districts should be sorted alphabetically")
+
+    def test_get_possible_actions(self):
+        expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT]
+        actual = map(lambda x: x[1], self.bot.get_possible_actions(1, 1)[1])
+        self.assertCountEqual(expected, actual, "A user without a subscription should get SUBSCRIBE and REPORT action")
+
+        self.bot.subscribe(1, 1)
+        expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT]
+        actual = map(lambda x: x[1], self.bot.get_possible_actions(1, 2)[1])
+        self.assertCountEqual(expected, actual, "A user without subscription should get SUBSCRIBE and REPORT action")
+
+        expected = [UserDistrictActions.UNSUBSCRIBE, UserDistrictActions.REPORT]
+        actual = map(lambda x: x[1], self.bot.get_possible_actions(1, 1)[1])
+        self.assertCountEqual(expected, actual, "A user with subscription should get UNSUBSCRIBE and REPORT action")

@@ -76,11 +76,11 @@ class Bot(object):
         actions = [("Bericht", UserDistrictActions.REPORT)]
         name = self._data.get_district_name(district_id)
         user = self._manager.get_user(user_id, with_subscriptions=True)
-        if district_id in user.subscriptions:
-            actions.append(("Beende Abo", UserDistrictActions.SUBSCRIBE))
+        if user and district_id in user.subscriptions:
+            actions.append(("Beende Abo", UserDistrictActions.UNSUBSCRIBE))
             verb = "beenden"
         else:
-            actions.append(("Starte Abo", UserDistrictActions.UNSUBSCRIBE))
+            actions.append(("Starte Abo", UserDistrictActions.SUBSCRIBE))
             verb = "starten"
 
         return ("Möchtest du dein Abo von {name} {verb} oder die aktuellen Daten erhalten?"
@@ -144,6 +144,8 @@ class Bot(object):
 
     def get_report(self, userid: int) -> str:
         user = self._manager.get_user(userid, with_subscriptions=True)
+        if not user:
+            return self._get_report([])
         return self._get_report(user.subscriptions)
 
     def _get_report(self, subscriptions: List[int]) -> str:
@@ -233,7 +235,7 @@ class Bot(object):
 
     def get_overview(self, userid: int) -> Tuple[str, Optional[List[Tuple[int, str]]]]:
         user = self._manager.get_user(userid, with_subscriptions=True)
-        if len(user.subscriptions) == 0:
+        if not user or len(user.subscriptions) == 0:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
                       "bspw. <code>/abo Dresden</code> "
             counties = None
