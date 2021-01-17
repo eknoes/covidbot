@@ -108,9 +108,13 @@ class TelegramInterface(object):
     def graphicHandler(self, update: Update, context: CallbackContext):
         entity = " ".join(context.args)
         message = self._bot.get_current(entity)
-        context.bot.send_photo(update.effective_chat.id, photo=self._bot.get_new_infection_graph(entity), caption=message,
-                               parse_mode=telegram.constants.PARSEMODE_HTML)
-        
+        graph = self._bot.get_new_infection_graph(entity)
+        if graph:
+            context.bot.send_photo(update.effective_chat.id, photo=graph, caption=message,
+                                   parse_mode=telegram.constants.PARSEMODE_HTML)
+        else:
+            update.message.reply_html(message)
+
     def deleteHandler(self, update: Update, context: CallbackContext) -> None:
         markup = InlineKeyboardMarkup([[InlineKeyboardButton("Ja, alle meine Daten löschen",
                                                              callback_data=self.CALLBACK_CMD_DELETEME)],
