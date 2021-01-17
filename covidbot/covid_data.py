@@ -182,6 +182,20 @@ class CovidData(object):
 
             return district
 
+    def get_covid_data_history(self, rs: int, days_in_past: int) -> Optional[List[DistrictData]]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s '
+                           'ORDER BY date DESC LIMIT %s', [rs, days_in_past])
+            history_data = []
+            d = cursor.fetchone()
+            while d is not None:
+                current_data = DistrictData(name=d['county_name'], incidence=d['incidence'], type=d['type'],
+                                            total_cases=d['total_cases'], new_cases=d['new_cases'],
+                                            total_deaths=d['total_deaths'], new_deaths=d['new_deaths'], date=d['date'])
+                history_data.append(current_data)
+                d = cursor.fetchone()
+            return history_data
+
     def get_country_data(self) -> DistrictData:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, "

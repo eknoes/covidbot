@@ -1,5 +1,9 @@
+from io import BytesIO
 import itertools
 import logging
+import datetime
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from typing import Optional, Tuple, List, Dict
 
 from covidbot.covid_data import CovidData, DistrictData, TrendValue
@@ -47,6 +51,32 @@ class Bot(object):
                 return self._handle_wrong_county_key(county_key)
         else:
             return self._handle_no_input()
+            
+    def get_new_infection_graph(self, county_key: str) -> Optional[BytesIO]:
+        if county_key != "":
+            possible_rs = self.data.find_rs(county_key)
+            if len(possible_rs) == 1:
+                rs, county = possible_rs[0]
+                history_data = self.data.get_covid_data_history(rs, 14)
+                y = []
+                for day_data in history_data:
+                    y.append(day_data.new_cases)
+                x = [datetime.datetime.now() - datetime.timedelta(days=i) for i in range(len(y))]
+                fig,ax1 = plt.subplots()
+                ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d %B'))
+                plt.xticks(x)
+                plt.plot(x,y)
+                plt.gcf().autofmt_xdate()
+                plt.title("Neuinfektionen der letzten " + str(len(y)) + " Tage")
+                buf = BytesIO()
+                plt.savefig(buf, format='JPEG')
+                buf.seek(0)
+                plt.clf()
+                return buf
+            else:
+                return None
+        else:
+            return None
 
     def subscribe(self, userid: int, county_key: str) -> str:
         if county_key != "":

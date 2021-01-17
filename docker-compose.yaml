@@ -1,0 +1,32 @@
+version: '3'    
+    
+volumes:
+   covid-mariadb:   
+    
+services:
+
+  #----------------------------------------------------------------
+  # Gitea
+  #----------------------------------------------------------------
+  covidbot:
+    image: hanneshil/covidbot
+    build: .
+    container_name: covidbot
+    restart: always
+    depends_on:
+      - covid-mariadb
+            
+  #----------------------------------------------------------------
+  # Postgre for CovidBot
+  #----------------------------------------------------------------
+  covid-mariadb:
+    image: mariadb:latest
+    container_name: covid-mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=covid
+      - MYSQL_USER=covid
+      - MYSQL_PASSWORD=covid
+      - MYSQL_DATABASE=covid
+    volumes:
+      - covid-mariadb:/var/lib/mysql
+    restart: always
