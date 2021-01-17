@@ -200,7 +200,8 @@ class TelegramInterface(object):
     def genSingleBtn(self, rs: int, user_id: int) -> Tuple[str, InlineKeyboardMarkup]:
         name = self._bot.data.get_district_name(rs)
         buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + name)]]
-        if rs in self._bot.manager.get_subscriptions(user_id):
+        user = self._bot.manager.get_user(user_id, with_subscriptions=True)
+        if rs in user.subscriptions:
             buttons.append([InlineKeyboardButton("Beende Abo",
                                                  callback_data=self.CALLBACK_CMD_UNSUBSCRIBE + name)])
             verb = "beenden"
@@ -252,14 +253,14 @@ class TelegramInterface(object):
         self.updater.idle()
 
     def send_correction_message(self, msg):
-        for subscriber in self._bot.manager.get_all_user():
+        for user in self._bot.manager.get_all_user():
             try:
-                self.updater.bot.send_message(subscriber, msg, parse_mode=telegram.ParseMode.HTML)
-                self.updater.bot.send_message(subscriber, self._bot.get_report(subscriber),
+                self.updater.bot.send_message(user.id, msg, parse_mode=telegram.ParseMode.HTML)
+                self.updater.bot.send_message(user.id, self._bot.get_report(user.id),
                                               parse_mode=telegram.ParseMode.HTML)
-                logging.info(f"Sent correction message to {str(subscriber)}")
+                logging.info(f"Sent correction message to {str(user)}")
             except BadRequest as error:
-                logging.warning(f"Could not send message to {str(subscriber)}: {str(error)}")
+                logging.warning(f"Could not send message to {str(user)}: {str(error)}")
 
     def error_callback(self, update: Update, context: CallbackContext):
         # noinspection PyBroadException

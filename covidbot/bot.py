@@ -113,7 +113,10 @@ class Bot(object):
             return self._handle_no_input()
 
     def get_report(self, userid: int) -> str:
-        subscriptions = self.manager.get_subscriptions(userid)
+        user = self.manager.get_user(userid, with_subscriptions=True)
+        return self._get_report(user.subscriptions)
+    
+    def _get_report(self, subscriptions: List[int]) -> str:
         country = self.data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n" \
                   "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
@@ -123,7 +126,7 @@ class Bot(object):
                                  new_cases_trend=self.format_data_trend(country.cases_trend),
                                  new_deaths=self.format_int(country.new_deaths),
                                  new_deaths_trend=self.format_data_trend(country.deaths_trend))
-        if len(subscriptions) > 0:
+        if subscriptions and len(subscriptions) > 0:
             message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen in den vergangenen 7 " \
                        "Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten " \
                        "Orte wie folgt aus:\n\n"
@@ -198,13 +201,14 @@ class Bot(object):
         return result
 
     def get_overview(self, userid: int) -> str:
-        subscriptions = self.manager.get_subscriptions(userid)
-        if subscriptions is None or len(subscriptions) == 0:
+        user = self.manager.get_user(userid, with_subscriptions=True)
+        if len(user.subscriptions) == 0:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
                       "bspw. <code>/abo Dresden</code> "
         else:
-            counties = map(self.data.get_district_name, subscriptions)
-            message = "Du hast aktuell <b>" + str(len(subscriptions)) + "</b> Orte abonniert: \n" + ", ".join(counties)
+            counties = map(self.data.get_district_name, user.subscriptions)
+            message = "Du hast aktuell <b>" + str(len(user.subscriptions)) + "</b> Orte abonniert: \n"\
+                      + ", ".join(counties)
         return message
 
     def _handle_wrong_county_key(self, location: str) -> str:
@@ -244,11 +248,11 @@ class Bot(object):
         self.log.info("Current COVID19 data from " + str(self.data.get_last_update()))
         result = []
         data_update = self.data.get_last_update()
-        for subscriber in self.manager.get_all_user():
-            user_last_update = self.manager.get_last_update(subscriber)
-            if user_last_update is None or user_last_update < data_update:
-                result.append((subscriber, self.get_report(subscriber)))
-                self.manager.set_last_update(subscriber, data_update)
+        for user in self.manager.get_all_user():
+            if user.last_update is None or user.last_update < data_update:
+                result.append((user.id, self._get_report(user.subscriptions)))
+                self.manager.set_last_update(user.id, data_update)
+
         if len(result) > 0:
             return result
 
@@ -257,7 +261,7 @@ class Bot(object):
         return result
 
     def get_statistic(self) -> str:
-        message = f"Aktuell nutzen {self.manager.get_total_user()} Personen diesen Bot.\n\n" \
+        message = f"Aktuell nutzen {self.manager.get_total_user_number()} Personen diesen Bot.\n\n" \
                   f"Die fünf beliebtesten Orte sind:\n"
         for county in self.manager.get_ranked_subscriptions()[:5]:
             message += f"• {county[0]} Abonnements: {county[1]}\n"

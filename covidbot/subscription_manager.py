@@ -1,7 +1,16 @@
+from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Any
 
 from mysql.connector import MySQLConnection
+
+
+@dataclass
+class BotUser:
+    id: int
+    last_update: datetime
+    language: str
+    subscriptions: Optional[List[int]] = None
 
 
 class SubscriptionManager(object):
@@ -14,7 +23,8 @@ class SubscriptionManager(object):
     def _create_db(self):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS bot_user '
-                           '(user_id INTEGER PRIMARY KEY, last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6))')
+                           '(user_id INTEGER PRIMARY KEY, last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
+                           'language VARCHAR(20) DEFAULT NULL)')
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
@@ -37,20 +47,55 @@ class SubscriptionManager(object):
             self.connection.commit()
             if cursor.rowcount == 0:
                 return False
-
-            if len(self.get_subscriptions(user_id)) == 0:
-                self.delete_user(user_id)
-
             return True
 
-    def get_subscriptions(self, user_id: int) -> Optional[List[int]]:
+    def get_all_user(self, with_subscriptions=False, filter_id=None) -> List[BotUser]:
         result = []
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT rs FROM subscriptions WHERE user_id=%s', [user_id])
+            if with_subscriptions:
+                query = ("SELECT bot_user.user_id, last_update, language, rs FROM bot_user "
+                         "LEFT JOIN subscriptions s on bot_user.user_id = s.user_id")
+            else:
+                query = "SELECT bot_user.user_id, last_update, language FROM bot_user"
+
+            if filter_id:
+                query += " WHERE bot_user.user_id=%s"
+            query += " ORDER BY bot_user.user_id"
+
+            if filter_id:
+                cursor.execute(query, [filter_id])
+            else:
+                cursor.execute(query)
+
+            current_user: Optional[BotUser] = None
             for row in cursor.fetchall():
-                result.append(row['rs'])
+                if not current_user or current_user.id != row['user_id']:
+                    if current_user:
+                        result.append(current_user)
+
+                    # de as default language
+                    if not row['language']:
+                        language = "de"
+                    else:
+                        language = row['language']
+
+                    current_user = BotUser(id=row['user_id'], last_update=row['last_update'], language=language)
+
+                if with_subscriptions:
+                    if not current_user.subscriptions:
+                        current_user.subscriptions = []
+                    current_user.subscriptions.append(row['rs'])
+
+            if current_user:
+                result.append(current_user)
+
         return result
 
+    def get_user(self, user_id: int, with_subscriptions=False) -> Optional[BotUser]:
+        result = self.get_all_user(filter_id=user_id, with_subscriptions=with_subscriptions)
+        if result:
+            return result[0]
+        
     def delete_user(self, user_id: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('DELETE FROM subscriptions WHERE user_id=%s', [user_id])
@@ -60,27 +105,17 @@ class SubscriptionManager(object):
                 return True
         return False
 
-    def get_all_user(self) -> List[int]:
-        result = []
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT user_id FROM bot_user')
-            for row in cursor.fetchall():
-                result.append(row['user_id'])
-        return result
-
     def set_last_update(self, user_id: int, date: datetime):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET last_update=%s WHERE user_id=%s", [date, user_id])
             self.connection.commit()
 
-    def get_last_update(self, user_id: int) -> Optional[datetime]:
+    def set_language(self, user_id: int, language: str):
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT last_update FROM bot_user WHERE user_id=%s", [user_id])
-            row = cursor.fetchone()
-            if row is not None and 'last_update' in row:
-                return row['last_update']
+            cursor.execute("UPDATE bot_user SET language=%s WHERE user_id=%s", [language, user_id])
+            self.connection.commit()
 
-    def get_total_user(self) -> int:
+    def get_total_user_number(self) -> int:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user")
             row = cursor.fetchone()
