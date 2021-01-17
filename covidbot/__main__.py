@@ -6,7 +6,7 @@ from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
-from covidbot.subscription_manager import UserManager
+from covidbot.user_manager import UserManager
 from covidbot.telegram_interface import TelegramInterface
 
 

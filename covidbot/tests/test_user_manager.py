@@ -4,7 +4,7 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.subscription_manager import UserManager
+from covidbot.user_manager import UserManager
 
 
 class TestSubscriptionManager(TestCase):

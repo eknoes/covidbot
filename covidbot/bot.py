@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from covidbot.covid_data import CovidData, DistrictData, TrendValue
 from covidbot.location_service import LocationService
-from covidbot.subscription_manager import UserManager, BotUser
+from covidbot.user_manager import UserManager, BotUser
 
 
 class UserDistrictActions(Enum):

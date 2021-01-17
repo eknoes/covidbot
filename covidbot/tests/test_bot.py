@@ -6,7 +6,7 @@ from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, DistrictData
-from covidbot.subscription_manager import UserManager
+from covidbot.user_manager import UserManager
 
 
 class TestBot(TestCase):
