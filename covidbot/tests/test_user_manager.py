@@ -4,7 +4,7 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.subscription_manager import UserManager
 
 
 class TestSubscriptionManager(TestCase):
@@ -20,7 +20,7 @@ class TestSubscriptionManager(TestCase):
         cls.conn.close()
 
     def setUp(self) -> None:
-        self.manager = SubscriptionManager(self.conn)
+        self.manager = UserManager(self.conn)
         with self.conn.cursor(dictionary=True) as cursor:
             cursor.execute("TRUNCATE subscriptions")
             # noinspection SqlWithoutWhere

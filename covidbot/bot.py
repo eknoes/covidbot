@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from covidbot.covid_data import CovidData, DistrictData, TrendValue
 from covidbot.location_service import LocationService
-from covidbot.subscription_manager import SubscriptionManager, BotUser
+from covidbot.subscription_manager import UserManager, BotUser
 
 
 class UserDistrictActions(Enum):
@@ -21,10 +21,10 @@ class UserDistrictActions(Enum):
 
 class Bot(object):
     _data: CovidData
-    _manager: SubscriptionManager
+    _manager: UserManager
     _location_service: LocationService
 
-    def __init__(self, covid_data: CovidData, subscription_manager: SubscriptionManager):
+    def __init__(self, covid_data: CovidData, subscription_manager: UserManager):
         self.log = logging.getLogger(__name__)
         self._data = covid_data
         self._manager = subscription_manager

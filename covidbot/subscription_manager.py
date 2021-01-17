@@ -13,7 +13,7 @@ class BotUser:
     subscriptions: Optional[List[int]] = None
 
 
-class SubscriptionManager(object):
+class UserManager(object):
     connection: MySQLConnection
 
     def __init__(self, db_connection: MySQLConnection):

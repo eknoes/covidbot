@@ -6,7 +6,7 @@ from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.subscription_manager import UserManager
 from covidbot.telegram_interface import TelegramInterface
 
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     with get_connection(config) as conn:
         data = CovidData(conn)
-        user_manager = SubscriptionManager(conn)
+        user_manager = UserManager(conn)
         telegram_bot = TelegramInterface(Bot(data, user_manager), api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
         if args is None:

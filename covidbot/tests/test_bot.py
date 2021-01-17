@@ -6,7 +6,7 @@ from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, DistrictData
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.subscription_manager import UserManager
 
 
 class TestBot(TestCase):
@@ -22,7 +22,7 @@ class TestBot(TestCase):
         cls.conn.close()
 
     def setUp(self) -> None:
-        self.man = SubscriptionManager(self.conn)
+        self.man = UserManager(self.conn)
         self.bot = Bot(CovidData(self.conn),
                        self.man)
         with self.conn.cursor(dictionary=True) as cursor:
