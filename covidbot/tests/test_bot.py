@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from unittest import TestCase
 
 from mysql.connector import MySQLConnection
@@ -36,6 +37,8 @@ class TestBot(TestCase):
     def test_update_with_subscribers(self):
         self.bot.subscribe(1, "Berlin")
         self.bot.subscribe(2, "Hessen")
+        self.man.set_last_update(1, datetime.now() - timedelta(days=1))
+        self.man.set_last_update(2, datetime.now() - timedelta(days=1))
         self.assertEqual(2, len(self.bot.update()), "New data should trigger 2 updates")
         self.assertEqual([], self.bot.update(), "Without new data no reports should be generated")
 
