@@ -130,12 +130,19 @@ class TelegramInterface(object):
         update.message.reply_html("Sollen alle deine Abonnements und Daten gelöscht werden?", reply_markup=markup)
 
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
-        query = " ".join(context.args)
-        msg, districts = self._bot.find_district_id(query)
+        if not context.args:
+            msg, districts = self._bot.get_overview(update.effective_chat.id)
+        else:
+            query = " ".join(context.args)
+            msg, districts = self._bot.find_district_id(query)
+
         if not districts:
             update.message.reply_html(msg)
-        elif len(districts) > 1:
-            markup = self.gen_multi_district_answer(districts, TelegramCallbacks.SUBSCRIBE)
+        elif len(districts) > 1 or not context.args:
+            if not context.args:
+                markup = self.gen_multi_district_answer(districts, TelegramCallbacks.CHOOSE_ACTION)
+            else:
+                markup = self.gen_multi_district_answer(districts, TelegramCallbacks.SUBSCRIBE)
             update.message.reply_html(msg, reply_markup=markup)
         else:
             update.message.reply_html(self._bot.subscribe(update.effective_chat.id, districts[0][0]))

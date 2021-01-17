@@ -31,6 +31,9 @@ class Bot(object):
         self._location_service = LocationService('resources/germany_rs.geojson')
 
     def find_district_id(self, district_query: str) -> Tuple[Optional[str], Optional[List[Tuple[int, str]]]]:
+        if not district_query:
+            return 'Dieser Befehl benötigt eine Ortsangabe', None
+
         possible_district = self._data.search_district_by_name(district_query)
         online_match = False
         if not possible_district:
@@ -50,7 +53,7 @@ class Bot(object):
             if online_match:
                 message = "Für {district} stellt das RKI leider keine spezifischen Daten zur Verfügung. " \
                           "Du kannst stattdessen die Zahlen des dazugehörigen Landkreises abrufen" \
-                          .format(district=district_query)
+                    .format(district=district_query)
             else:
                 message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden"
             return message, possible_district
@@ -228,19 +231,20 @@ class Bot(object):
 
         return result
 
-    def get_overview(self, userid: int) -> str:
+    def get_overview(self, userid: int) -> Tuple[str, Optional[List[Tuple[int, str]]]]:
         user = self._manager.get_user(userid, with_subscriptions=True)
         if len(user.subscriptions) == 0:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
                       "bspw. <code>/abo Dresden</code> "
+            counties = None
         else:
-            counties = map(self._data.get_district_name, user.subscriptions)
-            message = "Du hast aktuell <b>{abo_count}</b> Orte abonniert: \n" \
-                      + ", ".join(counties)
-        return message.format(abo_count=len(user.subscriptions))
+            counties = list(map(lambda s: (s, self._data.get_district_name(s)), user.subscriptions))
+            message = "Du hast aktuell <b>{abo_count}</b> Orte abonniert.".format(abo_count=len(user.subscriptions))
+
+        return message, counties
 
     @staticmethod
-    def _handle_no_input() -> str:
+    def handle_no_input() -> str:
         return 'Diese Aktion benötigt eine Ortsangabe.'
 
     @staticmethod
