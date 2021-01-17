@@ -1,42 +1,101 @@
-from io import BytesIO
+import datetime
 import itertools
 import logging
-import datetime
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+from enum import Enum
+from io import BytesIO
 from typing import Optional, Tuple, List, Dict
 
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+
 from covidbot.covid_data import CovidData, DistrictData, TrendValue
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.location_service import LocationService
+from covidbot.subscription_manager import SubscriptionManager, BotUser
+
+
+class UserDistrictActions(Enum):
+    SUBSCRIBE = 0
+    UNSUBSCRIBE = 1
+    REPORT = 2
 
 
 class Bot(object):
-    data: CovidData
-    manager: SubscriptionManager
+    _data: CovidData
+    _manager: SubscriptionManager
+    _location_service: LocationService
 
     def __init__(self, covid_data: CovidData, subscription_manager: SubscriptionManager):
         self.log = logging.getLogger(__name__)
-        self.data = covid_data
-        self.manager = subscription_manager
+        self._data = covid_data
+        self._manager = subscription_manager
+        self._location_service = LocationService('resources/germany_rs.geojson')
 
-    def get_current(self, county_key: str) -> str:
-        if county_key != "":
-            possible_rs = self.data.search_district_by_name(county_key)
-            if len(possible_rs) == 1:
-                rs, county = possible_rs[0]
-                current_data = self.data.get_district_data(rs)
-                message = "<b>{district_name}</b>\n\n" \
-                          "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):" \
-                          " {incidence} {incidence_trend}\n\n" \
-                          "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
-                          "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
-                          "Neue Todesfälle (seit gestern): {new_deaths} {new_deaths_trend}\n" \
-                          "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n" \
-                          "<i>Stand: {date}</i>\n" \
-                          "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
-                          "findest Du im <a href='https://corona.rki.de/'>Dashboard des RKI</a></i>\n"
-                message = message.format(
-                    district_name=current_data.name,
+    def find_district_id(self, district_query: str) -> Tuple[Optional[str], Optional[List[Tuple[int, str]]]]:
+        possible_district = self._data.search_district_by_name(district_query)
+        online_match = False
+        if not possible_district:
+            online_match = True
+            osm_results = self._location_service.find_location(district_query)
+            possible_district = []
+            for d in osm_results:
+                possible_district.append((d, self._data.get_district_name(d)))
+
+        if not possible_district:
+            message = 'Leider konnte kein Ort zu {location} gefunden werden. Bitte beachte, ' \
+                      'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location=district_query)
+            return message, None
+        elif len(possible_district) == 1:
+            return None, possible_district
+        elif 1 < len(possible_district) <= 15:
+            if online_match:
+                message = "Für {district} stellt das RKI leider keine spezifischen Daten zur Verfügung. " \
+                          "Du kannst stattdessen die Zahlen des dazugehörigen Landkreises abrufen" \
+                          .format(district=district_query)
+            else:
+                message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden"
+            return message, possible_district
+        else:
+            message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
+            return message, None
+
+    def find_district_id_from_geolocation(self, lon, lat) -> Tuple[Optional[str], Optional[List[Tuple[int, str]]]]:
+        district_id = self._location_service.find_rs(lon, lat)
+        # ToDo: Also return parent locations
+        if not district_id:
+            return ('Leider konnte kein Ort in den RKI Corona Daten zu {location} gefunden werden. Bitte beachte, '
+                    'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location="deinem Standort"),
+                    None)
+        else:
+            name = self._data.get_district_name(district_id)
+            return None, [(district_id, name)]
+
+    def get_possible_actions(self, user_id: int, district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
+        actions = [("Bericht", UserDistrictActions.REPORT)]
+        name = self._data.get_district_name(district_id)
+        user = self._manager.get_user(user_id, with_subscriptions=True)
+        if district_id in user.subscriptions:
+            actions.append(("Beende Abo", UserDistrictActions.SUBSCRIBE))
+            verb = "beenden"
+        else:
+            actions.append(("Starte Abo", UserDistrictActions.UNSUBSCRIBE))
+            verb = "starten"
+
+        return ("Möchtest du dein Abo von {name} {verb} oder die aktuellen Daten erhalten?"
+                .format(name=name, verb=verb), actions)
+
+    def get_district_report(self, district_id: int) -> str:
+        current_data = self._data.get_district_data(district_id)
+        message = "<b>{district_name}</b>\n\n" \
+                  "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):" \
+                  " {incidence} {incidence_trend}\n\n" \
+                  "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
+                  "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
+                  "Neue Todesfälle (seit gestern): {new_deaths} {new_deaths_trend}\n" \
+                  "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n" \
+                  "<i>Stand: {date}</i>\n" \
+                  "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
+                  "findest Du im <a href='https://corona.rki.de/'>Dashboard des RKI</a></i>\n" \
+            .format(district_name=current_data.name,
                     incidence=self.format_incidence(current_data.incidence),
                     incidence_trend=self.format_data_trend(current_data.incidence_trend),
                     new_cases=self.format_int(current_data.new_cases),
@@ -46,82 +105,50 @@ class Bot(object):
                     new_deaths_trend=self.format_data_trend(current_data.deaths_trend),
                     total_deaths=self.format_int(current_data.total_deaths),
                     date=current_data.date.strftime("%d.%m.%Y"))
-                return message
-            else:
-                return self._handle_wrong_county_key(county_key)
+        return message
+
+    def get_graphical_report(self, district_id: int) -> Tuple[str, Optional[BytesIO]]:
+        history_data = self._data.get_district_data(district_id, include_past_days=14)
+        y = []
+        for day_data in history_data:
+            y.append(day_data.new_cases)
+        x = [datetime.datetime.now() - datetime.timedelta(days=i) for i in range(len(y))]
+        fig, ax1 = plt.subplots()
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d %B'))
+        plt.xticks(x)
+        plt.plot(x, y)
+        plt.gcf().autofmt_xdate()
+        plt.title("Neuinfektionen der letzten " + str(len(y)) + " Tage")
+        buf = BytesIO()
+        plt.savefig(buf, format='JPEG')
+        buf.seek(0)
+        plt.clf()
+        return self.get_district_report(district_id), buf
+
+    def subscribe(self, userid: int, district_id: int) -> str:
+        if self._manager.add_subscription(userid, district_id):
+            message = "Dein Abonnement für {name} wurde erstellt."
         else:
-            return self._handle_no_input()
+            message = "Du hast {name} bereits abonniert."
+        return message.format(name=self._data.get_district_name(district_id))
 
-    def get_new_infection_graph(self, county_key: str) -> Optional[BytesIO]:
-        if county_key != "":
-            possible_rs = self.data.search_district_by_name(county_key)
-            if len(possible_rs) == 1:
-                rs, county = possible_rs[0]
-                history_data = self.data.get_district_data(rs, include_past_days=14)
-                y = []
-                for day_data in history_data:
-                    y.append(day_data.new_cases)
-                x = [datetime.datetime.now() - datetime.timedelta(days=i) for i in range(len(y))]
-                fig, ax1 = plt.subplots()
-                ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d %B'))
-                plt.xticks(x)
-                plt.plot(x, y)
-                plt.gcf().autofmt_xdate()
-                plt.title("Neuinfektionen der letzten " + str(len(y)) + " Tage")
-                buf = BytesIO()
-                plt.savefig(buf, format='JPEG')
-                buf.seek(0)
-                plt.clf()
-                return buf
-            else:
-                return None
+    def unsubscribe(self, userid: int, district_id: int) -> str:
+        if self._manager.rm_subscription(userid, district_id):
+            message = "Dein Abonnement für {name} wurde beendet."
         else:
-            return None
-
-    def subscribe(self, userid: int, county_key: str) -> str:
-        if county_key != "":
-            possible_rs = self.data.search_district_by_name(county_key)
-            if len(possible_rs) == 1:
-                rs, county = possible_rs[0]
-                if self.manager.add_subscription(userid, rs):
-                    message = "Dein Abonnement für " + county + " wurde erstellt."
-                else:
-                    message = "Du hast " + county + " bereits abonniert."
-
-                return message
-            else:
-                return self._handle_wrong_county_key(county_key)
-
-        else:
-            return self.get_overview(userid)
-
-    def unsubscribe(self, userid: str, county_key: str) -> str:
-        if county_key != "":
-            possible_rs = self.data.search_district_by_name(county_key)
-            if len(possible_rs) == 1:
-                rs, county = possible_rs[0]
-                if self.manager.rm_subscription(int(userid), rs):
-                    message = "Dein Abonnement für " + county + " wurde beendet."
-                else:
-                    message = "Du hast " + county + " nicht abonniert."
-
-                return message
-            else:
-                return self._handle_wrong_county_key(county_key)
-
-        else:
-            return self._handle_no_input()
+            message = "Du hast {name} nicht abonniert."
+        return message.format(name=self._data.get_district_name(district_id))
 
     def get_report(self, userid: int) -> str:
-        user = self.manager.get_user(userid, with_subscriptions=True)
+        user = self._manager.get_user(userid, with_subscriptions=True)
         return self._get_report(user.subscriptions)
-    
+
     def _get_report(self, subscriptions: List[int]) -> str:
-        country = self.data.get_country_data()
+        country = self._data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n" \
                   "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
                   "{new_deaths} Todesfälle {new_deaths_trend} gemeldet.\n\n"
-        message = message.format(date=self.data.get_last_update().strftime("%d.%m.%Y"),
+        message = message.format(date=self._data.get_last_update().strftime("%d.%m.%Y"),
                                  new_cases=self.format_int(country.new_cases),
                                  new_cases_trend=self.format_data_trend(country.cases_trend),
                                  new_deaths=self.format_int(country.new_deaths),
@@ -131,7 +158,7 @@ class Bot(object):
                        "Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten " \
                        "Orte wie folgt aus:\n\n"
             # Split Bundeslaender from other
-            subscription_data = list(map(lambda rs: self.data.get_district_data(rs), subscriptions))
+            subscription_data = list(map(lambda rs: self._data.get_district_data(rs), subscriptions))
             subscribed_bls = list(filter(lambda d: d.type == "Bundesland", subscription_data))
             subscribed_cities = list(filter(lambda d: d.type != "Bundesland", subscription_data))
             if len(subscribed_bls) > 0:
@@ -152,17 +179,18 @@ class Bot(object):
         return message
 
     def delete_user(self, user_id: int) -> str:
-        if self.manager.delete_user(user_id):
+        if self._manager.delete_user(user_id):
             return "Deine Daten wurden erfolgreich gelöscht."
         return "Zu deinem Account sind keine Daten vorhanden."
 
-    def format_district_data(self, district: DistrictData) -> str:
+    @staticmethod
+    def format_district_data(district: DistrictData) -> str:
         return "{name}: {incidence} {incidence_trend} ({new_cases} Neuinfektionen, {new_deaths} Todesfälle)" \
             .format(name=district.name,
-                    incidence=self.format_incidence(district.incidence),
-                    incidence_trend=self.format_data_trend(district.incidence_trend),
-                    new_cases=self.format_int(district.new_cases),
-                    new_deaths=self.format_int(district.new_deaths))
+                    incidence=Bot.format_incidence(district.incidence),
+                    incidence_trend=Bot.format_data_trend(district.incidence_trend),
+                    new_cases=Bot.format_int(district.new_cases),
+                    new_deaths=Bot.format_int(district.new_deaths))
 
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
@@ -201,32 +229,15 @@ class Bot(object):
         return result
 
     def get_overview(self, userid: int) -> str:
-        user = self.manager.get_user(userid, with_subscriptions=True)
+        user = self._manager.get_user(userid, with_subscriptions=True)
         if len(user.subscriptions) == 0:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
                       "bspw. <code>/abo Dresden</code> "
         else:
-            counties = map(self.data.get_district_name, user.subscriptions)
-            message = "Du hast aktuell <b>" + str(len(user.subscriptions)) + "</b> Orte abonniert: \n"\
+            counties = map(self._data.get_district_name, user.subscriptions)
+            message = "Du hast aktuell <b>{abo_count}</b> Orte abonniert: \n" \
                       + ", ".join(counties)
-        return message
-
-    def _handle_wrong_county_key(self, location: str) -> str:
-        """
-        Return Identifier or clarification message for certain location string. :param location: Location that should
-        be identified :return: (bool, str): Boolean shows whether identifier was found, str is then identifier.
-        Otherwise it is a message that should be sent to the user
-        """
-        possible_rs = self.data.search_district_by_name(location)
-        if not possible_rs:
-            message = "Es wurde <b>keine</b> Ort mit dem Namen " + location + " gefunden!"
-        elif 1 < len(possible_rs) <= 15:
-            message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden:\n"
-            message += "\n".join(list(map(lambda t: "• " + t[1], possible_rs)))
-        else:
-            message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
-
-        return message
+        return message.format(abo_count=len(user.subscriptions))
 
     @staticmethod
     def _handle_no_input() -> str:
@@ -245,27 +256,30 @@ class Bot(object):
         :return: List of (userid, message)
         """
         self.log.debug("Checking for new data")
-        self.log.info("Current COVID19 data from " + str(self.data.get_last_update()))
+        self.log.info("Current COVID19 data from " + str(self._data.get_last_update()))
         result = []
-        data_update = self.data.get_last_update()
-        for user in self.manager.get_all_user():
+        data_update = self._data.get_last_update()
+        for user in self._manager.get_all_user():
             if user.last_update is None or user.last_update < data_update:
                 result.append((user.id, self._get_report(user.subscriptions)))
-                self.manager.set_last_update(user.id, data_update)
+                self._manager.set_last_update(user.id, data_update)
 
         if len(result) > 0:
             return result
 
-        if self.data.fetch_current_data():
+        if self._data.fetch_current_data():
             return self.update()
         return result
 
     def get_statistic(self) -> str:
-        message = f"Aktuell nutzen {self.manager.get_total_user_number()} Personen diesen Bot.\n\n" \
+        message = f"Aktuell nutzen {self._manager.get_total_user_number()} Personen diesen Bot.\n\n" \
                   f"Die fünf beliebtesten Orte sind:\n"
-        for county in self.manager.get_ranked_subscriptions()[:5]:
+        for county in self._manager.get_ranked_subscriptions()[:5]:
             message += f"• {county[0]} Abonnements: {county[1]}\n"
         return message
+
+    def get_all_user(self) -> List[BotUser]:
+        return self._manager.get_all_user()
 
     @staticmethod
     def format_incidence(incidence: float) -> str:
@@ -289,3 +303,14 @@ class Bot(object):
             return "↘"
         else:
             return ""
+
+    @staticmethod
+    def get_privacy_msg():
+        return ("Unsere Datenschutzerklärung findest du hier: "
+                "https://github.com/eknoes/covid-bot/wiki/Datenschutz\n\n"
+                "Außerdem kannst du mit dem Befehl /loeschmich alle deine bei uns gespeicherten "
+                "Daten löschen.")
+
+    @staticmethod
+    def get_error_message():
+        return "Leider ist ein unvorhergesehener Fehler aufgetreten."

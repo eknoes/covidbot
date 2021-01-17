@@ -5,16 +5,15 @@ import os
 import signal
 import time
 import traceback
-
-from typing import Tuple, Optional
+from enum import Enum
+from typing import Tuple, List
 
 import telegram
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, NetworkError
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
-from covidbot.bot import Bot
-from covidbot.location_service import LocationService
+from covidbot.bot import Bot, UserDistrictActions
 
 '''
 Telegram Aktionen:
@@ -29,23 +28,24 @@ loeschmich - Lösche alle Daten
 '''
 
 
+class TelegramCallbacks(Enum):
+    SUBSCRIBE = "subscribe"
+    UNSUBSCRIBE = "unsubscribe"
+    DELETE_ME = "delete_me"
+    NO_DELETE = "no_delete"
+    CHOOSE_ACTION = "choose_action"
+    REPORT = "report"
+    GRAPHIC = "graphic"
+
+
 class TelegramInterface(object):
     _bot: Bot
-    _location_service: LocationService
     log = logging.getLogger(__name__)
     dev_chat_id: int
-
-    CALLBACK_CMD_SUBSCRIBE = "subscribe"
-    CALLBACK_CMD_DELETEME = "deleteme"
-    CALLBACK_CMD_NODELETE = "donotdelete"
-    CALLBACK_CMD_UNSUBSCRIBE = "unsubscribe"
-    CALLBACK_CMD_CHOOSE_ACTION = "choose"
-    CALLBACK_CMD_REPORT = "report"
 
     def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
         self.dev_chat_id = dev_chat_id
         self._bot = bot
-        self._location_service = LocationService('resources/germany_rs.geojson')
         self.updater = Updater(api_key)
 
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
@@ -60,9 +60,9 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
-        self.updater.dispatcher.add_handler(MessageHandler(Filters.location, self.locationHandler))
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.location, self.directMessageHandler))
         self.updater.dispatcher.add_error_handler(self.error_callback)
         self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
         self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
@@ -92,48 +92,67 @@ class TelegramInterface(object):
                                   f'/datenschutz.')
         self.log.debug("Someone called /hilfe")
 
-    @staticmethod
-    def privacyHandler(update: Update, context: CallbackContext) -> None:
-        update.message.reply_html("Unsere Datenschutzerklärung findest du hier: "
-                                  "https://github.com/eknoes/covid-bot/wiki/Datenschutz\n\n"
-                                  "Außerdem kannst du mit dem Befehl /loeschmich alle deine bei uns gespeicherten "
-                                  "Daten löschen.")
+    def privacyHandler(self, update: Update, context: CallbackContext) -> None:
+        update.message.reply_html(self._bot.get_privacy_msg())
 
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
-        entity = " ".join(context.args)
-        message = self._bot.get_current(entity)
-        update.message.reply_html(message)
+        query = " ".join(context.args)
+        msg, districts = self._bot.find_district_id(query)
+        if not districts:
+            update.message.reply_html(msg)
+        elif len(districts) > 1:
+            markup = self.gen_multi_district_answer(districts, TelegramCallbacks.REPORT)
+            update.message.reply_html(msg, reply_markup=markup)
+        else:
+            update.message.reply_html(self._bot.get_district_report(districts[0][0]))
         self.log.debug("Someone called /ort")
 
     def graphicHandler(self, update: Update, context: CallbackContext):
-        entity = " ".join(context.args)
-        message = self._bot.get_current(entity)
-        graph = self._bot.get_new_infection_graph(entity)
-        if graph:
-            context.bot.send_photo(update.effective_chat.id, photo=graph, caption=message,
-                                   parse_mode=telegram.constants.PARSEMODE_HTML)
+        query = " ".join(context.args)
+        msg, districts = self._bot.find_district_id(query)
+        if not districts:
+            update.message.reply_html(msg)
+        elif len(districts) > 1:
+            markup = self.gen_multi_district_answer(districts, TelegramCallbacks.GRAPHIC)
+            update.message.reply_html(msg, reply_markup=markup)
         else:
-            update.message.reply_html(message)
+            message, graph = self._bot.get_graphical_report(districts[0][0])
+            if graph:
+                update.message.reply_photo(graph, caption=message, parse_mode=telegram.constants.PARSEMODE_HTML)
+            else:
+                update.message.reply_html(message)
 
-    def deleteHandler(self, update: Update, context: CallbackContext) -> None:
+    @staticmethod
+    def deleteHandler(update: Update, context: CallbackContext) -> None:
         markup = InlineKeyboardMarkup([[InlineKeyboardButton("Ja, alle meine Daten löschen",
-                                                             callback_data=self.CALLBACK_CMD_DELETEME)],
-                                       [InlineKeyboardButton("Nein", callback_data=self.CALLBACK_CMD_NODELETE)]])
+                                                             callback_data=TelegramCallbacks.DELETE_ME.name)],
+                                       [InlineKeyboardButton("Nein", callback_data=TelegramCallbacks.NO_DELETE.name)]])
         update.message.reply_html("Sollen alle deine Abonnements und Daten gelöscht werden?", reply_markup=markup)
 
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
-        entity = " ".join(context.args)
-        update.message.reply_html(self._bot.subscribe(update.effective_chat.id, entity))
-        self.log.debug("Someone called /abo" + entity)
+        query = " ".join(context.args)
+        msg, districts = self._bot.find_district_id(query)
+        if not districts:
+            update.message.reply_html(msg)
+        elif len(districts) > 1:
+            markup = self.gen_multi_district_answer(districts, TelegramCallbacks.SUBSCRIBE)
+            update.message.reply_html(msg, reply_markup=markup)
+        else:
+            update.message.reply_html(self._bot.subscribe(update.effective_chat.id, districts[0][0]))
 
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
-        entity = " ".join(context.args)
-        update.message.reply_html(self._bot.unsubscribe(str(update.effective_chat.id), entity))
-        self.log.debug("Someone called /beende" + entity)
+        query = " ".join(context.args)
+        msg, districts = self._bot.find_district_id(query)
+        if not districts:
+            update.message.reply_html(msg)
+        elif len(districts) > 1:
+            markup = self.gen_multi_district_answer(districts, TelegramCallbacks.UNSUBSCRIBE)
+            update.message.reply_html(msg, reply_markup=markup)
+        else:
+            update.message.reply_html(self._bot.unsubscribe(update.effective_chat.id, districts[0][0]))
 
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_report(update.effective_chat.id))
-        self.log.debug("Someone called /bericht")
 
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.unknown_action())
@@ -147,87 +166,93 @@ class TelegramInterface(object):
     def callbackHandler(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
         query.answer()
-        if query.data.startswith(self.CALLBACK_CMD_SUBSCRIBE):
-            district = query.data[len(self.CALLBACK_CMD_SUBSCRIBE):]
-            query.edit_message_text(self._bot.subscribe(update.effective_chat.id, district),
+        # Subscribe Callback
+        if query.data.startswith(TelegramCallbacks.SUBSCRIBE.name):
+            district_id = int(query.data[len(TelegramCallbacks.SUBSCRIBE.name):])
+            query.edit_message_text(self._bot.subscribe(update.effective_chat.id, district_id),
                                     parse_mode=telegram.ParseMode.HTML)
-        elif query.data.startswith(self.CALLBACK_CMD_UNSUBSCRIBE):
-            district = query.data[len(self.CALLBACK_CMD_UNSUBSCRIBE):]
-            query.edit_message_text(self._bot.unsubscribe(update.effective_chat.id, district),
+
+        # Unsubscribe Callback
+        elif query.data.startswith(TelegramCallbacks.UNSUBSCRIBE.name):
+            district_id = int(query.data[len(TelegramCallbacks.UNSUBSCRIBE.name):])
+            query.edit_message_text(self._bot.unsubscribe(update.effective_chat.id, district_id),
                                     parse_mode=telegram.ParseMode.HTML)
-        elif query.data.startswith(self.CALLBACK_CMD_CHOOSE_ACTION):
-            district = query.data[len(self.CALLBACK_CMD_CHOOSE_ACTION):]
-            text, markup = self.genButtonMessage(district, update.effective_chat.id)
+
+        # Choose Action Callback
+        elif query.data.startswith(TelegramCallbacks.CHOOSE_ACTION.name):
+            district_id = int(query.data[len(TelegramCallbacks.CHOOSE_ACTION.name):])
+            text, markup = self.chooseActionBtnGenerator(district_id, update.effective_chat.id)
             if markup is not None:
                 query.edit_message_text(text, reply_markup=markup)
             else:
                 query.edit_message_text(text)
-        elif query.data.startswith(self.CALLBACK_CMD_REPORT):
-            district = query.data[len(self.CALLBACK_CMD_REPORT):]
-            query.edit_message_text(self._bot.get_current(district), parse_mode=telegram.ParseMode.HTML)
-        elif query.data.startswith(self.CALLBACK_CMD_DELETEME):
+
+        # Send Report Callback
+        elif query.data.startswith(TelegramCallbacks.REPORT.name):
+            district_id = int(query.data[len(TelegramCallbacks.REPORT.name):])
+            query.edit_message_text(self._bot.get_district_report(district_id), parse_mode=telegram.ParseMode.HTML)
+
+        # Send graphical report Callback
+        elif query.data.startswith(TelegramCallbacks.GRAPHIC.name):
+            district_id = int(query.data[len(TelegramCallbacks.GRAPHIC.name):])
+            message, graph = self._bot.get_graphical_report(district_id)
+            if graph:
+                context.bot.send_photo(update.effective_chat.id, photo=graph, caption=message,
+                                       parse_mode=telegram.constants.PARSEMODE_HTML)
+                query.delete_message()
+            else:
+                query.edit_message_text(message)
+
+        # DeleteMe Callback
+        elif query.data.startswith(TelegramCallbacks.DELETE_ME.name):
             query.edit_message_text(self._bot.delete_user(update.effective_chat.id), parse_mode=telegram.ParseMode.HTML)
-        elif query.data.startswith(self.CALLBACK_CMD_NODELETE):
+
+        # DoNotDeleteMe Callback
+        elif query.data.startswith(TelegramCallbacks.NO_DELETE.name):
             query.delete_message()
+        
+        else:
+            query.edit_message_text(self._bot.get_error_message())
 
     def directMessageHandler(self, update: Update, context: CallbackContext) -> None:
-        text, markup = self.genButtonMessage(update.message.text, update.effective_chat.id)
-        if markup is None:
-            update.message.reply_html(text)
+        if update.message.location:
+            msg, districts = self._bot.find_district_id_from_geolocation(update.message.location.longitude,
+                                                                         update.message.location.latitude)
         else:
-            update.message.reply_text(text, reply_markup=markup, parse_mode=ParseMode.HTML)
+            msg, districts = self._bot.find_district_id(update.message.text)
 
-    def genButtonMessage(self, county: str, user_id: int) -> Tuple[str, Optional[InlineKeyboardMarkup]]:
-        locations = self._bot.data.search_district_by_name(county)
-        if not locations:
-            possible_rs = self._location_service.find_location(county)
-            locations = []
-            for rs in possible_rs:
-                locations.append((rs, self._bot.data.get_district_name(rs)))
-
-        if not locations:
-            return (f"Die Ortsangabe {county} konnte leider nicht zugeordnet werden! "
-                    "Hilfe zur Benutzung des Bots gibts über <code>/hilfe</code>", None)
-        elif len(locations) == 1:
-            return self.genSingleBtn(locations[0][0], user_id)
+        if not districts:
+            update.message.reply_html(msg)
         else:
-            buttons = []
-            for rs, county in locations:
-                buttons.append([InlineKeyboardButton(county, callback_data=self.CALLBACK_CMD_CHOOSE_ACTION + county)])
-            markup = InlineKeyboardMarkup(buttons)
-            return "Bitte wähle einen Ort:", markup
-
-    def genSingleBtn(self, rs: int, user_id: int) -> Tuple[str, InlineKeyboardMarkup]:
-        name = self._bot.data.get_district_name(rs)
-        buttons = [[InlineKeyboardButton("Bericht", callback_data=self.CALLBACK_CMD_REPORT + name)]]
-        user = self._bot.manager.get_user(user_id, with_subscriptions=True)
-        if rs in user.subscriptions:
-            buttons.append([InlineKeyboardButton("Beende Abo",
-                                                 callback_data=self.CALLBACK_CMD_UNSUBSCRIBE + name)])
-            verb = "beenden"
-        else:
-            buttons.append([InlineKeyboardButton("Starte Abo",
-                                                 callback_data=self.CALLBACK_CMD_SUBSCRIBE + name)])
-            verb = "starten"
-        markup = InlineKeyboardMarkup(buttons)
-        return (f"Möchtest du dein Abo von {name} {verb} oder nur den aktuellen Bericht erhalten?",
-                markup)
-
-    def locationHandler(self, update: Update, context: CallbackContext) -> None:
-        if update.message.location is None:
-            return
-
-        rs = self._location_service.find_rs(update.message.location.longitude, update.message.location.latitude)
-        if rs is None:
-            update.message.reply_html(f"Leider konnte kein Ort in den RKI Corona Daten zu deinem Standort gefunden "
-                                      f"werden. Bitte beachte, dass Daten nur für Orte innerhalb Deutschlands "
-                                      f"verfügbar sind.")
-        else:
-            text, markup = self.genSingleBtn(rs, update.effective_chat.id)
-            if markup is None:
-                update.message.reply_html(text)
+            if len(districts) > 1:
+                markup = self.gen_multi_district_answer(districts, TelegramCallbacks.CHOOSE_ACTION)
             else:
-                update.message.reply_text(text, reply_markup=markup, parse_mode=ParseMode.HTML)
+                msg, markup = self.chooseActionBtnGenerator(districts[0][0], update.effective_chat.id)
+            update.message.reply_html(msg, reply_markup=markup)
+
+    @staticmethod
+    def gen_multi_district_answer(districts: List[Tuple[int, str]], callback: TelegramCallbacks) -> InlineKeyboardMarkup:
+        buttons = []
+        for district_id, name in districts:
+            buttons.append([InlineKeyboardButton(name, callback_data=callback.name + str(district_id))])
+        return InlineKeyboardMarkup(buttons)
+
+    def chooseActionBtnGenerator(self, district_id: int, user_id: int) -> Tuple[str, InlineKeyboardMarkup]:
+        message, actions = self._bot.get_possible_actions(user_id, district_id)
+        buttons = []
+
+        for action_name, action in actions:
+            callback = ""
+            if action == UserDistrictActions.REPORT:
+                callback = TelegramCallbacks.REPORT.name + str(district_id)
+            elif action == UserDistrictActions.SUBSCRIBE:
+                callback = TelegramCallbacks.SUBSCRIBE.name + str(district_id)
+            elif action == UserDistrictActions.UNSUBSCRIBE:
+                callback = TelegramCallbacks.UNSUBSCRIBE.name + str(district_id)
+            buttons.append([InlineKeyboardButton(action_name, callback_data=callback)])
+
+        markup = InlineKeyboardMarkup(buttons)
+        return message, markup
 
     def updateHandler(self, context: CallbackContext) -> None:
         self.log.info("Check for data update")
@@ -253,7 +278,7 @@ class TelegramInterface(object):
         self.updater.idle()
 
     def send_correction_message(self, msg):
-        for user in self._bot.manager.get_all_user():
+        for user in self._bot.get_all_user():
             try:
                 self.updater.bot.send_message(user.id, msg, parse_mode=telegram.ParseMode.HTML)
                 self.updater.bot.send_message(user.id, self._bot.get_report(user.id),
@@ -266,7 +291,7 @@ class TelegramInterface(object):
         # noinspection PyBroadException
         if isinstance(context.error, Unauthorized):
             logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}", exc_info=context.error)
-            self._bot.manager.delete_user(update.message.chat_id)
+            self._bot.delete_user(update.message.chat_id)
         elif isinstance(context.error, BadRequest):
             logging.warning(f"TelegramError: BadRequest: {str(context.chat_data)}", exc_info=context.error)
         elif isinstance(context.error, TimedOut):

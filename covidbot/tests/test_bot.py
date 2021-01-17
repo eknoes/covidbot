@@ -35,8 +35,8 @@ class TestBot(TestCase):
         del self.man
 
     def test_update_with_subscribers(self):
-        self.bot.subscribe(1, "Berlin")
-        self.bot.subscribe(2, "Hessen")
+        self.bot.subscribe(1, 1)
+        self.bot.subscribe(2, 2)
         self.man.set_last_update(1, datetime.now() - timedelta(days=1))
         self.man.set_last_update(2, datetime.now() - timedelta(days=1))
         self.assertEqual(2, len(self.bot.update()), "New data should trigger 2 updates")
