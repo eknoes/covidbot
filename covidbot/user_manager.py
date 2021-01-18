@@ -36,6 +36,7 @@ class UserManager(object):
                 cursor.execute('INSERT INTO subscriptions (user_id, rs) VALUES (%s, %s) '
                                'ON DUPLICATE KEY UPDATE user_id=user_id', [user_id, rs])
                 if cursor.rowcount == 1:
+                    self.connection.commit()
                     return True
             except IntegrityError:
                 if self.create_user(user_id):
