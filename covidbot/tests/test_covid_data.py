@@ -28,9 +28,9 @@ class CovidDataTest(TestCase):
     def tearDownClass(cls) -> None:
         cls.conn.close()
 
-    @freeze_time("2021-01-16 12:00:00")
     def setUp(self) -> None:
-        self.data = CovidData(self.conn)
+        with freeze_time("2021-01-16"):
+            self.data = CovidData(self.conn)
 
         with self.conn.cursor() as cursor:
             cursor.execute("TRUNCATE TABLE covid_data;")
@@ -43,7 +43,6 @@ class CovidDataTest(TestCase):
             with open("resources/2021-01-16-testdata-covid_data.sql", "r") as f:
                 for stmt in f.readlines():
                     cursor.execute(stmt)
-
 
     def tearDown(self) -> None:
         del self.data
