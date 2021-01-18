@@ -144,7 +144,8 @@ class Bot(object):
         plt.bar(x, y, color="#003f5c", width=0.95, zorder=3)
 
         # Styling
-        plt.title("Neuinfektionen seit " + str(len(y) - 1) + " Tagen")
+        plt.title("Neuinfektionen seit " + str(len(y) - 1) + " Tagen in {location}"
+                  .format(location=history_data[0].name))
         plt.ylabel("Neuinfektionen")
         for direction in ["left", "right", "bottom", "top"]:
             ax1.spines[direction].set_visible(False)
