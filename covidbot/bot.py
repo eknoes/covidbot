@@ -7,6 +7,7 @@ from typing import Optional, Tuple, List, Dict
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator, FixedLocator
 
 from covidbot.covid_data import CovidData, DistrictData, TrendValue
 from covidbot.location_service import LocationService
@@ -123,18 +124,38 @@ class Bot(object):
                     date=current_data.date.strftime("%d.%m.%Y"))
         return message
 
-    def get_graphical_report(self, district_id: int) -> Tuple[str, Optional[BytesIO]]:
-        history_data = self._data.get_district_data(district_id, include_past_days=14)
+    def get_graphical_report(self, district_id: int, subtract_days=0) -> Tuple[str, Optional[BytesIO]]:
+        history_data = self._data.get_district_data(district_id, include_past_days=14, subtract_days=0)
         y = []
+        current_date = None
         for day_data in history_data:
-            y.append(day_data.new_cases)
-        x = [datetime.datetime.now() - datetime.timedelta(days=i) for i in range(len(y))]
+            if not current_date or day_data.date.date() > current_date:
+                current_date = day_data.date.date()
+
+            if day_data.new_cases:
+                y.append(day_data.new_cases)
+            else:
+                continue
+
+        x = [current_date - datetime.timedelta(days=i) for i in range(len(y))]
         fig, ax1 = plt.subplots()
-        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d %B'))
+
         plt.xticks(x)
-        plt.plot(x, y)
-        plt.gcf().autofmt_xdate()
-        plt.title("Neuinfektionen der letzten " + str(len(y)) + " Tage")
+        plt.bar(x, y, color="#003f5c", width=0.95, zorder=3)
+
+        # Styling
+        plt.title("Neuinfektionen seit " + str(len(y) - 1) + " Tagen")
+        plt.ylabel("Neuinfektionen")
+        for direction in ["left", "right", "bottom", "top"]:
+            ax1.spines[direction].set_visible(False)
+        plt.grid(axis="y", zorder=0)
+
+        # One tick every 7 days for easier comparison
+        formatter = mdates.DateFormatter("%a, %d %b")
+        ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=current_date.weekday()))
+        ax1.xaxis.set_major_formatter(formatter)
+
+        # Save to buffer
         buf = BytesIO()
         plt.savefig(buf, format='JPEG')
         buf.seek(0)

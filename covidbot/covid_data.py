@@ -170,7 +170,7 @@ class CovidData(object):
             # Remove the one fetched for trend data if it exists
             if len(results) == include_past_days + 2:
                 results.pop()
-            else:
+            elif len(results) < include_past_days + 1:
                 logging.warning(f"No more data available for RS{rs}, requested {include_past_days + 1} days "
                                 f"but can just provide {len(results)} days")
 

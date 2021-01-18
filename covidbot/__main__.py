@@ -1,5 +1,6 @@
 import argparse
 import configparser
+import locale
 import logging
 
 from mysql.connector import connect, MySQLConnection
@@ -50,6 +51,12 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logging.getLogger().addHandler(logging.StreamHandler())
 
 if __name__ == "__main__":
+    # Set locale
+    try:
+        locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
+    except Exception:
+        logging.error("Can't set locale!")
+
     # Parse Arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--message', help='Do not start the bot but send a message to all users',
@@ -61,7 +68,8 @@ if __name__ == "__main__":
     with get_connection(config) as conn:
         data = CovidData(conn)
         user_manager = UserManager(conn)
-        telegram_bot = TelegramInterface(Bot(data, user_manager), api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
+        bot = Bot(data, user_manager)
+        telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
         if args is None:
             telegram_bot.run()
