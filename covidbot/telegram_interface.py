@@ -36,7 +36,6 @@ class TelegramCallbacks(Enum):
     NO_DELETE = "no_delete"
     CHOOSE_ACTION = "choose_action"
     REPORT = "report"
-    GRAPHIC = "graphic"
 
 
 class TelegramInterface(object):
@@ -57,7 +56,6 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
         self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('grafik', self.graphicHandler))
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
@@ -136,18 +134,6 @@ class TelegramInterface(object):
             markup = self.gen_multi_district_answer(districts, TelegramCallbacks.REPORT)
             update.message.reply_html(msg, reply_markup=markup)
         else:
-            update.message.reply_html(self._bot.get_district_report(districts[0][0]))
-        self.log.debug("Someone called /ort")
-
-    def graphicHandler(self, update: Update, context: CallbackContext):
-        query = " ".join(context.args)
-        msg, districts = self._bot.find_district_id(query)
-        if not districts:
-            update.message.reply_html(msg)
-        elif len(districts) > 1:
-            markup = self.gen_multi_district_answer(districts, TelegramCallbacks.GRAPHIC)
-            update.message.reply_html(msg, reply_markup=markup)
-        else:
             district_id = districts[0][0]
             context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_PHOTO)
             graph = self.getGraph(district_id)
@@ -158,6 +144,7 @@ class TelegramInterface(object):
                     self.addToFileCache(district_id, message.photo[-1])
             else:
                 update.message.reply_html(message)
+        self.log.debug("Someone called /ort")
 
     @staticmethod
     def deleteHandler(update: Update, context: CallbackContext) -> None:
@@ -234,11 +221,6 @@ class TelegramInterface(object):
         # Send Report Callback
         elif query.data.startswith(TelegramCallbacks.REPORT.name):
             district_id = int(query.data[len(TelegramCallbacks.REPORT.name):])
-            query.edit_message_text(self._bot.get_district_report(district_id), parse_mode=telegram.ParseMode.HTML)
-
-        # Send graphical report Callback
-        elif query.data.startswith(TelegramCallbacks.GRAPHIC.name):
-            district_id = int(query.data[len(TelegramCallbacks.GRAPHIC.name):])
             context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_PHOTO)
             graph = self.getGraph(district_id)
             message = self._bot.get_district_report(district_id)
