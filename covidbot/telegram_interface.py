@@ -183,7 +183,15 @@ class TelegramInterface(object):
             update.message.reply_html(self._bot.unsubscribe(update.effective_chat.id, districts[0][0]))
 
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_html(self._bot.get_report(update.effective_chat.id))
+        graph = self.getGraph(0)
+        message = self._bot.get_report(update.effective_chat.id)
+        if graph:
+            message = update.message.reply_photo(photo=graph, caption=message,
+                                                 parse_mode=telegram.constants.PARSEMODE_HTML)
+            if message.photo:
+                self.addToFileCache(0, message.photo[-1])
+        else:
+            update.message.reply_html(self._bot.get_report(update.effective_chat.id))
 
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.unknown_action())
@@ -292,13 +300,26 @@ class TelegramInterface(object):
             return
         # Empty file cache as there seems to be new content
         self.graph_cache = {}
+
+        # Generate graph for country
+
         # Avoid flood limits of 30 messages / second
         messages_sent = 0
         for userid, message in messages:
             if messages_sent > 0 and messages_sent % 25 == 0:
                 self.log.info("Sleep for one second to avoid flood limits")
                 time.sleep(1.0)
-            context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+
+            graph = self.getGraph(0)
+            if graph:
+                message = context.bot.send_photo(chat_id=userid, photo=graph, caption=message,
+                                                 parse_mode=telegram.constants.PARSEMODE_HTML)
+                if message.photo:
+                    self.addToFileCache(0, message.photo[-1])
+            else:
+                self.log.warning("No graph available in report!")
+                context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+
             self.log.info(f"Sent report to {userid}")
             messages_sent += 1
 
