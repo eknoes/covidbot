@@ -136,6 +136,8 @@ class Bot(object):
                 y.append(day_data.new_cases)
             else:
                 continue
+        if not y:
+            return None
 
         x = [current_date - datetime.timedelta(days=i) for i in range(len(y))]
 
