@@ -16,3 +16,7 @@ class TestLocationService(TestCase):
 
         self.assertIsNone(self.location_service.find_rs(2.323020153685483, 48.83753707055439),
                           "Paris should not resolve to a RS")
+
+    def test_find_location(self):
+        self.assertCountEqual([3151], self.location_service.find_location("Neubokel"))
+        self.assertCountEqual([6631, 6633, 16069], self.location_service.find_location("Simmershausen"))

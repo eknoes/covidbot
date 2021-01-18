@@ -1,12 +1,14 @@
 import argparse
 import configparser
+import locale
 import logging
 
 from mysql.connector import connect, MySQLConnection
+from mysql.connector.conversion import MySQLConverter
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.user_manager import UserManager
 from covidbot.telegram_interface import TelegramInterface
 
 
@@ -16,12 +18,12 @@ def parse_config(config_file: str):
     return cfg
 
 
-def get_connection(cfg) -> MySQLConnection:
+def get_connection(cfg, converter_class=MySQLConverter) -> MySQLConnection:
     return connect(database=cfg['DATABASE'].get('DATABASE'),
                    user=cfg['DATABASE'].get('USER'),
                    password=cfg['DATABASE'].get('PASSWORD'),
                    port=cfg['DATABASE'].get('PORT'),
-                   host=cfg['DATABASE'].get('HOST', 'localhost'))
+                   host=cfg['DATABASE'].get('HOST', 'localhost'), converter_class=converter_class)
 
 
 def send_correction_report(bot: TelegramInterface):
@@ -50,6 +52,12 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logging.getLogger().addHandler(logging.StreamHandler())
 
 if __name__ == "__main__":
+    # Set locale
+    try:
+        locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
+    except Exception:
+        logging.error("Can't set locale!")
+
     # Parse Arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--message', help='Do not start the bot but send a message to all users',
@@ -60,8 +68,9 @@ if __name__ == "__main__":
 
     with get_connection(config) as conn:
         data = CovidData(conn)
-        user_manager = SubscriptionManager(conn)
-        telegram_bot = TelegramInterface(Bot(data, user_manager), api_key=api_key)
+        user_manager = UserManager(conn)
+        bot = Bot(data, user_manager)
+        telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
         if args is None:
             telegram_bot.run()

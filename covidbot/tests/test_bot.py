@@ -1,11 +1,12 @@
+from datetime import datetime, timedelta
 from unittest import TestCase
 
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.bot import Bot
+from covidbot.bot import Bot, UserDistrictActions
 from covidbot.covid_data import CovidData, DistrictData
-from covidbot.subscription_manager import SubscriptionManager
+from covidbot.user_manager import UserManager
 
 
 class TestBot(TestCase):
@@ -21,26 +22,54 @@ class TestBot(TestCase):
         cls.conn.close()
 
     def setUp(self) -> None:
-        self.man = SubscriptionManager(self.conn)
+        with self.conn.cursor(dictionary=True) as cursor:
+            cursor.execute("DROP TABLE IF EXISTS subscriptions;")
+            cursor.execute("DROP TABLE IF EXISTS covid_data;")
+            cursor.execute("DROP TABLE IF EXISTS bot_user;")
+            cursor.execute("DROP TABLE IF EXISTS counties;")
+
+        self.man = UserManager(self.conn)
         self.bot = Bot(CovidData(self.conn),
                        self.man)
-        with self.conn.cursor(dictionary=True) as cursor:
-            cursor.execute("TRUNCATE subscriptions;")
-            # noinspection SqlWithoutWhere
-            cursor.execute("DELETE FROM bot_user;")
 
     def tearDown(self) -> None:
         del self.bot
         del self.man
 
     def test_update_with_subscribers(self):
-        self.bot.subscribe(1, "Berlin")
-        self.bot.subscribe(2, "Hessen")
-        self.assertEqual(2, len(self.bot.update()), "New data should trigger 2 updates")
+        hessen_id = self.bot.find_district_id("Hessen")[1][0][0]
+        bayern_id = self.bot.find_district_id("Bayern")[1][0][0]
+        self.bot.subscribe(1, hessen_id)
+        self.bot.subscribe(2, bayern_id)
+        self.man.set_last_update(1, datetime.now() - timedelta(days=1))
+        self.man.set_last_update(2, datetime.now() - timedelta(days=1))
+
+        update = self.bot.update()
+        self.assertEqual(2, len(update), "New data should trigger 2 updates")
+        for u in update:
+            if u[0] == 1:
+                self.assertRegex(u[1], "Hessen", "A subscribed district must be part of the daily report")
+                self.assertEqual(self.bot.get_report(1), u[1], "The daily report should be equal to the manual report")
+            if u[0] == 2:
+                self.assertRegex(u[1], "Bayern", "A subscribed district must be part of the daily report")
+                self.assertEqual(self.bot.get_report(2), u[1], "The daily report should be equal to the manual report")
+
         self.assertEqual([], self.bot.update(), "Without new data no reports should be generated")
 
     def test_update_no_subscribers(self):
         self.assertEqual([], self.bot.update(), "Empty subscribers should generate empty update list")
+
+    def test_no_user(self):
+        self.assertIsNotNone(self.bot.get_overview(1), "A not yet existing user should get an overview over their "
+                                                       "subscriptions")
+        self.assertIsNotNone(self.bot.get_district_report(1), "A not yet existing user should get a district report")
+        self.assertIsNotNone(self.bot.find_district_id_from_geolocation(3.0, 2.0), "A not yet existing user should "
+                                                                                   "be able to query for a location")
+        self.assertIsNotNone(self.bot.find_district_id("Berlin"), "A not yet existing user should be able to query for "
+                                                                  "a location")
+        self.assertIsNotNone(self.bot.get_report(1), "A not yet existing user should be able to query for a report")
+        self.assertIsNotNone(self.bot.get_possible_actions(1, 2), "A not yet existing user should be able to query for "
+                                                                  "possible actions")
 
     def test_format_int(self):
         expected = "1.121"
@@ -83,3 +112,17 @@ class TestBot(TestCase):
         self.assertEqual("A", actual_names[0], "Districts should be sorted alphabetically")
         self.assertEqual("B", actual_names[1], "Districts should be sorted alphabetically")
         self.assertEqual("C", actual_names[2], "Districts should be sorted alphabetically")
+
+    def test_get_possible_actions(self):
+        expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT]
+        actual = map(lambda x: x[1], self.bot.get_possible_actions(1, 1)[1])
+        self.assertCountEqual(expected, actual, "A user without a subscription should get SUBSCRIBE and REPORT action")
+
+        self.bot.subscribe(1, 1)
+        expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT]
+        actual = map(lambda x: x[1], self.bot.get_possible_actions(1, 2)[1])
+        self.assertCountEqual(expected, actual, "A user without subscription should get SUBSCRIBE and REPORT action")
+
+        expected = [UserDistrictActions.UNSUBSCRIBE, UserDistrictActions.REPORT]
+        actual = map(lambda x: x[1], self.bot.get_possible_actions(1, 1)[1])
+        self.assertCountEqual(expected, actual, "A user with subscription should get UNSUBSCRIBE and REPORT action")
