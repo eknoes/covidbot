@@ -1,6 +1,7 @@
 venv/*
 .idea/*
 *__pycache__*
+venv3.8/*
 
 # Secret configuration
 config.ini
