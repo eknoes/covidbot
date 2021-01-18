@@ -333,6 +333,9 @@ class Bot(object):
 
     def get_all_user(self) -> List[BotUser]:
         return self._manager.get_all_user()
+    
+    def add_user_feedback(self, user_id: int, feedback: str) -> bool:
+        return self._manager.add_feedback(user_id, feedback)
 
     @staticmethod
     def format_incidence(incidence: float) -> str:

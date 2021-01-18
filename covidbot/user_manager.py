@@ -28,6 +28,9 @@ class UserManager(object):
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
+            cursor.execute('CREATE TABLE IF NOT EXISTS user_feedback '
+                           '(user_id INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL,'
+                           'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             self.connection.commit()
 
     def add_subscription(self, user_id: int, rs: int) -> bool:
@@ -86,7 +89,7 @@ class UserManager(object):
                 if with_subscriptions:
                     if not current_user.subscriptions:
                         current_user.subscriptions = []
-                    
+
                     if row['rs']:
                         current_user.subscriptions.append(row['rs'])
 
@@ -99,7 +102,7 @@ class UserManager(object):
         result = self.get_all_user(filter_id=user_id, with_subscriptions=with_subscriptions)
         if result:
             return result[0]
-        
+
     def delete_user(self, user_id: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('DELETE FROM subscriptions WHERE user_id=%s', [user_id])
@@ -156,3 +159,16 @@ class UserManager(object):
                 result.append((row['subscribers'], row['county_name']))
             result.sort(key=lambda x: x[0], reverse=True)
             return result
+
+    def add_feedback(self, user_id: int, feedback: str) -> bool:
+        if not feedback:
+            return False
+
+        if not self.get_user(user_id):
+            self.create_user(user_id)
+
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('INSERT INTO user_feedback (user_id, feedback) VALUES (%s, %s)', [user_id, feedback])
+            if cursor.rowcount == 1:
+                return True
+            return False

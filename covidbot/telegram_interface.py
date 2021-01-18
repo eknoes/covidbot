@@ -60,6 +60,7 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
         self.updater.dispatcher.add_handler(CommandHandler('sprache', self.languageHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('feedback', self.feedbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
@@ -113,7 +114,8 @@ class TelegramInterface(object):
                                   f'Außerdem kannst du mit dem Befehl /bericht deinen Tagesbericht und mit /abo eine '
                                   f'Übersicht über deine aktuellen Abonnements einsehen.\n'
                                   f'Über den /statistik Befehl erhältst du eine kurze Nutzungsstatistik über diesen '
-                                  f'Bot.\n\n'
+                                  f'Bot. Und mit <code>/feedback DEIN TEXT</code> kannst du uns Feedback zukommen '
+                                  f'lassen!\n\n'
                                   f'Mehr Informationen zu diesem Bot findest du hier: '
                                   f'https://github.com/eknoes/covid-bot\n\n'
                                   f'Diesen Hilfetext erhältst du über /hilfe, Datenschutzinformationen über '
@@ -326,6 +328,20 @@ class TelegramInterface(object):
 
     def statHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_statistic())
+
+    def feedbackHandler(self, update: Update, context: CallbackContext) -> None:
+        feedback = " ".join(context.args)
+
+        if not feedback:
+            update.message.reply_html("Als Feedback kann leider nur Text angenommen werden!"
+                                      "Bitte versuche es erneut mit einem Text: <code>/feedback DEIN TEXT</code>")
+            return
+
+        context.bot.send_message(chat_id=self.dev_chat_id, text=f"<b>Neues Feedback!</b>\n{feedback}",
+                                 parse_mode=ParseMode.HTML)
+        self._bot.add_user_feedback(update.effective_chat.id, feedback)
+
+        update.message.reply_html("Danke für dein wertvolles Feedback!")
 
     def run(self):
         self.updater.start_polling()

@@ -23,6 +23,7 @@ class TestSubscriptionManager(TestCase):
     def setUp(self) -> None:
         with self.conn.cursor(dictionary=True) as cursor:
             cursor.execute("DROP TABLE IF EXISTS subscriptions;")
+            cursor.execute("DROP TABLE IF EXISTS user_feedback;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
 
         self.manager = UserManager(self.conn)
@@ -133,3 +134,11 @@ class TestSubscriptionManager(TestCase):
                               "get_ranked_subscriptions should return a ranking of subscriptions")
         self.assertEqual(self.manager.get_ranked_subscriptions()[0], (3, "Test1"),
                          "get_ranked_subscriptions result should be sorted")
+
+    def test_feedback(self):
+        user_id = 1
+        feedback = "I quite like it!"
+
+        self.assertTrue(self.manager.add_feedback(user_id, feedback), "Feedback should be added successfully")
+        self.assertTrue(self.manager.add_feedback(user_id, feedback), "Same Feedback should be added successfully")
+        self.assertFalse(self.manager.add_feedback(user_id, None), "Null Feedback should not be added successfully")

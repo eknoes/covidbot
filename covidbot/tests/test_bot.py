@@ -24,6 +24,7 @@ class TestBot(TestCase):
     def setUp(self) -> None:
         with self.conn.cursor(dictionary=True) as cursor:
             cursor.execute("DROP TABLE IF EXISTS subscriptions;")
+            cursor.execute("DROP TABLE IF EXISTS user_feedback;")
             cursor.execute("DROP TABLE IF EXISTS covid_data;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
             cursor.execute("DROP TABLE IF EXISTS counties;")
