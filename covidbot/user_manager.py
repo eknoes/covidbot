@@ -170,5 +170,6 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('INSERT INTO user_feedback (user_id, feedback) VALUES (%s, %s)', [user_id, feedback])
             if cursor.rowcount == 1:
+                self.connection.commit()
                 return True
             return False
