@@ -126,11 +126,14 @@ class Bot(object):
 
     def get_graphical_report(self, district_id: int, subtract_days=0) -> Optional[BytesIO]:
         history_data = self._data.get_district_data(district_id, include_past_days=14, subtract_days=0)
+        if not history_data:
+            return None
+
         y = []
         current_date = None
         for day_data in history_data:
-            if not current_date or day_data.date.date() > current_date:
-                current_date = day_data.date.date()
+            if not current_date or day_data.date > current_date:
+                current_date = day_data.date
 
             if day_data.new_cases is not None:
                 y.append(day_data.new_cases)
@@ -279,7 +282,7 @@ class Bot(object):
 
     def get_overview(self, userid: int) -> Tuple[str, Optional[List[Tuple[int, str]]]]:
         user = self._manager.get_user(userid, with_subscriptions=True)
-        if not user or len(user.subscriptions) == 0:
+        if not user or not user.subscriptions:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
                       "bspw. <code>/abo Dresden</code> "
             counties = None
@@ -310,7 +313,7 @@ class Bot(object):
         result = []
         data_update = self._data.get_last_update()
         for user in self._manager.get_all_user(with_subscriptions=True):
-            if user.last_update is None or user.last_update < data_update:
+            if user.last_update is None or user.last_update.date() < data_update:
                 result.append((user.id, self._get_report(user.subscriptions)))
                 self._manager.set_last_update(user.id, data_update)
 
