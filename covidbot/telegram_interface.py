@@ -71,7 +71,7 @@ class TelegramInterface(object):
     def getGraph(self, district_id: int) -> Union[PhotoSize, BytesIO]:
         if district_id in self.graph_cache.keys():
             return self.graph_cache.get(district_id)
-        
+
         return self._bot.get_graphical_report(district_id)
 
     def addToFileCache(self, district_id: int, file: PhotoSize):
@@ -139,7 +139,8 @@ class TelegramInterface(object):
             graph = self.getGraph(district_id)
             message = self._bot.get_district_report(district_id)
             if graph:
-                message = update.message.reply_photo(graph, caption=message, parse_mode=telegram.constants.PARSEMODE_HTML)
+                message = update.message.reply_photo(graph, caption=message,
+                                                     parse_mode=telegram.constants.PARSEMODE_HTML)
                 if message.photo:
                     self.addToFileCache(district_id, message.photo[-1])
             else:
@@ -330,17 +331,28 @@ class TelegramInterface(object):
         self.updater.start_polling()
         self.updater.idle()
 
-    def send_correction_message(self, msg):
-        i = 0
+    def message_all_users(self, report: str, with_report=False):
+        no_flood_counter = 0
         for user in self._bot.get_all_user():
             try:
-                if i % 25 == 0:
+                if no_flood_counter % 25 == 0:
                     time.sleep(1)
 
-                self.updater.bot.send_message(user.id, msg, parse_mode=telegram.ParseMode.HTML)
-                self.updater.bot.send_message(user.id, self._bot.get_report(user.id),
-                                              parse_mode=telegram.ParseMode.HTML)
-                i += 2
+                self.updater.bot.send_message(user.id, report, parse_mode=telegram.ParseMode.HTML)
+                if with_report:
+                    no_flood_counter += 1  # Additional message
+                    graph = self.getGraph(0)
+                    report = self._bot.get_report(user.id)
+                    if graph:
+                        report = self.updater.bot.send_photo(chat_id=user.id, photo=graph, caption=report,
+                                                             parse_mode=telegram.constants.PARSEMODE_HTML)
+                        if report.photo:
+                            self.addToFileCache(0, report.photo[-1])
+                    else:
+                        self.log.warning("No graph available in report!")
+                        self.updater.bot.send_message(chat_id=user.id, text=report, parse_mode=ParseMode.HTML)
+
+                no_flood_counter += 1
                 logging.info(f"Sent correction message to {str(user)}")
             except BadRequest as error:
                 logging.warning(f"Could not send message to {str(user)}: {str(error)}")

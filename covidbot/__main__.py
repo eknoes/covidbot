@@ -27,10 +27,15 @@ def get_connection(cfg) -> MySQLConnection:
 
 
 def send_correction_report(bot: TelegramInterface):
-    if input("If you want to sent a correction message with the current report to all users, press Y: ") != "Y":
+    if input("Do you want to send a message to all users? (y/N)").upper() != "Y":
         exit(0)
 
-    line = input("Message (Basic HTML allowed):\n")
+    append_report = False
+    if input("Do you want to append the current report? (y/N)").upper() == "Y":
+        append_report = True
+
+    line = input("Please write the message you want to send."
+                 "You can review it before sending, basic HTML is allowed):\n")
     lines = []
     while True:
         if line:
@@ -40,9 +45,9 @@ def send_correction_report(bot: TelegramInterface):
         line = input()
     msg = '\n'.join(lines)
 
-    print(f"\n\n{msg}\n\n")
+    print(f"\n{msg}\nAppend current report: {append_report}")
     if input("Press Y to send this message: ") == "Y":
-        bot.send_correction_message(msg)
+        bot.message_all_users(msg, append_report)
 
 
 # Setup logging
@@ -67,14 +72,15 @@ if __name__ == "__main__":
     api_key = config['TELEGRAM'].get('API_KEY')
 
     with get_connection(config) as conn:
-        data = CovidData(conn)
+        if args and args.message:
+            data = CovidData(conn, disable_autoupdate=True)
+        else:
+            data = CovidData(conn)
         user_manager = UserManager(conn)
         bot = Bot(data, user_manager)
         telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
-        if args is None:
-            telegram_bot.run()
-        elif args.message:
+        if args and args.message:
             send_correction_report(telegram_bot)
         else:
             telegram_bot.run()
