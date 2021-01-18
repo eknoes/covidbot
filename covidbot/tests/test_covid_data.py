@@ -1,19 +1,9 @@
 from unittest import TestCase
 
-from freezegun import freeze_time
 from mysql.connector import MySQLConnection
-from mysql.connector.conversion import MySQLConverter
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import CovidData, DistrictData, TrendValue
-
-
-class FreezeTimeConverter(MySQLConverter):
-    def _fakedatetime_to_mysql(self, value):
-        return super(FreezeTimeConverter, self)._datetime_to_mysql(value)
-
-    def _fakedate_to_mysql(self, value):
-        return super(FreezeTimeConverter, self)._date_to_mysql(value)
 
 
 class CovidDataTest(TestCase):
@@ -22,15 +12,14 @@ class CovidDataTest(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cfg = parse_config("resources/config.unittest.ini")
-        cls.conn = get_connection(cfg, converter_class=FreezeTimeConverter)
+        cls.conn = get_connection(cfg)
 
     @classmethod
     def tearDownClass(cls) -> None:
         cls.conn.close()
 
     def setUp(self) -> None:
-        with freeze_time("2021-01-16"):
-            self.data = CovidData(self.conn)
+        self.data = CovidData(self.conn, disable_autoupdate=True)
 
         with self.conn.cursor() as cursor:
             cursor.execute("TRUNCATE TABLE covid_data;")

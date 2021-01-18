@@ -39,10 +39,11 @@ class CovidData(object):
     connection: MySQLConnection
     log = logging.getLogger(__name__)
 
-    def __init__(self, connection: MySQLConnection) -> None:
+    def __init__(self, connection: MySQLConnection, disable_autoupdate=False) -> None:
         self.connection = connection
         self._create_tables()
-        self.fetch_current_data()
+        if not disable_autoupdate:
+            self.fetch_current_data()
 
     def _create_tables(self):
         with self.connection.cursor(dictionary=True) as cursor:
