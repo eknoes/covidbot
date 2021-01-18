@@ -1,5 +1,4 @@
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2020-12-29 00:00:00', 474, 48.8, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2020-12-29 00:00:00', 23784, 85.1651, 394);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2020-12-29 00:00:00', 2216, 89.1432, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2020-12-29 00:00:00', 2488, 119.152, 18);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1004, '2020-12-29 00:00:00', 656, 26.1858, 9);
@@ -15,9 +14,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2020-12-29 00:00:00', 818, 75.565, 13);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2020-12-29 00:00:00', 3063, 176.526, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2020-12-29 00:00:00', 35484, 113.195, 598);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2020-12-29 00:00:00', 35484, 113.195, 598);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2020-12-29 00:00:00', 2301, 72.5724, 38);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2020-12-29 00:00:00', 103750, 87.2197, 1851);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2020-12-29 00:00:00', 1738, 73.8319, 37);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2020-12-29 00:00:00', 1382, 43.4185, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3151, '2020-12-29 00:00:00', 1978, 151.255, 21);
@@ -63,10 +60,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2020-12-29 00:00:00', 889, 45.1554, 13);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2020-12-29 00:00:00', 417, 38.6467, 6);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2020-12-29 00:00:00', 11976, 94.2633, 161);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2020-12-29 00:00:00', 13259, 90.4284, 186);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2020-12-29 00:00:00', 1283, 71.2758, 25);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2020-12-29 00:00:00', 13047, 92.462, 130);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2020-12-29 00:00:00', 383008, 138.807, 6227);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2020-12-29 00:00:00', 14920, 129.941, 331);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2020-12-29 00:00:00', 12654, 178.633, 191);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5114, '2020-12-29 00:00:00', 5153, 152.583, 51);
@@ -120,7 +115,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2020-12-29 00:00:00', 3318, 79.8582, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2020-12-29 00:00:00', 9505, 144.344, 197);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2020-12-29 00:00:00', 2877, 76.9337, 68);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2020-12-29 00:00:00', 132204, 139.057, 2582);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2020-12-29 00:00:00', 20565, 120.124, 340);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2020-12-29 00:00:00', 4337, 162.726, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6414, '2020-12-29 00:00:00', 6683, 91.2114, 109);
@@ -147,7 +141,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2020-12-29 00:00:00', 2647, 256.384, 37);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2020-12-29 00:00:00', 1219, 144.094, 43);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2020-12-29 00:00:00', 2077, 113.106, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2020-12-29 00:00:00', 70024, 122.695, 1328);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2020-12-29 00:00:00', 1960, 93.0154, 24);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2020-12-29 00:00:00', 1693, 50.4639, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7133, '2020-12-29 00:00:00', 2617, 169.251, 32);
@@ -184,7 +177,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2020-12-29 00:00:00', 3547, 110.682, 90);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2020-12-29 00:00:00', 1177, 101.233, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2020-12-29 00:00:00', 14519, 111.494, 170);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2020-12-29 00:00:00', 231686, 147.013, 4587);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2020-12-29 00:00:00', 8598, 100.304, 120);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2020-12-29 00:00:00', 12386, 137.377, 251);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8117, '2020-12-29 00:00:00', 5669, 142.556, 127);
@@ -229,7 +221,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2020-12-29 00:00:00', 3987, 124.727, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2020-12-29 00:00:00', 2094, 80.2452, 46);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2020-12-29 00:00:00', 3124, 111.36, 59);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2020-12-29 00:00:00', 314934, 161.535, 6398);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2020-12-29 00:00:00', 43139, 159.544, 544);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2020-12-29 00:00:00', 2270, 214.001, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9171, '2020-12-29 00:00:00', 2866, 102.227, 104);
@@ -326,14 +317,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2020-12-29 00:00:00', 2606, 136.041, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2020-12-29 00:00:00', 2759, 149.351, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2020-12-29 00:00:00', 7567, 187.397, 224);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2020-12-29 00:00:00', 19341, 131.322, 412);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2020-12-29 00:00:00', 1743, 101.702, 26);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2020-12-29 00:00:00', 2278, 107.299, 37);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2020-12-29 00:00:00', 3887, 142.034, 52);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2020-12-29 00:00:00', 2333, 72.4352, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2020-12-29 00:00:00', 1533, 63.2133, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2020-12-29 00:00:00', 732, 108.057, 18);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2020-12-29 00:00:00', 37820, 135.374, 814);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2020-12-29 00:00:00', 1426, 183.591, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2020-12-29 00:00:00', 891, 202.594, 5);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12054, '2020-12-29 00:00:00', 2327, 112.014, 66);
@@ -352,7 +341,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2020-12-29 00:00:00', 2124, 23.5298, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2020-12-29 00:00:00', 1147, 116.859, 30);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2020-12-29 00:00:00', 852, 26.7698, 9);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2020-12-29 00:00:00', 11168, 77.2322, 152);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2020-12-29 00:00:00', 814, 85.7265, 16);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2020-12-29 00:00:00', 2354, 147.632, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13072, '2020-12-29 00:00:00', 940, 53.2916, 11);
@@ -361,7 +349,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2020-12-29 00:00:00', 2280, 117.985, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2020-12-29 00:00:00', 1611, 74.6061, 21);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2020-12-29 00:00:00', 7464, 440.865, 171);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2020-12-29 00:00:00', 126421, 364.664, 2838);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2020-12-29 00:00:00', 15521, 363.937, 380);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2020-12-29 00:00:00', 9933, 426.177, 97);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14523, '2020-12-29 00:00:00', 5561, 653.106, 148);
@@ -375,7 +362,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2020-12-29 00:00:00', 5517, 335.478, 52);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2020-12-29 00:00:00', 5397, 376.25, 102);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2020-12-29 00:00:00', 920, 146.062, 15);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2020-12-29 00:00:00', 27754, 172.181, 532);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2020-12-29 00:00:00', 2877, 138.213, 51);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2020-12-29 00:00:00', 2479, 95.1319, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15081, '2020-12-29 00:00:00', 631, 73.3411, 20);
@@ -390,7 +376,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2020-12-29 00:00:00', 1384, 232.935, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2020-12-29 00:00:00', 1955, 201.676, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2020-12-29 00:00:00', 2743, 190.204, 58);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2020-12-29 00:00:00', 39647, 273.697, 907);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2020-12-29 00:00:00', 2029, 282.416, 77);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2020-12-29 00:00:00', 1652, 197.588, 17);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16054, '2020-12-29 00:00:00', 658, 309.875, 15);
@@ -414,7 +399,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2020-12-29 00:00:00', 2261, 240.251, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2020-12-29 00:00:00', 2734, 479.903, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2020-12-29 00:00:00', 7469, 192.538, 105);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2020-12-29 00:00:00', 94442, 145.115, 1172);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2020-12-29 00:00:00', 7988, 139.653, 111);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2020-12-29 00:00:00', 4478, 115.577, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11003, '2020-12-29 00:00:00', 7390, 56.5275, 75);
@@ -426,7 +410,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2020-12-29 00:00:00', 12803, 138.046, 125);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2020-12-29 00:00:00', 8777, 130.824, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2020-12-29 00:00:00', 9876, 172.63, 213);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2020-12-30 00:00:00', 24284, 82.4789, 411);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2020-12-30 00:00:00', 482, 46.5818, 7);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2020-12-30 00:00:00', 2261, 76.1769, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2020-12-30 00:00:00', 2530, 98.3697, 19);
@@ -442,9 +425,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2020-12-30 00:00:00', 2514, 69.6311, 52);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2020-12-30 00:00:00', 829, 67.1689, 13);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2020-12-30 00:00:00', 3154, 180.622, 75);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2020-12-30 00:00:00', 35947, 103.83, 614);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2020-12-30 00:00:00', 35947, 103.83, 614);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2020-12-30 00:00:00', 104768, 79.5886, 1908);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2020-12-30 00:00:00', 2301, 58.5391, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2020-12-30 00:00:00', 1745, 43.1485, 37);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2020-12-30 00:00:00', 1395, 32.1618, 62);
@@ -490,10 +471,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2020-12-30 00:00:00', 4118, 162.449, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2020-12-30 00:00:00', 911, 60.9598, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2020-12-30 00:00:00', 422, 38.6467, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2020-12-30 00:00:00', 13411, 94.8324, 191);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2020-12-30 00:00:00', 12105, 100.959, 166);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2020-12-30 00:00:00', 1306, 64.2363, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2020-12-30 00:00:00', 387437, 132.511, 6451);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2020-12-30 00:00:00', 13166, 90.2108, 130);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2020-12-30 00:00:00', 15094, 134.153, 336);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2020-12-30 00:00:00', 12801, 170.568, 198);
@@ -547,7 +526,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2020-12-30 00:00:00', 4677, 97.1316, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2020-12-30 00:00:00', 3362, 85.16, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2020-12-30 00:00:00', 9617, 129.403, 200);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2020-12-30 00:00:00', 133475, 126.414, 2711);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2020-12-30 00:00:00', 2902, 82.563, 70);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2020-12-30 00:00:00', 20679, 107.548, 343);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2020-12-30 00:00:00', 4391, 150.445, 65);
@@ -574,7 +552,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2020-12-30 00:00:00', 3147, 101.295, 103);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2020-12-30 00:00:00', 2647, 186.054, 37);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2020-12-30 00:00:00', 1219, 137.137, 43);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2020-12-30 00:00:00', 70749, 115.122, 1378);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2020-12-30 00:00:00', 2104, 108.722, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2020-12-30 00:00:00', 1981, 94.5528, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2020-12-30 00:00:00', 1700, 45.0293, 23);
@@ -611,7 +588,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2020-12-30 00:00:00', 3305, 135.827, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2020-12-30 00:00:00', 3609, 113.047, 93);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2020-12-30 00:00:00', 1196, 100.178, 27);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2020-12-30 00:00:00', 234498, 141.427, 4695);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2020-12-30 00:00:00', 14693, 117.941, 174);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2020-12-30 00:00:00', 8679, 95.4667, 125);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2020-12-30 00:00:00', 12576, 139.62, 262);
@@ -656,7 +632,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2020-12-30 00:00:00', 2978, 152.665, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2020-12-30 00:00:00', 4051, 119.121, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2020-12-30 00:00:00', 2118, 82.5379, 46);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2020-12-30 00:00:00', 318339, 154.738, 6549);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2020-12-30 00:00:00', 3102, 95.3476, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2020-12-30 00:00:00', 43551, 163.048, 560);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2020-12-30 00:00:00', 2297, 209.281, 34);
@@ -753,14 +728,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2020-12-30 00:00:00', 2711, 150.68, 54);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2020-12-30 00:00:00', 2657, 145.011, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2020-12-30 00:00:00', 2791, 157.684, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2020-12-30 00:00:00', 19539, 112.678, 421);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2020-12-30 00:00:00', 7567, 125.337, 224);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2020-12-30 00:00:00', 1763, 100.733, 26);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2020-12-30 00:00:00', 2291, 90.5577, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2020-12-30 00:00:00', 3977, 152.841, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2020-12-30 00:00:00', 2356, 70.3255, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2020-12-30 00:00:00', 1585, 91.9466, 47);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2020-12-30 00:00:00', 39627, 154.011, 884);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2020-12-30 00:00:00', 752, 135.764, 20);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2020-12-30 00:00:00', 1468, 190.614, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2020-12-30 00:00:00', 891, 102.163, 5);
@@ -779,7 +752,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2020-12-30 00:00:00', 2978, 170.594, 76);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2020-12-30 00:00:00', 2397, 176.474, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2020-12-30 00:00:00', 1185, 115.177, 36);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2020-12-30 00:00:00', 11623, 82.3312, 161);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2020-12-30 00:00:00', 868, 27.7259, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2020-12-30 00:00:00', 835, 82.5902, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2020-12-30 00:00:00', 2512, 167.394, 23);
@@ -788,7 +760,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2020-12-30 00:00:00', 1202, 52.758, 21);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2020-12-30 00:00:00', 2304, 111.619, 43);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2020-12-30 00:00:00', 1736, 103.882, 22);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2020-12-30 00:00:00', 128785, 329.963, 3003);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2020-12-30 00:00:00', 7551, 356.021, 181);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2020-12-30 00:00:00', 15616, 303.032, 384);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2020-12-30 00:00:00', 10057, 383.757, 97);
@@ -802,7 +773,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2020-12-30 00:00:00', 8803, 188.15, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2020-12-30 00:00:00', 5607, 294.415, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2020-12-30 00:00:00', 5579, 385.353, 103);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2020-12-30 00:00:00', 28316, 156.735, 560);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2020-12-30 00:00:00', 927, 123.591, 15);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2020-12-30 00:00:00', 2919, 105.544, 51);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2020-12-30 00:00:00', 2510, 94.29, 34);
@@ -817,7 +787,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2020-12-30 00:00:00', 2519, 192.465, 41);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2020-12-30 00:00:00', 1392, 183.47, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2020-12-30 00:00:00', 2055, 218.482, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2020-12-30 00:00:00', 40658, 255.088, 957);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2020-12-30 00:00:00', 2814, 163.566, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2020-12-30 00:00:00', 2047, 262.013, 79);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2020-12-30 00:00:00', 1707, 217.346, 17);
@@ -841,7 +810,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2020-12-30 00:00:00', 1993, 343.66, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2020-12-30 00:00:00', 2293, 213.557, 68);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2020-12-30 00:00:00', 2745, 417.259, 42);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2020-12-30 00:00:00', 95729, 140.21, 1213);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2020-12-30 00:00:00', 7544, 173.284, 110);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2020-12-30 00:00:00', 8097, 149.222, 114);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2020-12-30 00:00:00', 4519, 91.9366, 48);
@@ -854,7 +822,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2020-12-30 00:00:00', 12920, 129.251, 128);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2020-12-30 00:00:00', 8880, 122.669, 64);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2020-12-30 00:00:00', 9983, 165.9, 221);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2020-12-31 00:00:00', 24792, 77.1066, 425);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2020-12-31 00:00:00', 488, 41.0363, 7);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2020-12-31 00:00:00', 2289, 68.8834, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2020-12-31 00:00:00', 2573, 97.4461, 19);
@@ -870,9 +837,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2020-12-31 00:00:00', 2552, 64.9409, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2020-12-31 00:00:00', 856, 67.1689, 13);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2020-12-31 00:00:00', 3217, 144.989, 77);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2020-12-31 00:00:00', 36417, 100.474, 632);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2020-12-31 00:00:00', 36417, 100.474, 632);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2020-12-31 00:00:00', 106789, 79.5886, 1967);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2020-12-31 00:00:00', 2352, 55.3315, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2020-12-31 00:00:00', 1772, 52.7371, 37);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2020-12-31 00:00:00', 1416, 36.9861, 62);
@@ -918,10 +883,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2020-12-31 00:00:00', 4175, 156.847, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2020-12-31 00:00:00', 920, 49.6709, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2020-12-31 00:00:00', 425, 28.1067, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2020-12-31 00:00:00', 13559, 80.1524, 194);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2020-12-31 00:00:00', 12237, 83.5155, 169);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2020-12-31 00:00:00', 1322, 63.3563, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2020-12-31 00:00:00', 393185, 126.761, 6552);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2020-12-31 00:00:00', 13287, 86.6731, 131);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2020-12-31 00:00:00', 15259, 130.343, 341);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2020-12-31 00:00:00', 13104, 179.148, 205);
@@ -975,7 +938,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2020-12-31 00:00:00', 4771, 102.187, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2020-12-31 00:00:00', 3441, 85.16, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2020-12-31 00:00:00', 9748, 115.728, 200);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2020-12-31 00:00:00', 136577, 132.171, 2845);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2020-12-31 00:00:00', 2935, 65.6751, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2020-12-31 00:00:00', 20993, 115.801, 350);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2020-12-31 00:00:00', 4451, 133.558, 67);
@@ -1002,7 +964,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2020-12-31 00:00:00', 3262, 129.68, 110);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2020-12-31 00:00:00', 2761, 173.267, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2020-12-31 00:00:00', 1278, 126.206, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2020-12-31 00:00:00', 71993, 109.993, 1428);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2020-12-31 00:00:00', 2127, 95.5704, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2020-12-31 00:00:00', 2012, 99.1652, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2020-12-31 00:00:00', 1720, 45.0293, 23);
@@ -1039,7 +1000,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2020-12-31 00:00:00', 3420, 173.34, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2020-12-31 00:00:00', 3677, 123.926, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2020-12-31 00:00:00', 1234, 109.669, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2020-12-31 00:00:00', 237993, 132.581, 4789);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2020-12-31 00:00:00', 14855, 126.118, 175);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2020-12-31 00:00:00', 8728, 74.8459, 125);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2020-12-31 00:00:00', 12668, 128.966, 269);
@@ -1084,7 +1044,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2020-12-31 00:00:00', 3043, 144.388, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2020-12-31 00:00:00', 4180, 126.479, 41);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2020-12-31 00:00:00', 2152, 73.367, 46);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2020-12-31 00:00:00', 324937, 163.31, 6716);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2020-12-31 00:00:00', 3145, 88.0692, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2020-12-31 00:00:00', 44308, 172.952, 572);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2020-12-31 00:00:00', 2326, 210.854, 34);
@@ -1181,14 +1140,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2020-12-31 00:00:00', 2758, 127.975, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2020-12-31 00:00:00', 2700, 148.001, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2020-12-31 00:00:00', 2818, 102.559, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2020-12-31 00:00:00', 19879, 112.982, 432);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2020-12-31 00:00:00', 7714, 121.991, 232);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2020-12-31 00:00:00', 1784, 107.513, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2020-12-31 00:00:00', 2333, 76.0989, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2020-12-31 00:00:00', 4070, 171.882, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2020-12-31 00:00:00', 2375, 61.8864, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2020-12-31 00:00:00', 1603, 93.096, 47);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2020-12-31 00:00:00', 41241, 176.732, 937);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2020-12-31 00:00:00', 752, 95.5891, 20);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2020-12-31 00:00:00', 1514, 208.672, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2020-12-31 00:00:00', 925, 107.357, 5);
@@ -1207,7 +1164,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2020-12-31 00:00:00', 2978, 80.0211, 76);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2020-12-31 00:00:00', 2485, 227.651, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2020-12-31 00:00:00', 1202, 104.248, 37);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2020-12-31 00:00:00', 11997, 88.9227, 171);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2020-12-31 00:00:00', 886, 25.8137, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2020-12-31 00:00:00', 912, 127.544, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2020-12-31 00:00:00', 2623, 183.668, 23);
@@ -1216,7 +1172,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2020-12-31 00:00:00', 1215, 51.4868, 21);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2020-12-31 00:00:00', 2363, 116.712, 46);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2020-12-31 00:00:00', 1784, 110.965, 24);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2020-12-31 00:00:00', 132356, 326.672, 3139);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2020-12-31 00:00:00', 7626, 328.01, 188);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2020-12-31 00:00:00', 15913, 274.669, 387);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2020-12-31 00:00:00', 10225, 342.323, 101);
@@ -1230,7 +1185,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2020-12-31 00:00:00', 8972, 185.115, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2020-12-31 00:00:00', 5741, 252.964, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2020-12-31 00:00:00', 5777, 381.307, 103);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2020-12-31 00:00:00', 29200, 153.318, 602);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2020-12-31 00:00:00', 995, 151.056, 16);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2020-12-31 00:00:00', 3037, 108.057, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2020-12-31 00:00:00', 2541, 77.0315, 35);
@@ -1245,7 +1199,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2020-12-31 00:00:00', 2609, 184.005, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2020-12-31 00:00:00', 1445, 167.281, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2020-12-31 00:00:00', 2111, 214.481, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2020-12-31 00:00:00', 42034, 246.464, 995);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2020-12-31 00:00:00', 2905, 149.546, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2020-12-31 00:00:00', 2107, 248.054, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2020-12-31 00:00:00', 1716, 114.062, 17);
@@ -1269,7 +1222,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2020-12-31 00:00:00', 2056, 331.208, 41);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2020-12-31 00:00:00', 2349, 208.423, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2020-12-31 00:00:00', 2838, 441.869, 42);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2020-12-31 00:00:00', 96788, 125.685, 1247);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2020-12-31 00:00:00', 7654, 152.875, 112);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2020-12-31 00:00:00', 8197, 130.083, 118);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2020-12-31 00:00:00', 4556, 77.3018, 48);
@@ -1282,7 +1234,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2020-12-31 00:00:00', 13076, 133.249, 133);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2020-12-31 00:00:00', 8975, 109.552, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2020-12-31 00:00:00', 10095, 158.878, 230);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-01 00:00:00', 25134, 76.3834, 427);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-01 00:00:00', 495, 46.5818, 7);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-01 00:00:00', 2315, 68.073, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-01 00:00:00', 2599, 92.8278, 19);
@@ -1298,9 +1249,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-01 00:00:00', 2585, 68.9095, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-01 00:00:00', 856, 54.1931, 13);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-01 00:00:00', 3262, 148.266, 78);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-01 00:00:00', 36985, 113.303, 653);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-01 00:00:00', 36985, 113.303, 653);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-01 00:00:00', 108607, 84.1422, 2003);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-01 00:00:00', 2474, 92.2191, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-01 00:00:00', 1792, 56.5725, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-01 00:00:00', 1446, 61.1075, 62);
@@ -1346,10 +1295,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-01 00:00:00', 4182, 107.833, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-01 00:00:00', 932, 63.2175, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-01 00:00:00', 433, 42.16, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-01 00:00:00', 13681, 86.6116, 196);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-01 00:00:00', 12338, 88.8013, 171);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-01 00:00:00', 1343, 75.6756, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-01 00:00:00', 396880, 125.975, 6631);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-01 00:00:00', 13368, 88.4419, 132);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-01 00:00:00', 15365, 123.324, 345);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-01 00:00:00', 13249, 167.822, 209);
@@ -1403,7 +1350,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-01 00:00:00', 4798, 94.604, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-01 00:00:00', 3531, 102.722, 68);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-01 00:00:00', 9842, 101.8, 200);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-01 00:00:00', 138379, 132.155, 2887);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-01 00:00:00', 2962, 71.3044, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-01 00:00:00', 21166, 123.923, 353);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-01 00:00:00', 4488, 137.396, 67);
@@ -1430,7 +1376,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-01 00:00:00', 3314, 123.558, 116);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-01 00:00:00', 2890, 183.497, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-01 00:00:00', 1294, 112.294, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-01 00:00:00', 72785, 113.29, 1441);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-01 00:00:00', 2129, 87.6793, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-01 00:00:00', 2031, 105.315, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-01 00:00:00', 1739, 45.0293, 24);
@@ -1467,7 +1412,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-01 00:00:00', 3444, 179.162, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-01 00:00:00', 3700, 115.412, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-01 00:00:00', 1247, 123.377, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-01 00:00:00', 240888, 129.41, 4840);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-01 00:00:00', 14959, 135.239, 175);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-01 00:00:00', 8755, 53.9705, 128);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-01 00:00:00', 12829, 130.275, 279);
@@ -1512,7 +1456,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-01 00:00:00', 3097, 120.936, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-01 00:00:00', 4254, 122.625, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-01 00:00:00', 2193, 84.8306, 47);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-01 00:00:00', 328640, 164.948, 6765);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-01 00:00:00', 3173, 96.0755, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-01 00:00:00', 44718, 181.374, 577);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-01 00:00:00', 2347, 207.707, 35);
@@ -1609,14 +1552,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-01 00:00:00', 2787, 119.718, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-01 00:00:00', 2749, 160.708, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-01 00:00:00', 2838, 78.2011, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-01 00:00:00', 20000, 101.329, 433);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-01 00:00:00', 7714, 118.34, 232);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-01 00:00:00', 1785, 77.4871, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-01 00:00:00', 2345, 56.3132, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-01 00:00:00', 4152, 149.754, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-01 00:00:00', 2400, 68.919, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-01 00:00:00', 1604, 78.1546, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-01 00:00:00', 42274, 196.876, 976);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-01 00:00:00', 810, 164.856, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-01 00:00:00', 1514, 180.581, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-01 00:00:00', 925, 83.1154, 5);
@@ -1635,7 +1576,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-01 00:00:00', 3264, 265.565, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-01 00:00:00', 2506, 235.887, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-01 00:00:00', 1256, 149.646, 37);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-01 00:00:00', 12168, 90.2286, 172);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-01 00:00:00', 895, 26.2918, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-01 00:00:00', 936, 141.135, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-01 00:00:00', 2655, 180.181, 23);
@@ -1644,7 +1584,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-01 00:00:00', 1221, 46.4016, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-01 00:00:00', 2363, 107.375, 46);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-01 00:00:00', 1847, 126.075, 24);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-01 00:00:00', 135397, 334.482, 3266);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-01 00:00:00', 7739, 317.455, 206);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-01 00:00:00', 16235, 284.223, 392);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-01 00:00:00', 10374, 272.28, 138);
@@ -1658,7 +1597,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-01 00:00:00', 9159, 174.325, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-01 00:00:00', 5886, 270.01, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-01 00:00:00', 6013, 422.27, 106);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-01 00:00:00', 30135, 164.754, 651);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-01 00:00:00', 1070, 220.965, 17);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-01 00:00:00', 3063, 97.1679, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-01 00:00:00', 2571, 74.085, 35);
@@ -1673,7 +1611,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-01 00:00:00', 2689, 179.775, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-01 00:00:00', 1505, 189.765, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-01 00:00:00', 2209, 267.301, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-01 00:00:00', 43278, 256.307, 1012);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-01 00:00:00', 2994, 177.119, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-01 00:00:00', 2143, 205.101, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-01 00:00:00', 1789, 164.357, 17);
@@ -1697,7 +1634,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-01 00:00:00', 2121, 412.143, 41);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-01 00:00:00', 2381, 190.969, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-01 00:00:00', 2973, 423.971, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-01 00:00:00', 97430, 126.911, 1271);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-01 00:00:00', 7728, 146.714, 113);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-01 00:00:00', 8281, 142.344, 121);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-01 00:00:00', 4556, 77.3018, 48);
@@ -1710,7 +1646,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-01 00:00:00', 13084, 135.114, 134);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-01 00:00:00', 9031, 104.234, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-01 00:00:00', 10185, 157.415, 232);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-02 00:00:00', 25247, 74.2482, 436);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-02 00:00:00', 500, 47.6909, 7);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-02 00:00:00', 2323, 59.5638, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-02 00:00:00', 2610, 91.9041, 19);
@@ -1726,9 +1661,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-02 00:00:00', 2604, 71.435, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-02 00:00:00', 867, 56.4829, 13);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-02 00:00:00', 3262, 148.266, 78);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-02 00:00:00', 37293, 118.5, 658);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-02 00:00:00', 37293, 118.5, 658);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-02 00:00:00', 109810, 88.9711, 2016);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-02 00:00:00', 2485, 92.6201, 41);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-02 00:00:00', 1808, 69.0376, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-02 00:00:00', 1454, 63.5196, 62);
@@ -1774,10 +1707,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-02 00:00:00', 4182, 107.833, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-02 00:00:00', 936, 55.3154, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-02 00:00:00', 447, 56.2133, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-02 00:00:00', 13703, 84.9968, 201);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-02 00:00:00', 12359, 89.1537, 176);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-02 00:00:00', 1344, 64.2363, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-02 00:00:00', 398678, 123.523, 6701);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-02 00:00:00', 13407, 83.7786, 132);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-02 00:00:00', 15396, 126.131, 348);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-02 00:00:00', 13338, 150.834, 209);
@@ -1831,7 +1762,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-02 00:00:00', 4840, 94.604, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-02 00:00:00', 3570, 101.728, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-02 00:00:00', 9912, 107.371, 201);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-02 00:00:00', 139368, 134.445, 2917);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-02 00:00:00', 2969, 63.7986, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-02 00:00:00', 21235, 109.644, 354);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-02 00:00:00', 4499, 141.234, 67);
@@ -1858,7 +1788,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-02 00:00:00', 3330, 116.322, 116);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-02 00:00:00', 2940, 206.514, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-02 00:00:00', 1319, 137.137, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-02 00:00:00', 73545, 117.956, 1459);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-02 00:00:00', 2154, 94.6936, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-02 00:00:00', 2061, 110.696, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-02 00:00:00', 1754, 54.3457, 24);
@@ -1895,7 +1824,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-02 00:00:00', 3472, 177.868, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-02 00:00:00', 3715, 103.587, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-02 00:00:00', 1243, 123.377, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-02 00:00:00', 242744, 130.824, 4894);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-02 00:00:00', 15004, 132.251, 175);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-02 00:00:00', 8908, 84.2653, 128);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-02 00:00:00', 12908, 118.126, 282);
@@ -1940,7 +1868,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-02 00:00:00', 3126, 127.374, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-02 00:00:00', 4285, 121.924, 43);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-02 00:00:00', 2201, 84.8306, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-02 00:00:00', 330855, 160.826, 6811);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-02 00:00:00', 3173, 73.5123, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-02 00:00:00', 44718, 181.307, 577);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-02 00:00:00', 2358, 185.678, 35);
@@ -2037,14 +1964,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-02 00:00:00', 2810, 121.095, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-02 00:00:00', 2778, 172.668, 68);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-02 00:00:00', 2838, 68.5862, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-02 00:00:00', 20111, 96.9716, 440);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-02 00:00:00', 7716, 87.3099, 239);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-02 00:00:00', 1841, 118.168, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-02 00:00:00', 2364, 65.445, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-02 00:00:00', 4179, 157.988, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-02 00:00:00', 2407, 61.1832, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-02 00:00:00', 1604, 78.1546, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-02 00:00:00', 42384, 180.499, 982);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-02 00:00:00', 810, 130.223, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-02 00:00:00', 1559, 225.727, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-02 00:00:00', 959, 136.794, 7);
@@ -2063,7 +1988,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-02 00:00:00', 3264, 219.838, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-02 00:00:00', 2506, 225.298, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-02 00:00:00', 1256, 149.646, 37);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-02 00:00:00', 12362, 92.4672, 173);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-02 00:00:00', 908, 30.5941, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-02 00:00:00', 951, 153.68, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-02 00:00:00', 2711, 173.981, 23);
@@ -2072,7 +1996,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-02 00:00:00', 1232, 52.1224, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-02 00:00:00', 2435, 117.561, 46);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-02 00:00:00', 1855, 123.242, 24);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-02 00:00:00', 137031, 341.162, 3302);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-02 00:00:00', 7830, 320.297, 206);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-02 00:00:00', 16568, 353.488, 399);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-02 00:00:00', 10574, 288.393, 138);
@@ -2086,7 +2009,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-02 00:00:00', 9377, 183.429, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-02 00:00:00', 5957, 254.127, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-02 00:00:00', 6045, 396.478, 106);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-02 00:00:00', 30708, 161.519, 666);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-02 00:00:00', 1084, 225.959, 17);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-02 00:00:00', 3173, 116.015, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-02 00:00:00', 2589, 65.2453, 35);
@@ -2101,7 +2023,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-02 00:00:00', 2793, 189.822, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-02 00:00:00', 1540, 193.363, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-02 00:00:00', 2209, 267.301, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-02 00:00:00', 43875, 244.729, 1027);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-02 00:00:00', 3012, 153.285, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-02 00:00:00', 2143, 176.107, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-02 00:00:00', 1803, 155.376, 18);
@@ -2125,7 +2046,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-02 00:00:00', 2145, 356.111, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-02 00:00:00', 2402, 177.622, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-02 00:00:00', 3024, 346.783, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-02 00:00:00', 97637, 127.729, 1277);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-02 00:00:00', 7782, 159.807, 114);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-02 00:00:00', 8301, 148.325, 122);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-02 00:00:00', 4556, 77.3018, 48);
@@ -2138,7 +2058,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-02 00:00:00', 13108, 140.444, 134);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-02 00:00:00', 9031, 104.234, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-02 00:00:00', 10233, 145.419, 236);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-03 00:00:00', 25540, 77.4165, 443);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-03 00:00:00', 506, 48.8, 7);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-03 00:00:00', 2336, 58.3483, 36);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-03 00:00:00', 2638, 99.2934, 19);
@@ -2154,9 +2073,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-03 00:00:00', 2708, 103.184, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-03 00:00:00', 877, 58.0095, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-03 00:00:00', 3285, 144.58, 82);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-03 00:00:00', 37535, 118.013, 661);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-03 00:00:00', 37535, 118.013, 661);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-03 00:00:00', 110271, 88.9961, 2028);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-03 00:00:00', 2496, 89.0115, 41);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-03 00:00:00', 1809, 69.9965, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-03 00:00:00', 1454, 60.3034, 62);
@@ -2202,10 +2119,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-03 00:00:00', 4257, 147.745, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-03 00:00:00', 937, 50.7998, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-03 00:00:00', 447, 56.2133, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-03 00:00:00', 13713, 81.6204, 202);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-03 00:00:00', 12369, 86.1584, 177);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-03 00:00:00', 1344, 58.9566, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-03 00:00:00', 400594, 122.749, 6751);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-03 00:00:00', 13501, 94.3917, 132);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-03 00:00:00', 15467, 122.321, 351);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-03 00:00:00', 13432, 163.017, 209);
@@ -2259,7 +2174,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-03 00:00:00', 4853, 97.8537, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-03 00:00:00', 3579, 94.7695, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-03 00:00:00', 9969, 119.273, 204);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-03 00:00:00', 139965, 134.174, 2962);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-03 00:00:00', 2979, 67.5515, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-03 00:00:00', 21340, 114.098, 362);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-03 00:00:00', 4502, 141.234, 69);
@@ -2286,7 +2200,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-03 00:00:00', 3334, 112.426, 118);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-03 00:00:00', 2940, 186.054, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-03 00:00:00', 1325, 123.225, 46);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-03 00:00:00', 73915, 117.785, 1466);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-03 00:00:00', 2174, 100.831, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-03 00:00:00', 2061, 106.084, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-03 00:00:00', 1754, 48.1348, 24);
@@ -2323,7 +2236,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-03 00:00:00', 3496, 184.983, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-03 00:00:00', 3753, 110.682, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-03 00:00:00', 1250, 130.759, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-03 00:00:00', 243914, 128.518, 4925);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-03 00:00:00', 15082, 130.679, 175);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-03 00:00:00', 9016, 103.613, 128);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-03 00:00:00', 12962, 108.593, 284);
@@ -2368,7 +2280,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-03 00:00:00', 3139, 116.338, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-03 00:00:00', 4326, 131.734, 43);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-03 00:00:00', 2208, 83.3021, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-03 00:00:00', 332619, 157.116, 6868);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-03 00:00:00', 3213, 97.5312, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-03 00:00:00', 44718, 141.151, 577);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-03 00:00:00', 2360, 174.663, 35);
@@ -2465,14 +2376,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-03 00:00:00', 2818, 126.599, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-03 00:00:00', 2791, 175.658, 68);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-03 00:00:00', 2846, 69.2272, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-03 00:00:00', 20141, 90.6892, 441);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-03 00:00:00', 7716, 67.5359, 240);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-03 00:00:00', 1846, 110.419, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-03 00:00:00', 2370, 68.489, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-03 00:00:00', 4198, 163.648, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-03 00:00:00', 2407, 58.3701, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-03 00:00:00', 1604, 78.1546, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-03 00:00:00', 42713, 176.931, 993);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-03 00:00:00', 838, 156.544, 24);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-03 00:00:00', 1559, 225.727, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-03 00:00:00', 989, 169.694, 7);
@@ -2491,7 +2400,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-03 00:00:00', 3264, 210.165, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-03 00:00:00', 2506, 225.298, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-03 00:00:00', 1256, 113.496, 37);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-03 00:00:00', 12454, 90.726, 177);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-03 00:00:00', 922, 35.8524, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-03 00:00:00', 953, 149.499, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-03 00:00:00', 2727, 161.969, 24);
@@ -2500,7 +2408,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-03 00:00:00', 1234, 53.3937, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-03 00:00:00', 2481, 119.683, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-03 00:00:00', 1860, 121.353, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-03 00:00:00', 138332, 329.693, 3353);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-03 00:00:00', 7880, 261.84, 206);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-03 00:00:00', 16672, 368.714, 411);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-03 00:00:00', 10745, 321.606, 168);
@@ -2514,7 +2421,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-03 00:00:00', 9558, 172.302, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-03 00:00:00', 6047, 245.604, 54);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-03 00:00:00', 6180, 411.144, 106);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-03 00:00:00', 31497, 174.323, 687);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-03 00:00:00', 1090, 223.462, 17);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-03 00:00:00', 3474, 148.265, 90);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-03 00:00:00', 2614, 75.7687, 35);
@@ -2529,7 +2435,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-03 00:00:00', 2848, 204.098, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-03 00:00:00', 1571, 186.168, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-03 00:00:00', 2209, 237.689, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-03 00:00:00', 44366, 248.901, 1030);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-03 00:00:00', 3016, 146.742, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-03 00:00:00', 2170, 196.51, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-03 00:00:00', 1836, 171.542, 18);
@@ -2553,7 +2458,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-03 00:00:00', 2180, 344.905, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-03 00:00:00', 2409, 175.568, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-03 00:00:00', 3087, 417.259, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-03 00:00:00', 98097, 121.079, 1285);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-03 00:00:00', 7782, 150.95, 114);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-03 00:00:00', 8380, 138.756, 122);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-03 00:00:00', 4608, 55.5372, 48);
@@ -2566,7 +2470,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-03 00:00:00', 13248, 140.444, 135);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-03 00:00:00', 9078, 107.424, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-03 00:00:00', 10255, 134.885, 242);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-04 00:00:00', 25751, 78.243, 446);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-04 00:00:00', 511, 48.8, 7);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-04 00:00:00', 2347, 58.3483, 36);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-04 00:00:00', 2652, 97.4461, 19);
@@ -2582,9 +2485,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-04 00:00:00', 2752, 114.368, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-04 00:00:00', 881, 52.6665, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-04 00:00:00', 3308, 131.883, 83);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-04 00:00:00', 37535, 109.73, 661);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-04 00:00:00', 37535, 109.73, 661);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-04 00:00:00', 110777, 91.0978, 2041);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-04 00:00:00', 2509, 92.6201, 41);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-04 00:00:00', 1809, 68.0787, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-04 00:00:00', 1466, 67.5399, 62);
@@ -2630,10 +2531,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-04 00:00:00', 4257, 147.044, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-04 00:00:00', 942, 56.4442, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-04 00:00:00', 456, 68.51, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-04 00:00:00', 13747, 81.0332, 204);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-04 00:00:00', 12394, 83.8679, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-04 00:00:00', 1353, 66.8761, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-04 00:00:00', 402519, 120.464, 6820);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-04 00:00:00', 13594, 93.266, 132);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-04 00:00:00', 15524, 126.733, 355);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-04 00:00:00', 13506, 161.473, 210);
@@ -2687,7 +2586,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-04 00:00:00', 4854, 96.4094, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-04 00:00:00', 3596, 96.0949, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-04 00:00:00', 9983, 117.248, 208);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-04 00:00:00', 140371, 133.538, 2991);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-04 00:00:00', 2981, 64.4241, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-04 00:00:00', 21340, 106.5, 362);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-04 00:00:00', 4518, 141.234, 69);
@@ -2714,7 +2612,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-04 00:00:00', 3334, 107.974, 119);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-04 00:00:00', 2940, 173.906, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-04 00:00:00', 1331, 129.187, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-04 00:00:00', 74435, 117.858, 1476);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-04 00:00:00', 2192, 102.585, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-04 00:00:00', 2081, 98.3964, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-04 00:00:00', 1761, 52.793, 24);
@@ -2751,7 +2648,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-04 00:00:00', 3533, 169.46, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-04 00:00:00', 3771, 110.209, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-04 00:00:00', 1285, 142.359, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-04 00:00:00', 244930, 128.833, 4947);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-04 00:00:00', 15112, 109.135, 175);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-04 00:00:00', 9037, 108.196, 128);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-04 00:00:00', 13008, 113.266, 287);
@@ -2796,7 +2692,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-04 00:00:00', 3139, 102.083, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-04 00:00:00', 4334, 126.829, 44);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-04 00:00:00', 2208, 81.7737, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-04 00:00:00', 334567, 158.921, 6925);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-04 00:00:00', 3226, 101.17, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-04 00:00:00', 44958, 133.133, 586);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-04 00:00:00', 2366, 163.648, 36);
@@ -2893,14 +2788,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-04 00:00:00', 2844, 126.599, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-04 00:00:00', 2818, 178.648, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-04 00:00:00', 2846, 61.5353, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-04 00:00:00', 20199, 86.6361, 445);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-04 00:00:00', 7716, 45.3282, 240);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-04 00:00:00', 1850, 114.293, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-04 00:00:00', 2370, 66.967, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-04 00:00:00', 4198, 161.075, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-04 00:00:00', 2407, 56.9636, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-04 00:00:00', 1658, 121.829, 52);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-04 00:00:00', 42887, 170.309, 1008);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-04 00:00:00', 839, 148.232, 24);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-04 00:00:00', 1559, 183.591, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-04 00:00:00', 1010, 206.057, 7);
@@ -2919,7 +2812,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-04 00:00:00', 3264, 199.613, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-04 00:00:00', 2506, 225.298, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-04 00:00:00', 1283, 114.337, 39);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-04 00:00:00', 12562, 91.5344, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-04 00:00:00', 931, 38.7206, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-04 00:00:00', 953, 148.453, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-04 00:00:00', 2755, 156.932, 24);
@@ -2928,7 +2820,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-04 00:00:00', 1234, 52.758, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-04 00:00:00', 2536, 126.898, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-04 00:00:00', 1863, 121.825, 26);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-04 00:00:00', 139700, 323.013, 3378);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-04 00:00:00', 7987, 207.036, 207);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-04 00:00:00', 16726, 363.34, 412);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-04 00:00:00', 10850, 317.989, 168);
@@ -2942,7 +2833,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-04 00:00:00', 9683, 158.477, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-04 00:00:00', 6128, 249.091, 54);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-04 00:00:00', 6235, 438.452, 106);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-04 00:00:00', 32083, 182.387, 694);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-04 00:00:00', 1090, 218.469, 17);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-04 00:00:00', 3701, 174.651, 91);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-04 00:00:00', 2630, 74.5059, 35);
@@ -2957,7 +2847,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-04 00:00:00', 2869, 209.914, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-04 00:00:00', 1597, 188.866, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-04 00:00:00', 2222, 248.093, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-04 00:00:00', 44696, 251.432, 1054);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-04 00:00:00', 3049, 145.34, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-04 00:00:00', 2181, 200.805, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-04 00:00:00', 1849, 181.421, 18);
@@ -2981,7 +2870,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-04 00:00:00', 2203, 339.924, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-04 00:00:00', 2452, 213.557, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-04 00:00:00', 3150, 467.598, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-04 00:00:00', 98754, 125.849, 1305);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-04 00:00:00', 7845, 154.415, 116);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-04 00:00:00', 8431, 147.428, 124);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-04 00:00:00', 4666, 77.3018, 48);
@@ -2994,7 +2882,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-04 00:00:00', 13272, 135.114, 135);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-04 00:00:00', 9129, 125.506, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-04 00:00:00', 10288, 130.496, 244);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-05 00:00:00', 25986, 77.141, 475);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-05 00:00:00', 527, 57.6727, 7);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-05 00:00:00', 2375, 65.2366, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-05 00:00:00', 2700, 105.297, 19);
@@ -3010,9 +2897,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-05 00:00:00', 2774, 114.729, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-05 00:00:00', 884, 49.6134, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-05 00:00:00', 3308, 101.574, 83);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-05 00:00:00', 37879, 101.881, 671);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-05 00:00:00', 37879, 101.881, 671);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-05 00:00:00', 111453, 88.283, 2101);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-05 00:00:00', 2518, 87.4077, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-05 00:00:00', 1816, 68.0787, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-05 00:00:00', 1466, 57.0873, 62);
@@ -3058,10 +2943,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-05 00:00:00', 4279, 147.745, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-05 00:00:00', 954, 64.3464, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-05 00:00:00', 456, 63.24, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-05 00:00:00', 13803, 80.2992, 208);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-05 00:00:00', 12435, 82.2822, 183);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-05 00:00:00', 1368, 70.3959, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-05 00:00:00', 404488, 116.954, 7010);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-05 00:00:00', 13616, 90.5324, 135);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-05 00:00:00', 15538, 123.926, 361);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-05 00:00:00', 13564, 160.272, 220);
@@ -3115,7 +2998,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-05 00:00:00', 4908, 112.658, 64);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-05 00:00:00', 3604, 90.1304, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-05 00:00:00', 10000, 121.046, 214);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-05 00:00:00', 141012, 131.105, 3095);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-05 00:00:00', 2993, 67.5515, 74);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-05 00:00:00', 21480, 116.063, 373);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-05 00:00:00', 4535, 151.213, 75);
@@ -3142,7 +3024,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-05 00:00:00', 3343, 109.644, 124);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-05 00:00:00', 2931, 173.906, 46);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-05 00:00:00', 1334, 114.281, 52);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-05 00:00:00', 74962, 114.78, 1531);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-05 00:00:00', 2232, 113.983, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-05 00:00:00', 2105, 103.009, 30);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-05 00:00:00', 1762, 50.4639, 27);
@@ -3179,7 +3060,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-05 00:00:00', 3568, 166.873, 70);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-05 00:00:00', 3802, 116.831, 96);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-05 00:00:00', 1291, 120.214, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-05 00:00:00', 246440, 124.644, 5052);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-05 00:00:00', 15239, 89.1634, 176);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-05 00:00:00', 9047, 100.813, 130);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-05 00:00:00', 13083, 109.154, 293);
@@ -3224,7 +3104,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-05 00:00:00', 3208, 119.557, 41);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-05 00:00:00', 4361, 124.026, 46);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-05 00:00:00', 2213, 81.0094, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-05 00:00:00', 337095, 160.14, 7163);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-05 00:00:00', 3252, 109.177, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-05 00:00:00', 45449, 150.786, 613);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-05 00:00:00', 2373, 163.648, 36);
@@ -3321,14 +3200,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-05 00:00:00', 2859, 130.039, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-05 00:00:00', 2827, 162.203, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-05 00:00:00', 2846, 54.4844, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-05 00:00:00', 20272, 87.0414, 455);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-05 00:00:00', 7722, 38.6354, 242);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-05 00:00:00', 1851, 105.576, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-05 00:00:00', 2370, 60.1181, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-05 00:00:00', 4220, 168.795, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-05 00:00:00', 2446, 78.0613, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-05 00:00:00', 1663, 120.68, 53);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-05 00:00:00', 43163, 143.384, 1015);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-05 00:00:00', 841, 139.92, 24);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-05 00:00:00', 1559, 94.3037, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-05 00:00:00', 1015, 214.715, 7);
@@ -3347,7 +3224,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-05 00:00:00', 3270, 152.128, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-05 00:00:00', 2506, 171.179, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-05 00:00:00', 1313, 103.407, 39);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-05 00:00:00', 12738, 96.5091, 189);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-05 00:00:00', 937, 40.1547, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-05 00:00:00', 961, 153.68, 24);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-05 00:00:00', 2827, 184.056, 24);
@@ -3356,7 +3232,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-05 00:00:00', 1248, 57.8432, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-05 00:00:00', 2581, 127.322, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-05 00:00:00', 1870, 119.936, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-05 00:00:00', 141002, 298.75, 3412);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-05 00:00:00', 8158, 237.888, 208);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-05 00:00:00', 16771, 359.757, 412);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-05 00:00:00', 10920, 317.002, 168);
@@ -3370,7 +3245,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-05 00:00:00', 9794, 163.872, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-05 00:00:00', 6251, 272.334, 54);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-05 00:00:00', 6254, 372.204, 106);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-05 00:00:00', 32480, 176.692, 704);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-05 00:00:00', 1092, 212.227, 17);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-05 00:00:00', 3794, 206.482, 91);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-05 00:00:00', 2644, 69.4547, 35);
@@ -3385,7 +3259,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-05 00:00:00', 2961, 218.374, 54);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-05 00:00:00', 1597, 180.772, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-05 00:00:00', 2260, 193.673, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-05 00:00:00', 45112, 241.823, 1110);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-05 00:00:00', 3055, 126.179, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-05 00:00:00', 2197, 178.255, 85);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-05 00:00:00', 1867, 184.116, 19);
@@ -3409,7 +3282,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-05 00:00:00', 2224, 331.208, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-05 00:00:00', 2475, 217.664, 75);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-05 00:00:00', 3163, 463.124, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-05 00:00:00', 99525, 116.092, 1327);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-05 00:00:00', 7882, 151.72, 119);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-05 00:00:00', 8431, 119.617, 124);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-05 00:00:00', 4749, 91.5613, 49);
@@ -3422,7 +3294,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-05 00:00:00', 13360, 122.056, 135);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-05 00:00:00', 9158, 103.879, 68);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-05 00:00:00', 10337, 123.182, 251);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-06 00:00:00', 26536, 76.3145, 497);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-06 00:00:00', 547, 72.0909, 8);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-06 00:00:00', 2414, 61.995, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-06 00:00:00', 2732, 90.9805, 19);
@@ -3438,9 +3309,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-06 00:00:00', 2836, 116.533, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-06 00:00:00', 889, 46.5603, 15);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-06 00:00:00', 3385, 97.4787, 88);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-06 00:00:00', 38575, 112.87, 695);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-06 00:00:00', 38575, 112.87, 695);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-06 00:00:00', 112166, 76.4236, 2122);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-06 00:00:00', 2518, 66.5581, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-06 00:00:00', 1816, 42.1896, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-06 00:00:00', 1474, 46.6347, 62);
@@ -3486,10 +3355,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-06 00:00:00', 4320, 142.843, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-06 00:00:00', 959, 47.4132, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-06 00:00:00', 465, 66.7533, 7);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-06 00:00:00', 13915, 73.6933, 209);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-06 00:00:00', 12543, 78.2298, 184);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-06 00:00:00', 1372, 51.037, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-06 00:00:00', 408998, 115.333, 7246);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-06 00:00:00', 13696, 84.7434, 143);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-06 00:00:00', 15689, 119.314, 366);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-06 00:00:00', 13685, 152.207, 234);
@@ -3543,7 +3410,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-06 00:00:00', 4985, 109.408, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-06 00:00:00', 3644, 86.1541, 75);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-06 00:00:00', 10127, 118.26, 226);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-06 00:00:00', 142925, 129.785, 3211);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-06 00:00:00', 3025, 68.8025, 75);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-06 00:00:00', 21632, 106.762, 385);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-06 00:00:00', 4585, 141.234, 77);
@@ -3570,7 +3436,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-06 00:00:00', 3390, 95.1729, 130);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-06 00:00:00', 2953, 143.856, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-06 00:00:00', 1349, 129.187, 53);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-06 00:00:00', 75885, 110.213, 1582);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-06 00:00:00', 2254, 114.86, 50);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-06 00:00:00', 2117, 103.009, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-06 00:00:00', 1779, 49.6875, 28);
@@ -3607,7 +3472,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-06 00:00:00', 3621, 161.698, 76);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-06 00:00:00', 3886, 122.507, 97);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-06 00:00:00', 1315, 120.214, 32);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-06 00:00:00', 249397, 124.041, 5180);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-06 00:00:00', 15370, 85.5466, 176);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-06 00:00:00', 9163, 105.904, 131);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-06 00:00:00', 13198, 114.2, 297);
@@ -3652,7 +3516,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-06 00:00:00', 3333, 156.343, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-06 00:00:00', 4535, 159.762, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-06 00:00:00', 2250, 90.1803, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-06 00:00:00', 338786, 138.852, 7260);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-06 00:00:00', 3274, 114.999, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-06 00:00:00', 45552, 121.814, 616);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-06 00:00:00', 2385, 138.471, 36);
@@ -3749,14 +3612,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-06 00:00:00', 2912, 136.919, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-06 00:00:00', 2863, 153.233, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-06 00:00:00', 2864, 46.7925, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-06 00:00:00', 20497, 78.9351, 467);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-06 00:00:00', 7737, 7.30118, 244);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-06 00:00:00', 1885, 117.199, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-06 00:00:00', 2429, 86.7527, 43);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-06 00:00:00', 4312, 168.28, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-06 00:00:00', 2468, 78.7645, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-06 00:00:00', 1666, 93.096, 53);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-06 00:00:00', 44556, 143.781, 1083);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-06 00:00:00', 846, 130.223, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-06 00:00:00', 1611, 105.339, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-06 00:00:00', 1017, 176.62, 8);
@@ -3775,7 +3636,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-06 00:00:00', 3433, 195.216, 90);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-06 00:00:00', 2588, 112.943, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-06 00:00:00', 1363, 131.992, 43);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-06 00:00:00', 13225, 96.4469, 200);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-06 00:00:00', 956, 40.6327, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-06 00:00:00', 996, 168.317, 26);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-06 00:00:00', 2974, 178.631, 25);
@@ -3784,7 +3644,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-06 00:00:00', 1294, 58.4788, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-06 00:00:00', 2611, 123.078, 51);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-06 00:00:00', 1993, 115.687, 32);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-06 00:00:00', 143122, 262.109, 3502);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-06 00:00:00', 8187, 224.086, 208);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-06 00:00:00', 16937, 325.125, 428);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-06 00:00:00', 11035, 299.902, 169);
@@ -3798,7 +3657,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-06 00:00:00', 9919, 155.948, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-06 00:00:00', 6423, 302.55, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-06 00:00:00', 6361, 302.922, 106);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-06 00:00:00', 33019, 157.464, 725);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-06 00:00:00', 1097, 138.572, 18);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-06 00:00:00', 3904, 213.602, 93);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-06 00:00:00', 2693, 77.0315, 35);
@@ -3813,7 +3671,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-06 00:00:00', 2961, 136.946, 54);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-06 00:00:00', 1670, 220.344, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-06 00:00:00', 2326, 185.67, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-06 00:00:00', 46285, 244.589, 1168);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-06 00:00:00', 3148, 141.134, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-06 00:00:00', 2226, 188.993, 86);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-06 00:00:00', 1898, 164.357, 20);
@@ -3837,7 +3694,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-06 00:00:00', 2247, 313.776, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-06 00:00:00', 2501, 211.503, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-06 00:00:00', 3199, 402.716, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-06 00:00:00', 100760, 116.828, 1390);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-06 00:00:00', 7944, 132.466, 126);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-06 00:00:00', 8616, 146.232, 135);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-06 00:00:00', 4857, 123.833, 51);
@@ -3850,7 +3706,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-06 00:00:00', 13445, 113.261, 140);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-06 00:00:00', 9216, 90.4066, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-06 00:00:00', 10431, 116.744, 261);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-07 00:00:00', 27078, 79.104, 514);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-07 00:00:00', 560, 78.7454, 8);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-07 00:00:00', 2453, 66.047, 43);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-07 00:00:00', 2761, 87.7477, 19);
@@ -3866,9 +3721,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-07 00:00:00', 2903, 127.356, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-07 00:00:00', 905, 38.1642, 15);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-07 00:00:00', 3470, 106.489, 90);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-07 00:00:00', 39154, 112.816, 725);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-07 00:00:00', 39154, 112.816, 725);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-07 00:00:00', 114282, 75.6855, 2206);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-07 00:00:00', 2617, 74.9781, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-07 00:00:00', 1835, 41.2308, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-07 00:00:00', 1501, 44.2225, 62);
@@ -3914,10 +3767,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-07 00:00:00', 4359, 125.338, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-07 00:00:00', 987, 62.0887, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-07 00:00:00', 479, 68.51, 8);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-07 00:00:00', 14069, 73.9869, 209);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-07 00:00:00', 12664, 76.1154, 184);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-07 00:00:00', 1405, 63.3563, 25);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-07 00:00:00', 415041, 116.609, 7507);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-07 00:00:00', 13815, 84.4218, 145);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-07 00:00:00', 15912, 130.944, 372);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-07 00:00:00', 13842, 126.639, 245);
@@ -3971,7 +3822,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-07 00:00:00', 5052, 102.909, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-07 00:00:00', 3700, 70.58, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-07 00:00:00', 10290, 133.201, 229);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-07 00:00:00', 145009, 126.255, 3278);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-07 00:00:00', 3057, 70.6789, 75);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-07 00:00:00', 21830, 99.9502, 390);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-07 00:00:00', 4658, 147.375, 80);
@@ -3998,7 +3848,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-07 00:00:00', 3429, 93.5032, 133);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-07 00:00:00', 2985, 116.364, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-07 00:00:00', 1400, 121.237, 56);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-07 00:00:00', 76991, 107.55, 1632);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-07 00:00:00', 2279, 124.505, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-07 00:00:00', 2148, 89.9405, 33);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-07 00:00:00', 1790, 39.5947, 28);
@@ -4035,7 +3884,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-07 00:00:00', 3687, 166.226, 77);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-07 00:00:00', 3949, 124.872, 98);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-07 00:00:00', 1355, 118.105, 32);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-07 00:00:00', 250675, 101.186, 5207);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-07 00:00:00', 15410, 71.0791, 176);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-07 00:00:00', 9230, 106.668, 132);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-07 00:00:00', 13271, 100.743, 297);
@@ -4080,7 +3928,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-07 00:00:00', 3347, 126.454, 46);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-07 00:00:00', 4555, 121.924, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-07 00:00:00', 2250, 60.3749, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-07 00:00:00', 342280, 121.686, 7424);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-07 00:00:00', 3303, 113.544, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-07 00:00:00', 46072, 113.056, 631);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-07 00:00:00', 2404, 122.736, 37);
@@ -4177,14 +4024,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-07 00:00:00', 2952, 130.039, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-07 00:00:00', 2888, 140.526, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-07 00:00:00', 2895, 49.3564, 30);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-07 00:00:00', 20805, 89.8786, 483);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-07 00:00:00', 7940, 69.057, 259);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-07 00:00:00', 1909, 120.105, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-07 00:00:00', 2448, 83.7088, 43);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-07 00:00:00', 4349, 131.228, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-07 00:00:00', 2493, 75.9515, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-07 00:00:00', 1666, 72.408, 53);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-07 00:00:00', 45720, 135.93, 1143);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-07 00:00:00', 861, 98.3597, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-07 00:00:00', 1687, 156.504, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-07 00:00:00', 1067, 245.883, 17);
@@ -4203,7 +4048,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-07 00:00:00', 3433, 70.3482, 90);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-07 00:00:00', 2719, 137.649, 44);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-07 00:00:00', 1423, 135.354, 46);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-07 00:00:00', 13701, 102.976, 215);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-07 00:00:00', 989, 44.935, 11);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-07 00:00:00', 1016, 108.726, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-07 00:00:00', 3136, 198.393, 25);
@@ -4212,7 +4056,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-07 00:00:00', 1314, 62.9283, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-07 00:00:00', 2646, 115.014, 52);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-07 00:00:00', 2079, 132.213, 32);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-07 00:00:00', 146658, 269.82, 3626);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-07 00:00:00', 8325, 228.551, 208);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-07 00:00:00', 17265, 309.003, 439);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-07 00:00:00', 11199, 305.821, 169);
@@ -4226,7 +4069,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-07 00:00:00', 10304, 191.69, 111);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-07 00:00:00', 6573, 290.154, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-07 00:00:00', 6580, 325.679, 106);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-07 00:00:00', 33929, 159.606, 777);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-07 00:00:00', 1160, 136.075, 20);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-07 00:00:00', 3973, 227.423, 95);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-07 00:00:00', 2748, 87.134, 35);
@@ -4241,7 +4083,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-07 00:00:00', 3035, 133.245, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-07 00:00:00', 1695, 185.268, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-07 00:00:00', 2369, 161.661, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-07 00:00:00', 47576, 232.401, 1216);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-07 00:00:00', 3211, 118.235, 76);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-07 00:00:00', 2272, 172.886, 89);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-07 00:00:00', 1962, 178.727, 21);
@@ -4265,7 +4106,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-07 00:00:00', 2301, 305.06, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-07 00:00:00', 2576, 232.038, 83);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-07 00:00:00', 3259, 364.682, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-07 00:00:00', 102070, 122.415, 1445);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-07 00:00:00', 8095, 141.323, 132);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-07 00:00:00', 8735, 146.531, 137);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-07 00:00:00', 4961, 149.725, 53);
@@ -4278,7 +4118,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-07 00:00:00', 13567, 129.784, 142);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-07 00:00:00', 9255, 76.5797, 79);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-07 00:00:00', 10554, 123.182, 265);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-08 07:38:49', 27542, 83.2365, 520);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-08 00:00:00', 595, 109.8, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-08 00:00:00', 2492, 72.1249, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-08 00:00:00', 2811, 98.8316, 19);
@@ -4294,9 +4133,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-08 00:00:00', 2947, 130.603, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-08 00:00:00', 915, 44.2704, 15);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-08 00:00:00', 3518, 108.537, 90);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-08 07:38:49', 39587, 117.58, 763);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-08 00:00:00', 39587, 117.58, 763);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-08 07:38:49', 116432, 84.5425, 2258);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-08 00:00:00', 2617, 56.5343, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-08 00:00:00', 1874, 63.2845, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-08 00:00:00', 1520, 54.6751, 62);
@@ -4342,10 +4179,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-08 00:00:00', 4388, 112.734, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-08 00:00:00', 992, 62.0887, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-08 00:00:00', 501, 94.86, 8);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-08 07:38:49', 14177, 73.5465, 213);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-08 00:00:00', 12751, 74.1773, 186);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-08 00:00:00', 1426, 70.3959, 27);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-08 07:38:49', 420190, 127.663, 7706);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-08 00:00:00', 13920, 89.7284, 146);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-08 00:00:00', 16012, 129.741, 388);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-08 00:00:00', 14081, 142.597, 251);
@@ -4399,7 +4234,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-08 00:00:00', 5124, 118.074, 68);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-08 00:00:00', 3797, 81.8463, 83);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-08 00:00:00', 10406, 122.312, 235);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-08 07:38:49', 147012, 131.487, 3349);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-08 00:00:00', 3103, 81.9375, 76);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-08 00:00:00', 21830, 85.5406, 390);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-08 00:00:00', 4672, 135.094, 80);
@@ -4426,7 +4260,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-08 00:00:00', 3472, 87.381, 134);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-08 00:00:00', 3125, 169.431, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-08 00:00:00', 1440, 145.087, 59);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-08 07:38:49', 78087, 115.855, 1686);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-08 00:00:00', 2303, 126.258, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-08 00:00:00', 2177, 108.39, 33);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-08 00:00:00', 1804, 38.8184, 30);
@@ -4463,7 +4296,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-08 00:00:00', 3734, 177.868, 79);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-08 00:00:00', 4021, 151.36, 100);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-08 00:00:00', 1375, 136.031, 32);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-08 07:38:49', 254652, 111.744, 5337);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-08 00:00:00', 15602, 86.9619, 178);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-08 00:00:00', 9323, 122.197, 134);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-08 00:00:00', 13469, 103.734, 304);
@@ -4508,7 +4340,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-08 00:00:00', 3438, 137.95, 52);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-08 00:00:00', 4684, 141.193, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-08 00:00:00', 2305, 84.0664, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-08 07:38:49', 348143, 136.498, 7656);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-08 00:00:00', 3437, 190.695, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-08 00:00:00', 46664, 130.169, 638);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-08 00:00:00', 2427, 130.604, 40);
@@ -4605,14 +4436,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-08 00:00:00', 2999, 145.864, 64);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-08 00:00:00', 2969, 165.193, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-08 00:00:00', 2944, 68.5862, 43);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-08 07:38:49', 21321, 128.181, 497);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-08 00:00:00', 8176, 139.635, 262);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-08 00:00:00', 1939, 119.136, 30);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-08 00:00:00', 2496, 100.451, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-08 00:00:00', 4456, 154.9, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-08 00:00:00', 2528, 90.0166, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-08 00:00:00', 1726, 140.219, 58);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-08 07:38:49', 48351, 212.896, 1221);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-08 00:00:00', 919, 151.003, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-08 00:00:00', 1767, 238.769, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-08 00:00:00', 1118, 223.373, 18);
@@ -4631,7 +4460,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-08 00:00:00', 3779, 311.291, 101);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-08 00:00:00', 2921, 244.71, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-08 00:00:00', 1529, 223.629, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-08 07:38:49', 14031, 108.2, 226);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-08 00:00:00', 1005, 45.8911, 11);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-08 00:00:00', 1036, 93.0446, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-08 00:00:00', 3227, 222.417, 29);
@@ -4640,7 +4468,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-08 00:00:00', 1363, 76.9123, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-08 00:00:00', 2681, 110.77, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-08 00:00:00', 2140, 136.935, 34);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-08 07:38:49', 149707, 297.595, 3814);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-08 00:00:00', 8461, 251.285, 245);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-08 00:00:00', 17527, 311.69, 449);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-08 00:00:00', 11361, 297.929, 182);
@@ -4654,7 +4481,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-08 00:00:00', 10564, 188.15, 111);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-08 00:00:00', 6889, 374.604, 79);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-08 00:00:00', 6723, 336.804, 107);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-08 07:38:49', 34971, 180.2, 805);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-08 00:00:00', 1186, 136.075, 21);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-08 00:00:00', 4198, 288.153, 107);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-08 00:00:00', 2767, 82.5037, 35);
@@ -4669,7 +4495,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-08 00:00:00', 3105, 141.705, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-08 00:00:00', 1728, 184.369, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-08 00:00:00', 2404, 156.059, 59);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-08 07:38:49', 49045, 256.87, 1257);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-08 00:00:00', 3339, 161.229, 76);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-08 00:00:00', 2297, 162.148, 90);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-08 00:00:00', 1999, 181.421, 21);
@@ -4693,7 +4518,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-08 00:00:00', 2379, 321.247, 51);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-08 00:00:00', 2622, 245.385, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-08 00:00:00', 3298, 305.393, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-08 07:38:49', 103639, 150.92, 1487);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-08 00:00:00', 8219, 154.03, 136);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-08 00:00:00', 8896, 175.239, 145);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-08 00:00:00', 5085, 196.256, 59);
@@ -4706,7 +4530,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-08 00:00:00', 13732, 173.756, 144);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-08 00:00:00', 9369, 104.234, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-08 00:00:00', 10737, 150.393, 267);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-09 04:35:42', 28056, 96.2885, 534);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-09 00:00:00', 612, 122, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-09 00:00:00', 2544, 90.3588, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-09 00:00:00', 2854, 111.763, 19);
@@ -4722,9 +4545,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-09 00:00:00', 2987, 137.458, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-09 00:00:00', 933, 51.14, 15);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-09 00:00:00', 3551, 122.053, 92);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-09 04:35:42', 40123, 135.12, 792);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-09 00:00:00', 40123, 135.12, 792);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-09 04:35:42', 118305, 101.506, 2313);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-09 00:00:00', 2699, 85.4029, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-09 00:00:00', 1901, 89.1736, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-09 00:00:00', 1534, 64.3237, 62);
@@ -4770,10 +4591,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-09 00:00:00', 4405, 124.638, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-09 00:00:00', 1027, 99.3419, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-09 00:00:00', 531, 147.56, 10);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-09 04:35:42', 14257, 81.914, 219);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-09 00:00:00', 12818, 82.106, 191);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-09 00:00:00', 1439, 80.9553, 28);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-09 04:35:42', 424492, 142.44, 7866);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-09 00:00:00', 14106, 111.919, 147);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-09 00:00:00', 16127, 146.585, 397);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-09 00:00:00', 14210, 149.633, 255);
@@ -4827,7 +4646,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-09 00:00:00', 5189, 127.102, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-09 00:00:00', 3885, 103.716, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-09 00:00:00', 10509, 146.876, 235);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-09 04:35:42', 148863, 147.803, 3461);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-09 00:00:00', 3141, 103.204, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-09 00:00:00', 22186, 119.731, 403);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-09 00:00:00', 4733, 176.543, 81);
@@ -4854,7 +4672,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-09 00:00:00', 3511, 100.182, 137);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-09 00:00:00', 3128, 139.381, 54);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-09 00:00:00', 1460, 140.119, 60);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-09 04:35:42', 79252, 133.247, 1740);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-09 00:00:00', 2325, 129.765, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-09 00:00:00', 2209, 113.771, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-09 00:00:00', 1857, 76.8604, 32);
@@ -4891,7 +4708,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-09 00:00:00', 3761, 181.749, 83);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-09 00:00:00', 4063, 165.55, 101);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-09 00:00:00', 1383, 144.468, 34);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-09 04:35:42', 257403, 124.59, 5464);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-09 00:00:00', 15749, 102.53, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-09 00:00:00', 9437, 115.069, 139);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-09 00:00:00', 13585, 121.864, 309);
@@ -4936,7 +4752,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-09 00:00:00', 3538, 172.897, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-09 00:00:00', 4790, 169.222, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-09 00:00:00', 2309, 76.424, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-09 04:35:42', 351615, 147.934, 7786);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-09 00:00:00', 3472, 195.062, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-09 00:00:00', 47101, 159.679, 645);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-09 00:00:00', 2461, 162.075, 40);
@@ -5033,14 +4848,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-09 00:00:00', 3033, 154.12, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-09 00:00:00', 3027, 187.617, 74);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-09 00:00:00', 2997, 101.918, 43);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-09 04:35:42', 21642, 154.121, 529);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-09 00:00:00', 8414, 211.734, 262);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-09 00:00:00', 1951, 105.576, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-09 00:00:00', 2519, 113.387, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-09 00:00:00', 4468, 150.268, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-09 00:00:00', 2548, 96.3459, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-09 00:00:00', 1742, 158.608, 59);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-09 04:35:42', 49531, 244.182, 1281);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-09 00:00:00', 919, 112.213, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-09 00:00:00', 1808, 251.811, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-09 00:00:00', 1117, 242.42, 19);
@@ -5059,7 +4872,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-09 00:00:00', 3779, 283.152, 101);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-09 00:00:00', 3032, 310.005, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-09 00:00:00', 1588, 273.231, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-09 04:35:42', 14429, 124.243, 235);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-09 00:00:00', 1022, 47.3252, 12);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-09 00:00:00', 1064, 118.135, 30);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-09 00:00:00', 3341, 243.341, 30);
@@ -5068,7 +4880,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-09 00:00:00', 1393, 94.0746, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-09 00:00:00', 2752, 124.351, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-09 00:00:00', 2192, 158.656, 36);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-09 04:35:42', 152459, 339.123, 3981);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-09 00:00:00', 8650, 308.524, 250);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-09 00:00:00', 17719, 332.29, 466);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-09 00:00:00', 11592, 304.506, 200);
@@ -5082,7 +4893,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-09 00:00:00', 10674, 186.295, 111);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-09 00:00:00', 7065, 414.118, 79);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-09 00:00:00', 6869, 365.124, 134);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-09 04:35:42', 35734, 185.166, 832);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-09 00:00:00', 1206, 148.559, 21);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-09 00:00:00', 4324, 307, 107);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-09 00:00:00', 2828, 100.604, 37);
@@ -5097,7 +4907,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-09 00:00:00', 3128, 148.579, 64);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-09 00:00:00', 1776, 180.772, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-09 00:00:00', 2499, 232.087, 65);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-09 04:35:42', 50302, 289.306, 1298);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-09 00:00:00', 3403, 181.792, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-09 00:00:00', 2369, 239.463, 90);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-09 00:00:00', 2006, 172.44, 21);
@@ -5121,7 +4930,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-09 00:00:00', 2428, 352.376, 51);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-09 00:00:00', 2687, 289.534, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-09 00:00:00', 3401, 368.038, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-09 04:35:42', 105118, 183.404, 1547);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-09 00:00:00', 8298, 175.21, 143);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-09 00:00:00', 9034, 216.507, 146);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-09 00:00:00', 5218, 245.79, 69);
@@ -5134,7 +4942,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-09 00:00:00', 13837, 157.5, 153);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-09 00:00:00', 9465, 136.496, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-09 00:00:00', 10851, 177.019, 273);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-10 04:35:29', 28480, 101.799, 545);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-10 00:00:00', 625, 130.873, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-10 00:00:00', 2559, 91.1692, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-10 00:00:00', 2888, 118.228, 22);
@@ -5150,9 +4957,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-10 00:00:00', 3012, 110.039, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-10 00:00:00', 954, 59.5361, 15);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-10 00:00:00', 3588, 128.197, 92);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-10 04:35:29', 40476, 139.396, 817);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-10 00:00:00', 40476, 139.396, 817);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-10 04:35:29', 119533, 109.688, 2329);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-10 00:00:00', 2735, 95.4267, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-10 00:00:00', 1913, 100.68, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-10 00:00:00', 1573, 86.837, 62);
@@ -5198,10 +5003,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-10 00:00:00', 4440, 129.539, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-10 00:00:00', 1039, 107.244, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-10 00:00:00', 533, 151.073, 10);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-10 04:35:29', 14323, 89.988, 222);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-10 00:00:00', 12879, 90.9157, 194);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-10 00:00:00', 1444, 85.355, 28);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-10 04:35:29', 427710, 150.09, 7942);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-10 00:00:00', 14163, 104.844, 147);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-10 00:00:00', 16234, 153.804, 404);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-10 00:00:00', 14340, 156.153, 263);
@@ -5255,7 +5058,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-10 00:00:00', 5235, 139.378, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-10 00:00:00', 3920, 109.681, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-10 00:00:00', 10599, 165.109, 238);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-10 04:35:29', 150229, 161.687, 3483);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-10 00:00:00', 3163, 111.96, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-10 00:00:00', 22348, 128.769, 407);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-10 00:00:00', 4735, 175.775, 81);
@@ -5282,7 +5084,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-10 00:00:00', 3533, 109.644, 137);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-10 00:00:00', 3177, 163.037, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-10 00:00:00', 1489, 162.975, 60);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-10 04:35:29', 79839, 132.539, 1762);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-10 00:00:00', 2327, 114.86, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-10 00:00:00', 2209, 102.24, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-10 00:00:00', 1857, 74.5313, 32);
@@ -5319,7 +5120,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-10 00:00:00', 3778, 151.35, 83);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-10 00:00:00', 4108, 168.861, 102);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-10 00:00:00', 1394, 128.65, 34);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-10 04:35:29', 260001, 138.842, 5530);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-10 00:00:00', 15848, 111.494, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-10 00:00:00', 9533, 119.397, 139);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-10 00:00:00', 13669, 129.527, 310);
@@ -5364,7 +5164,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-10 00:00:00', 3567, 180.255, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-10 00:00:00', 4872, 181.835, 50);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-10 00:00:00', 2388, 135.27, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-10 04:35:29', 354494, 155.996, 7875);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-10 00:00:00', 3517, 206.708, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-10 00:00:00', 47529, 166.08, 654);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-10 00:00:00', 2468, 169.942, 41);
@@ -5461,14 +5260,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-10 00:00:00', 3111, 202.283, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-10 00:00:00', 3045, 191.355, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-10 00:00:00', 2997, 95.5079, 43);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-10 04:35:29', 21868, 173.677, 540);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-10 00:00:00', 8490, 234.855, 268);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-10 00:00:00', 1976, 124.948, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-10 00:00:00', 2520, 112.626, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-10 00:00:00', 4549, 181.145, 74);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-10 00:00:00', 2568, 108.301, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-10 00:00:00', 1765, 182.744, 61);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-10 04:35:29', 49531, 233.555, 1281);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-10 00:00:00', 919, 110.828, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-10 00:00:00', 1808, 220.711, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-10 00:00:00', 1117, 206.057, 19);
@@ -5487,7 +5284,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-10 00:00:00', 3779, 269.961, 101);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-10 00:00:00', 3032, 310.005, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-10 00:00:00', 1588, 254.735, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-10 04:35:29', 14667, 132.7, 239);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-10 00:00:00', 1022, 43.0229, 12);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-10 00:00:00', 1079, 131.726, 32);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-10 00:00:00', 3395, 258.066, 30);
@@ -5496,7 +5292,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-10 00:00:00', 1425, 113.779, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-10 00:00:00', 2764, 104.404, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-10 00:00:00', 2259, 186.987, 38);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-10 04:35:29', 154520, 357.64, 4064);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-10 00:00:00', 8733, 304.465, 251);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-10 00:00:00', 17966, 390.21, 471);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-10 00:00:00', 11677, 287.078, 200);
@@ -5510,7 +5305,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-10 00:00:00', 10868, 193.376, 112);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-10 00:00:00', 7192, 431.938, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-10 00:00:00', 6971, 377.767, 138);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-10 04:35:29', 35734, 162.841, 832);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-10 00:00:00', 1206, 144.814, 21);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-10 00:00:00', 4324, 269.306, 107);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-10 00:00:00', 2828, 90.0806, 37);
@@ -5525,7 +5319,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-10 00:00:00', 3128, 115.268, 64);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-10 00:00:00', 1776, 154.69, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-10 00:00:00', 2499, 221.683, 65);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-10 04:35:29', 51272, 313.962, 1322);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-10 00:00:00', 3458, 206.093, 83);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-10 00:00:00', 2400, 240.537, 93);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-10 00:00:00', 2069, 207.467, 22);
@@ -5549,7 +5342,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-10 00:00:00', 2526, 430.82, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-10 00:00:00', 2718, 315.202, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-10 00:00:00', 3445, 390.411, 48);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-10 04:35:29', 105850, 190.163, 1560);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-10 00:00:00', 8375, 198.699, 146);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-10 00:00:00', 9125, 209.33, 147);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-10 00:00:00', 5276, 228.153, 69);
@@ -5562,7 +5354,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-10 00:00:00', 13914, 176.954, 152);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-10 00:00:00', 9528, 139.687, 81);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-10 00:00:00', 10932, 195.159, 275);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-11 07:32:40', 28624, 99.6979, 554);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-11 00:00:00', 642, 144.182, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-11 00:00:00', 2567, 90.764, 46);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-11 00:00:00', 2894, 114.534, 25);
@@ -5578,9 +5369,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-11 00:00:00', 3032, 100.658, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-11 00:00:00', 955, 57.2462, 15);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-11 00:00:00', 3601, 123.691, 92);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-11 07:32:40', 40687, 139.938, 820);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-11 00:00:00', 40687, 139.938, 820);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-11 07:32:40', 120634, 118.72, 2340);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-11 00:00:00', 2741, 92.6201, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-11 00:00:00', 1933, 115.063, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-11 00:00:00', 1575, 87.641, 62);
@@ -5626,10 +5415,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-11 00:00:00', 4455, 140.042, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-11 00:00:00', 1049, 108.373, 14);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-11 00:00:00', 559, 170.397, 10);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-11 07:32:40', 14365, 90.8688, 223);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-11 00:00:00', 12916, 93.2062, 195);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-11 00:00:00', 1449, 79.1954, 28);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-11 07:32:40', 429506, 150.018, 7978);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-11 00:00:00', 14256, 108.221, 147);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-11 00:00:00', 16332, 162.226, 405);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-11 00:00:00', 14391, 152.207, 263);
@@ -5683,7 +5470,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-11 00:00:00', 5253, 145.517, 70);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-11 00:00:00', 3958, 119.29, 89);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-11 00:00:00', 10612, 164.856, 239);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-11 07:32:40', 150790, 162.577, 3513);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-11 00:00:00', 3167, 113.211, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-11 00:00:00', 22427, 132.044, 410);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-11 00:00:00', 4766, 184.986, 84);
@@ -5710,7 +5496,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-11 00:00:00', 3561, 124.671, 138);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-11 00:00:00', 3214, 184.136, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-11 00:00:00', 1508, 175.894, 61);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-11 07:32:40', 80449, 138.572, 1780);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-11 00:00:00', 2347, 117.49, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-11 00:00:00', 2253, 113.002, 34);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-11 00:00:00', 1876, 88.5059, 32);
@@ -5747,7 +5532,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-11 00:00:00', 3794, 154.583, 85);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-11 00:00:00', 4125, 154.671, 102);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-11 00:00:00', 1407, 132.868, 34);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-11 07:32:40', 261487, 142.391, 5575);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-11 00:00:00', 15944, 122.501, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-11 00:00:00', 9543, 116.851, 139);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-11 00:00:00', 13779, 141.115, 315);
@@ -5792,7 +5576,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-11 00:00:00', 3622, 199.568, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-11 00:00:00', 4921, 196.199, 51);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-11 00:00:00', 2397, 135.27, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-11 07:32:40', 356922, 161.306, 7913);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-11 00:00:00', 3533, 203.069, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-11 00:00:00', 47755, 166.551, 661);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-11 00:00:00', 2498, 207.707, 41);
@@ -5889,14 +5672,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-11 00:00:00', 3129, 197.467, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-11 00:00:00', 3129, 233.961, 79);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-11 00:00:00', 3027, 114.097, 43);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-11 07:32:40', 21900, 167.699, 543);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-11 00:00:00', 8505, 237.288, 268);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-11 00:00:00', 1986, 129.791, 31);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-11 00:00:00', 2520, 106.538, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-11 00:00:00', 4549, 175.485, 74);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-11 00:00:00', 2571, 104.785, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-11 00:00:00', 1769, 127.576, 64);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-11 07:32:40', 50180, 251.319, 1286);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-11 00:00:00', 949, 149.618, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-11 00:00:00', 1820, 232.749, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-11 00:00:00', 1126, 212.983, 19);
@@ -5915,7 +5696,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-11 00:00:00', 3779, 256.771, 101);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-11 00:00:00', 3120, 361.771, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-11 00:00:00', 1636, 269.027, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-11 07:32:40', 14757, 134.13, 242);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-11 00:00:00', 1041, 52.1055, 12);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-11 00:00:00', 1083, 135.908, 32);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-11 00:00:00', 3437, 263.103, 30);
@@ -5924,7 +5704,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-11 00:00:00', 1424, 109.966, 22);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-11 00:00:00', 2774, 98.4624, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-11 00:00:00', 2261, 186.515, 40);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-11 07:32:40', 155627, 359.826, 4130);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-11 00:00:00', 8814, 271.582, 252);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-11 00:00:00', 18013, 387.224, 473);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-11 00:00:00', 11795, 304.835, 208);
@@ -5938,7 +5717,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-11 00:00:00', 10868, 170.616, 112);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-11 00:00:00', 7298, 435.812, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-11 00:00:00', 7038, 411.65, 138);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-11 07:32:40', 37300, 215.648, 870);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-11 00:00:00', 1271, 225.959, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-11 00:00:00', 4469, 291.922, 113);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-11 00:00:00', 2893, 110.707, 37);
@@ -5953,7 +5731,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-11 00:00:00', 3321, 194.58, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-11 00:00:00', 1849, 173.577, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-11 00:00:00', 2610, 310.517, 67);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-11 07:32:40', 51606, 316.212, 1354);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-11 00:00:00', 3477, 200.018, 83);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-11 00:00:00', 2400, 240.537, 93);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-11 00:00:00', 2079, 205.671, 22);
@@ -5977,7 +5754,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-11 00:00:00', 2536, 414.633, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-11 00:00:00', 2737, 290.56, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-11 00:00:00', 3494, 382.58, 61);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-11 07:32:40', 106190, 186.647, 1565);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-11 00:00:00', 8430, 201.395, 148);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-11 00:00:00', 9175, 220.394, 147);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-11 00:00:00', 5276, 228.153, 69);
@@ -5990,7 +5766,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-11 00:00:00', 13914, 154.036, 152);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-11 00:00:00', 9546, 145.36, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-11 00:00:00', 11011, 206.863, 275);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-12 04:29:36', 28845, 98.2515, 569);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-12 00:00:00', 642, 126.436, 9);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-12 00:00:00', 2598, 91.1692, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-12 00:00:00', 2924, 107.145, 26);
@@ -6006,9 +5781,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-12 00:00:00', 3048, 95.2467, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-12 00:00:00', 964, 59.5361, 18);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-12 00:00:00', 3614, 120.415, 98);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-12 04:29:36', 40960, 127.054, 820);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-12 00:00:00', 40960, 127.054, 820);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-12 04:29:36', 121103, 114.416, 2386);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-12 00:00:00', 2754, 93.8229, 52);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-12 00:00:00', 1933, 113.145, 39);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-12 00:00:00', 1578, 82.8167, 62);
@@ -6054,10 +5827,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-12 00:00:00', 4460, 126.738, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-12 00:00:00', 1049, 101.6, 16);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-12 00:00:00', 559, 152.83, 10);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-12 04:29:36', 14383, 86.318, 225);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-12 00:00:00', 12934, 90.2109, 197);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-12 00:00:00', 1449, 66.8761, 28);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-12 04:29:36', 431807, 148.586, 8181);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-12 00:00:00', 14315, 110.954, 155);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-12 00:00:00', 16372, 167.641, 409);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-12 00:00:00', 14430, 149.118, 267);
@@ -6111,7 +5882,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-12 00:00:00', 5272, 132.157, 70);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-12 00:00:00', 3969, 120.616, 92);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-12 00:00:00', 10614, 153.46, 240);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-12 04:29:36', 151293, 157.234, 3588);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-12 00:00:00', 3195, 123.219, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-12 00:00:00', 22469, 126.411, 410);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-12 00:00:00', 4787, 178.846, 95);
@@ -6138,7 +5908,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-12 00:00:00', 3564, 119.105, 139);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-12 00:00:00', 3238, 198.202, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-12 00:00:00', 1516, 180.862, 64);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-12 04:29:36', 81039, 139.451, 1838);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-12 00:00:00', 2363, 105.215, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-12 00:00:00', 2285, 129.145, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-12 00:00:00', 1879, 86.1768, 32);
@@ -6175,7 +5944,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-12 00:00:00', 3825, 161.051, 90);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-12 00:00:00', 4132, 145.211, 104);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-12 00:00:00', 1409, 126.541, 37);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-12 04:29:36', 262509, 138.563, 5665);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-12 00:00:00', 16021, 120.143, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-12 00:00:00', 9552, 111.251, 141);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-12 00:00:00', 13836, 134.386, 316);
@@ -6220,7 +5988,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-12 00:00:00', 3640, 188.072, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-12 00:00:00', 4939, 193.747, 52);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-12 00:00:00', 2400, 132.213, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-12 04:29:36', 358804, 158.784, 8053);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-12 00:00:00', 3543, 194.334, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-12 00:00:00', 47903, 157.186, 669);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-12 00:00:00', 2507, 206.134, 42);
@@ -6317,14 +6084,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-12 00:00:00', 3156, 187.834, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-12 00:00:00', 3136, 233.213, 79);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-12 00:00:00', 3037, 118.584, 43);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-12 04:29:36', 22142, 184.317, 555);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-12 00:00:00', 8523, 242.46, 268);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-12 00:00:00', 1993, 136.571, 32);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-12 00:00:00', 2564, 124.802, 51);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-12 00:00:00', 4703, 240.326, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-12 00:00:00', 2590, 101.269, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-12 00:00:00', 1769, 121.829, 64);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-12 04:29:36', 51521, 258.496, 1335);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-12 00:00:00', 954, 149.618, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-12 00:00:00', 1892, 283.914, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-12 00:00:00', 1135, 225.104, 23);
@@ -6343,7 +6108,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-12 00:00:00', 4111, 488.041, 114);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-12 00:00:00', 3207, 362.359, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-12 00:00:00', 1656, 237.921, 49);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-12 04:29:36', 14882, 128.969, 254);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-12 00:00:00', 1045, 48.2812, 12);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-12 00:00:00', 1087, 131.726, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-12 00:00:00', 3461, 236.754, 30);
@@ -6352,7 +6116,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-12 00:00:00', 1430, 108.059, 24);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-12 00:00:00', 2835, 107.799, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-12 00:00:00', 2269, 186.043, 41);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-12 04:29:36', 156677, 341.874, 4196);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-12 00:00:00', 8837, 261.84, 252);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-12 00:00:00', 18083, 388.717, 474);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-12 00:00:00', 11878, 307.466, 208);
@@ -6366,7 +6129,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-12 00:00:00', 11209, 209.392, 139);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-12 00:00:00', 7390, 417.217, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-12 00:00:00', 7072, 384.341, 138);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-12 04:29:36', 38320, 237.655, 912);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-12 00:00:00', 1283, 232.201, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-12 00:00:00', 4654, 327.942, 124);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-12 00:00:00', 2918, 115.337, 38);
@@ -6381,7 +6143,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-12 00:00:00', 3397, 215.73, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-12 00:00:00', 1878, 185.268, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-12 00:00:00', 2789, 402.551, 79);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-12 04:29:36', 52315, 325.681, 1409);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-12 00:00:00', 3481, 191.138, 86);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-12 00:00:00', 2429, 255.57, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-12 00:00:00', 2086, 196.69, 22);
@@ -6405,7 +6166,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-12 00:00:00', 2551, 402.181, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-12 00:00:00', 2771, 303.908, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-12 00:00:00', 3573, 458.649, 67);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-12 04:29:36', 107226, 187.301, 1591);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-12 00:00:00', 8432, 188.302, 151);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-12 00:00:00', 9264, 217.703, 152);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-12 00:00:00', 5361, 213.143, 73);
@@ -6418,7 +6178,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-12 00:00:00', 13954, 148.972, 155);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-12 00:00:00', 9564, 121.96, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-12 00:00:00', 11097, 212.715, 275);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-13 04:24:13', 29250, 94.1534, 594);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-13 00:00:00', 663, 125.327, 10);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-13 00:00:00', 2618, 83.4704, 47);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-13 00:00:00', 2939, 90.9805, 27);
@@ -6434,9 +6193,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-13 00:00:00', 3079, 86.5879, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-13 00:00:00', 984, 70.222, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-13 00:00:00', 3649, 110.995, 99);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-13 04:24:13', 41350, 119.637, 851);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-13 00:00:00', 41350, 119.637, 851);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-13 04:24:13', 122431, 108.074, 2442);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-13 00:00:00', 2803, 90.6153, 53);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-13 00:00:00', 1937, 98.7621, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-13 00:00:00', 1591, 70.756, 62);
@@ -6482,10 +6239,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-13 00:00:00', 4510, 133.04, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-13 00:00:00', 1050, 77.8931, 17);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-13 00:00:00', 561, 140.533, 12);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-13 04:24:13', 14469, 83.6756, 226);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-13 00:00:00', 13020, 87.0394, 198);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-13 00:00:00', 1449, 66.8761, 28);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-13 04:24:13', 435464, 141.777, 8402);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-13 00:00:00', 14315, 97.1253, 155);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-13 00:00:00', 16449, 152.802, 412);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-13 00:00:00', 14507, 146.372, 270);
@@ -6539,7 +6294,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-13 00:00:00', 5339, 125.657, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-13 00:00:00', 3995, 112.663, 93);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-13 00:00:00', 10728, 161.31, 246);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-13 04:24:13', 152844, 149.966, 3716);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-13 00:00:00', 3210, 108.208, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-13 00:00:00', 22629, 120.91, 415);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-13 00:00:00', 4830, 163.494, 99);
@@ -6566,7 +6320,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-13 00:00:00', 3603, 117.992, 142);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-13 00:00:00', 3253, 175.824, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-13 00:00:00', 1532, 181.856, 66);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-13 04:24:13', 81737, 132.343, 1870);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-13 00:00:00', 2388, 113.106, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-13 00:00:00', 2305, 134.526, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-13 00:00:00', 1880, 69.0967, 32);
@@ -6603,7 +6356,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-13 00:00:00', 3851, 146.175, 95);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-13 00:00:00', 4185, 130.075, 105);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-13 00:00:00', 1431, 114.941, 38);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-13 04:24:13', 264735, 129.698, 5758);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-13 00:00:00', 16131, 118.413, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-13 00:00:00', 9608, 96.2305, 145);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-13 00:00:00', 13923, 129.527, 319);
@@ -6648,7 +6400,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-13 00:00:00', 3714, 159.562, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-13 00:00:00', 5061, 175.879, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-13 00:00:00', 2436, 136.035, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-13 04:24:13', 361582, 147.736, 8216);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-13 00:00:00', 3576, 197.974, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-13 00:00:00', 48349, 156.243, 678);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-13 00:00:00', 2530, 206.134, 45);
@@ -6745,14 +6496,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-13 00:00:00', 3202, 189.21, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-13 00:00:00', 3162, 214.527, 81);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-13 00:00:00', 3064, 108.969, 45);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-13 04:24:13', 22279, 176.413, 566);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-13 00:00:00', 8570, 252.195, 275);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-13 00:00:00', 2027, 119.136, 32);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-13 00:00:00', 2590, 111.104, 52);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-13 00:00:00', 4703, 201.216, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-13 00:00:00', 2607, 95.6426, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-13 00:00:00', 1782, 133.323, 66);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-13 04:24:13', 52285, 229.629, 1361);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-13 00:00:00', 964, 142.691, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-13 00:00:00', 1951, 289.934, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-13 00:00:00', 1144, 154.11, 23);
@@ -6771,7 +6520,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-13 00:00:00', 4110, 397.467, 114);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-13 00:00:00', 3319, 353.536, 45);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-13 00:00:00', 1712, 232.877, 55);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-13 04:24:13', 15316, 122.129, 260);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-13 00:00:00', 1059, 45.413, 12);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-13 00:00:00', 1111, 120.226, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-13 00:00:00', 3609, 229.392, 31);
@@ -6780,7 +6528,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-13 00:00:00', 1448, 90.2607, 25);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-13 00:00:00', 2902, 123.927, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-13 00:00:00', 2371, 175.655, 42);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-13 04:24:13', 158624, 304.398, 4323);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-13 00:00:00', 8879, 216.779, 261);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-13 00:00:00', 18225, 323.632, 477);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-13 00:00:00', 12055, 311.083, 218);
@@ -6794,7 +6541,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-13 00:00:00', 11475, 190.173, 140);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-13 00:00:00', 7569, 435.037, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-13 00:00:00', 7149, 334.781, 146);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-13 04:24:13', 39233, 232.187, 949);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-13 00:00:00', 1317, 195.998, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-13 00:00:00', 4767, 337.156, 133);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-13 00:00:00', 2949, 98.4994, 39);
@@ -6809,7 +6555,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-13 00:00:00', 3472, 196.167, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-13 00:00:00', 1887, 174.476, 81);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-13 00:00:00', 2849, 382.544, 81);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-13 04:24:13', 53532, 324.181, 1468);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-13 00:00:00', 3537, 179.923, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-13 00:00:00', 2456, 252.349, 95);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-13 00:00:00', 2105, 149.987, 22);
@@ -6833,7 +6578,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-13 00:00:00', 2612, 449.497, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-13 00:00:00', 2810, 317.255, 93);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-13 00:00:00', 3619, 473.191, 67);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-13 04:24:13', 108295, 183.595, 1635);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-13 00:00:00', 8495, 180.601, 158);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-13 00:00:00', 9280, 181.22, 153);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-13 00:00:00', 5466, 209.39, 73);
@@ -6846,7 +6590,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-13 00:00:00', 14098, 153.503, 161);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-13 00:00:00', 9640, 133.305, 85);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-13 00:00:00', 11126, 187.845, 281);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-14 05:40:54', 29734, 92.397, 609);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-14 00:00:00', 681, 130.873, 10);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-14 00:00:00', 2654, 83.0652, 49);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-14 00:00:00', 2981, 103.45, 27);
@@ -6862,9 +6605,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-14 00:00:00', 3110, 73.5997, 70);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-14 00:00:00', 1006, 76.3283, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-14 00:00:00', 3694, 95.0212, 105);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-14 05:40:54', 41746, 114.927, 865);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-14 00:00:00', 41746, 114.927, 865);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-14 05:40:54', 124027, 99.7672, 2493);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-14 00:00:00', 2855, 95.0258, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-14 00:00:00', 1972, 101.639, 40);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-14 00:00:00', 1621, 79.6005, 62);
@@ -6910,10 +6651,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-14 00:00:00', 4546, 130.94, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-14 00:00:00', 1078, 97.0841, 17);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-14 00:00:00', 566, 105.4, 12);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-14 05:40:54', 14629, 83.9692, 227);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-14 00:00:00', 13146, 86.8632, 198);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-14 00:00:00', 1483, 69.5159, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-14 05:40:54', 439609, 131.174, 8585);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-14 00:00:00', 14484, 104.201, 157);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-14 00:00:00', 16575, 132.348, 417);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-14 00:00:00', 14685, 150.148, 270);
@@ -6967,7 +6706,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-14 00:00:00', 5410, 128.907, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-14 00:00:00', 4057, 108.355, 93);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-14 00:00:00', 10829, 142.318, 251);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-14 05:40:54', 154500, 140.886, 3780);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-14 00:00:00', 3230, 103.204, 84);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-14 00:00:00', 22771, 119.207, 417);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-14 00:00:00', 4857, 146.607, 99);
@@ -6994,7 +6732,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-14 00:00:00', 3622, 101.852, 143);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-14 00:00:00', 3350, 212.907, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-14 00:00:00', 1565, 163.969, 69);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-14 05:40:54', 82472, 122.133, 1919);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-14 00:00:00', 2428, 122.751, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-14 00:00:00', 2323, 119.921, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-14 00:00:00', 1924, 93.1641, 36);
@@ -7031,7 +6768,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-14 00:00:00', 3851, 97.0189, 95);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-14 00:00:00', 4237, 131.967, 106);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-14 00:00:00', 1441, 82.2516, 39);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-14 05:40:54', 267714, 133.374, 5874);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-14 00:00:00', 16249, 122.816, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-14 00:00:00', 9684, 101.322, 145);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-14 00:00:00', 14076, 134.947, 329);
@@ -7076,7 +6812,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-14 00:00:00', 3793, 185.773, 62);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-14 00:00:00', 5230, 207.761, 57);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-14 00:00:00', 2473, 139.856, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-14 05:40:54', 366609, 159.577, 8399);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-14 00:00:00', 3642, 189.967, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-14 00:00:00', 48688, 156.176, 680);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-14 00:00:00', 2560, 226.59, 46);
@@ -7173,14 +6908,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-14 00:00:00', 3276, 209.851, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-14 00:00:00', 3212, 219.011, 86);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-14 00:00:00', 3107, 124.353, 46);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-14 05:40:54', 22542, 160.099, 588);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-14 00:00:00', 8681, 218.731, 291);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-14 00:00:00', 2040, 103.639, 32);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-14 00:00:00', 2614, 105.777, 54);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-14 00:00:00', 4778, 204.303, 82);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-14 00:00:00', 2631, 90.7198, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-14 00:00:00', 1798, 102.291, 66);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-14 05:40:54', 53533, 212.261, 1469);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-14 00:00:00', 975, 138.535, 30);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-14 00:00:00', 1998, 306.988, 74);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-14 00:00:00', 1160, 128.136, 33);
@@ -7199,7 +6932,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-14 00:00:00', 4233, 351.741, 121);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-14 00:00:00', 3456, 405.89, 64);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-14 00:00:00', 1738, 197.567, 61);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-14 05:40:54', 15684, 116.657, 268);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-14 00:00:00', 1071, 38.7206, 12);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-14 00:00:00', 1151, 141.135, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-14 00:00:00', 3714, 208.467, 34);
@@ -7208,7 +6940,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-14 00:00:00', 1474, 93.4389, 26);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-14 00:00:00', 2971, 133.688, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-14 00:00:00', 2436, 163.378, 44);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-14 05:40:54', 161352, 292.414, 4583);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-14 00:00:00', 8969, 198.511, 293);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-14 00:00:00', 18430, 299.151, 498);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-14 00:00:00', 12443, 394.937, 233);
@@ -7222,7 +6953,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-14 00:00:00', 11681, 187.475, 144);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-14 00:00:00', 7706, 376.541, 115);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-14 00:00:00', 7233, 282.187, 147);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-14 05:40:54', 40234, 240.981, 1006);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-14 00:00:00', 1330, 182.265, 23);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-14 00:00:00', 4767, 278.52, 133);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-14 00:00:00', 2993, 103.13, 39);
@@ -7237,7 +6967,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-14 00:00:00', 3641, 258.559, 72);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-14 00:00:00', 1934, 187.967, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-14 00:00:00', 2912, 432.163, 90);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-14 05:40:54', 54636, 310.353, 1505);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-14 00:00:00', 3615, 174.782, 92);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-14 00:00:00', 2495, 243.758, 95);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-14 00:00:00', 2180, 185.912, 24);
@@ -7261,7 +6990,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-14 00:00:00', 2644, 427.084, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-14 00:00:00', 2879, 311.095, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-14 00:00:00', 3679, 473.191, 75);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-14 05:40:54', 109569, 180.406, 1711);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-14 00:00:00', 8583, 169.433, 170);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-14 00:00:00', 9421, 189.593, 165);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-14 00:00:00', 5580, 215.394, 76);
@@ -7274,7 +7002,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-14 00:00:00', 14247, 155.635, 168);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-14 00:00:00', 9706, 117.351, 86);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-14 00:00:00', 11265, 189.6, 284);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-15 09:20:44', 30159, 90.4685, 624);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-15 00:00:00', 712, 127.545, 10);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-15 00:00:00', 2682, 76.9873, 50);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-15 00:00:00', 3035, 105.297, 28);
@@ -7290,9 +7017,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-15 00:00:00', 3154, 73.9605, 70);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-15 00:00:00', 1021, 79.3814, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-15 00:00:00', 3731, 90.5159, 105);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-15 09:20:44', 42070, 104.425, 882);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-15 00:00:00', 42070, 104.425, 882);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-15 09:20:44', 125183, 92.9618, 2531);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-15 00:00:00', 2890, 94.6248, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-15 00:00:00', 1987, 82.4616, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-15 00:00:00', 1640, 82.0127, 62);
@@ -7338,10 +7063,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-15 00:00:00', 4568, 126.038, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-15 00:00:00', 1106, 89.1819, 18);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-15 00:00:00', 607, 149.317, 12);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-15 09:20:44', 14699, 78.6844, 227);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-15 00:00:00', 13198, 80.8727, 198);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-15 00:00:00', 1501, 67.756, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-15 09:20:44', 444159, 127.975, 8838);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-15 00:00:00', 14628, 109.507, 159);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-15 00:00:00', 16682, 133.35, 422);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-15 00:00:00', 14863, 140.538, 276);
@@ -7395,7 +7118,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-15 00:00:00', 5513, 140.101, 73);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-15 00:00:00', 4115, 92.1186, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-15 00:00:00', 10938, 141.052, 267);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-15 09:20:44', 156127, 136.512, 3843);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-15 00:00:00', 3279, 100.702, 87);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-15 00:00:00', 22920, 115.277, 426);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-15 00:00:00', 4904, 168.099, 101);
@@ -7422,7 +7144,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-15 00:00:00', 3659, 103.521, 144);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-15 00:00:00', 3369, 155.365, 64);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-15 00:00:00', 1593, 147.075, 70);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-15 09:20:44', 83476, 118.664, 1977);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-15 00:00:00', 2459, 119.244, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-15 00:00:00', 2335, 111.465, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-15 00:00:00', 1943, 73.7549, 37);
@@ -7459,7 +7180,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-15 00:00:00', 3919, 116.423, 110);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-15 00:00:00', 4279, 119.669, 107);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-15 00:00:00', 1457, 80.1426, 41);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-15 09:20:44', 270036, 131.121, 5978);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-15 00:00:00', 16355, 118.885, 197);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-15 00:00:00', 9739, 87.3202, 145);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-15 00:00:00', 14170, 123.733, 332);
@@ -7504,7 +7224,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-15 00:00:00', 3838, 184.393, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-15 00:00:00', 5307, 206.009, 59);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-15 00:00:00', 2503, 144.441, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-15 09:20:44', 369672, 155.957, 8513);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-15 00:00:00', 3682, 176.866, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-15 00:00:00', 48958, 148.63, 687);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-15 00:00:00', 2570, 225.016, 46);
@@ -7601,14 +7320,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-15 00:00:00', 3320, 222.924, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-15 00:00:00', 3244, 206.304, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-15 00:00:00', 3150, 132.686, 46);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-15 09:20:44', 22742, 139.732, 599);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-15 00:00:00', 8795, 185.267, 298);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-15 00:00:00', 2053, 94.9217, 33);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-15 00:00:00', 2632, 89.7967, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-15 00:00:00', 4815, 187.321, 80);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-15 00:00:00', 2640, 76.6548, 65);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-15 00:00:00', 1807, 93.096, 67);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-15 09:20:44', 55402, 220.192, 1527);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-15 00:00:00', 1042, 170.398, 30);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-15 00:00:00', 1998, 231.746, 74);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-15 00:00:00', 1161, 96.968, 33);
@@ -7627,7 +7344,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-15 00:00:00', 4233, 233.908, 121);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-15 00:00:00', 3571, 378.242, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-15 00:00:00', 1795, 210.178, 65);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-15 09:20:44', 15989, 118.087, 282);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-15 00:00:00', 1086, 35.3744, 12);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-15 00:00:00', 1164, 133.817, 37);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-15 00:00:00', 3805, 223.579, 35);
@@ -7636,7 +7352,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-15 00:00:00', 1487, 78.8192, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-15 00:00:00', 3028, 140.903, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-15 00:00:00', 2466, 150.629, 53);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-15 09:20:44', 163469, 274.093, 4794);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-15 00:00:00', 9050, 153.044, 300);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-15 00:00:00', 18550, 273.177, 504);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-15 00:00:00', 12743, 415.325, 247);
@@ -7650,7 +7365,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-15 00:00:00', 11868, 200.12, 186);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-15 00:00:00', 7796, 326.181, 139);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-15 00:00:00', 7324, 256.902, 147);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-15 09:20:44', 41394, 243.122, 1068);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-15 00:00:00', 1342, 189.756, 27);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-15 00:00:00', 4999, 317.89, 138);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-15 00:00:00', 3026, 109.023, 39);
@@ -7665,7 +7379,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-15 00:00:00', 3736, 272.835, 78);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-15 00:00:00', 1955, 159.187, 98);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-15 00:00:00', 2987, 436.964, 94);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-15 09:20:44', 55641, 287.619, 1556);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-15 00:00:00', 3657, 134.124, 98);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-15 00:00:00', 2507, 224.43, 97);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-15 00:00:00', 2220, 188.606, 26);
@@ -7689,7 +7402,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-15 00:00:00', 2644, 329.963, 55);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-15 00:00:00', 2917, 304.934, 96);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-15 00:00:00', 3758, 501.158, 75);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-15 09:20:44', 110740, 166.317, 1755);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-15 00:00:00', 8670, 162.117, 175);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-15 00:00:00', 9487, 161.184, 166);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-15 00:00:00', 5646, 180.871, 81);
@@ -7702,7 +7414,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-15 00:00:00', 14340, 146.84, 172);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-15 00:00:00', 9770, 108.133, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-15 00:00:00', 11354, 163.267, 290);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1, '2021-01-16 05:34:25', 30581, 87.3002, 648);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1001, '2021-01-16 00:00:00', 736, 136.418, 11);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1002, '2021-01-16 00:00:00', 2710, 67.6678, 51);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1003, '2021-01-16 00:00:00', 3077, 108.068, 29);
@@ -7718,9 +7429,7 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1060, '2021-01-16 00:00:00', 3187, 71.0742, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1061, '2021-01-16 00:00:00', 1033, 74.8017, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (1062, '2021-01-16 00:00:00', 3774, 96.2499, 113);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2, '2021-01-16 05:34:25', 42349, 99.3908, 895);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (2000, '2021-01-16 00:00:00', 42349, 99.3908, 895);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3, '2021-01-16 05:34:25', 127115, 98.6914, 2604);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3101, '2021-01-16 00:00:00', 2890, 76.582, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3102, '2021-01-16 00:00:00', 2007, 90.1324, 42);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3103, '2021-01-16 00:00:00', 1655, 64.3237, 63);
@@ -7766,10 +7475,8 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3460, '2021-01-16 00:00:00', 4591, 129.539, 48);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3461, '2021-01-16 00:00:00', 1141, 116.275, 19);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (3462, '2021-01-16 00:00:00', 619, 151.073, 12);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4, '2021-01-16 05:34:25', 14796, 80.0056, 230);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4011, '2021-01-16 00:00:00', 13273, 81.9298, 201);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (4012, '2021-01-16 00:00:00', 1523, 70.3959, 29);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5, '2021-01-16 05:34:25', 447493, 122.13, 9033);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5111, '2021-01-16 00:00:00', 14628, 80.7234, 159);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5112, '2021-01-16 00:00:00', 16752, 124.327, 427);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5113, '2021-01-16 00:00:00', 14951, 131.272, 282);
@@ -7823,7 +7530,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5970, '2021-01-16 00:00:00', 5554, 129.629, 75);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5974, '2021-01-16 00:00:00', 4156, 82.8404, 95);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (5978, '2021-01-16 00:00:00', 11003, 130.922, 279);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6, '2021-01-16 05:34:25', 157255, 128.911, 3907);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6411, '2021-01-16 00:00:00', 3317, 100.076, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6412, '2021-01-16 00:00:00', 22920, 93.6624, 426);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6413, '2021-01-16 00:00:00', 4974, 177.31, 102);
@@ -7850,7 +7556,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6634, '2021-01-16 00:00:00', 3691, 100.739, 145);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6635, '2021-01-16 00:00:00', 3408, 148.332, 67);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (6636, '2021-01-16 00:00:00', 1604, 138.131, 74);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7, '2021-01-16 05:34:25', 84229, 113.706, 2035);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7111, '2021-01-16 00:00:00', 2471, 110.476, 60);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7131, '2021-01-16 00:00:00', 2357, 106.852, 35);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7132, '2021-01-16 00:00:00', 1956, 76.8604, 37);
@@ -7887,7 +7592,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7338, '2021-01-16 00:00:00', 3949, 120.303, 135);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7339, '2021-01-16 00:00:00', 4332, 119.196, 110);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (7340, '2021-01-16 00:00:00', 1474, 94.9057, 41);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8, '2021-01-16 05:34:25', 271976, 123.104, 6050);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8111, '2021-01-16 00:00:00', 16447, 112.123, 209);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8115, '2021-01-16 00:00:00', 9826, 82.9924, 152);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8116, '2021-01-16 00:00:00', 14300, 126.536, 336);
@@ -7932,7 +7636,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8435, '2021-01-16 00:00:00', 3911, 171.978, 64);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8436, '2021-01-16 00:00:00', 5375, 187.09, 61);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (8437, '2021-01-16 00:00:00', 2516, 112.343, 51);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9, '2021-01-16 05:34:25', 372696, 148.193, 8639);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9161, '2021-01-16 00:00:00', 3726, 182.689, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9162, '2021-01-16 00:00:00', 49218, 131.382, 696);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9163, '2021-01-16 00:00:00', 2588, 202.987, 46);
@@ -8029,14 +7732,12 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9778, '2021-01-16 00:00:00', 3343, 211.227, 71);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9779, '2021-01-16 00:00:00', 3265, 178.648, 94);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (9780, '2021-01-16 00:00:00', 3170, 111.533, 46);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10, '2021-01-16 05:34:25', 22939, 118.96, 606);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10041, '2021-01-16 00:00:00', 8878, 133.855, 300);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10042, '2021-01-16 00:00:00', 2070, 95.8903, 33);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10043, '2021-01-16 00:00:00', 2632, 71.5329, 56);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10044, '2021-01-16 00:00:00', 4849, 168.28, 81);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10045, '2021-01-16 00:00:00', 2658, 73.1385, 66);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (10046, '2021-01-16 00:00:00', 1852, 126.427, 70);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12, '2021-01-16 05:34:25', 56036, 201.674, 1549);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12051, '2021-01-16 00:00:00', 1089, 169.013, 29);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12052, '2021-01-16 00:00:00', 2009, 201.649, 75);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12053, '2021-01-16 00:00:00', 1182, 114.284, 41);
@@ -8055,7 +7756,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12071, '2021-01-16 00:00:00', 4233, 182.026, 121);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12072, '2021-01-16 00:00:00', 3571, 318.829, 69);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (12073, '2021-01-16 00:00:00', 1851, 204.293, 66);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13, '2021-01-16 05:34:25', 16361, 115.786, 296);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13003, '2021-01-16 00:00:00', 1105, 39.1986, 12);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13004, '2021-01-16 00:00:00', 1177, 118.135, 38);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13071, '2021-01-16 00:00:00', 3882, 201.88, 36);
@@ -8064,7 +7764,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13074, '2021-01-16 00:00:00', 1509, 73.7341, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13075, '2021-01-16 00:00:00', 3118, 153.211, 63);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (13076, '2021-01-16 00:00:00', 2546, 164.794, 58);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14, '2021-01-16 05:34:25', 165292, 255.798, 4982);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14511, '2021-01-16 00:00:00', 9090, 137.212, 304);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14521, '2021-01-16 00:00:00', 18683, 239.739, 507);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14522, '2021-01-16 00:00:00', 12938, 434.069, 275);
@@ -8078,7 +7777,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14713, '2021-01-16 00:00:00', 12171, 211.247, 186);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14729, '2021-01-16 00:00:00', 7955, 315.334, 153);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (14730, '2021-01-16 00:00:00', 7402, 225.042, 163);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15, '2021-01-16 05:34:25', 42249, 234.556, 1089);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15001, '2021-01-16 00:00:00', 1366, 177.272, 28);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15002, '2021-01-16 00:00:00', 5103, 313.702, 139);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15003, '2021-01-16 00:00:00', 3062, 98.4994, 39);
@@ -8093,7 +7791,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15089, '2021-01-16 00:00:00', 3892, 263.847, 79);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15090, '2021-01-16 00:00:00', 1978, 145.697, 100);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (15091, '2021-01-16 00:00:00', 3064, 401.751, 99);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16, '2021-01-16 05:34:25', 56539, 268.307, 1611);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16051, '2021-01-16 00:00:00', 3729, 144.405, 102);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16052, '2021-01-16 00:00:00', 2530, 173.96, 97);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16053, '2021-01-16 00:00:00', 2273, 198.486, 26);
@@ -8117,7 +7814,6 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16075, '2021-01-16 00:00:00', 2711, 271.441, 58);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16076, '2021-01-16 00:00:00', 2932, 254.625, 96);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (16077, '2021-01-16 00:00:00', 3810, 459.768, 77);
-INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11, '2021-01-16 05:34:25', 111730, 157.815, 1800);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11012, '2021-01-16 00:00:00', 8724, 152.875, 179);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11004, '2021-01-16 00:00:00', 9520, 137.26, 167);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11009, '2021-01-16 00:00:00', 5703, 159.857, 87);
@@ -8130,3 +7826,5 @@ INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) V
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11001, '2021-01-16 00:00:00', 14409, 132.183, 172);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11002, '2021-01-16 00:00:00', 9827, 100.688, 88);
 INSERT IGNORE INTO covid_data (rs, date, total_cases, incidence, total_deaths) VALUES (11007, '2021-01-16 00:00:00', 11460, 163.267, 291);
+INSERT INTO covid_data (rs, date, total_cases, total_deaths) SELECT new.parent, new_date, new_cases, new_deaths FROM (SELECT c.parent as parent, MIN(date) as new_date, SUM(total_cases) as new_cases, SUM(total_deaths) as new_deaths FROM covid_data LEFT JOIN counties c on covid_data.rs = c.rs WHERE c.parent IS NOT NULL GROUP BY c.parent, DATE(date)) as new ON DUPLICATE KEY UPDATE date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths;
+INSERT INTO covid_data (rs, date, total_cases, total_deaths) SELECT new.parent, new_date, new_cases, new_deaths FROM (SELECT c.parent as parent, MIN(date) as new_date, SUM(total_cases) as new_cases, SUM(total_deaths) as new_deaths FROM covid_data LEFT JOIN counties c on covid_data.rs = c.rs WHERE c.parent IS NOT NULL GROUP BY c.parent, DATE(date)) as new ON DUPLICATE KEY UPDATE date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths;

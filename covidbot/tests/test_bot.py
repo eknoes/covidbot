@@ -22,13 +22,15 @@ class TestBot(TestCase):
         cls.conn.close()
 
     def setUp(self) -> None:
+        with self.conn.cursor(dictionary=True) as cursor:
+            cursor.execute("DROP TABLE IF EXISTS subscriptions;")
+            cursor.execute("DROP TABLE IF EXISTS covid_data;")
+            cursor.execute("DROP TABLE IF EXISTS bot_user;")
+            cursor.execute("DROP TABLE IF EXISTS counties;")
+
         self.man = UserManager(self.conn)
         self.bot = Bot(CovidData(self.conn),
                        self.man)
-        with self.conn.cursor(dictionary=True) as cursor:
-            cursor.execute("TRUNCATE subscriptions;")
-            # noinspection SqlWithoutWhere
-            cursor.execute("DELETE FROM bot_user;")
 
     def tearDown(self) -> None:
         del self.bot
@@ -60,7 +62,6 @@ class TestBot(TestCase):
     def test_no_user(self):
         self.assertIsNotNone(self.bot.get_overview(1), "A not yet existing user should get an overview over their "
                                                        "subscriptions")
-        self.assertIsNotNone(self.bot.get_graphical_report(1), "A not yet existing user should get a graphical report")
         self.assertIsNotNone(self.bot.get_district_report(1), "A not yet existing user should get a district report")
         self.assertIsNotNone(self.bot.find_district_id_from_geolocation(3.0, 2.0), "A not yet existing user should "
                                                                                    "be able to query for a location")

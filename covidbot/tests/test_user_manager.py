@@ -4,6 +4,7 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
+from covidbot.covid_data import CovidData
 from covidbot.user_manager import UserManager
 
 
@@ -20,11 +21,11 @@ class TestSubscriptionManager(TestCase):
         cls.conn.close()
 
     def setUp(self) -> None:
-        self.manager = UserManager(self.conn)
         with self.conn.cursor(dictionary=True) as cursor:
-            cursor.execute("TRUNCATE subscriptions")
-            # noinspection SqlWithoutWhere
-            cursor.execute("DELETE FROM bot_user")
+            cursor.execute("DROP TABLE IF EXISTS subscriptions;")
+            cursor.execute("DROP TABLE IF EXISTS bot_user;")
+
+        self.manager = UserManager(self.conn)
 
     def tearDown(self) -> None:
         del self.manager
@@ -77,6 +78,10 @@ class TestSubscriptionManager(TestCase):
         self.assertEqual(self.manager.get_user(2).last_update, expected_date,
                          "Setting last_update of a new user should create the user")
 
+        self.manager.create_user(3)
+        self.assertEqual(self.manager.get_user(3, with_subscriptions=True).subscriptions, [],
+                         "New user should have no subscriptions")
+
     def test_create_user(self):
         self.assertTrue(self.manager.create_user(1), "Creating a non-existing user should return True")
         self.assertFalse(self.manager.create_user(1), "Creating an existing user should return False")
@@ -114,10 +119,12 @@ class TestSubscriptionManager(TestCase):
         self.manager.add_subscription(2, 1)
         self.manager.add_subscription(3, 1)
 
+        # Make sure table exists
+        CovidData(self.conn)
+    
         with self.conn.cursor() as cursor:
             cursor.execute("DELETE FROM covid_data")
-            cursor.execute("DELETE FROM counties WHERE parent IS NOT NULL")
-            cursor.execute("DELETE FROM counties")
+            cursor.execute("DELETE FROM counties ORDER BY parent DESC")
             cursor.executemany("INSERT INTO counties (rs, county_name) VALUES (%s, %s)", [(1, "Test1"), (2, "Test2")])
         self.assertEqual(self.manager.get_total_user_number(), 3, "get_total_user should return the number of users")
         self.assertEqual(len(self.manager.get_ranked_subscriptions()), 2, "len(get_ranked_subscriptions) should return "

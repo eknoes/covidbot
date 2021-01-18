@@ -2,8 +2,18 @@ from unittest import TestCase
 
 from freezegun import freeze_time
 from mysql.connector import MySQLConnection
+from mysql.connector.conversion import MySQLConverter
+
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import CovidData, DistrictData, TrendValue
+
+
+class FreezeTimeConverter(MySQLConverter):
+    def _fakedatetime_to_mysql(self, value):
+        return super(FreezeTimeConverter, self)._datetime_to_mysql(value)
+
+    def _fakedate_to_mysql(self, value):
+        return super(FreezeTimeConverter, self)._date_to_mysql(value)
 
 
 class CovidDataTest(TestCase):
@@ -12,7 +22,7 @@ class CovidDataTest(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cfg = parse_config("resources/config.unittest.ini")
-        cls.conn = get_connection(cfg)
+        cls.conn = get_connection(cfg, converter_class=FreezeTimeConverter)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -20,10 +30,12 @@ class CovidDataTest(TestCase):
 
     @freeze_time("2021-01-16 12:00:00")
     def setUp(self) -> None:
+        self.data = CovidData(self.conn)
+
         with self.conn.cursor() as cursor:
-            cursor.execute("TRUNCATE covid_data;")
-            cursor.execute("DELETE FROM counties WHERE parent IS NOT NULL;")
-            cursor.execute("DELETE FROM counties WHERE parent IS NULL;")
+            cursor.execute("TRUNCATE TABLE covid_data;")
+            # noinspection SqlWithoutWhere
+            cursor.execute("DELETE FROM counties ORDER BY parent DESC;")
             with open("resources/2021-01-16-testdata-counties.sql", "r") as f:
                 for stmt in f.readlines():
                     cursor.execute(stmt)
@@ -32,7 +44,6 @@ class CovidDataTest(TestCase):
                 for stmt in f.readlines():
                     cursor.execute(stmt)
 
-        self.data = CovidData(self.conn)
 
     def tearDown(self) -> None:
         del self.data
@@ -44,6 +55,8 @@ class CovidDataTest(TestCase):
                          "Kassel Stadt should match SK Kassel")
         self.assertEqual(1, len(self.data.search_district_by_name("Stadt Kassel")),
                          "Stadt Kassel should match SK Kassel")
+        self.assertEqual(1, len(self.data.search_district_by_name("Göttingen")),
+                         "Göttingen should match")
         self.assertEqual(1, len(self.data.search_district_by_name("Kassel Land")), "Kassel Land should match LK Kassel")
         self.assertEqual(1, len(self.data.search_district_by_name("Bundesland Hessen")), "Exact match should be chosen")
 
@@ -62,7 +75,7 @@ class CovidDataTest(TestCase):
                              "Clean name of " + item[0] + " should be " + item[1])
 
     def test_get_district_data(self):
-        data = self.data.get_district_data(11)
+        data = self.data.get_district_data(3151)
 
         self.assertIsNotNone(data, "Data for District#11 must be available")
         self.assertIsNotNone(data.new_cases, "New Cases for today must be available")

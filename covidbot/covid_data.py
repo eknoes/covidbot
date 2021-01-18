@@ -3,7 +3,7 @@ import csv
 import logging
 import os
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date
 from enum import Enum
 from typing import Tuple, List, Optional, Union
 
@@ -20,7 +20,7 @@ class TrendValue(Enum):
 @dataclass
 class DistrictData:
     name: str
-    date: Optional[datetime] = None
+    date: Optional[datetime.date] = None
     type: Optional[str] = None
     incidence: Optional[float] = None
     incidence_trend: Optional[TrendValue] = None
@@ -52,7 +52,7 @@ class CovidData(object):
                            'UNIQUE(rs, county_name))')
             # Raw Data
             cursor.execute(
-                'CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date TIMESTAMP NULL DEFAULT NULL,'
+                'CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date DATE NULL DEFAULT NULL,'
                 'total_cases INT, incidence FLOAT, total_deaths INT,'
                 'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
 
@@ -63,9 +63,13 @@ class CovidData(object):
                            'covid_data.incidence '
                            'FROM covid_data '
                            'LEFT JOIN covid_data y on y.rs = covid_data.rs AND '
-                           'DATE(y.date) = subdate(date(covid_data.date), 1) '
+                           'y.date = subdate(covid_data.date, 1) '
                            'LEFT JOIN counties c on c.rs = covid_data.rs '
                            'ORDER BY covid_data.date DESC')
+
+            # Insert if not exists
+            cursor.execute('INSERT IGNORE INTO counties (rs, county_name, type, parent) '
+                           'VALUES (0, "Bundesrepublik Deutschland", "Staat", NULL)')
             self.connection.commit()
 
     def add_data(self, filename: str):
@@ -84,22 +88,27 @@ class CovidData(object):
         rs_data = []
         added_bl = set()
         last_update = self.get_last_update()
-        now = datetime.now()
+        now = datetime.now().date()
+        new_updated = None
         for row in reader:
-            updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr")
-            if last_update and updated <= last_update or now < updated:
+            new_updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr").date()
+            if last_update and new_updated <= last_update or now < new_updated:
                 # Do not take data from future, important for testing
                 continue
 
             # Gather Bundesland data
             if row['BL_ID'] not in added_bl:
                 covid_data.append(
-                    (int(row['BL_ID']), updated, None, float(row['cases7_bl_per_100k']),
+                    (int(row['BL_ID']), new_updated, None, float(row['cases7_bl_per_100k']),
                      None))
-                rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', None))
+                rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', 0))
                 added_bl.add(row['BL_ID'])
 
-            covid_data.append((int(row['RS']), updated, int(row['cases']), float(row['cases7_per_100k']),
+            if 0 not in added_bl:
+                added_bl.add(0)
+                rs_data.append((0, 'Bundesrepublik Deutschland', 'Staat', None))
+
+            covid_data.append((int(row['RS']), new_updated, int(row['cases']), float(row['cases7_per_100k']),
                                int(row['deaths'])))
             rs_data.append((int(row['RS']), self.clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
                             row['BEZ'], int(row['BL_ID'])))
@@ -111,12 +120,20 @@ class CovidData(object):
                                rs_data)
             cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
              VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
-            # Update Bundesländer
-            cursor.execute('''UPDATE covid_data
-            INNER JOIN (SELECT parent, date, SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths
-            FROM covid_data JOIN counties c on c.rs = covid_data.rs GROUP BY parent, date) as subquery
-            SET covid_data.total_deaths = subquery.total_deaths, covid_data.total_cases = subquery.total_cases
-            WHERE covid_data.date=subquery.date AND covid_data.rs=parent''')
+
+            # Calculate all parents, must be executed for every depth
+            for i in range(2):
+                cursor.execute('''INSERT INTO covid_data (rs, date, total_cases, total_deaths)
+                                    SELECT new.parent, new_date, new_cases, new_deaths
+                                    FROM
+                                    (SELECT c.parent as parent, date as new_date, SUM(total_cases) as new_cases,
+                                     SUM(total_deaths) as new_deaths FROM covid_data_calculated 
+                                     LEFT JOIN counties c on covid_data_calculated.rs = c.rs
+                                     WHERE c.parent IS NOT NULL AND date = DATE(%s)
+                                     GROUP BY c.parent, date)
+                                    as new
+                                  ON DUPLICATE KEY UPDATE 
+                                  date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths''', [new_updated])
             self.connection.commit()
 
     @staticmethod
@@ -182,27 +199,7 @@ class CovidData(object):
             return results
 
     def get_country_data(self) -> DistrictData:
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT SUM(total_cases) as total_cases, SUM(total_deaths) as total_deaths, "
-                           "SUM(new_cases) as new_cases, SUM(new_deaths) as new_deaths, DATE(date) as date "
-                           "FROM covid_data_calculated "
-                           "WHERE type != 'Bundesland' GROUP BY DATE(date) ORDER BY date DESC LIMIT 2")
-            current_data = cursor.fetchone()
-            country_data = DistrictData(name="Bundesrepublik Deutschland",
-                                        total_cases=current_data['total_cases'],
-                                        total_deaths=current_data['total_deaths'], new_cases=current_data['new_cases'],
-                                        new_deaths=current_data['new_deaths'], date=current_data['date'])
-            previous_data = cursor.fetchone()
-
-            if previous_data:
-                yesterday = DistrictData(name="Bundesrepublik Deutschland",
-                                         total_cases=previous_data['total_cases'],
-                                         total_deaths=previous_data['total_deaths'],
-                                         new_cases=previous_data['new_cases'],
-                                         new_deaths=previous_data['new_deaths'], date=previous_data['date'])
-                country_data = self.fill_trend(country_data, yesterday)
-
-        return country_data
+        return self.get_district_data(0)
 
     @staticmethod
     def fill_trend(today: DistrictData, yesterday: DistrictData) -> DistrictData:
@@ -235,7 +232,7 @@ class CovidData(object):
                 today.incidence_trend = TrendValue.SAME
         return today
 
-    def get_last_update(self) -> Optional[datetime]:
+    def get_last_update(self) -> Optional[date]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data')
             result = cursor.fetchone()
