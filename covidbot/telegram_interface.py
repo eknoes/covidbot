@@ -357,6 +357,12 @@ class TelegramInterface(object):
                 for line in message:
                     if not context.bot.send_message(chat_id=self.dev_chat_id, text=line, parse_mode=ParseMode.HTML):
                         self.log.warning("Can't send message to developers!")
+                
+                # Inform user that an error happened
+                if update.effective_chat.id:
+                    context.bot.send_message(chat_id=update.effective_chat.id,
+                                             text="Entschuldige, leider ist ein Fehler aufgetreten. Bitte versuche "
+                                                  "es später erneut!")
             except Exception as e:
                 self.log.error("Can't send error to developers", exc_info=e)
 
