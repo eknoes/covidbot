@@ -18,12 +18,12 @@ def parse_config(config_file: str):
     return cfg
 
 
-def get_connection(cfg, converter_class=MySQLConverter) -> MySQLConnection:
+def get_connection(cfg) -> MySQLConnection:
     return connect(database=cfg['DATABASE'].get('DATABASE'),
                    user=cfg['DATABASE'].get('USER'),
                    password=cfg['DATABASE'].get('PASSWORD'),
                    port=cfg['DATABASE'].get('PORT'),
-                   host=cfg['DATABASE'].get('HOST', 'localhost'), converter_class=converter_class)
+                   host=cfg['DATABASE'].get('HOST', 'localhost'))
 
 
 def send_correction_report(bot: TelegramInterface):

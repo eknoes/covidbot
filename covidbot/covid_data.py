@@ -148,10 +148,6 @@ class CovidData(object):
                            'concat(LOWER(type), LOWER(county_name)) LIKE %s',
                            ['%' + search_str + '%', '%' + search_str + '%'])
             for row in cursor.fetchall():
-                if row['rs'] is None:
-                    row['rs'] = 0
-                    # TODO: Bad hack for Germany, we need to introduce our own IDs
-
                 if row['county_name'].lower() == search_str.replace("%", " "):
                     return [(row['rs'], row['county_name'])]
                 results.append((row['rs'], row['county_name']))
