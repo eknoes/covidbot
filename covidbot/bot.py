@@ -265,7 +265,7 @@ class Bot(object):
         self.log.info("Current COVID19 data from " + str(self._data.get_last_update()))
         result = []
         data_update = self._data.get_last_update()
-        for user in self._manager.get_all_user():
+        for user in self._manager.get_all_user(with_subscriptions=True):
             if user.last_update is None or user.last_update < data_update:
                 result.append((user.id, self._get_report(user.subscriptions)))
                 self._manager.set_last_update(user.id, data_update)

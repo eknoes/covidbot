@@ -285,11 +285,16 @@ class TelegramInterface(object):
         self.updater.idle()
 
     def send_correction_message(self, msg):
+        i = 0
         for user in self._bot.get_all_user():
             try:
+                if i % 25 == 0:
+                    time.sleep(1)
+
                 self.updater.bot.send_message(user.id, msg, parse_mode=telegram.ParseMode.HTML)
                 self.updater.bot.send_message(user.id, self._bot.get_report(user.id),
                                               parse_mode=telegram.ParseMode.HTML)
+                i += 2
                 logging.info(f"Sent correction message to {str(user)}")
             except BadRequest as error:
                 logging.warning(f"Could not send message to {str(user)}: {str(error)}")

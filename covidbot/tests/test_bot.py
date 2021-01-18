@@ -35,11 +35,23 @@ class TestBot(TestCase):
         del self.man
 
     def test_update_with_subscribers(self):
-        self.bot.subscribe(1, 1)
-        self.bot.subscribe(2, 2)
+        hessen_id = self.bot.find_district_id("Hessen")[1][0][0]
+        bayern_id = self.bot.find_district_id("Bayern")[1][0][0]
+        self.bot.subscribe(1, hessen_id)
+        self.bot.subscribe(2, bayern_id)
         self.man.set_last_update(1, datetime.now() - timedelta(days=1))
         self.man.set_last_update(2, datetime.now() - timedelta(days=1))
-        self.assertEqual(2, len(self.bot.update()), "New data should trigger 2 updates")
+
+        update = self.bot.update()
+        self.assertEqual(2, len(update), "New data should trigger 2 updates")
+        for u in update:
+            if u[0] == 1:
+                self.assertRegex(u[1], "Hessen", "A subscribed district must be part of the daily report")
+                self.assertEqual(self.bot.get_report(1), u[1], "The daily report should be equal to the manual report")
+            if u[0] == 2:
+                self.assertRegex(u[1], "Bayern", "A subscribed district must be part of the daily report")
+                self.assertEqual(self.bot.get_report(2), u[1], "The daily report should be equal to the manual report")
+
         self.assertEqual([], self.bot.update(), "Without new data no reports should be generated")
 
     def test_update_no_subscribers(self):
