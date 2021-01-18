@@ -1,7 +1,7 @@
 alter table covid_data modify date date null default null;
 INSERT INTO counties (rs, county_name, type, parent) VALUE (0, "Deutschland", "Staat", NULL);
 UPDATE counties SET parent=0 WHERE type="Bundesland";
-DELETE FROM covid_data WHERE rs < 17;
+
 INSERT INTO covid_data (rs, date, total_cases, total_deaths)
                                 SELECT new.parent, new_date, new_cases, new_deaths
                                 FROM
