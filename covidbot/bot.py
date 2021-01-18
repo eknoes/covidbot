@@ -138,7 +138,9 @@ class Bot(object):
                 continue
 
         x = [current_date - datetime.timedelta(days=i) for i in range(len(y))]
-        fig, ax1 = plt.subplots()
+
+        px = 1 / plt.rcParams['figure.dpi']
+        fig, ax1 = plt.subplots(figsize=(900*px, 600*px))
 
         plt.xticks(x)
         plt.bar(x, y, color="#003f5c", width=0.95, zorder=3)
@@ -147,6 +149,11 @@ class Bot(object):
         plt.title("Neuinfektionen seit " + str(len(y) - 1) + " Tagen in {location}"
                   .format(location=history_data[0].name))
         plt.ylabel("Neuinfektionen")
+        plt.figtext(0.8, 0.01, "Stand: {date}\nDaten vom Robert Koch-Institut (RKI)"
+                    .format(date=current_date.strftime("%d.%m.%Y")), horizontalalignment='left', fontsize=8, verticalalignment="baseline")
+        plt.figtext(0.05, 0.01, "Folge @CovidInzidenzBot auf Telegram, um tagesaktuelle Daten zu erhalten\n"
+                               "https://t.me/CovidInzidenzBot", horizontalalignment='left', fontsize=8, verticalalignment="baseline")
+
         for direction in ["left", "right", "bottom", "top"]:
             ax1.spines[direction].set_visible(False)
         plt.grid(axis="y", zorder=0)
