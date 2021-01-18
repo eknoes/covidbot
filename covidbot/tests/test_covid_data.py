@@ -84,6 +84,9 @@ class CovidDataTest(TestCase):
         history = self.data.get_district_data(1, include_past_days=13)
         self.assertEqual(14, len(history), "GetCovidDataHistory should return 14 DistrictData items")
 
+        history = self.data.get_district_data(3151, include_past_days=14)
+        self.assertEqual(15, len(history), "GetCovidDataHistory should return 15 DistrictData items")
+
     def test_fill_trend(self):
         today = DistrictData("Test1", new_cases=5, new_deaths=5, incidence=5)
         yesterday = DistrictData("Test1", new_cases=5, new_deaths=6, incidence=4)

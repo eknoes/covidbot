@@ -132,7 +132,7 @@ class Bot(object):
             if not current_date or day_data.date.date() > current_date:
                 current_date = day_data.date.date()
 
-            if day_data.new_cases:
+            if day_data.new_cases is not None:
                 y.append(day_data.new_cases)
             else:
                 continue
