@@ -52,7 +52,7 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
         self.updater.dispatcher.add_handler(CommandHandler('loeschmich', self.deleteHandler))
         self.updater.dispatcher.add_handler(CommandHandler('datenschutz', self.privacyHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('start', self.helpHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
         self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
         self.updater.dispatcher.add_handler(CommandHandler('grafik', self.graphicHandler))
@@ -67,22 +67,40 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_error_handler(self.error_callback)
         self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
         self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
+    
+    def startHandler(self, update: Update, context: CallbackContext):
+        update.message.reply_html(f'Hallo {update.effective_user.first_name},\n'
+                                  f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
+                                  f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. '
+                                  f'Einen Überblick über alle Befehle erhältst du über /hilfe.\n\n'
+                                  f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
+                                  f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. '
+                                  f'Du kannst auch einen Standort senden! Wenn die Daten des Ortes nur gesammelt für '
+                                  f'eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
+                                  f'vorgeschlagen.')
+        if update.effective_user and update.effective_user.language_code:
+            self._bot.set_language(update.effective_chat.id, update.effective_user.language_code)
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(f'Hallo {update.effective_user.first_name},\n'
                                   f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
                                   f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
+                                  f'<b>Informationen erhalten</b>\n'
                                   f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
                                   f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. '
                                   f'Du kannst auch einen Standort senden. '
                                   f'Wenn Du auf "Starte Abo" klickst, erhältst du '
                                   f'jeden Morgen deinen persönlichen Tagesbericht mit den von dir '
                                   f'abonnierten Orten. Wählst du "Bericht" aus, '
-                                  f'erhältst Du die Informationen über den Ort nur einmalig. '
+                                  f'erhältst Du die Informationen über den Ort nur einmalig.'
                                   f'\n\n'
+                                  f'<b>Kostenloses Abo beenden</b>\n'
                                   f'Möchtest Du ein Abonnement beenden, schicke eine Nachricht mit dem '
                                   f'entsprechenden Ort und wähle dann "Beende Abo" aus.'
+                                  f'Wenn du alle Daten die wir über dich gespeichert haben löschen möchtest, '
+                                  f'sende /loeschmich.'
                                   f'\n\n'
+                                  f'<b>Weiteres</b>\n'
                                   f'Außerdem kannst du mit dem Befehl /bericht deinen Tagesbericht und mit /abo eine '
                                   f'Übersicht über deine aktuellen Abonnements einsehen.\n'
                                   f'Über den /statistik Befehl erhältst du eine kurze Nutzungsstatistik über diesen '

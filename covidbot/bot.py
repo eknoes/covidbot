@@ -86,7 +86,7 @@ class Bot(object):
             return None, [(district_id, name)]
 
     def get_possible_actions(self, user_id: int, district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
-        actions = [("Bericht", UserDistrictActions.REPORT)]
+        actions = [("Daten anzeigen", UserDistrictActions.REPORT)]
         name = self._data.get_district_name(district_id)
         user = self._manager.get_user(user_id, with_subscriptions=True)
         if user and district_id in user.subscriptions:
