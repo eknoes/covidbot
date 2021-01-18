@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple, Dict, Any
 
-from mysql.connector import MySQLConnection
+from mysql.connector import MySQLConnection, IntegrityError
 
 
 @dataclass
@@ -32,14 +32,15 @@ class UserManager(object):
 
     def add_subscription(self, user_id: int, rs: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('INSERT INTO bot_user (user_id) VALUES (%s) '
-                           'ON DUPLICATE KEY UPDATE user_id=user_id', [user_id])
-            cursor.execute('INSERT INTO subscriptions (user_id, rs) VALUES (%s, %s) '
-                           'ON DUPLICATE KEY UPDATE user_id=user_id', [user_id, rs])
-            self.connection.commit()
-            if cursor.rowcount == 1:
-                return True
-        return False
+            try:
+                cursor.execute('INSERT INTO subscriptions (user_id, rs) VALUES (%s, %s) '
+                               'ON DUPLICATE KEY UPDATE user_id=user_id', [user_id, rs])
+                if cursor.rowcount == 1:
+                    return True
+            except IntegrityError:
+                if self.create_user(user_id):
+                    return self.add_subscription(user_id, rs)
+            return False
 
     def rm_subscription(self, user_id: int, rs: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -105,15 +106,34 @@ class UserManager(object):
                 return True
         return False
 
-    def set_last_update(self, user_id: int, date: datetime):
+    def set_last_update(self, user_id: int, last_update: datetime) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("UPDATE bot_user SET last_update=%s WHERE user_id=%s", [date, user_id])
+            cursor.execute("UPDATE bot_user SET last_update=%s WHERE user_id=%s", [last_update, user_id])
+            if cursor.rowcount == 0:
+                return self.create_user(user_id, last_update=last_update)
             self.connection.commit()
+            return True
 
-    def set_language(self, user_id: int, language: str):
+    def set_language(self, user_id: int, language: str) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET language=%s WHERE user_id=%s", [language, user_id])
+            if cursor.rowcount == 0:
+                return self.create_user(user_id, language=language)
             self.connection.commit()
+            return True
+
+    def create_user(self, user_id: int, last_update=datetime.today(), language=None) -> bool:
+        with self.connection.cursor(dictionary=True) as cursor:
+            try:
+                cursor.execute("INSERT INTO bot_user SET user_id=%s, last_update=%s, language=%s",
+                               [user_id, last_update, language])
+                if cursor.rowcount == 1:
+                    self.connection.commit()
+                    return True
+            except IntegrityError:
+                pass
+
+            return False
 
     def get_total_user_number(self) -> int:
         with self.connection.cursor(dictionary=True) as cursor:

@@ -23,12 +23,25 @@ class Bot(object):
     _data: CovidData
     _manager: UserManager
     _location_service: LocationService
-
+    DEFAULT_LANG = "de"
+    
     def __init__(self, covid_data: CovidData, subscription_manager: UserManager):
         self.log = logging.getLogger(__name__)
         self._data = covid_data
         self._manager = subscription_manager
         self._location_service = LocationService('resources/germany_rs.geojson')
+
+    def set_language(self, user_id: int, language: Optional[str]) -> str:
+        if not language:
+            user = self._manager.get_user(user_id)
+            if user and user.language:
+                language = user.language
+            else:
+                language = self.DEFAULT_LANG
+            return "Deine aktuelle Spracheinstellung ist {language}".format(language=language)
+        if self._manager.set_language(user_id, language):
+            return "Deine bevorzugte Sprache wurde auf {language} gesetzt.".format(language=language)
+        return "Leider konnte deine Sprache nicht auf {language} gesetzt werde.".format(language=language)
 
     def find_district_id(self, district_query: str) -> Tuple[Optional[str], Optional[List[Tuple[int, str]]]]:
         if not district_query:

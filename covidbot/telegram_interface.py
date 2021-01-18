@@ -59,6 +59,7 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('sprache', self.languageHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
@@ -90,10 +91,12 @@ class TelegramInterface(object):
                                   f'https://github.com/eknoes/covid-bot\n\n'
                                   f'Diesen Hilfetext erhältst du über /hilfe, Datenschutzinformationen über '
                                   f'/datenschutz.')
-        self.log.debug("Someone called /hilfe")
 
     def privacyHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_privacy_msg())
+
+    def languageHandler(self, update: Update, context: CallbackContext) -> None:
+        update.message.reply_html(self._bot.set_language(update.effective_chat.id, " ".join(context.args)))
 
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         query = " ".join(context.args)

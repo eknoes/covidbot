@@ -66,6 +66,21 @@ class TestSubscriptionManager(TestCase):
         self.manager.delete_user(1)
         self.assertIsNone(self.manager.get_user(1), "Return None for a non existing user")
 
+    def test_new_user(self):
+        self.manager.set_language(1, "de")
+        
+        expected_date = datetime.today()
+        self.manager.set_last_update(2, expected_date)
+
+        self.assertEqual(self.manager.get_user(1).language, "de", "Setting language of a new user should create the "
+                                                                  "user")
+        self.assertEqual(self.manager.get_user(2).last_update, expected_date,
+                         "Setting last_update of a new user should create the user")
+
+    def test_create_user(self):
+        self.assertTrue(self.manager.create_user(1), "Creating a non-existing user should return True")
+        self.assertFalse(self.manager.create_user(1), "Creating an existing user should return False")
+
     def test_delete_user(self):
         self.assertFalse(self.manager.delete_user(1), "Deleting an non-existing user should return false")
         self.manager.add_subscription(1, 1)
