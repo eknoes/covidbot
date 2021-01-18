@@ -142,7 +142,7 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user")
             row = cursor.fetchone()
-            if row is not None and 'user_num' in row and not row['user_num']:
+            if row and 'user_num' in row and row['user_num']:
                 return row['user_num']
             return 0
 
