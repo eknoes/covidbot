@@ -70,7 +70,7 @@ class CovidData(object):
 
             # Insert if not exists
             cursor.execute('INSERT IGNORE INTO counties (rs, county_name, type, parent) '
-                           'VALUES (0, "Bundesrepublik Deutschland", "Staat", NULL)')
+                           'VALUES (0, "Deutschland", "Staat", NULL)')
             self.connection.commit()
 
     def add_data(self, filename: str):
@@ -104,10 +104,6 @@ class CovidData(object):
                      None))
                 rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', 0))
                 added_bl.add(row['BL_ID'])
-
-            if 0 not in added_bl:
-                added_bl.add(0)
-                rs_data.append((0, 'Bundesrepublik Deutschland', 'Staat', None))
 
             covid_data.append((int(row['RS']), new_updated, int(row['cases']), float(row['cases7_per_100k']),
                                int(row['deaths'])))

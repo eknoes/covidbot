@@ -214,9 +214,9 @@ class TelegramInterface(object):
             district_id = int(query.data[len(TelegramCallbacks.CHOOSE_ACTION.name):])
             text, markup = self.chooseActionBtnGenerator(district_id, update.effective_chat.id)
             if markup is not None:
-                query.edit_message_text(text, reply_markup=markup)
+                query.edit_message_text(text, reply_markup=markup, parse_mode=telegram.ParseMode.HTML)
             else:
-                query.edit_message_text(text)
+                query.edit_message_text(text, parse_mode=telegram.ParseMode.HTML)
 
         # Send Report Callback
         elif query.data.startswith(TelegramCallbacks.REPORT.name):
@@ -231,7 +231,7 @@ class TelegramInterface(object):
                     self.addToFileCache(district_id, message.photo[-1])
                 query.delete_message()
             else:
-                query.edit_message_text(message)
+                query.edit_message_text(message, parse_mode=telegram.ParseMode.HTML)
 
         # DeleteMe Callback
         elif query.data.startswith(TelegramCallbacks.DELETE_ME.name):
@@ -242,7 +242,7 @@ class TelegramInterface(object):
             query.delete_message()
 
         else:
-            query.edit_message_text(self._bot.get_error_message())
+            query.edit_message_text(self._bot.get_error_message(), parse_mode=telegram.ParseMode.HTML)
 
     def directMessageHandler(self, update: Update, context: CallbackContext) -> None:
         if update.message.location:
