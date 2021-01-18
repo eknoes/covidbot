@@ -6,10 +6,11 @@ import signal
 import time
 import traceback
 from enum import Enum
-from typing import Tuple, List
+from io import BytesIO
+from typing import Tuple, List, Dict, Union
 
 import telegram
-from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, ChatAction
 from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, NetworkError
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
@@ -42,6 +43,7 @@ class TelegramInterface(object):
     _bot: Bot
     log = logging.getLogger(__name__)
     dev_chat_id: int
+    graph_cache: Dict[int, PhotoSize] = {}
 
     def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
         self.dev_chat_id = dev_chat_id
@@ -67,7 +69,16 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_error_handler(self.error_callback)
         self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
         self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
-    
+
+    def getGraph(self, district_id: int) -> Union[PhotoSize, BytesIO]:
+        if district_id in self.graph_cache.keys():
+            return self.graph_cache.get(district_id)
+        
+        return self._bot.get_graphical_report(district_id)
+
+    def addToFileCache(self, district_id: int, file: PhotoSize):
+        self.graph_cache[district_id] = file
+
     def startHandler(self, update: Update, context: CallbackContext):
         update.message.reply_html(f'Hallo {update.effective_user.first_name},\n'
                                   f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
@@ -137,9 +148,14 @@ class TelegramInterface(object):
             markup = self.gen_multi_district_answer(districts, TelegramCallbacks.GRAPHIC)
             update.message.reply_html(msg, reply_markup=markup)
         else:
-            message, graph = self._bot.get_graphical_report(districts[0][0])
+            district_id = districts[0][0]
+            context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_PHOTO)
+            graph = self.getGraph(district_id)
+            message = self._bot.get_district_report(district_id)
             if graph:
-                update.message.reply_photo(graph, caption=message, parse_mode=telegram.constants.PARSEMODE_HTML)
+                message = update.message.reply_photo(graph, caption=message, parse_mode=telegram.constants.PARSEMODE_HTML)
+                if message.photo:
+                    self.addToFileCache(district_id, message.photo[-1])
             else:
                 update.message.reply_html(message)
 
@@ -223,10 +239,14 @@ class TelegramInterface(object):
         # Send graphical report Callback
         elif query.data.startswith(TelegramCallbacks.GRAPHIC.name):
             district_id = int(query.data[len(TelegramCallbacks.GRAPHIC.name):])
-            message, graph = self._bot.get_graphical_report(district_id)
+            context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_PHOTO)
+            graph = self.getGraph(district_id)
+            message = self._bot.get_district_report(district_id)
             if graph:
-                context.bot.send_photo(update.effective_chat.id, photo=graph, caption=message,
-                                       parse_mode=telegram.constants.PARSEMODE_HTML)
+                message = context.bot.send_photo(chat_id=update.effective_chat.id, photo=graph, caption=message,
+                                                 parse_mode=telegram.constants.PARSEMODE_HTML)
+                if message.photo:
+                    self.addToFileCache(district_id, message.photo[-1])
                 query.delete_message()
             else:
                 query.edit_message_text(message)
@@ -238,7 +258,7 @@ class TelegramInterface(object):
         # DoNotDeleteMe Callback
         elif query.data.startswith(TelegramCallbacks.NO_DELETE.name):
             query.delete_message()
-        
+
         else:
             query.edit_message_text(self._bot.get_error_message())
 
@@ -259,7 +279,8 @@ class TelegramInterface(object):
             update.message.reply_html(msg, reply_markup=markup)
 
     @staticmethod
-    def gen_multi_district_answer(districts: List[Tuple[int, str]], callback: TelegramCallbacks) -> InlineKeyboardMarkup:
+    def gen_multi_district_answer(districts: List[Tuple[int, str]],
+                                  callback: TelegramCallbacks) -> InlineKeyboardMarkup:
         buttons = []
         for district_id, name in districts:
             buttons.append([InlineKeyboardButton(name, callback_data=callback.name + str(district_id))])
@@ -287,7 +308,8 @@ class TelegramInterface(object):
         messages = self._bot.update()
         if not messages:
             return
-
+        # Empty file cache as there seems to be new content
+        self.graph_cache = {}
         # Avoid flood limits of 30 messages / second
         messages_sent = 0
         for userid, message in messages:
@@ -357,7 +379,7 @@ class TelegramInterface(object):
                 for line in message:
                     if not context.bot.send_message(chat_id=self.dev_chat_id, text=line, parse_mode=ParseMode.HTML):
                         self.log.warning("Can't send message to developers!")
-                
+
                 # Inform user that an error happened
                 if update.effective_chat.id:
                     context.bot.send_message(chat_id=update.effective_chat.id,

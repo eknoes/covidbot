@@ -124,7 +124,7 @@ class Bot(object):
                     date=current_data.date.strftime("%d.%m.%Y"))
         return message
 
-    def get_graphical_report(self, district_id: int, subtract_days=0) -> Tuple[str, Optional[BytesIO]]:
+    def get_graphical_report(self, district_id: int, subtract_days=0) -> Optional[BytesIO]:
         history_data = self._data.get_district_data(district_id, include_past_days=14, subtract_days=0)
         y = []
         current_date = None
@@ -168,7 +168,7 @@ class Bot(object):
         plt.savefig(buf, format='JPEG')
         buf.seek(0)
         plt.clf()
-        return self.get_district_report(district_id), buf
+        return buf
 
     def subscribe(self, userid: int, district_id: int) -> str:
         if self._manager.add_subscription(userid, district_id):
