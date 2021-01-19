@@ -55,7 +55,12 @@ class TestBot(TestCase):
                 self.assertRegex(u[1], "Bayern", "A subscribed district must be part of the daily report")
                 self.assertEqual(self.bot.get_report(2), u[1], "The daily report should be equal to the manual report")
 
-        self.assertEqual([], self.bot.update(), "Without new data no reports should be generated")
+        self.assertEqual(2, len(self.bot.update()), "Without setting last_updated, new reports should be generated")
+        self.bot.confirm_daily_report_send(1)
+        self.assertEqual(1, len(self.bot.update()), "Without setting last_updated, new report should be generated")
+        self.bot.confirm_daily_report_send(2)
+        self.assertEqual([], self.bot.update(), "If both users already have current report, it should not be "
+                                                     "sent again")
 
     def test_update_no_subscribers(self):
         self.assertEqual([], self.bot.update(), "Empty subscribers should generate empty update list")
