@@ -315,15 +315,23 @@ class TelegramInterface(object):
 
             graph = self.getGraph(0)
             if graph:
-                message = context.bot.send_photo(chat_id=userid, photo=graph, caption=message,
-                                                 parse_mode=telegram.constants.PARSEMODE_HTML)
-                if message.photo:
-                    self.addToFileCache(0, message.photo[-1])
+                try:
+                    sent_msg = context.bot.send_photo(chat_id=userid, photo=graph, caption=message,
+                                                      parse_mode=telegram.constants.PARSEMODE_HTML)
+                except BadRequest as e:
+                    self.log.warning(f"Can't send report attached to graphic for {userid}: {e.message}", exc_info=e)
+
+                    sent_msg = context.bot.send_photo(chat_id=userid, photo=graph,
+                                                      parse_mode=telegram.constants.PARSEMODE_HTML)
+                    context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+
+                if sent_msg.photo:
+                    self.addToFileCache(0, sent_msg.photo[-1])
             else:
                 self.log.warning("No graph available in report!")
-                message = context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+                sent_msg = context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
 
-            if message:
+            if sent_msg:
                 self._bot.confirm_daily_report_send(userid)
 
             self.log.info(f"Sent report to {userid}!")
