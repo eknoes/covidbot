@@ -321,9 +321,12 @@ class TelegramInterface(object):
                     self.addToFileCache(0, message.photo[-1])
             else:
                 self.log.warning("No graph available in report!")
-                context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+                message = context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
 
-            self.log.info(f"Sent report to {userid}")
+            if message:
+                self._bot.confirm_daily_report_send(userid)
+
+            self.log.info(f"Sent report to {userid}!")
             messages_sent += 1
 
     def statHandler(self, update: Update, context: CallbackContext) -> None:

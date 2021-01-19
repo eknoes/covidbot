@@ -315,7 +315,6 @@ class Bot(object):
         for user in self._manager.get_all_user(with_subscriptions=True):
             if user.last_update is None or user.last_update.date() < data_update:
                 result.append((user.id, self._get_report(user.subscriptions)))
-                self._manager.set_last_update(user.id, data_update)
 
         if len(result) > 0:
             return result
@@ -323,6 +322,10 @@ class Bot(object):
         if self._data.fetch_current_data():
             return self.update()
         return result
+
+    def confirm_daily_report_send(self, user_id: int):
+        updated = self._data.get_last_update()
+        self._manager.set_last_update(user_id, updated)
 
     def get_statistic(self) -> str:
         message = f"Aktuell nutzen {self._manager.get_total_user_number()} Personen diesen Bot.\n\n" \
