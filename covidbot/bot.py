@@ -125,7 +125,7 @@ class Bot(object):
         return message
 
     def get_graphical_report(self, district_id: int, subtract_days=0) -> Optional[BytesIO]:
-        history_data = self._data.get_district_data(district_id, include_past_days=14, subtract_days=0)
+        history_data = self._data.get_district_data(district_id, include_past_days=21, subtract_days=0)
         if not history_data:
             return None
 
