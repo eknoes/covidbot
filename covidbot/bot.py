@@ -343,8 +343,8 @@ class Bot(object):
 
     def get_statistic(self) -> str:
         message = f"Aktuell nutzen {self._manager.get_total_user_number()} Personen diesen Bot.\n\n" \
-                  f"Die fünf beliebtesten Orte sind:\n"
-        for county in self._manager.get_ranked_subscriptions()[:5]:
+                  f"Die zehn beliebtesten Orte sind:\n"
+        for county in self._manager.get_ranked_subscriptions()[:10]:
             message += f"• {county[0]} Abonnements: {county[1]}\n"
         return message
 

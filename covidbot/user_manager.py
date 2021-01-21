@@ -155,7 +155,7 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(subscriptions.user_id) as subscribers, c.county_name FROM subscriptions "
                            "JOIN counties c on subscriptions.rs = c.rs GROUP BY c.county_name "
-                           "ORDER BY subscribers DESC LIMIT 5")
+                           "ORDER BY subscribers DESC LIMIT 10")
             result = []
             for row in cursor.fetchall():
                 result.append((row['subscribers'], row['county_name']))
