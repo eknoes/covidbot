@@ -42,7 +42,7 @@ def send_newsletter(telegram: TelegramInterface, file: str):
     if input("Do you want to append the current report? (y/N)").upper() == "Y":
         append_report = True
 
-    if input("Please confirm sending the message: ") == "Y":
+    if input("Please confirm sending the message (Y): ") == "Y":
         telegram.message_all_users(message, append_report)
 
 
