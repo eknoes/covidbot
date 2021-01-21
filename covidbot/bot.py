@@ -25,7 +25,7 @@ class Bot(object):
     _manager: UserManager
     _location_service: LocationService
     DEFAULT_LANG = "de"
-    
+
     def __init__(self, covid_data: CovidData, subscription_manager: UserManager):
         self.log = logging.getLogger(__name__)
         self._data = covid_data
@@ -88,41 +88,49 @@ class Bot(object):
 
     def get_possible_actions(self, user_id: int, district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
         actions = [("Daten anzeigen", UserDistrictActions.REPORT)]
-        name = self._data.get_district(district_id).name
-        user = self._manager.get_user(user_id, with_subscriptions=True)
-        if user and district_id in user.subscriptions:
-            actions.append(("Beende Abo", UserDistrictActions.UNSUBSCRIBE))
-            verb = "beenden"
-        else:
-            actions.append(("Starte Abo", UserDistrictActions.SUBSCRIBE))
-            verb = "starten"
+        district = self._data.get_district(district_id)
 
-        return ("Möchtest du dein Abo von {name} {verb} oder die aktuellen Daten erhalten?"
-                .format(name=name, verb=verb), actions)
+        if district.type != "Staat":
+            user = self._manager.get_user(user_id, with_subscriptions=True)
+            if user and district_id in user.subscriptions:
+                actions.append(("Beende Abo", UserDistrictActions.UNSUBSCRIBE))
+                verb = "beenden"
+            else:
+                actions.append(("Starte Abo", UserDistrictActions.SUBSCRIBE))
+                verb = "starten"
+
+            message = "Möchtest du dein Abo von {name} {verb} oder die aktuellen Daten erhalten?" \
+                .format(name=district.name, verb=verb)
+        else:
+            message = "Möchtest du die aktuellen Daten von {name} erhalten?".format(name=district.name)
+        return message, actions
 
     def get_district_report(self, district_id: int) -> str:
         current_data = self._data.get_district_data(district_id)
-        message = "<b>{district_name}</b>\n\n" \
-                  "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):" \
-                  " {incidence} {incidence_trend}\n\n" \
-                  "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
-                  "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
-                  "Neue Todesfälle (seit gestern): {new_deaths} {new_deaths_trend}\n" \
-                  "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n" \
-                  "<i>Stand: {date}</i>\n" \
-                  "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
-                  "findest Du im <a href='https://corona.rki.de/'>Dashboard des RKI</a></i>\n" \
-            .format(district_name=current_data.name,
-                    incidence=self.format_incidence(current_data.incidence),
-                    incidence_trend=self.format_data_trend(current_data.incidence_trend),
-                    new_cases=self.format_int(current_data.new_cases),
-                    new_cases_trend=self.format_data_trend(current_data.cases_trend),
-                    total_cases=self.format_int(current_data.total_cases),
-                    new_deaths=self.format_int(current_data.new_deaths),
-                    new_deaths_trend=self.format_data_trend(current_data.deaths_trend),
-                    total_deaths=self.format_int(current_data.total_deaths),
-                    date=current_data.date.strftime("%d.%m.%Y"))
-        return message
+        message = "<b>{district_name}</b>\n\n"
+
+        if current_data.incidence:
+            message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):" \
+                       " {incidence} {incidence_trend}\n\n"
+
+        message += "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
+                   "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
+                   "Neue Todesfälle (seit gestern): {new_deaths} {new_deaths_trend}\n" \
+                   "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n" \
+                   "<i>Stand: {date}</i>\n" \
+                   "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
+                   "findest Du im <a href='https://corona.rki.de/'>Dashboard des RKI</a></i>\n"
+
+        return message.format(district_name=current_data.name,
+                              incidence=self.format_incidence(current_data.incidence),
+                              incidence_trend=self.format_data_trend(current_data.incidence_trend),
+                              new_cases=self.format_int(current_data.new_cases),
+                              new_cases_trend=self.format_data_trend(current_data.cases_trend),
+                              total_cases=self.format_int(current_data.total_cases),
+                              new_deaths=self.format_int(current_data.new_deaths),
+                              new_deaths_trend=self.format_data_trend(current_data.deaths_trend),
+                              total_deaths=self.format_int(current_data.total_deaths),
+                              date=current_data.date.strftime("%d.%m.%Y"))
 
     def get_graphical_report(self, district_id: int, subtract_days=0) -> Optional[BytesIO]:
         history_data = self._data.get_district_data(district_id, include_past_days=21, subtract_days=0)
@@ -145,7 +153,7 @@ class Bot(object):
         x = [current_date - datetime.timedelta(days=i) for i in range(len(y))]
 
         px = 1 / plt.rcParams['figure.dpi']
-        fig, ax1 = plt.subplots(figsize=(900*px, 600*px))
+        fig, ax1 = plt.subplots(figsize=(900 * px, 600 * px))
 
         plt.xticks(x)
         plt.bar(x, y, color="#003f5c", width=0.95, zorder=3)
@@ -155,9 +163,11 @@ class Bot(object):
                   .format(location=history_data[0].name))
         plt.ylabel("Neuinfektionen")
         plt.figtext(0.8, 0.01, "Stand: {date}\nDaten vom Robert Koch-Institut (RKI)"
-                    .format(date=current_date.strftime("%d.%m.%Y")), horizontalalignment='left', fontsize=8, verticalalignment="baseline")
+                    .format(date=current_date.strftime("%d.%m.%Y")), horizontalalignment='left', fontsize=8,
+                    verticalalignment="baseline")
         plt.figtext(0.05, 0.01, "Folge @CovidInzidenzBot auf Telegram, um tagesaktuelle Daten zu erhalten\n"
-                               "https://t.me/CovidInzidenzBot", horizontalalignment='left', fontsize=8, verticalalignment="baseline")
+                                "https://t.me/CovidInzidenzBot", horizontalalignment='left', fontsize=8,
+                    verticalalignment="baseline")
 
         for direction in ["left", "right", "bottom", "top"]:
             ax1.spines[direction].set_visible(False)
@@ -336,7 +346,7 @@ class Bot(object):
 
     def get_all_user(self) -> List[BotUser]:
         return self._manager.get_all_user()
-    
+
     def add_user_feedback(self, user_id: int, feedback: str) -> bool:
         return self._manager.add_feedback(user_id, feedback)
 
