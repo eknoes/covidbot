@@ -26,28 +26,24 @@ def get_connection(cfg) -> MySQLConnection:
                    host=cfg['DATABASE'].get('HOST', 'localhost'))
 
 
-def send_correction_report(bot: TelegramInterface):
-    if input("Do you want to send a message to all users? (y/N)").upper() != "Y":
+def send_newsletter(telegram: TelegramInterface, file: str):
+    try:
+        with open(file, "r") as file:
+            message = file.read()
+    except FileNotFoundError as e:
+        print("Can't read that file - sorry...")
+        return
+
+    print(message)
+    if input("Do you want to send this message to all users? (y/N)").upper() != "Y":
         exit(0)
 
     append_report = False
     if input("Do you want to append the current report? (y/N)").upper() == "Y":
         append_report = True
 
-    line = input("Please write the message you want to send."
-                 "You can review it before sending, basic HTML is allowed):\n")
-    lines = []
-    while True:
-        if line:
-            lines.append(line)
-        else:
-            break
-        line = input()
-    msg = '\n'.join(lines)
-
-    print(f"\n{msg}\nAppend current report: {append_report}")
-    if input("Press Y to send this message: ") == "Y":
-        bot.message_all_users(msg, append_report)
+    if input("Please confirm sending the message: ") == "Y":
+        telegram.message_all_users(message, append_report)
 
 
 # Setup logging
@@ -65,8 +61,8 @@ if __name__ == "__main__":
 
     # Parse Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--message', help='Do not start the bot but send a message to all users',
-                        action='store_true')
+    parser.add_argument('--message', help='Instead of starting the bot, send the message from <FILE> to all users',
+                        metavar='FILE', action='store')
     args = parser.parse_args()
     config = parse_config("config.ini")
     api_key = config['TELEGRAM'].get('API_KEY')
@@ -81,6 +77,6 @@ if __name__ == "__main__":
         telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
         if args and args.message:
-            send_correction_report(telegram_bot)
+            send_newsletter(telegram_bot, args.message)
         else:
             telegram_bot.run()

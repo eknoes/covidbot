@@ -409,7 +409,7 @@ class TelegramInterface(object):
                         self.updater.bot.send_message(chat_id=user.id, text=report, parse_mode=ParseMode.HTML)
 
                 no_flood_counter += 1
-                logging.info(f"Sent correction message to {str(user)}")
+                logging.info(f"Sent message to {str(user)}")
             except BadRequest as error:
                 logging.warning(f"Could not send message to {str(user)}: {str(error)}")
 
