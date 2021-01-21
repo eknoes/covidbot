@@ -52,7 +52,7 @@ class Bot(object):
         possible_district = self._data.search_district_by_name(district_query)
         online_match = False
         
-        query_regex = re.compile("[\w,()\-\s]*")
+        query_regex = re.compile("^[\w,()\- ]*$")
         # If e.g. emojis or ?!. are part of query, we do not have to query online
         if not possible_district and query_regex.match(district_query):
             online_match = True
