@@ -223,6 +223,7 @@ class Bot(object):
             message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen in den vergangenen 7 " \
                        "Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten " \
                        "Orte wie folgt aus:\n\n"
+
             # Split Bundeslaender from other
             subscription_data = list(map(lambda rs: self._data.get_district_data(rs), subscriptions))
             subscribed_bls = list(filter(lambda d: d.type == "Bundesland", subscription_data))
@@ -275,13 +276,12 @@ class Bot(object):
         already_sorted = []
         for group in groups:
             for district in districts:
-                already_sorted = list(itertools.chain.from_iterable(result.values()))
-
                 if district not in already_sorted and district.incidence > group:
                     if group not in result:
                         result[group] = []
 
                     result[group].append(district)
+                    already_sorted.append(district)
 
         # Add remaining to 0-group
         if len(districts) != len(already_sorted):
