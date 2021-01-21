@@ -18,10 +18,14 @@ class TrendValue(Enum):
 
 
 @dataclass
-class DistrictData:
+class District:
     name: str
-    date: Optional[datetime.date] = None
     type: Optional[str] = None
+
+
+@dataclass
+class DistrictData(District):
+    date: Optional[datetime.date] = None
     incidence: Optional[float] = None
     incidence_trend: Optional[TrendValue] = None
     new_cases: Optional[int] = None
@@ -130,7 +134,8 @@ class CovidData(object):
                                      GROUP BY c.parent, date)
                                     as new
                                   ON DUPLICATE KEY UPDATE 
-                                  date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths''', [new_updated])
+                                  date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths''',
+                               [new_updated])
             self.connection.commit()
 
     @staticmethod
@@ -153,10 +158,11 @@ class CovidData(object):
                 results.append((row['rs'], row['county_name']))
         return results
 
-    def get_district_name(self, rs: int) -> str:
+    def get_district(self, rs: int) -> District:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [int(rs)])
-            return cursor.fetchone()['county_name']
+            cursor.execute('SELECT county_name, type FROM counties WHERE rs=%s', [int(rs)])
+            data = cursor.fetchone()
+            return District(data['county_name'], type=data['type'])
 
     def get_district_data(self, rs: int, include_past_days=0, subtract_days=0) \
             -> Optional[Union[DistrictData, List[DistrictData]]]:

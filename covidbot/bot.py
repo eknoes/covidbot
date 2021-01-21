@@ -55,7 +55,7 @@ class Bot(object):
             osm_results = self._location_service.find_location(district_query)
             possible_district = []
             for d in osm_results:
-                possible_district.append((d, self._data.get_district_name(d)))
+                possible_district.append((d, self._data.get_district(d).name))
 
         if not possible_district:
             message = 'Leider konnte kein Ort zu {location} gefunden werden. Bitte beachte, ' \
@@ -83,12 +83,12 @@ class Bot(object):
                     'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location="deinem Standort"),
                     None)
         else:
-            name = self._data.get_district_name(district_id)
+            name = self._data.get_district(district_id).name
             return None, [(district_id, name)]
 
     def get_possible_actions(self, user_id: int, district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
         actions = [("Daten anzeigen", UserDistrictActions.REPORT)]
-        name = self._data.get_district_name(district_id)
+        name = self._data.get_district(district_id).name
         user = self._manager.get_user(user_id, with_subscriptions=True)
         if user and district_id in user.subscriptions:
             actions.append(("Beende Abo", UserDistrictActions.UNSUBSCRIBE))
@@ -180,14 +180,14 @@ class Bot(object):
             message = "Dein Abonnement für {name} wurde erstellt."
         else:
             message = "Du hast {name} bereits abonniert."
-        return message.format(name=self._data.get_district_name(district_id))
+        return message.format(name=self._data.get_district(district_id).name)
 
     def unsubscribe(self, userid: int, district_id: int) -> str:
         if self._manager.rm_subscription(userid, district_id):
             message = "Dein Abonnement für {name} wurde beendet."
         else:
             message = "Du hast {name} nicht abonniert."
-        return message.format(name=self._data.get_district_name(district_id))
+        return message.format(name=self._data.get_district(district_id).name)
 
     def get_report(self, userid: int) -> str:
         user = self._manager.get_user(userid, with_subscriptions=True)
@@ -287,7 +287,7 @@ class Bot(object):
                       "bspw. <code>/abo Dresden</code> "
             counties = None
         else:
-            counties = list(map(lambda s: (s, self._data.get_district_name(s)), user.subscriptions))
+            counties = list(map(lambda s: (s, self._data.get_district(s).name), user.subscriptions))
             message = "Du hast aktuell <b>{abo_count}</b> Orte abonniert.".format(abo_count=len(user.subscriptions))
 
         return message, counties
