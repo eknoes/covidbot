@@ -1,6 +1,7 @@
 import datetime
 import itertools
 import logging
+import re
 from enum import Enum
 from io import BytesIO
 from typing import Optional, Tuple, List, Dict
@@ -50,7 +51,10 @@ class Bot(object):
 
         possible_district = self._data.search_district_by_name(district_query)
         online_match = False
-        if not possible_district:
+        
+        query_regex = re.compile("[\w,()\-\s]*")
+        # If e.g. emojis or ?!. are part of query, we do not have to query online
+        if not possible_district and query_regex.match(district_query):
             online_match = True
             osm_results = self._location_service.find_location(district_query)
             possible_district = []
@@ -58,7 +62,7 @@ class Bot(object):
                 possible_district.append((d, self._data.get_district(d).name))
 
         if not possible_district:
-            message = 'Leider konnte kein Ort zu {location} gefunden werden. Bitte beachte, ' \
+            message = 'Leider konnte kein Ort gefunden werden. Bitte beachte, ' \
                       'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location=district_query)
             return message, None
         elif len(possible_district) == 1:
@@ -347,7 +351,7 @@ class Bot(object):
     def get_all_user(self) -> List[BotUser]:
         return self._manager.get_all_user()
 
-    def add_user_feedback(self, user_id: int, feedback: str) -> bool:
+    def add_user_feedback(self, user_id: int, feedback: str) -> Optional[int]:
         return self._manager.add_feedback(user_id, feedback)
 
     @staticmethod

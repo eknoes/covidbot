@@ -29,7 +29,8 @@ class UserManager(object):
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             cursor.execute('CREATE TABLE IF NOT EXISTS user_feedback '
-                           '(user_id INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL,'
+                           '(id INT AUTO_INCREMENT PRIMARY KEY, user_id INTEGER,'
+                           'added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL,'
                            'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             self.connection.commit()
 
@@ -160,9 +161,9 @@ class UserManager(object):
             result.sort(key=lambda x: x[0], reverse=True)
             return result
 
-    def add_feedback(self, user_id: int, feedback: str) -> bool:
+    def add_feedback(self, user_id: int, feedback: str) -> Optional[int]:
         if not feedback:
-            return False
+            return None
 
         if not self.get_user(user_id):
             self.create_user(user_id)
@@ -170,6 +171,16 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('INSERT INTO user_feedback (user_id, feedback) VALUES (%s, %s)', [user_id, feedback])
             if cursor.rowcount == 1:
+                new_id = cursor.lastrowid
+                self.connection.commit()
+                return new_id
+            return None
+
+    def rm_feedback(self, feedback_id) -> bool:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('DELETE FROM user_feedback WHERE id=%s', [feedback_id])
+            if cursor.rowcount == 1:
                 self.connection.commit()
                 return True
             return False
+

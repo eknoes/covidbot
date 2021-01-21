@@ -136,9 +136,13 @@ class TestSubscriptionManager(TestCase):
                          "get_ranked_subscriptions result should be sorted")
 
     def test_feedback(self):
-        user_id = 1
+        user_id = 2323
         feedback = "I quite like it!"
 
-        self.assertTrue(self.manager.add_feedback(user_id, feedback), "Feedback should be added successfully")
-        self.assertTrue(self.manager.add_feedback(user_id, feedback), "Same Feedback should be added successfully")
-        self.assertFalse(self.manager.add_feedback(user_id, None), "Null Feedback should not be added successfully")
+        self.assertIsNotNone(self.manager.add_feedback(user_id, feedback), "Feedback should be added successfully")
+        self.assertIsNotNone(self.manager.add_feedback(user_id, feedback), "Same Feedback should be added successfully")
+        self.assertIsNone(self.manager.add_feedback(user_id, ""), "Null Feedback should not be added successfully")
+        
+        feedback_id = self.manager.add_feedback(user_id, feedback)
+        self.assertTrue(self.manager.rm_feedback(feedback_id), "Removing feedback should be successful")
+        self.assertFalse(self.manager.rm_feedback(feedback_id), "Removing non-existent feedback should not be successful")

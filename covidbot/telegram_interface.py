@@ -33,9 +33,10 @@ class TelegramCallbacks(Enum):
     SUBSCRIBE = "subscribe"
     UNSUBSCRIBE = "unsubscribe"
     DELETE_ME = "delete_me"
-    NO_DELETE = "no_delete"
     CHOOSE_ACTION = "choose_action"
     REPORT = "report"
+    CONFIRM_FEEDBACK = "feedback"
+    DISCARD = "discard"
 
 
 class TelegramInterface(object):
@@ -43,6 +44,7 @@ class TelegramInterface(object):
     log = logging.getLogger(__name__)
     dev_chat_id: int
     graph_cache: Dict[int, PhotoSize] = {}
+    feedback_cache: Dict[int, str] = {}
 
     def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
         self.dev_chat_id = dev_chat_id
@@ -110,12 +112,16 @@ class TelegramInterface(object):
                                   f'Wenn du alle Daten die wir über dich gespeichert haben löschen möchtest, '
                                   f'sende /loeschmich.'
                                   f'\n\n'
+                                  f'<b>Feedback</b>\n'
+                                  f'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
+                                  f'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!'
+                                  f'Alternativ kannst du auch es auch mit <code>/feedback DEINE NACHRICHT</code> '
+                                  f'senden.\n\n'
                                   f'<b>Weiteres</b>\n'
                                   f'Außerdem kannst du mit dem Befehl /bericht deinen Tagesbericht und mit /abo eine '
                                   f'Übersicht über deine aktuellen Abonnements einsehen.\n'
                                   f'Über den /statistik Befehl erhältst du eine kurze Nutzungsstatistik über diesen '
-                                  f'Bot. Und mit <code>/feedback DEIN TEXT</code> kannst du uns Feedback zukommen '
-                                  f'lassen!\n\n'
+                                  f'Bot.\n\n'
                                   f'Mehr Informationen zu diesem Bot findest du hier: '
                                   f'https://github.com/eknoes/covid-bot\n\n'
                                   f'Diesen Hilfetext erhältst du über /hilfe, Datenschutzinformationen über '
@@ -153,7 +159,7 @@ class TelegramInterface(object):
     def deleteHandler(update: Update, context: CallbackContext) -> None:
         markup = InlineKeyboardMarkup([[InlineKeyboardButton("Ja, alle meine Daten löschen",
                                                              callback_data=TelegramCallbacks.DELETE_ME.name)],
-                                       [InlineKeyboardButton("Nein", callback_data=TelegramCallbacks.NO_DELETE.name)]])
+                                       [InlineKeyboardButton("Nein", callback_data=TelegramCallbacks.DISCARD.name)]])
         update.message.reply_html("Sollen alle deine Abonnements und Daten gelöscht werden?", reply_markup=markup)
 
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
@@ -248,10 +254,24 @@ class TelegramInterface(object):
         elif query.data.startswith(TelegramCallbacks.DELETE_ME.name):
             query.edit_message_text(self._bot.delete_user(update.effective_chat.id), parse_mode=telegram.ParseMode.HTML)
 
-        # DoNotDeleteMe Callback
-        elif query.data.startswith(TelegramCallbacks.NO_DELETE.name):
+        # Discard Callback
+        elif query.data.startswith(TelegramCallbacks.DISCARD.name):
             query.delete_message()
 
+        # ConfirmFeedback Callback
+        elif query.data.startswith(TelegramCallbacks.CONFIRM_FEEDBACK.name):
+            if update.effective_chat.id not in self.feedback_cache:
+                query.edit_message_text(self._bot.get_error_message(), parse_mode=telegram.ParseMode.HTML)
+            else:
+                feedback = self.feedback_cache[update.effective_chat.id]
+                self._bot.add_user_feedback(update.effective_chat.id, feedback)
+                query.edit_message_text("Danke für dein wertvolles Feedback!")
+
+                # Send to Devs
+                context.bot.send_message(chat_id=self.dev_chat_id, text=f"<b>Neues Feedback!</b>\n{feedback}",
+                                         parse_mode=ParseMode.HTML)
+
+                del self.feedback_cache[update.effective_chat.id]
         else:
             query.edit_message_text(self._bot.get_error_message(), parse_mode=telegram.ParseMode.HTML)
 
@@ -264,6 +284,15 @@ class TelegramInterface(object):
 
         if not districts:
             update.message.reply_html(msg)
+
+            self.feedback_cache[update.effective_chat.id] = update.message.text
+            feedback_markup = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Ja", callback_data=TelegramCallbacks.CONFIRM_FEEDBACK.name)],
+                 [InlineKeyboardButton("Abbrechen",
+                                       callback_data=TelegramCallbacks.DISCARD.name)]])
+
+            update.message.reply_html("Hast du gar keinen Ort gesucht, sondern möchtest uns deine Nachricht als "
+                                      "Feedback zusenden?", reply_markup=feedback_markup)
         else:
             if len(districts) > 1:
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.CHOOSE_ACTION)
