@@ -89,7 +89,8 @@ class TelegramInterface(object):
                                   f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. '
                                   f'Du kannst auch einen Standort senden! Wenn die Daten des Ortes nur gesammelt für '
                                   f'eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
-                                  f'vorgeschlagen.')
+                                  f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
+                                  f' auch die aktuellen Zahlen für andere Orte ansehen.')
         if update.effective_user and update.effective_user.language_code:
             self._bot.set_language(update.effective_chat.id, update.effective_user.language_code)
 
