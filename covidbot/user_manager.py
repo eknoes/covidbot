@@ -107,6 +107,7 @@ class UserManager(object):
     def delete_user(self, user_id: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('DELETE FROM subscriptions WHERE user_id=%s', [user_id])
+            cursor.execute('DELETE FROM user_feedback WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM bot_user WHERE user_id=%s', [user_id])
             self.connection.commit()
             if cursor.rowcount > 0:

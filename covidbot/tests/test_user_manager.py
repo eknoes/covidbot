@@ -92,9 +92,11 @@ class TestSubscriptionManager(TestCase):
         self.manager.add_subscription(1, 1)
         self.manager.add_subscription(1, 2)
         self.manager.add_subscription(2, 1)
-        self.assertTrue(self.manager.delete_user(1), "Deleting an existing user should return true")
+        self.assertTrue(self.manager.delete_user(1), "Deleting an existing user with subscriptions should return true")
         self.assertFalse(self.manager.delete_user(1), "Deleting an non-existing user should return false")
-        self.assertTrue(self.manager.delete_user(2), "Deleting an existing user should return true")
+
+        self.manager.add_feedback(2, "Testfeedback")
+        self.assertTrue(self.manager.delete_user(2), "Deleting an existing user with feedback should return true")
 
     def test_get_all_user(self):
         self.manager.add_subscription(1, 1)
