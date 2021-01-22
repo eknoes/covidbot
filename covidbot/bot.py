@@ -195,6 +195,7 @@ class Bot(object):
             # Send more on first subscription
             user = self._manager.get_user(userid, True)
             if len(user.subscriptions) == 1:
+                message += " "
                 message += ("Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
                             "einen weiteren Ort!\n\n"
                             "Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
