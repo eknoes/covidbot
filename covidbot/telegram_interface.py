@@ -388,17 +388,8 @@ class TelegramInterface(object):
 
                 self.updater.bot.send_message(uid, report, parse_mode=telegram.ParseMode.HTML)
                 if with_report:
-                    no_flood_counter += 1  # Additional message
-                    graph = self.getGraph(0)
-                    report = self._bot.get_report(uid)
-                    if graph:
-                        report = self.updater.bot.send_photo(chat_id=uid, photo=graph, caption=report,
-                                                             parse_mode=telegram.constants.PARSEMODE_HTML)
-                        if report.photo:
-                            self.addToFileCache(0, report.photo[-1])
-                    else:
-                        self.log.warning("No graph available in report!")
-                        self.updater.bot.send_message(chat_id=uid, text=report, parse_mode=ParseMode.HTML)
+                    no_flood_counter += 2  # Additional message
+                    self.sendReport(uid)
 
                 no_flood_counter += 1
                 logging.info(f"Sent message to {str(uid)}")
