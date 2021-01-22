@@ -62,7 +62,6 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
         self.updater.dispatcher.add_handler(CommandHandler('sprache', self.languageHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('feedback', self.feedbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
@@ -114,9 +113,7 @@ class TelegramInterface(object):
                                   f'\n\n'
                                   f'<b>Feedback</b>\n'
                                   f'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
-                                  f'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf! '
-                                  f'Alternativ kannst du auch es auch mit <code>/feedback DEINE NACHRICHT</code> '
-                                  f'senden.\n\n'
+                                  f'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
                                   f'<b>Weiteres</b>\n'
                                   f'Außerdem kannst du mit dem Befehl /bericht deinen Tagesbericht und mit /abo eine '
                                   f'Übersicht über deine aktuellen Abonnements einsehen.\n'
@@ -257,7 +254,11 @@ class TelegramInterface(object):
             else:
                 feedback = self.feedback_cache[update.effective_chat.id]
                 self._bot.add_user_feedback(update.effective_chat.id, feedback)
-                query.edit_message_text("Danke für dein wertvolles Feedback!")
+                if update.effective_user:
+                    query.edit_message_text("Danke für dein wertvolles Feedback, {name}!"
+                                              .format(name=update.effective_user.first_name))
+                else:
+                    query.edit_message_text("Danke für dein wertvolles Feedback!")
 
                 # Send to Devs
                 context.bot.send_message(chat_id=self.dev_chat_id, text=f"<b>Neues Feedback!</b>\n{feedback}",
@@ -278,6 +279,9 @@ class TelegramInterface(object):
             update.message.reply_html(msg)
 
             self.feedback_cache[update.effective_chat.id] = update.message.text
+            if update.effective_user:
+                self.feedback_cache[update.effective_chat.id] += "\n— {name}"\
+                    .format(name=update.effective_user.first_name)
             feedback_markup = InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Ja", callback_data=TelegramCallbacks.CONFIRM_FEEDBACK.name)],
                  [InlineKeyboardButton("Abbrechen",
@@ -368,20 +372,6 @@ class TelegramInterface(object):
 
     def statHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_statistic())
-
-    def feedbackHandler(self, update: Update, context: CallbackContext) -> None:
-        feedback = " ".join(context.args)
-
-        if not feedback:
-            update.message.reply_html("Als Feedback kann leider nur Text angenommen werden!"
-                                      "Bitte versuche es erneut mit einem Text: <code>/feedback DEIN TEXT</code>")
-            return
-
-        context.bot.send_message(chat_id=self.dev_chat_id, text=f"<b>Neues Feedback!</b>\n{feedback}",
-                                 parse_mode=ParseMode.HTML)
-        self._bot.add_user_feedback(update.effective_chat.id, feedback)
-
-        update.message.reply_html("Danke für dein wertvolles Feedback!")
 
     def run(self):
         self.updater.start_polling()
