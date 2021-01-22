@@ -23,8 +23,8 @@ class UserManager(object):
     def _create_db(self):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS bot_user '
-                           '(user_id INTEGER PRIMARY KEY, last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
-                           'language VARCHAR(20) DEFAULT NULL)')
+                           '(user_id INTEGER PRIMARY KEY, last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
+                           'language VARCHAR(20) DEFAULT NULL, created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6))')
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
