@@ -415,6 +415,38 @@ class TelegramInterface(object):
                 logging.warning(f"Could not send message to {str(user)}: {str(error)}")
 
     def error_callback(self, update: Update, context: CallbackContext):
+        # Send all errors to maintainers
+        # Try to send non Telegram Exceptions to maintainer
+        try:
+            tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
+            tb_string = ''.join(tb_list)
+
+            message = [f'<b>An exception was raised while handling an update!</b>\n']
+            if update:
+                message.append(f'<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}'
+                               f'</pre>\n\n',)
+            if context and context.chat_data:
+                message.append(f'<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n')
+
+            if context and context.user_data:
+                message.append(f'<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n',)
+                
+            message.append(f'<pre>{html.escape(tb_string)}</pre>')
+
+            # Finally, send the message
+            self.log.info("Send error message to developers")
+            for line in message:
+                if not context.bot.send_message(chat_id=self.dev_chat_id, text=line, parse_mode=ParseMode.HTML):
+                    self.log.warning("Can't send message to developers!")
+
+            # Inform user that an error happened
+            if update.effective_chat.id:
+                context.bot.send_message(chat_id=update.effective_chat.id,
+                                         text="Entschuldige, leider ist ein Fehler aufgetreten. Bitte versuche "
+                                              "es später erneut!")
+        except Exception as e:
+            self.log.error("Can't send error to developers", exc_info=e)
+
         # noinspection PyBroadException
         if isinstance(context.error, Unauthorized):
             logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}", exc_info=context.error)
@@ -431,34 +463,5 @@ class TelegramInterface(object):
         else:
             # Stop on all other exceptions
             logging.error(f"Non-Telegram Exception. Exiting!", exc_info=context.error)
-
-            # Try to send non Telegram Exceptions to maintainer
-            try:
-                tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
-                tb_string = ''.join(tb_list)
-
-                message = [
-                    f'<b>An exception was raised while handling an update! A manual restart may be required!</b>\n',
-                    f'<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}'
-                    f'</pre>\n\n',
-                    f'<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n',
-                    f'<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n',
-                    f'<pre>{html.escape(tb_string)}</pre>'
-                ]
-
-                # Finally, send the message
-                self.log.info("Send error message to developers")
-                for line in message:
-                    if not context.bot.send_message(chat_id=self.dev_chat_id, text=line, parse_mode=ParseMode.HTML):
-                        self.log.warning("Can't send message to developers!")
-
-                # Inform user that an error happened
-                if update.effective_chat.id:
-                    context.bot.send_message(chat_id=update.effective_chat.id,
-                                             text="Entschuldige, leider ist ein Fehler aufgetreten. Bitte versuche "
-                                                  "es später erneut!")
-            except Exception as e:
-                self.log.error("Can't send error to developers", exc_info=e)
-
             # Stop bot
             os.kill(os.getpid(), signal.SIGINT)
