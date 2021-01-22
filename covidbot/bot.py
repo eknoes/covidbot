@@ -51,7 +51,7 @@ class Bot(object):
 
         possible_district = self._data.search_district_by_name(district_query)
         online_match = False
-        
+
         query_regex = re.compile("^[\w,()\- ]*$")
         # If e.g. emojis or ?!. are part of query, we do not have to query online
         if not possible_district and query_regex.match(district_query):
@@ -192,6 +192,13 @@ class Bot(object):
     def subscribe(self, userid: int, district_id: int) -> str:
         if self._manager.add_subscription(userid, district_id):
             message = "Dein Abonnement für {name} wurde erstellt."
+            # Send more on first subscription
+            user = self._manager.get_user(userid, True)
+            if len(user.subscriptions) == 1:
+                message += ("Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
+                            "einen weiteren Ort!\n\n"
+                            "Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
+                            "erfährst du über den /hilfe Befehl. Danke, dass du unseren Bot benutzt!")
         else:
             message = "Du hast {name} bereits abonniert."
         return message.format(name=self._data.get_district(district_id).name)
