@@ -68,7 +68,6 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.location, self.directMessageHandler))
         self.updater.dispatcher.add_error_handler(self.error_callback)
         self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
-        self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
 
     def getGraph(self, district_id: int) -> Union[PhotoSize, BytesIO]:
         if district_id in self.graph_cache.keys():
@@ -374,6 +373,7 @@ class TelegramInterface(object):
         update.message.reply_html(self._bot.get_statistic())
 
     def run(self):
+        self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
         self.updater.start_polling()
         self.updater.idle()
 
