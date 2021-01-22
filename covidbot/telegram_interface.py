@@ -74,7 +74,6 @@ class TelegramInterface(object):
     def getGraph(self, district_id: int) -> Union[PhotoSize, BytesIO]:
         if district_id in self.graph_cache.keys():
             return self.graph_cache.get(district_id)
-
         return self._bot.get_graphical_report(district_id)
 
     def addToFileCache(self, district_id: int, file: PhotoSize):
@@ -349,12 +348,10 @@ class TelegramInterface(object):
 
         graph = self.getGraph(0)
         if graph:
-            try:
+            if len(message) <= 1024:
                 sent_msg = self.updater.bot.send_photo(chat_id=userid, photo=graph, caption=message,
                                                        parse_mode=telegram.constants.PARSEMODE_HTML)
-            except BadRequest as e:
-                self.log.warning(f"Can't send report attached to graphic for {userid}: {e.message}", exc_info=e)
-
+            else:
                 sent_msg = self.updater.bot.send_photo(chat_id=userid, photo=graph,
                                                        parse_mode=telegram.constants.PARSEMODE_HTML)
                 self.updater.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
