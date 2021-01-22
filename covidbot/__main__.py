@@ -2,14 +2,15 @@ import argparse
 import configparser
 import locale
 import logging
+import sys
+from typing import List, Optional
 
 from mysql.connector import connect, MySQLConnection
-from mysql.connector.conversion import MySQLConverter
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
-from covidbot.user_manager import UserManager
 from covidbot.telegram_interface import TelegramInterface
+from covidbot.user_manager import UserManager
 
 
 def parse_config(config_file: str):
@@ -26,16 +27,14 @@ def get_connection(cfg) -> MySQLConnection:
                    host=cfg['DATABASE'].get('HOST', 'localhost'))
 
 
-def send_newsletter(telegram: TelegramInterface, file: str):
-    try:
-        with open(file, "r") as file:
-            message = file.read()
-    except FileNotFoundError as e:
-        print("Can't read that file - sorry...")
-        return
-
+def send_newsletter(telegram: TelegramInterface, message: str, specific_users: Optional[List[int]]):
     print(message)
-    if input("Do you want to send this message to all users? (y/N)").upper() != "Y":
+    
+    ident = "all"
+    if specific_users:
+        ident = "specific"
+    
+    if input(f"Do you want to send this message to {ident} users? (y/N)").upper() != "Y":
         exit(0)
 
     append_report = False
@@ -43,7 +42,7 @@ def send_newsletter(telegram: TelegramInterface, file: str):
         append_report = True
 
     if input("Please confirm sending the message (Y): ") == "Y":
-        telegram.message_all_users(message, append_report)
+        telegram.message_users(message, append_report, specific_users)
 
 
 # Setup logging
@@ -61,14 +60,21 @@ if __name__ == "__main__":
 
     # Parse Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--message', help='Instead of starting the bot, send the message from <FILE> to all users',
+    parser.add_argument('--message-file', help='Send the message from <FILE> to users',
                         metavar='FILE', action='store')
+    parser.add_argument('--message', help='Send a message from to users', action='store_true')
+    parser.add_argument('--specific', help='Just send the message to specific user_ids',
+                        metavar='USERS', action='store', nargs="+", type=int)
     args = parser.parse_args()
     config = parse_config("config.ini")
     api_key = config['TELEGRAM'].get('API_KEY')
 
+    if args.specific and not (args.message or args.message_file):
+        print("You can use --specific only with --message or --message-file")
+        sys.exit(1)
+
     with get_connection(config) as conn:
-        if args and args.message:
+        if args and (args.message or args.message_file):
             data = CovidData(conn, disable_autoupdate=True)
         else:
             data = CovidData(conn)
@@ -76,7 +82,23 @@ if __name__ == "__main__":
         bot = Bot(data, user_manager)
         telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
-        if args and args.message:
-            send_newsletter(telegram_bot, args.message)
+        if args and (args.message or args.message_file):
+            if args.message_file:
+                try:
+                    with open(args.message_file, "r") as file:
+                        message = file.read()
+                except FileNotFoundError as e:
+                    print("Can't read that file - sorry...")
+                    sys.exit(1)
+            else:
+                lines = []
+                line = input("Please write a message: ")
+                while line != "":
+                    lines.append(line)
+                    line = input()
+                
+                message = "\n".join(lines)
+                
+            send_newsletter(telegram_bot, message, args.specific)
         else:
             telegram_bot.run()
