@@ -253,6 +253,7 @@ class TelegramInterface(object):
                 query.edit_message_text(self._bot.get_error_message(), parse_mode=telegram.ParseMode.HTML)
             else:
                 feedback = self.feedback_cache[update.effective_chat.id]
+                uid = update.effective_chat.id
                 self._bot.add_user_feedback(update.effective_chat.id, feedback)
                 if update.effective_user:
                     query.edit_message_text("Danke für dein wertvolles Feedback, {name}!"
@@ -261,7 +262,7 @@ class TelegramInterface(object):
                     query.edit_message_text("Danke für dein wertvolles Feedback!")
 
                 # Send to Devs
-                context.bot.send_message(chat_id=self.dev_chat_id, text=f"<b>Neues Feedback!</b>\n{feedback}",
+                context.bot.send_message(chat_id=self.dev_chat_id, text=f"<b>Neues Feedback von {uid}!</b>\n{feedback}",
                                          parse_mode=ParseMode.HTML)
 
                 del self.feedback_cache[update.effective_chat.id]
