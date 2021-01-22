@@ -193,15 +193,7 @@ class TelegramInterface(object):
             update.message.reply_html(self._bot.unsubscribe(update.effective_chat.id, districts[0][0]))
 
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
-        graph = self.getGraph(0)
-        message = self._bot.get_report(update.effective_chat.id)
-        if graph:
-            message = update.message.reply_photo(photo=graph, caption=message,
-                                                 parse_mode=telegram.constants.PARSEMODE_HTML)
-            if message.photo:
-                self.addToFileCache(0, message.photo[-1])
-        else:
-            update.message.reply_html(self._bot.get_report(update.effective_chat.id))
+        self.sendReport(update.effective_chat.id)
 
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.unknown_action())
@@ -343,29 +335,39 @@ class TelegramInterface(object):
                 self.log.info("Sleep for one second to avoid flood limits")
                 time.sleep(1.0)
 
-            graph = self.getGraph(0)
-            if graph:
-                try:
-                    sent_msg = context.bot.send_photo(chat_id=userid, photo=graph, caption=message,
-                                                      parse_mode=telegram.constants.PARSEMODE_HTML)
-                except BadRequest as e:
-                    self.log.warning(f"Can't send report attached to graphic for {userid}: {e.message}", exc_info=e)
-
-                    sent_msg = context.bot.send_photo(chat_id=userid, photo=graph,
-                                                      parse_mode=telegram.constants.PARSEMODE_HTML)
-                    context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
-
-                if sent_msg.photo:
-                    self.addToFileCache(0, sent_msg.photo[-1])
-            else:
-                self.log.warning("No graph available in report!")
-                sent_msg = context.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+            sent_msg = self.sendReport(userid, message)
 
             if sent_msg:
                 self._bot.confirm_daily_report_send(userid)
 
             self.log.info(f"Sent report to {userid}!")
             messages_sent += 1
+
+    def sendReport(self, userid: int, message=None):
+        if not message:
+            message = self._bot.get_report(userid)
+
+        graph = self.getGraph(0)
+        if graph:
+            try:
+                sent_msg = self.updater.bot.send_photo(chat_id=userid, photo=graph, caption=message,
+                                                       parse_mode=telegram.constants.PARSEMODE_HTML)
+            except BadRequest as e:
+                self.log.warning(f"Can't send report attached to graphic for {userid}: {e.message}", exc_info=e)
+
+                sent_msg = self.updater.bot.send_photo(chat_id=userid, photo=graph,
+                                                       parse_mode=telegram.constants.PARSEMODE_HTML)
+                self.updater.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+
+            if sent_msg.photo:
+                self.addToFileCache(0, sent_msg.photo[-1])
+        else:
+            self.log.warning("No graph available in report!")
+            sent_msg = self.updater.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+
+        if sent_msg:
+            return True
+        return False
 
     def statHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_statistic())
@@ -423,14 +425,15 @@ class TelegramInterface(object):
 
             message = [f'<b>An exception was raised while handling an update!</b>\n']
             if update:
-                message.append(f'<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}'
-                               f'</pre>\n\n',)
+                message.append(
+                    f'<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}'
+                    f'</pre>\n\n', )
             if context and context.chat_data:
                 message.append(f'<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n')
 
             if context and context.user_data:
-                message.append(f'<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n',)
-                
+                message.append(f'<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n', )
+
             message.append(f'<pre>{html.escape(tb_string)}</pre>')
 
             # Finally, send the message
