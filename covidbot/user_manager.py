@@ -164,7 +164,8 @@ class UserManager(object):
 
     def get_mean_subscriptions(self) -> float:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(*)/COUNT(DISTINCT user_id) as mean FROM subscriptions ORDER BY user_id")
+            cursor.execute("SELECT COUNT(*)/COUNT(DISTINCT user_id) as mean FROM subscriptions ORDER BY user_id "
+                           "LIMIT 1")
             row = cursor.fetchone()
 
             if row['mean']:
@@ -174,12 +175,12 @@ class UserManager(object):
     def get_most_subscriptions(self) -> int:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(rs) as num_subscriptions FROM subscriptions "
-                           "GROUP BY user_id ORDER BY num_subscriptions DESC")
+                           "GROUP BY user_id ORDER BY num_subscriptions DESC LIMIT 1")
             row = cursor.fetchone()
 
-            if row['num_subscriptions']:
+            if row and row['num_subscriptions']:
                 return row['num_subscriptions']
-            return 1
+            return 0
 
     def add_feedback(self, user_id: int, feedback: str) -> Optional[int]:
         if not feedback:

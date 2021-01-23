@@ -148,3 +148,25 @@ class TestSubscriptionManager(TestCase):
         feedback_id = self.manager.add_feedback(user_id, feedback)
         self.assertTrue(self.manager.rm_feedback(feedback_id), "Removing feedback should be successful")
         self.assertFalse(self.manager.rm_feedback(feedback_id), "Removing non-existent feedback should not be successful")
+    
+    def test_get_most_subscriptions(self):
+        self.assertEqual(0, self.manager.get_most_subscriptions(), "Without users 0 should be the number of most "
+                                                                   "subscriptions")
+
+        self.manager.create_user(1)
+        self.assertEqual(0, self.manager.get_most_subscriptions(), "Without subscriptions 0 should be the number of most "
+                                                                   "subscriptions")
+
+        self.manager.create_user(2)
+        self.manager.add_subscription(1, 1)
+        self.manager.add_subscription(1, 2)
+        self.manager.add_subscription(1, 3)
+        self.assertEqual(3, self.manager.get_most_subscriptions())
+
+        self.manager.add_subscription(2, 1)
+        self.assertEqual(3, self.manager.get_most_subscriptions())
+
+        self.manager.add_subscription(2, 2)
+        self.manager.add_subscription(2, 3)
+        self.manager.add_subscription(2, 4)
+        self.assertEqual(4, self.manager.get_most_subscriptions())
