@@ -10,6 +10,7 @@ from mysql.connector import connect, MySQLConnection
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
 from covidbot.telegram_interface import TelegramInterface
+from covidbot.text_interface import SimpleTextInterface
 from covidbot.user_manager import UserManager
 
 
@@ -65,6 +66,7 @@ if __name__ == "__main__":
     parser.add_argument('--message', help='Send a message to users', action='store_true')
     parser.add_argument('--specific', help='Just send the message to specific user_ids',
                         metavar='USERS', action='store', nargs="+", type=int)
+    parser.add_argument('--interactive', help='Chat with Textbot', action='store_true')
     args = parser.parse_args()
     config = parse_config("config.ini")
     api_key = config['TELEGRAM'].get('API_KEY')
@@ -80,25 +82,34 @@ if __name__ == "__main__":
             data = CovidData(conn)
         user_manager = UserManager(conn)
         bot = Bot(data, user_manager)
-        telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
-        if args and (args.message or args.message_file):
-            if args.message_file:
-                try:
-                    with open(args.message_file, "r") as file:
-                        message = file.read()
-                except FileNotFoundError as e:
-                    print("Can't read that file - sorry...")
-                    sys.exit(1)
-            else:
-                lines = []
-                line = input("Please write a message: ")
-                while line != "":
-                    lines.append(line)
-                    line = input()
-                
-                message = "\n".join(lines)
-                
-            send_newsletter(telegram_bot, message, args.specific)
+        if args and args.interactive:
+            bot = SimpleTextInterface(bot)
+            user_input = input("Please enter input:\n")
+            while user_input != "":
+                print(f"> {bot.handle_input(user_input, '1')}")
+                user_input = input()
+            sys.exit(0)
         else:
-            telegram_bot.run()
+            telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
+
+            if args and (args.message or args.message_file):
+                if args.message_file:
+                    try:
+                        with open(args.message_file, "r") as file:
+                            message = file.read()
+                    except FileNotFoundError as e:
+                        print("Can't read that file - sorry...")
+                        sys.exit(1)
+                else:
+                    lines = []
+                    line = input("Please write a message: ")
+                    while line != "":
+                        lines.append(line)
+                        line = input()
+
+                    message = "\n".join(lines)
+
+                send_newsletter(telegram_bot, message, args.specific)
+            else:
+                telegram_bot.run()
