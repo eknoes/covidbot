@@ -17,6 +17,7 @@ class SimpleTextInterface(object):
     def __init__(self, bot: Bot):
         self.bot = bot
         self.handler_list.append(Handler("hilfe", self.helpHandler))
+        self.handler_list.append(Handler("/hilfe", self.helpHandler))
         self.handler_list.append(Handler("abo", self.subscribeHandler))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler))
         self.handler_list.append(Handler("daten", self.currentDataHandler))
@@ -63,7 +64,11 @@ class SimpleTextInterface(object):
 
     def subscribeHandler(self, user_input: str, user_id: str) -> str:
         if not user_input:
-            return self.bot.get_overview(user_id)
+            message, locations = self.bot.get_overview(user_id)
+            message += "\n"
+            for loc in locations:
+                message += f"• {loc[1]}\t{loc[0]}\n"
+            return message
         location = self.parseLocationInput(user_input)
         if type(location) == int:
             return self.bot.subscribe(user_id, location)
