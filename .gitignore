@@ -12,3 +12,4 @@ covidbot/tests/*.json
 data.csv
 *.log
 /covidbot/tests/current_test.csv
+*.pyc
