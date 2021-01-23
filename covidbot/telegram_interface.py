@@ -337,13 +337,17 @@ class TelegramInterface(object):
                 self.log.info("Sleep for one second to avoid flood limits")
                 time.sleep(1.0)
 
-            sent_msg = self.sendReport(userid, message)
+            try:
+                sent_msg = self.sendReport(userid, message)
 
-            if sent_msg:
-                self._bot.confirm_daily_report_send(userid)
+                if sent_msg:
+                    self._bot.confirm_daily_report_send(userid)
 
-            self.log.info(f"Sent report to {userid}!")
-            messages_sent += 1
+                self.log.info(f"Sent report to {userid}!")
+                messages_sent += 1
+            except Unauthorized:
+                self._bot.delete_user(userid)
+                logging.warning(f"Deleted user {userid}, as he blocked us")
 
     def sendReport(self, userid: int, message=None):
         if not message:
@@ -432,15 +436,13 @@ class TelegramInterface(object):
 
         # noinspection PyBroadException
         if isinstance(context.error, Unauthorized):
-            logging.warning(f"TelegramError: Unauthorized chat_id {update.message.chat_id}", exc_info=context.error)
-            self._bot.delete_user(update.message.chat_id)
-        elif isinstance(context.error, BadRequest):
-            logging.warning(f"TelegramError: BadRequest: {str(context.chat_data)}", exc_info=context.error)
-        elif isinstance(context.error, TimedOut):
-            logging.warning(f"TelegramError: TimedOut sending {str(context.chat_data)}", exc_info=context.error)
-        elif isinstance(context.error, NetworkError):
-            logging.warning(f"TelegramError: NetworkError while sending {str(context.chat_data)}",
-                            exc_info=context.error)
+            user_id = 0
+            if update and update.effective_chat:
+                user_id = update.effective_chat.id
+            
+            logging.warning(f"TelegramError: Unauthorized chat_id {user_id}", exc_info=context.error)
+            if user_id and self._bot.delete_user(user_id):
+                logging.info(f"Removed {user_id} from users")
         elif isinstance(context.error, TelegramError):
             logging.warning(f"TelegramError: While sending {context.chat_data}", exc_info=context.error)
         else:
