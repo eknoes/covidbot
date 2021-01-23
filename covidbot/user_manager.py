@@ -162,6 +162,25 @@ class UserManager(object):
             result.sort(key=lambda x: x[0], reverse=True)
             return result
 
+    def get_mean_subscriptions(self) -> float:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT COUNT(*)/COUNT(DISTINCT user_id) as mean FROM subscriptions ORDER BY user_id")
+            row = cursor.fetchone()
+
+            if row['mean']:
+                return row['mean']
+            return 1.0
+
+    def get_most_subscriptions(self) -> int:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT COUNT(rs) as num_subscriptions FROM subscriptions "
+                           "GROUP BY user_id ORDER BY num_subscriptions DESC")
+            row = cursor.fetchone()
+
+            if row['num_subscriptions']:
+                return row['num_subscriptions']
+            return 1
+
     def add_feedback(self, user_id: int, feedback: str) -> Optional[int]:
         if not feedback:
             return None

@@ -350,11 +350,21 @@ class Bot(object):
         self._manager.set_last_update(user_id, updated)
 
     def get_statistic(self) -> str:
-        message = f"Aktuell nutzen {self._manager.get_total_user_number()} Personen diesen Bot.\n\n" \
-                  f"Die zehn beliebtesten Orte sind:\n"
+        message = "Aktuell nutzen {total_user} Personen diesen Bot.\n\n" \
+                  "Die Top 10 der beliebtesten Orte sind:\n"
+
+        i = 1
         for county in self._manager.get_ranked_subscriptions()[:10]:
-            message += f"• {county[0]} Abonnements: {county[1]}\n"
-        return message
+            if county[0] == 1:
+                message += f"{i}. {county[1]} ({county[0]} Abo)\n"
+            else:
+                message += f"{i}. {county[1]} ({county[0]} Abos)\n"
+        message += "\nIm Durchschnitt hat ein:e Nutzer:in {mean} Orte abonniert, " \
+                   "die höchste Anzahl an Abos liegt bei {most_subs}."
+        
+        return message.format(total_user=self._manager.get_total_user_number(),
+                              mean=self.format_incidence(self._manager.get_mean_subscriptions()),
+                              most_subs=self._manager.get_most_subscriptions())
 
     def get_all_user(self) -> List[BotUser]:
         return self._manager.get_all_user()
