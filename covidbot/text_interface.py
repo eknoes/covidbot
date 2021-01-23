@@ -17,7 +17,7 @@ class SimpleTextInterface(object):
     def __init__(self, bot: Bot):
         self.bot = bot
         self.handler_list.append(Handler("hilfe", self.helpHandler))
-        self.handler_list.append(Handler("starte", self.subscribeHandler))
+        self.handler_list.append(Handler("abo", self.subscribeHandler))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler))
         self.handler_list.append(Handler("daten", self.currentDataHandler))
         self.handler_list.append(Handler("bericht", self.reportHandler))
