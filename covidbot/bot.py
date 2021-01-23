@@ -359,6 +359,7 @@ class Bot(object):
                 message += f"{i}. {county[1]} ({county[0]} Abo)\n"
             else:
                 message += f"{i}. {county[1]} ({county[0]} Abos)\n"
+            i += 1
         message += "\nIm Durchschnitt hat ein:e Nutzer:in {mean} Orte abonniert, " \
                    "die höchste Anzahl an Abos liegt bei {most_subs}."
         
