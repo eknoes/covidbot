@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--message-file', help='Send the message from <FILE> to users',
                         metavar='FILE', action='store')
-    parser.add_argument('--message', help='Send a message from to users', action='store_true')
+    parser.add_argument('--message', help='Send a message to users', action='store_true')
     parser.add_argument('--specific', help='Just send the message to specific user_ids',
                         metavar='USERS', action='store', nargs="+", type=int)
     args = parser.parse_args()

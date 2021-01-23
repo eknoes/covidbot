@@ -51,24 +51,6 @@ class TelegramInterface(object):
         self._bot = bot
         self.updater = Updater(api_key)
 
-        self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('loeschmich', self.deleteHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('datenschutz', self.privacyHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('sprache', self.languageHandler))
-        self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
-        self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
-        self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
-        self.updater.dispatcher.add_handler(MessageHandler(Filters.location, self.directMessageHandler))
-        self.updater.dispatcher.add_error_handler(self.error_callback)
-        self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
-
     def getGraph(self, district_id: int) -> Union[PhotoSize, BytesIO]:
         if district_id in self.graph_cache.keys():
             return self.graph_cache.get(district_id)
@@ -377,6 +359,24 @@ class TelegramInterface(object):
         update.message.reply_html(self._bot.get_statistic())
 
     def run(self):
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('loeschmich', self.deleteHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('datenschutz', self.privacyHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('sprache', self.languageHandler))
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
+        self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.location, self.directMessageHandler))
+        self.updater.dispatcher.add_error_handler(self.error_callback)
+        self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
+
         self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
         self.updater.start_polling()
         self.updater.idle()
