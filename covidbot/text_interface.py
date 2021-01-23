@@ -38,11 +38,12 @@ class SimpleTextInterface(object):
                 f'Mit "Daten ORT" erhältst du einmalig die aktuellen Daten für den gegebenen Ort.'
                 f'\n\n'
                 f'<b>Weiteres</b>\n'
-                f'• Sende /bericht um deinen Tagesbericht erneut zu erhalten\n'
+                f'• Sende "Bericht" um deinen aktuellen Tagesbericht zu erhalten. Unabhängig davon erhältst du diesen '
+                f'jeden Morgen, wenn neue Daten vorliegen\n'
                 f'\n\n'
                 f'Mehr Informationen zu diesem Bot findest du hier: '
                 f'https://github.com/eknoes/covid-bot\n\n'
-                f'Diesen Hilfetext erhältst du über /hilfe')
+                f'Diesen Hilfetext erhältst du über "Hilfe"')
 
     def parseLocationInput(self, location_query: str) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)

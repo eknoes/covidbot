@@ -2,6 +2,7 @@ import argparse
 import configparser
 import locale
 import logging
+import re
 import sys
 from typing import List, Optional
 
@@ -28,13 +29,18 @@ def get_connection(cfg) -> MySQLConnection:
                    host=cfg['DATABASE'].get('HOST', 'localhost'))
 
 
+def strip_html(text: str) -> str:
+    # Simple replace, as it is just used for interfaces that do not support scripting in any way
+    return re.sub('<[^<]+?>', "", text)
+
+
 def send_newsletter(telegram: TelegramInterface, message: str, specific_users: Optional[List[int]]):
     print(message)
-    
+
     ident = "all"
     if specific_users:
         ident = "specific"
-    
+
     if input(f"Do you want to send this message to {ident} users? (y/N)").upper() != "Y":
         exit(0)
 
@@ -85,10 +91,10 @@ if __name__ == "__main__":
 
         if args and args.interactive:
             bot = SimpleTextInterface(bot)
-            user_input = input("Please enter input:\n")
+            user_input = input("Please enter input:\n> ")
             while user_input != "":
-                print(f"> {bot.handle_input(user_input, '1')}")
-                user_input = input()
+                print(f"{strip_html(bot.handle_input(user_input, '1'))}")
+                user_input = input("> ")
             sys.exit(0)
         else:
             telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
