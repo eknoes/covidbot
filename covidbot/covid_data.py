@@ -149,9 +149,13 @@ class CovidData(object):
         search_str = search_str.replace(" ", "%")
         results = []
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT rs, county_name FROM counties WHERE LOWER(county_name) LIKE %s OR '
-                           'concat(LOWER(type), LOWER(county_name)) LIKE %s',
-                           ['%' + search_str + '%', '%' + search_str + '%'])
+            if search_str.isdigit():
+                cursor.execute('SELECT rs, county_name FROM counties WHERE rs = %s',
+                               [int(search_str)])
+            else:
+                cursor.execute('SELECT rs, county_name FROM counties WHERE LOWER(county_name) LIKE %s OR '
+                               'concat(LOWER(type), LOWER(county_name)) LIKE %s',
+                               ['%' + search_str + '%', '%' + search_str + '%'])
             for row in cursor.fetchall():
                 if row['county_name'].lower() == search_str.replace("%", " "):
                     return [(row['rs'], row['county_name'])]
