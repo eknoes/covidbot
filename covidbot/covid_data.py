@@ -52,7 +52,8 @@ class CovidData(object):
     def _create_tables(self):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS counties '
-                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30), parent INTEGER,'
+                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30),'
+                           'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
                            'UNIQUE(rs, county_name))')
             # Raw Data
@@ -106,24 +107,25 @@ class CovidData(object):
                 covid_data.append(
                     (int(row['BL_ID']), new_updated, None, float(row['cases7_bl_per_100k']),
                      None))
-                rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', 0))
+                rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', None, 0))
                 added_bl.add(row['BL_ID'])
 
             covid_data.append((int(row['RS']), new_updated, int(row['cases']), float(row['cases7_per_100k']),
                                int(row['deaths'])))
             rs_data.append((int(row['RS']), self.clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
-                            row['BEZ'], int(row['BL_ID'])))
+                            row['BEZ'], int(row['EWZ']), int(row['BL_ID'])))
 
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.executemany('INSERT INTO counties (rs, county_name, type, parent) VALUES (%s, %s, %s, %s) '
-                               'ON DUPLICATE KEY UPDATE '
-                               'type=type, parent=parent, county_name=county_name',
+            cursor.executemany('INSERT INTO counties (rs, county_name, type, population, parent) '
+                               'VALUES (%s, %s, %s, %s, %s) '
+                               'ON DUPLICATE KEY UPDATE population=VALUES(population)',
                                rs_data)
             cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
              VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
 
             # Calculate all parents, must be executed for every depth
             for i in range(2):
+                # Calculate Covid Data
                 cursor.execute('''INSERT INTO covid_data (rs, date, total_cases, total_deaths)
                                     SELECT new.parent, new_date, new_cases, new_deaths
                                     FROM
@@ -136,6 +138,14 @@ class CovidData(object):
                                   ON DUPLICATE KEY UPDATE 
                                   date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths''',
                                [new_updated])
+                # Calculate Population
+                cursor.execute(
+                    'UPDATE counties, (SELECT ncounties.rs as id, SUM(counties.population) as pop FROM counties\n'
+                    '    LEFT JOIN counties ncounties ON ncounties.rs = counties.parent\n'
+                    'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
+                    'SET population=pop_sum.pop WHERE rs=pop_sum.id')
+                # TODO: Calculate 7 Day incidence, see #32 for current problems
+
             self.connection.commit()
 
     @staticmethod
