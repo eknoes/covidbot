@@ -25,4 +25,8 @@ class SignalInterface(SimpleTextInterface):
         text = ctx.message.get_body()
         if text:
             reply = self.handle_input(text, 1)
-            await ctx.message.reply(reply)
+            await ctx.message.reply(self.strip_html(reply))
+
+    def strip_html(self, text: str) -> str:
+        pattern = re.compile("<[^<]+?>")
+        return pattern.sub("", text)
