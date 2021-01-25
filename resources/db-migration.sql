@@ -12,11 +12,6 @@ alter table bot_user
 alter table bot_user
 	add user_id int auto_increment primary key;
 
-
-alter table bot_user
-	add constraint bot_user_pk
-		primary key (user_id);
-
 alter table bot_user
 	add constraint bot_user_unique
         unique (platform_id, platform);
