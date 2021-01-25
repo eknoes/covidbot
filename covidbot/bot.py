@@ -221,12 +221,15 @@ class Bot(object):
         country = self._data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n" \
                   "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
-                  "{new_deaths} Todesfälle {new_deaths_trend} gemeldet.\n\n"
+                  "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
+                  "{incidence_trend}.\n\n"
         message = message.format(date=self._data.get_last_update().strftime("%d.%m.%Y"),
                                  new_cases=self.format_int(country.new_cases),
                                  new_cases_trend=self.format_data_trend(country.cases_trend),
                                  new_deaths=self.format_int(country.new_deaths),
-                                 new_deaths_trend=self.format_data_trend(country.deaths_trend))
+                                 new_deaths_trend=self.format_data_trend(country.deaths_trend),
+                                 incidence=self.format_incidence(country.incidence),
+                                 incidence_trend=self.format_data_trend(country.incidence_trend))
         if subscriptions and len(subscriptions) > 0:
             message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen in den vergangenen 7 " \
                        "Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten " \

@@ -122,7 +122,11 @@ class CovidData(object):
                                rs_data)
             cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
              VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
+            self.connection.commit()
+        self.calculate_aggregated_values(new_updated)
 
+    def calculate_aggregated_values(self, new_updated: date):
+        with self.connection.cursor(dictionary=True) as cursor:
             # Calculate all parents, must be executed for every depth
             for i in range(2):
                 # Calculate Covid Data
@@ -144,7 +148,16 @@ class CovidData(object):
                     '    LEFT JOIN counties ncounties ON ncounties.rs = counties.parent\n'
                     'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
                     'SET population=pop_sum.pop WHERE rs=pop_sum.id')
-                # TODO: Calculate 7 Day incidence, see #32 for current problems
+                # Calculate Incidence
+                cursor.execute('UPDATE covid_data, '
+                               '(SELECT c.parent as rs, d.date, SUM(c.population * d.incidence) / SUM(c.population) '
+                               'as incidence FROM covid_data as d '
+                               'LEFT JOIN counties c on c.rs = d.rs '
+                               'WHERE c.parent IS NOT NULL '
+                               'GROUP BY date, c.parent) as incidence '
+                               'SET covid_data.incidence = incidence.incidence '
+                               'WHERE covid_data.incidence IS NULL AND covid_data.date = incidence.date '
+                               'AND covid_data.rs = incidence.rs')
 
             self.connection.commit()
 

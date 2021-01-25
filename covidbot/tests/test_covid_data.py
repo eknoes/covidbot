@@ -1,3 +1,4 @@
+from datetime import date
 from unittest import TestCase
 
 from mysql.connector import MySQLConnection
@@ -32,6 +33,8 @@ class CovidDataTest(TestCase):
             with open("resources/2021-01-16-testdata-covid_data.sql", "r") as f:
                 for stmt in f.readlines():
                     cursor.execute(stmt)
+
+            self.data.calculate_aggregated_values(date.fromisoformat("2021-01-16"))
 
     def tearDown(self) -> None:
         del self.data
@@ -104,3 +107,4 @@ class CovidDataTest(TestCase):
         self.assertIsNotNone(self.data.get_country_data())
         self.assertEqual(18678, data.new_cases, "New Cases on 16.01.2020 should be 18,678 for Germany")
         self.assertEqual(980, data.new_deaths, "New Deaths on 16.01.2020 should be 980 for Germany")
+        self.assertEqual(139.24, data.incidence, "Incidence on 16.01.2020 should be 139.2 for Germany")
