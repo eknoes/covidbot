@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Callable, Dict, List, TypedDict, Union, Optional
+from typing import Callable, Dict, List, TypedDict, Union, Optional, Tuple
 
 from covidbot.bot import Bot
 
 
 @dataclass
-class BotRespone:
+class BotResponse:
     message: str
     image: Optional[BytesIO] = None
 
@@ -17,7 +17,7 @@ class BotRespone:
 @dataclass
 class Handler:
     command: str
-    method: Callable[[str, str], BotRespone]
+    method: Callable[[str, str], BotResponse]
 
 
 class SimpleTextInterface(object):
@@ -32,16 +32,17 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("beende", self.unsubscribeHandler))
         self.handler_list.append(Handler("daten", self.currentDataHandler))
         self.handler_list.append(Handler("bericht", self.reportHandler))
+        self.handler_list.append(Handler("statistik", self.statHandler))
         self.handler_list.append(Handler("", self.directHandler))
 
-    def handle_input(self, user_input: str, user_id: str) -> BotRespone:
+    def handle_input(self, user_input: str, user_id: str) -> BotResponse:
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
                 text_in = user_input[len(handler.command):].strip()
                 return handler.method(text_in, user_id)
 
-    def helpHandler(self, user_input: str, user_id: str) -> BotRespone:
-        return BotRespone(f'Hallo,\n'
+    def helpHandler(self, user_input: str, user_id: str) -> BotResponse:
+        return BotResponse(f'Hallo,\n'
                           f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
                           f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
                           f'<b>📈 Informationen erhalten</b>\n'
@@ -72,37 +73,48 @@ class SimpleTextInterface(object):
                               f"auch die ID nutzen, also bspw. Abo {locations[0][0]} für {locations[0][1]}"
             return locations_list
 
-    def subscribeHandler(self, user_input: str, user_id: str) -> BotRespone:
+    def subscribeHandler(self, user_input: str, user_id: str) -> BotResponse:
         if not user_input:
             message, locations = self.bot.get_overview(user_id)
             if locations:
                 message += "\n"
                 for loc in locations:
                     message += f"• {loc[1]}\t{loc[0]}\n"
-            return BotRespone(message)
+            return BotResponse(message)
         location = self.parseLocationInput(user_input)
         if type(location) == int:
-            return BotRespone(self.bot.subscribe(user_id, location))
-        return BotRespone(location)
+            return BotResponse(self.bot.subscribe(user_id, location))
+        return BotResponse(location)
 
-    def unsubscribeHandler(self, user_input: str, user_id: str) -> BotRespone:
+    def unsubscribeHandler(self, user_input: str, user_id: str) -> BotResponse:
         location = self.parseLocationInput(user_input)
         if type(location) == int:
-            return BotRespone(self.bot.unsubscribe(user_id, location))
-        return BotRespone(location)
+            return BotResponse(self.bot.unsubscribe(user_id, location))
+        return BotResponse(location)
 
-    def currentDataHandler(self, user_input: str, user_id: str) -> BotRespone:
+    def currentDataHandler(self, user_input: str, user_id: str) -> BotResponse:
         location = self.parseLocationInput(user_input)
         if type(location) == int:
             message = self.bot.get_district_report(location)
             image = self.bot.get_graphical_report(location)
-            return BotRespone(message, image)
-        return BotRespone(location)
+            return BotResponse(message, image)
+        return BotResponse(location)
 
-    def reportHandler(self, user_input: str, user_id: str) -> BotRespone:
+    def reportHandler(self, user_input: str, user_id: str) -> BotResponse:
         message = self.bot.get_report(user_id)
         graph = self.bot.get_graphical_report(0)
-        return BotRespone(message, graph)
+        return BotResponse(message, graph)
 
-    def directHandler(self, user_input: str, user_id: str) -> BotRespone:
-        return BotRespone(self.bot.unknown_action())
+    def directHandler(self, user_input: str, user_id: str) -> BotResponse:
+        return BotResponse(self.bot.unknown_action())
+
+    def statHandler(self, user_input: str, user_id: str) -> BotResponse:
+        return BotResponse(self.bot.get_statistic())
+
+    def getUpdates(self) -> List[Tuple[str, BotResponse]]:
+        updates = self.bot.update()
+        graph = self.bot.get_graphical_report(0)
+        return list(map(lambda x: (x[0], BotResponse(x[1], graph)), updates))
+
+    def confirm_daily_report_send(self, user_identification: Union[int, str]):
+        return self.bot.confirm_daily_report_send(user_identification)
