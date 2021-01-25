@@ -28,7 +28,7 @@ def get_connection(cfg) -> MySQLConnection:
                    user=cfg['DATABASE'].get('USER'),
                    password=cfg['DATABASE'].get('PASSWORD'),
                    port=cfg['DATABASE'].get('PORT'),
-                   host=cfg['DATABASE'].get('HOST', 'localhost'))
+                   host=cfg['DATABASE'].get('HOST', 'localhost'), pool_size=4)
 
 
 def strip_html(text: str) -> str:
@@ -91,45 +91,50 @@ if __name__ == "__main__":
         print("You can use --specific only with --message or --message-file")
         sys.exit(1)
 
-    with get_connection(config) as conn:
-        if args and (args.message or args.message_file):
-            data = CovidData(conn, disable_autoupdate=True)
+    if args.interactive:
+        data = CovidData(get_connection(config))
+        user_manager = UserManager("simple_text", get_connection(config))
+
+        bot = SimpleTextInterface(Bot(data, user_manager))
+        user_input = input("Please enter input:\n> ")
+        while user_input != "":
+            print(f"{strip_html(bot.handle_input(user_input, '1'))}")
+            user_input = input("> ")
+        sys.exit(0)
+    elif args.signal:
+        data = CovidData(get_connection(config))
+        user_manager = UserManager("signal", get_connection(config))
+        bot = Bot(data, user_manager)
+        signal_interface = SignalInterface(config['SIGNAL'].get('PHONE_NUMBER'),
+                                           config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
+        asyncio.run(signal_interface.run())
+    elif args.telegram:
+        if args.message or args.message_file:
+            data = CovidData(get_connection(config), disable_autoupdate=True)
         else:
-            data = CovidData(conn)
-        user_manager = UserManager(conn)
+            data = CovidData(get_connection(config))
+        user_manager = UserManager("telegram", get_connection(config))
         bot = Bot(data, user_manager)
 
-        if args and args.interactive:
-            bot = SimpleTextInterface(bot)
-            user_input = input("Please enter input:\n> ")
-            while user_input != "":
-                print(f"{strip_html(bot.handle_input(user_input, '1'))}")
-                user_input = input("> ")
-            sys.exit(0)
-        elif args.signal:
-            signal_interface = SignalInterface(config['SIGNAL'].get('PHONE_NUMBER'),
-                                               config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
-            asyncio.run(signal_interface.run())
-        elif args.telegram:
-            telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
+        telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
-            if args and (args.message or args.message_file):
-                if args.message_file:
-                    try:
-                        with open(args.message_file, "r") as file:
-                            message = file.read()
-                    except FileNotFoundError as e:
-                        print("Can't read that file - sorry...")
-                        sys.exit(1)
-                else:
-                    lines = []
-                    line = input("Please write a message: ")
-                    while line != "":
-                        lines.append(line)
-                        line = input()
-
-                    message = "\n".join(lines)
-
-                send_newsletter(telegram_bot, message, args.specific)
+        if args and (args.message or args.message_file):
+            if args.message_file:
+                try:
+                    with open(args.message_file, "r") as file:
+                        message = file.read()
+                except FileNotFoundError as e:
+                    print("Can't read that file - sorry...")
+                    sys.exit(1)
             else:
-                telegram_bot.run()
+                lines = []
+                line = input("Please write a message: ")
+                while line != "":
+                    lines.append(line)
+                    line = input()
+
+                message = "\n".join(lines)
+
+            send_newsletter(telegram_bot, message, args.specific)
+        else:
+            telegram_bot.run()

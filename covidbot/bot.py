@@ -1,14 +1,12 @@
 import datetime
-import itertools
 import logging
 import re
 from enum import Enum
 from io import BytesIO
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Union
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator, FixedLocator
 
 from covidbot.covid_data import CovidData, DistrictData, TrendValue
 from covidbot.location_service import LocationService
@@ -33,7 +31,8 @@ class Bot(object):
         self._manager = subscription_manager
         self._location_service = LocationService('resources/germany_rs.geojson')
 
-    def set_language(self, user_id: int, language: Optional[str]) -> str:
+    def set_language(self, user_identification: Union[int, str], language: Optional[str]) -> str:
+        user_id = self._manager.get_user_id(user_identification)
         if not language:
             user = self._manager.get_user(user_id)
             if user and user.language:
@@ -90,9 +89,10 @@ class Bot(object):
             name = self._data.get_district(district_id).name
             return None, [(district_id, name)]
 
-    def get_possible_actions(self, user_id: int, district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
+    def get_possible_actions(self, user_identification: Union[int, str], district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
         actions = [("Daten anzeigen", UserDistrictActions.REPORT)]
         district = self._data.get_district(district_id)
+        user_id = self._manager.get_user_id(user_identification)
 
         if district.type != "Staat":
             user = self._manager.get_user(user_id, with_subscriptions=True)
@@ -189,11 +189,12 @@ class Bot(object):
         plt.clf()
         return buf
 
-    def subscribe(self, userid: int, district_id: int) -> str:
-        if self._manager.add_subscription(userid, district_id):
+    def subscribe(self, user_identification: Union[int, str], district_id: int) -> str:
+        user_id = self._manager.get_user_id(user_identification)
+        if self._manager.add_subscription(user_id, district_id):
             message = "Dein Abonnement für {name} wurde erstellt."
             # Send more on first subscription
-            user = self._manager.get_user(userid, True)
+            user = self._manager.get_user(user_id, True)
             if len(user.subscriptions) == 1:
                 message += " "
                 message += ("Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
@@ -204,15 +205,17 @@ class Bot(object):
             message = "Du hast {name} bereits abonniert."
         return message.format(name=self._data.get_district(district_id).name)
 
-    def unsubscribe(self, userid: int, district_id: int) -> str:
-        if self._manager.rm_subscription(userid, district_id):
+    def unsubscribe(self, user_identification: Union[int, str], district_id: int) -> str:
+        user_id = self._manager.get_user_id(user_identification)
+        if self._manager.rm_subscription(user_id, district_id):
             message = "Dein Abonnement für {name} wurde beendet."
         else:
             message = "Du hast {name} nicht abonniert."
         return message.format(name=self._data.get_district(district_id).name)
 
-    def get_report(self, userid: int) -> str:
-        user = self._manager.get_user(userid, with_subscriptions=True)
+    def get_report(self, user_identification: Union[int, str]) -> str:
+        user_id = self._manager.get_user_id(user_identification)
+        user = self._manager.get_user(user_id, with_subscriptions=True)
         if not user:
             return self._get_report([])
         return self._get_report(user.subscriptions)
@@ -253,9 +256,11 @@ class Bot(object):
 
         return message
 
-    def delete_user(self, user_id: int) -> str:
-        if self._manager.delete_user(user_id):
-            return "Deine Daten wurden erfolgreich gelöscht."
+    def delete_user(self, user_identification: Union[int, str]) -> str:
+        user_id = self._manager.get_user_id(user_identification, create_if_not_exists=False)
+        if user_id:
+            if self._manager.delete_user(user_id):
+                return "Deine Daten wurden erfolgreich gelöscht."
         return "Zu deinem Account sind keine Daten vorhanden."
 
     @staticmethod
@@ -302,8 +307,9 @@ class Bot(object):
 
         return result
 
-    def get_overview(self, userid: int) -> Tuple[str, Optional[List[Tuple[int, str]]]]:
-        user = self._manager.get_user(userid, with_subscriptions=True)
+    def get_overview(self, user_identification: Union[int, str]) -> Tuple[str, Optional[List[Tuple[int, str]]]]:
+        user_id = self._manager.get_user_id(user_identification)
+        user = self._manager.get_user(user_id, with_subscriptions=True)
         if not user or not user.subscriptions:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
                       "bspw. <code>/abo Dresden</code> "
@@ -323,7 +329,7 @@ class Bot(object):
         return ("Dieser Befehl wurde nicht verstanden. Nutze <code>/hilfe</code> um einen Überblick über die Funktionen"
                 "zu bekommen!")
 
-    def update(self) -> Optional[List[Tuple[int, str]]]:
+    def update(self) -> Optional[List[Tuple[Union[int, str], str]]]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
@@ -336,7 +342,7 @@ class Bot(object):
         data_update = self._data.get_last_update()
         for user in self._manager.get_all_user(with_subscriptions=True):
             if user.last_update is None or user.last_update.date() < data_update:
-                result.append((user.id, self._get_report(user.subscriptions)))
+                result.append((user.platform_id, self._get_report(user.subscriptions)))
 
         if len(result) > 0:
             return result
@@ -345,8 +351,9 @@ class Bot(object):
             return self.update()
         return result
 
-    def confirm_daily_report_send(self, user_id: int):
+    def confirm_daily_report_send(self, user_identification: Union[int, str]):
         updated = self._data.get_last_update()
+        user_id = self._manager.get_user_id(user_identification)
         self._manager.set_last_update(user_id, updated)
 
     def get_statistic(self) -> str:
@@ -370,7 +377,8 @@ class Bot(object):
     def get_all_user(self) -> List[BotUser]:
         return self._manager.get_all_user()
 
-    def add_user_feedback(self, user_id: int, feedback: str) -> Optional[int]:
+    def add_user_feedback(self, user_identification: Union[int, str], feedback: str) -> Optional[int]:
+        user_id = self._manager.get_user_id(user_identification)
         return self._manager.add_feedback(user_id, feedback)
 
     @staticmethod

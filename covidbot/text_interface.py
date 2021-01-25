@@ -59,15 +59,16 @@ class SimpleTextInterface(object):
 
             locations_list += "\n"
             locations_list += "Leider musst du deine Auswahl genauer angeben. Anstatt des kompletten Namens kannst du " \
-                              f"auch die ID nutzen, also bspw. /abo {locations[0][0]} für {locations[0][1]}"
+                              f"auch die ID nutzen, also bspw. Abo {locations[0][0]} für {locations[0][1]}"
             return locations_list
 
     def subscribeHandler(self, user_input: str, user_id: str) -> str:
         if not user_input:
             message, locations = self.bot.get_overview(user_id)
-            message += "\n"
-            for loc in locations:
-                message += f"• {loc[1]}\t{loc[0]}\n"
+            if locations:
+                message += "\n"
+                for loc in locations:
+                    message += f"• {loc[1]}\t{loc[0]}\n"
             return message
         location = self.parseLocationInput(user_input)
         if type(location) == int:

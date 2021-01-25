@@ -24,7 +24,7 @@ class SignalInterface(SimpleTextInterface):
     async def text_handler(self, ctx: ChatContext):
         text = ctx.message.get_body()
         if text:
-            reply = self.handle_input(text, 1)
+            reply = self.handle_input(text, ctx.message.username)
             await ctx.message.reply(self.strip_html(reply))
 
     def strip_html(self, text: str) -> str:
