@@ -1,13 +1,23 @@
 from dataclasses import dataclass
-from typing import Callable, Dict, List, TypedDict, Union
+from io import BytesIO
+from typing import Callable, Dict, List, TypedDict, Union, Optional
 
 from covidbot.bot import Bot
 
 
 @dataclass
+class BotRespone:
+    message: str
+    image: Optional[BytesIO] = None
+
+    def __str__(self):
+        return self.message
+
+
+@dataclass
 class Handler:
     command: str
-    method: Callable[[str, str], str]
+    method: Callable[[str, str], BotRespone]
 
 
 class SimpleTextInterface(object):
@@ -24,27 +34,27 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("bericht", self.reportHandler))
         self.handler_list.append(Handler("", self.directHandler))
 
-    def handle_input(self, user_input: str, user_id: str) -> str:
+    def handle_input(self, user_input: str, user_id: str) -> BotRespone:
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
                 text_in = user_input[len(handler.command):].strip()
                 return handler.method(text_in, user_id)
 
-    def helpHandler(self, user_input: str, user_id: str) -> str:
-        return (f'Hallo,\n'
-                f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
-                f'<b>📈 Informationen erhalten</b>\n'
-                f'Mit "Abo ORT" kannst du einen Ort abonnieren, mit "Beende ORT" diese Abonnement wieder beenden. '
-                f'Mit "Daten ORT" erhältst du einmalig die aktuellen Daten für den gegebenen Ort.'
-                f'\n\n'
-                f'<b>Weiteres</b>\n'
-                f'• Sende "Bericht" um deinen aktuellen Tagesbericht zu erhalten. Unabhängig davon erhältst du diesen '
-                f'jeden Morgen, wenn neue Daten vorliegen\n'
-                f'\n\n'
-                f'Mehr Informationen zu diesem Bot findest du hier: '
-                f'https://github.com/eknoes/covid-bot\n\n'
-                f'Diesen Hilfetext erhältst du über "Hilfe"')
+    def helpHandler(self, user_input: str, user_id: str) -> BotRespone:
+        return BotRespone(f'Hallo,\n'
+                          f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
+                          f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
+                          f'<b>📈 Informationen erhalten</b>\n'
+                          f'Mit "Abo ORT" kannst du einen Ort abonnieren, mit "Beende ORT" diese Abonnement wieder beenden. '
+                          f'Mit "Daten ORT" erhältst du einmalig die aktuellen Daten für den gegebenen Ort.'
+                          f'\n\n'
+                          f'<b>Weiteres</b>\n'
+                          f'• Sende "Bericht" um deinen aktuellen Tagesbericht zu erhalten. Unabhängig davon erhältst du diesen '
+                          f'jeden Morgen, wenn neue Daten vorliegen\n'
+                          f'\n\n'
+                          f'Mehr Informationen zu diesem Bot findest du hier: '
+                          f'https://github.com/eknoes/covid-bot\n\n'
+                          f'Diesen Hilfetext erhältst du über "Hilfe"')
 
     def parseLocationInput(self, location_query: str) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)
@@ -62,33 +72,37 @@ class SimpleTextInterface(object):
                               f"auch die ID nutzen, also bspw. Abo {locations[0][0]} für {locations[0][1]}"
             return locations_list
 
-    def subscribeHandler(self, user_input: str, user_id: str) -> str:
+    def subscribeHandler(self, user_input: str, user_id: str) -> BotRespone:
         if not user_input:
             message, locations = self.bot.get_overview(user_id)
             if locations:
                 message += "\n"
                 for loc in locations:
                     message += f"• {loc[1]}\t{loc[0]}\n"
-            return message
+            return BotRespone(message)
         location = self.parseLocationInput(user_input)
         if type(location) == int:
-            return self.bot.subscribe(user_id, location)
-        return location
+            return BotRespone(self.bot.subscribe(user_id, location))
+        return BotRespone(location)
 
-    def unsubscribeHandler(self, user_input: str, user_id: str) -> str:
+    def unsubscribeHandler(self, user_input: str, user_id: str) -> BotRespone:
         location = self.parseLocationInput(user_input)
         if type(location) == int:
-            return self.bot.unsubscribe(user_id, location)
-        return location
+            return BotRespone(self.bot.unsubscribe(user_id, location))
+        return BotRespone(location)
 
-    def currentDataHandler(self, user_input: str, user_id: str) -> str:
+    def currentDataHandler(self, user_input: str, user_id: str) -> BotRespone:
         location = self.parseLocationInput(user_input)
         if type(location) == int:
-            return self.bot.get_district_report(location)
-        return location
+            message = self.bot.get_district_report(location)
+            image = self.bot.get_graphical_report(location)
+            return BotRespone(message, image)
+        return BotRespone(location)
 
-    def reportHandler(self, user_input: str, user_id: str) -> str:
-        return self.bot.get_report(user_id)
+    def reportHandler(self, user_input: str, user_id: str) -> BotRespone:
+        message = self.bot.get_report(user_id)
+        graph = self.bot.get_graphical_report(0)
+        return BotRespone(message, graph)
 
-    def directHandler(self, user_input: str, user_id: str) -> str:
-        return self.bot.unknown_action()
+    def directHandler(self, user_input: str, user_id: str) -> BotRespone:
+        return BotRespone(self.bot.unknown_action())

@@ -99,7 +99,7 @@ if __name__ == "__main__":
         bot = SimpleTextInterface(Bot(data, user_manager))
         user_input = input("Please enter input:\n> ")
         while user_input != "":
-            print(f"{strip_html(bot.handle_input(user_input, '1'))}")
+            print(f"{strip_html(bot.handle_input(user_input, '1').message)}")
             user_input = input("> ")
         sys.exit(0)
     elif args.signal:
