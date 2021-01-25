@@ -29,7 +29,7 @@ class UserManager(object):
                            '(user_id INTEGER PRIMARY KEY AUTO_INCREMENT, '
                            'last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
                            'language VARCHAR(20) DEFAULT NULL, created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
-                           'platform_id VARCHAR(100), platform VARCHAR(10), UNIQUE(platform_id, platform))')
+                           'platform_id VARCHAR(100), platform VARCHAR(20), UNIQUE(platform_id, platform))')
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')

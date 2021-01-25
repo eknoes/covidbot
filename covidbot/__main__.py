@@ -84,7 +84,8 @@ if __name__ == "__main__":
     if args.signal and args.telegram:
         sys.exit(1)
 
-    if not args.signal and not args.telegram:
+    if not args.signal and not args.telegram and not args.interactive:
+        print("You have to specify the used messenger")
         sys.exit(1)
 
     if args.specific and not (args.message or args.message_file):
@@ -93,7 +94,7 @@ if __name__ == "__main__":
 
     if args.interactive:
         data = CovidData(get_connection(config))
-        user_manager = UserManager("simple_text", get_connection(config))
+        user_manager = UserManager("interactive", get_connection(config))
 
         bot = SimpleTextInterface(Bot(data, user_manager))
         user_input = input("Please enter input:\n> ")
