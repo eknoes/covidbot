@@ -41,11 +41,15 @@ class TestBot(TestCase):
         hessen_id = self.bot.find_district_id("Hessen")[1][0][0]
         bayern_id = self.bot.find_district_id("Bayern")[1][0][0]
 
-        uid1 = self.man.get_user_id("uid1")
-        uid2 = self.man.get_user_id("uid2")
+        user1 = "uid1"
+        user2 = "uid2"
 
-        self.bot.subscribe(uid1, hessen_id)
-        self.bot.subscribe(uid2, bayern_id)
+        self.bot.subscribe(user1, hessen_id)
+        self.bot.subscribe(user2, bayern_id)
+
+        uid1 = self.man.get_user_id(user1)
+        uid2 = self.man.get_user_id(user2)
+
         self.man.set_last_update(uid1, datetime.now() - timedelta(days=1))
         self.man.set_last_update(uid2, datetime.now() - timedelta(days=1))
 
@@ -54,15 +58,15 @@ class TestBot(TestCase):
         for u in update:
             if u[0] == 1:
                 self.assertRegex(u[1], "Hessen", "A subscribed district must be part of the daily report")
-                self.assertEqual(self.bot.get_report(uid1), u[1], "The daily report should be equal to the manual report")
+                self.assertEqual(self.bot.get_report(user1), u[1], "The daily report should be equal to the manual report")
             if u[0] == 2:
                 self.assertRegex(u[1], "Bayern", "A subscribed district must be part of the daily report")
-                self.assertEqual(self.bot.get_report(uid2), u[1], "The daily report should be equal to the manual report")
+                self.assertEqual(self.bot.get_report(user2), u[1], "The daily report should be equal to the manual report")
 
         self.assertEqual(2, len(self.bot.update()), "Without setting last_updated, new reports should be generated")
-        self.bot.confirm_daily_report_send(uid1)
+        self.bot.confirm_daily_report_send(user1)
         self.assertEqual(1, len(self.bot.update()), "Without setting last_updated, new report should be generated")
-        self.bot.confirm_daily_report_send(uid2)
+        self.bot.confirm_daily_report_send(user2)
         self.assertEqual([], self.bot.update(), "If both users already have current report, it should not be "
                                                      "sent again")
 
@@ -70,10 +74,10 @@ class TestBot(TestCase):
         self.assertEqual([], self.bot.update(), "Empty subscribers should generate empty update list")
 
     def test_no_user(self):
-        uid1 = self.man.get_user_id("uid1")
+        uid1 = "uid1"
         self.assertIsNotNone(self.bot.get_overview(uid1), "A not yet existing user should get an overview over their "
                                                        "subscriptions")
-        self.assertIsNotNone(self.bot.get_district_report(uid1), "A not yet existing user should get a district report")
+        self.assertIsNotNone(self.bot.get_district_report(1), "A not yet existing user should get a district report")
         self.assertIsNotNone(self.bot.find_district_id("Berlin"), "A not yet existing user should be able to query for "
                                                                   "a location")
         self.assertIsNotNone(self.bot.get_report(uid1), "A not yet existing user should be able to query for a report")
@@ -128,7 +132,7 @@ class TestBot(TestCase):
         self.assertEqual("C", actual_names[2], "Districts should be sorted alphabetically")
 
     def test_get_possible_actions(self):
-        uid1 = self.man.get_user_id("uid1")
+        uid1 = "uid1"
         expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT]
         actual = map(lambda x: x[1], self.bot.get_possible_actions(uid1, 1)[1])
         self.assertCountEqual(expected, actual, "A user without a subscription should get SUBSCRIBE and REPORT action")

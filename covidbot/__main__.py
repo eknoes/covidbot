@@ -28,7 +28,7 @@ def get_connection(cfg) -> MySQLConnection:
                    user=cfg['DATABASE'].get('USER'),
                    password=cfg['DATABASE'].get('PASSWORD'),
                    port=cfg['DATABASE'].get('PORT'),
-                   host=cfg['DATABASE'].get('HOST', 'localhost'), pool_size=4)
+                   host=cfg['DATABASE'].get('HOST', 'localhost'))
 
 
 def strip_html(text: str) -> str:

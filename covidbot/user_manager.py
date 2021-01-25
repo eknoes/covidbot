@@ -76,11 +76,11 @@ class UserManager(object):
         result = []
         with self.connection.cursor(dictionary=True) as cursor:
             if with_subscriptions:
-                query = ("SELECT bot_user.user_id, bot_user.platform_id, last_update, language, rs FROM bot_user "
+                query = ("SELECT bot_user.user_id, platform_id, last_update, language, rs FROM bot_user "
                          "LEFT JOIN subscriptions s on bot_user.user_id = s.user_id "
                          "WHERE platform=%s")
             else:
-                query = "SELECT bot_user.user_id, last_update, language FROM bot_user WHERE platform=%s"
+                query = "SELECT bot_user.user_id, platform_id, last_update, language FROM bot_user WHERE platform=%s"
             args = [self.platform]
 
             if filter_id:
@@ -136,7 +136,7 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET last_update=%s WHERE user_id=%s", [last_update, user_id])
             if cursor.rowcount == 0:
-                return self.create_user(user_id, last_update=last_update)
+                return False
             self.connection.commit()
             return True
 
@@ -144,7 +144,7 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET language=%s WHERE user_id=%s", [language, user_id])
             if cursor.rowcount == 0:
-                return self.create_user(user_id, language=language)
+                return False
             self.connection.commit()
             return True
 
