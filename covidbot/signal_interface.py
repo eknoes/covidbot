@@ -9,15 +9,20 @@ from covidbot.text_interface import SimpleTextInterface
 
 class SignalInterface(SimpleTextInterface):
     phone_number: str
+    socket: str
 
-    def __init__(self, phone_number: str, bot: Bot):
+    def __init__(self, phone_number: str, socket: str, bot: Bot):
         super().__init__(bot)
         self.phone_number = phone_number
+        self.socket = socket
     
     async def run(self):
-        async with semaphore.Bot(self.phone_number) as bot:
+        async with semaphore.Bot(self.phone_number, socket_path=self.socket) as bot:
             bot.register_handler(re.compile(""), self.text_handler)
             await bot.start()
         
-    def text_handler(self, ctx: ChatContext):
-        pass
+    async def text_handler(self, ctx: ChatContext):
+        text = ctx.message.get_body()
+        if text:
+            reply = self.handle_input(text, 1)
+            await ctx.message.reply(reply)

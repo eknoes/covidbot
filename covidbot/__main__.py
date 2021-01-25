@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import configparser
 import locale
 import logging
@@ -10,6 +11,7 @@ from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData
+from covidbot.signal_interface import SignalInterface
 from covidbot.telegram_interface import TelegramInterface
 from covidbot.text_interface import SimpleTextInterface
 from covidbot.user_manager import UserManager
@@ -73,9 +75,17 @@ if __name__ == "__main__":
     parser.add_argument('--specific', help='Just send the message to specific user_ids',
                         metavar='USERS', action='store', nargs="+", type=int)
     parser.add_argument('--interactive', help='Chat with Textbot', action='store_true')
+    parser.add_argument('--telegram', help='Use Telegram', action='store_true')
+    parser.add_argument('--signal', help='Use Signal', action='store_true')
     args = parser.parse_args()
     config = parse_config("config.ini")
     api_key = config['TELEGRAM'].get('API_KEY')
+
+    if args.signal and args.telegram:
+        sys.exit(1)
+
+    if not args.signal and not args.telegram:
+        sys.exit(1)
 
     if args.specific and not (args.message or args.message_file):
         print("You can use --specific only with --message or --message-file")
@@ -96,7 +106,11 @@ if __name__ == "__main__":
                 print(f"{strip_html(bot.handle_input(user_input, '1'))}")
                 user_input = input("> ")
             sys.exit(0)
-        else:
+        elif args.signal:
+            signal_interface = SignalInterface(config['SIGNAL'].get('PHONE_NUMBER'),
+                                               config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
+            asyncio.run(signal_interface.run())
+        elif args.telegram:
             telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
 
             if args and (args.message or args.message_file):
