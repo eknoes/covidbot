@@ -1,24 +1,35 @@
-alter table covid_data modify date date null default null;
-INSERT INTO counties (rs, county_name, type, parent) VALUE (0, "Deutschland", "Staat", NULL);
-UPDATE counties SET parent=0 WHERE type="Bundesland";
+# Drop foreign key constraints
+alter table subscriptions drop foreign key subscriptions_ibfk_1;
+alter table user_feedback drop foreign key user_feedback_ibfk_1;
 
-INSERT INTO covid_data (rs, date, total_cases, total_deaths)
-                                SELECT new.parent, new_date, new_cases, new_deaths
-                                FROM
-                                (SELECT c.parent as parent, date as new_date, SUM(total_cases) as new_cases,
-                                 SUM(total_deaths) as new_deaths FROM covid_data_calculated
-                                 LEFT JOIN counties c on covid_data_calculated.rs = c.rs
-                                 WHERE c.parent IS NOT NULL
-                                 GROUP BY c.parent, date)
-                                as new
-                              ON DUPLICATE KEY UPDATE date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths
-INSERT INTO covid_data (rs, date, total_cases, total_deaths)
-                                SELECT new.parent, new_date, new_cases, new_deaths
-                                FROM
-                                (SELECT c.parent as parent, date as new_date, SUM(total_cases) as new_cases,
-                                 SUM(total_deaths) as new_deaths FROM covid_data_calculated
-                                 LEFT JOIN counties c on covid_data_calculated.rs = c.rs
-                                 WHERE c.parent IS NOT NULL
-                                 GROUP BY c.parent, date)
-                                as new
-                              ON DUPLICATE KEY UPDATE date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths
+# Alter to new UserManager scheme
+alter table bot_user change user_id platform_id VARCHAR(100) not null;
+alter table bot_user drop primary key;
+
+alter table bot_user
+	add platform VARCHAR(10) null;
+
+alter table bot_user
+	add user_id int auto_increment primary key;
+
+alter table bot_user
+	add constraint bot_user_unique
+        unique (platform_id, platform);
+
+# Migrate NULL users to Telegram
+UPDATE bot_user SET platform="telegram" WHERE platform IS NULL;
+
+UPDATE subscriptions, (SELECT platform_id, user_id FROM bot_user) as user
+SET subscriptions.user_id=user.user_id WHERE subscriptions.user_id=user.platform_id;
+
+UPDATE user_feedback, (SELECT platform_id, user_id FROM bot_user) as user
+SET user_feedback.user_id=user.user_id WHERE user_feedback.user_id=user.platform_id;
+
+alter table subscriptions
+	add constraint subscriptions_ibfk_1
+		foreign key (user_id) references bot_user (user_id);
+
+alter table user_feedback
+	add constraint user_feedback_ibfk_1
+		foreign key (user_id) references bot_user (user_id);
+
