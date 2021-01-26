@@ -56,7 +56,9 @@ class SimpleTextInterface(object):
                     return BotResponse("Danke für dein wertvolles Feedback!")
                 else:
                     del self.chat_states[user_id]
-                    return BotResponse("Alles klar, deine Nachricht wird nicht weitergeleitet.")
+
+                    if user_input.strip().lower()[:4] == "nein":
+                        return BotResponse("Alles klar, deine Nachricht wird nicht weitergeleitet.")
 
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
@@ -92,10 +94,15 @@ class SimpleTextInterface(object):
                                   f'https://github.com/eknoes/covid-bot\n\n'
                                   f'Diesen Hilfetext erhältst du über /hilfe')
 
-    def parseLocationInput(self, location_query: str) -> Union[str, int]:
+    def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)
         if not locations:
+            if set_feedback != 0:
+                self.chat_states[set_feedback] = (ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
+                message += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
+                             "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
             return message
+
         elif len(locations) == 1:
             return locations[0][0]
         else:
@@ -141,7 +148,7 @@ class SimpleTextInterface(object):
         return BotResponse(message, graph)
 
     def directHandler(self, user_input: str, user_id: str) -> BotResponse:
-        location = self.parseLocationInput(user_input)
+        location = self.parseLocationInput(user_input, set_feedback=user_id)
         if type(location) == int:
             self.chat_states[user_id] = (ChatBotState.WAITING_FOR_COMMAND, str(location))
             message, available_actions = self.bot.get_possible_actions(user_id, location)
