@@ -54,13 +54,10 @@ def send_newsletter(telegram: TelegramInterface, message: str, specific_users: O
         telegram.message_users(message, append_report, specific_users)
 
 
-# Setup logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO, filename="bot.log")
-# Also write to stderr
-logging.getLogger().addHandler(logging.StreamHandler())
-
 if __name__ == "__main__":
+    logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging_level = logging.INFO
+
     # Set locale
     try:
         locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
@@ -92,7 +89,11 @@ if __name__ == "__main__":
         print("You can use --specific only with --message or --message-file")
         sys.exit(1)
 
-    if args.interactive:
+    if args.interactive:# Setup logging
+        logging.basicConfig(format=logging_format, level=logging_level, filename="interactive-bot.log")
+        # Also write to stderr
+        logging.getLogger().addHandler(logging.StreamHandler())
+
         data = CovidData(get_connection(config))
         user_manager = UserManager("interactive", get_connection(config))
 
@@ -103,6 +104,7 @@ if __name__ == "__main__":
             user_input = input("> ")
         sys.exit(0)
     elif args.signal:
+        logging.basicConfig(format=logging_format, level=logging_level, filename="signal-bot.log")
         data = CovidData(get_connection(config))
         user_manager = UserManager("signal", get_connection(config))
         bot = Bot(data, user_manager)
@@ -110,6 +112,8 @@ if __name__ == "__main__":
                                            config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
         asyncio.run(signal_interface.run())
     elif args.telegram:
+        logging.basicConfig(format=logging_format, level=logging_level, filename="telegram-bot.log")
+
         if args.message or args.message_file:
             data = CovidData(get_connection(config), disable_autoupdate=True)
         else:
