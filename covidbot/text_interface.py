@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+from enum import Enum
 from io import BytesIO
 from typing import Callable, Dict, List, TypedDict, Union, Optional, Tuple
 
-from covidbot.bot import Bot
+from covidbot.bot import Bot, UserDistrictActions
 
 
 @dataclass
@@ -20,9 +21,15 @@ class Handler:
     method: Callable[[str, str], BotResponse]
 
 
+class ChatBotState:
+    WAITING_FOR_COMMAND = 1
+    WAITING_FOR_IS_FEEDBACK = 3
+
+
 class SimpleTextInterface(object):
     bot: Bot
     handler_list: List[Handler] = []
+    chat_states: Dict[str, Tuple[ChatBotState, Optional[str]]] = {}
 
     def __init__(self, bot: Bot):
         self.bot = bot
@@ -36,6 +43,21 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("", self.directHandler))
 
     def handle_input(self, user_input: str, user_id: str) -> BotResponse:
+        if user_id in self.chat_states.keys():
+            state = self.chat_states[user_id]
+            if state[0] == ChatBotState.WAITING_FOR_COMMAND:
+                if user_input.strip().lower() in ["abo", "daten", "beende"]:
+                    user_input += " " + str(state[1])
+                del self.chat_states[user_id]
+            elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
+                if user_input.lower().strip() == "ja":
+                    self.bot.add_user_feedback(user_id, state[1])
+                    del self.chat_states[user_id]
+                    return BotResponse("Danke für dein wertvolles Feedback!")
+                else:
+                    del self.chat_states[user_id]
+                    return BotResponse("Alles klar, deine Nachricht wird nicht weitergeleitet.")
+
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
                 text_in = user_input[len(handler.command):].strip()
@@ -43,19 +65,32 @@ class SimpleTextInterface(object):
 
     def helpHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(f'Hallo,\n'
-                          f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                          f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
-                          f'<b>📈 Informationen erhalten</b>\n'
-                          f'Mit "Abo ORT" kannst du einen Ort abonnieren, mit "Beende ORT" diese Abonnement wieder beenden. '
-                          f'Mit "Daten ORT" erhältst du einmalig die aktuellen Daten für den gegebenen Ort.'
-                          f'\n\n'
-                          f'<b>Weiteres</b>\n'
-                          f'• Sende "Bericht" um deinen aktuellen Tagesbericht zu erhalten. Unabhängig davon erhältst du diesen '
-                          f'jeden Morgen, wenn neue Daten vorliegen\n'
-                          f'\n\n'
-                          f'Mehr Informationen zu diesem Bot findest du hier: '
-                          f'https://github.com/eknoes/covid-bot\n\n'
-                          f'Diesen Hilfetext erhältst du über "Hilfe"')
+                                  f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
+                                  f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
+                                  f'<b>🔎 Orte finden</b>\n'
+                                  f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
+                                  f'möchtest. So kannst du nach einer Stadt, Adresse oder auch dem Namen deiner '
+                                  f'Lieblingskneipe suchen.\n\n'
+                                  f'<b>📈 Informationen erhalten</b>\n'
+                                  f'Wählst du "Daten" aus, erhältst Du einmalig Informationen über diesen Ort. Diese '
+                                  f'enthalten eine Grafik, die für diesen Ort generiert wurde.\n'
+                                  f'Wählst du "Abo" aus, wird dieser Ort in deinem '
+                                  f'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
+                                  f'stattdessen angeboten, das Abo wieder zu beenden. '
+                                  f'Du kannst beliebig viele Orte abonnieren!'
+                                  f'\n\n'
+                                  f'<b>💬 Feedback</b>\n'
+                                  f'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
+                                  f'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
+                                  f'<b>🤓 Statistik</b>\n'
+                                  f'Wenn du "Statistik" sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
+                                  f'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
+                                  f'<b>Weiteres</b>\n'
+                                  f'• Sende "Bericht" um deinen Tagesbericht erneut zu erhalten\n'
+                                  f'• Sende "Abo" um deine abonnierten Orte einzusehen\n\n'
+                                  f'Mehr Informationen zu diesem Bot findest du hier: '
+                                  f'https://github.com/eknoes/covid-bot\n\n'
+                                  f'Diesen Hilfetext erhältst du über /hilfe')
 
     def parseLocationInput(self, location_query: str) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)
@@ -106,7 +141,20 @@ class SimpleTextInterface(object):
         return BotResponse(message, graph)
 
     def directHandler(self, user_input: str, user_id: str) -> BotResponse:
-        return BotResponse(self.bot.unknown_action())
+        location = self.parseLocationInput(user_input)
+        if type(location) == int:
+            self.chat_states[user_id] = (ChatBotState.WAITING_FOR_COMMAND, str(location))
+            message, available_actions = self.bot.get_possible_actions(user_id, location)
+            message += "\n\n"
+            for action in available_actions:
+                if action[1] == UserDistrictActions.REPORT:
+                    message += '• Schreibe "Daten", um die aktuellen Daten zu erhalten\n'
+                elif action[1] == UserDistrictActions.SUBSCRIBE:
+                    message += '• Schreibe "Abo", um den Ort zu abonnieren\n'
+                elif action[1] == UserDistrictActions.UNSUBSCRIBE:
+                    message += '• Schreibe "Beende", dein Abo zu beenden\n'
+            return BotResponse(message)
+        return BotResponse(location)
 
     def statHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(self.bot.get_statistic())
