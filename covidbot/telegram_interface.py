@@ -45,6 +45,7 @@ class TelegramInterface(object):
     dev_chat_id: int
     graph_cache: Dict[int, PhotoSize] = {}
     feedback_cache: Dict[int, str] = {}
+    answered_callbacks: List[int] = []
 
     def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
         self.dev_chat_id = dev_chat_id
@@ -182,6 +183,10 @@ class TelegramInterface(object):
 
     def callbackHandler(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
+        if query.message.message_id in self.answered_callbacks:
+            return
+
+        self.answered_callbacks.append(query.message.message_id)
         query.answer()
         # Subscribe Callback
         if query.data.startswith(TelegramCallbacks.SUBSCRIBE.name):
