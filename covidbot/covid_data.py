@@ -202,7 +202,7 @@ class CovidData(object):
         """
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT %s,%s',
-                           [rs, subtract_days, include_past_days + 2])
+                           [rs, subtract_days, include_past_days + 1])
 
             results = []
             for record in cursor.fetchall():
@@ -211,13 +211,22 @@ class CovidData(object):
                                             total_deaths=record['total_deaths'], new_cases=record['new_cases'],
                                             new_deaths=record['new_deaths'], date=record['date']))
 
-            for i in range(len(results) - 1):
-                results[i] = self.fill_trend(results[i], results[i + 1])
+            # Add Trend in comparison to last week
+            if len(results) >= 7:
+                for i in range(len(results) - 6):
+                    results[i] = self.fill_trend(results[i], results[i + 6])
+            elif results:
+                cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=(Date(%s) - 7) LIMIT 1',
+                               [rs, results[0].date])
+                record = cursor.fetchone()
+                if record:
+                    last_week = DistrictData(name=record['county_name'], incidence=record['incidence'],
+                                             type=record['type'], total_cases=record['total_cases'],
+                                             total_deaths=record['total_deaths'], new_cases=record['new_cases'],
+                                             new_deaths=record['new_deaths'], date=record['date'])
+                    results[0] = self.fill_trend(results[0], last_week)
 
-            # Remove the one fetched for trend data if it exists
-            if len(results) == include_past_days + 2:
-                results.pop()
-            elif len(results) < include_past_days + 1:
+            if len(results) < include_past_days + 1:
                 logging.warning(f"No more data available for RS{rs}, requested {include_past_days + 1} days "
                                 f"but can just provide {len(results)} days")
 
@@ -232,31 +241,31 @@ class CovidData(object):
         return self.get_district_data(0)
 
     @staticmethod
-    def fill_trend(today: DistrictData, yesterday: DistrictData) -> DistrictData:
-        if yesterday:
-            if not yesterday.new_cases or not today.new_cases:
+    def fill_trend(today: DistrictData, last_week: DistrictData) -> DistrictData:
+        if last_week:
+            if not last_week.new_cases or not today.new_cases:
                 today.cases_trend = None
-            elif yesterday.new_cases < today.new_cases:
+            elif last_week.new_cases < today.new_cases:
                 today.cases_trend = TrendValue.UP
-            elif yesterday.new_cases > today.new_cases:
+            elif last_week.new_cases > today.new_cases:
                 today.cases_trend = TrendValue.DOWN
             else:
                 today.cases_trend = TrendValue.SAME
 
-            if not yesterday.new_deaths or not today.new_deaths:
+            if not last_week.new_deaths or not today.new_deaths:
                 today.deaths_trend = None
-            elif yesterday.new_deaths < today.new_deaths:
+            elif last_week.new_deaths < today.new_deaths:
                 today.deaths_trend = TrendValue.UP
-            elif yesterday.new_deaths > today.new_deaths:
+            elif last_week.new_deaths > today.new_deaths:
                 today.deaths_trend = TrendValue.DOWN
             else:
                 today.deaths_trend = TrendValue.SAME
 
-            if not yesterday.incidence or not today.incidence:
+            if not last_week.incidence or not today.incidence:
                 today.incidence_trend = None
-            elif yesterday.incidence < today.incidence:
+            elif last_week.incidence < today.incidence:
                 today.incidence_trend = TrendValue.UP
-            elif yesterday.incidence > today.incidence:
+            elif last_week.incidence > today.incidence:
                 today.incidence_trend = TrendValue.DOWN
             else:
                 today.incidence_trend = TrendValue.SAME
