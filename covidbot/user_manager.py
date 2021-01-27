@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any, Union
 
 from mysql.connector import MySQLConnection, IntegrityError
 
@@ -8,6 +8,7 @@ from mysql.connector import MySQLConnection, IntegrityError
 @dataclass
 class BotUser:
     id: int
+    platform_id: Union[int, str]
     last_update: datetime
     language: str
     subscriptions: Optional[List[int]] = None
@@ -15,16 +16,20 @@ class BotUser:
 
 class UserManager(object):
     connection: MySQLConnection
+    platform: str
 
-    def __init__(self, db_connection: MySQLConnection):
+    def __init__(self, platform: str, db_connection: MySQLConnection):
         self.connection = db_connection
         self._create_db()
+        self.platform = platform
 
     def _create_db(self):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS bot_user '
-                           '(user_id INTEGER PRIMARY KEY, last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
-                           'language VARCHAR(20) DEFAULT NULL, created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6))')
+                           '(user_id INTEGER PRIMARY KEY AUTO_INCREMENT, '
+                           'last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
+                           'language VARCHAR(20) DEFAULT NULL, created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
+                           'platform_id VARCHAR(100), platform VARCHAR(20), UNIQUE(platform_id, platform))')
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
@@ -34,17 +39,29 @@ class UserManager(object):
                            'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             self.connection.commit()
 
+    def get_user_id(self, identifier: str, create_if_not_exists=True) -> Optional[int]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT user_id FROM bot_user WHERE platform=%s AND platform_id=%s",
+                           [self.platform, identifier])
+            row = cursor.fetchone()
+            if row:
+                return row['user_id']
+            if create_if_not_exists:
+                new_id = self.create_user(identifier)
+                if not new_id:
+                    raise IntegrityError("Either a user_id should be available, or creating a user should return an ID")
+                return new_id
+            return None
+
     def add_subscription(self, user_id: int, rs: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             try:
-                cursor.execute('INSERT INTO subscriptions (user_id, rs) VALUES (%s, %s) '
-                               'ON DUPLICATE KEY UPDATE user_id=user_id', [user_id, rs])
+                cursor.execute('INSERT INTO subscriptions (user_id, rs) VALUES (%s, %s)', [user_id, rs])
                 if cursor.rowcount == 1:
                     self.connection.commit()
                     return True
             except IntegrityError:
-                if self.create_user(user_id):
-                    return self.add_subscription(user_id, rs)
+                return False
             return False
 
     def rm_subscription(self, user_id: int, rs: int) -> bool:
@@ -59,19 +76,19 @@ class UserManager(object):
         result = []
         with self.connection.cursor(dictionary=True) as cursor:
             if with_subscriptions:
-                query = ("SELECT bot_user.user_id, last_update, language, rs FROM bot_user "
-                         "LEFT JOIN subscriptions s on bot_user.user_id = s.user_id")
+                query = ("SELECT bot_user.user_id, platform_id, last_update, language, rs FROM bot_user "
+                         "LEFT JOIN subscriptions s on bot_user.user_id = s.user_id "
+                         "WHERE platform=%s")
             else:
-                query = "SELECT bot_user.user_id, last_update, language FROM bot_user"
+                query = "SELECT bot_user.user_id, platform_id, last_update, language FROM bot_user WHERE platform=%s"
+            args = [self.platform]
 
             if filter_id:
-                query += " WHERE bot_user.user_id=%s"
+                query += " AND bot_user.user_id=%s"
+                args.append(filter_id)
             query += " ORDER BY bot_user.user_id"
 
-            if filter_id:
-                cursor.execute(query, [filter_id])
-            else:
-                cursor.execute(query)
+            cursor.execute(query, args)
 
             current_user: Optional[BotUser] = None
             for row in cursor.fetchall():
@@ -85,7 +102,8 @@ class UserManager(object):
                     else:
                         language = row['language']
 
-                    current_user = BotUser(id=row['user_id'], last_update=row['last_update'], language=language)
+                    current_user = BotUser(id=row['user_id'], platform_id=row['platform_id'],
+                                           last_update=row['last_update'], language=language)
 
                 if with_subscriptions:
                     if not current_user.subscriptions:
@@ -118,7 +136,7 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET last_update=%s WHERE user_id=%s", [last_update, user_id])
             if cursor.rowcount == 0:
-                return self.create_user(user_id, last_update=last_update)
+                return False
             self.connection.commit()
             return True
 
@@ -126,21 +144,20 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET language=%s WHERE user_id=%s", [language, user_id])
             if cursor.rowcount == 0:
-                return self.create_user(user_id, language=language)
+                return False
             self.connection.commit()
             return True
 
-    def create_user(self, user_id: int, last_update=datetime.today(), language=None) -> bool:
+    def create_user(self, identifier: str, last_update=datetime.today(), language=None) -> Union[int, bool]:
         with self.connection.cursor(dictionary=True) as cursor:
             try:
-                cursor.execute("INSERT INTO bot_user SET user_id=%s, last_update=%s, language=%s",
-                               [user_id, last_update, language])
+                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, last_update=%s, language=%s",
+                               [identifier, self.platform, last_update, language])
                 if cursor.rowcount == 1:
                     self.connection.commit()
-                    return True
+                    return cursor.lastrowid
             except IntegrityError:
-                pass
-
+                return False
             return False
 
     def get_total_user_number(self) -> int:
@@ -164,7 +181,8 @@ class UserManager(object):
 
     def get_mean_subscriptions(self) -> float:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(*)/COUNT(DISTINCT user_id) as mean FROM subscriptions ORDER BY user_id")
+            cursor.execute("SELECT COUNT(*)/COUNT(DISTINCT user_id) as mean FROM subscriptions ORDER BY user_id "
+                           "LIMIT 1")
             row = cursor.fetchone()
 
             if row['mean']:
@@ -174,19 +192,16 @@ class UserManager(object):
     def get_most_subscriptions(self) -> int:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(rs) as num_subscriptions FROM subscriptions "
-                           "GROUP BY user_id ORDER BY num_subscriptions DESC")
+                           "GROUP BY user_id ORDER BY num_subscriptions DESC LIMIT 1")
             row = cursor.fetchone()
 
-            if row['num_subscriptions']:
+            if row and row['num_subscriptions']:
                 return row['num_subscriptions']
-            return 1
+            return 0
 
     def add_feedback(self, user_id: int, feedback: str) -> Optional[int]:
         if not feedback:
             return None
-
-        if not self.get_user(user_id):
-            self.create_user(user_id)
 
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('INSERT INTO user_feedback (user_id, feedback) VALUES (%s, %s)', [user_id, feedback])
@@ -203,4 +218,3 @@ class UserManager(object):
                 self.connection.commit()
                 return True
             return False
-
