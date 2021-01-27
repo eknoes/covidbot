@@ -5,7 +5,7 @@ from io import BytesIO
 from typing import Dict
 
 import semaphore
-from semaphore import ChatContext, MessageSender
+from semaphore import ChatContext
 
 from covidbot.bot import Bot
 from covidbot.text_interface import SimpleTextInterface, BotResponse
@@ -34,7 +34,7 @@ class SignalInterface(SimpleTextInterface):
         text = ctx.message.get_body()
         if text:
             await ctx.message.typing_started()
-            reply = self.handle_input(text, ctx.message.username)
+            reply = self.handle_input(text, ctx.message.source)
             await self.reply_message(ctx, reply)
             await ctx.message.typing_stopped()
 
