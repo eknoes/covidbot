@@ -1,3 +1,5 @@
+import logging
+
 import threema.gateway as threema
 from aiohttp import web
 from threema.gateway.e2e import create_application, add_callback_route
@@ -25,6 +27,7 @@ class ThreemaInterface(SimpleTextInterface):
         )
 
     def run(self):
+        logging.info("Run Threema Interface")
         # Create the application and register the handler for incoming messages
         application = create_application(self.connection)
         add_callback_route(self.connection, application, self.handle_threema_msg, path='/gateway_callback')

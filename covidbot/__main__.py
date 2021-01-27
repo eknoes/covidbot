@@ -115,6 +115,7 @@ if __name__ == "__main__":
         asyncio.run(signal_interface.run())
     elif args.threema:
         logging.basicConfig(format=logging_format, level=logging_level, filename="threema-bot.log")
+        logging.getLogger().addHandler(logging.StreamHandler())
         logging.info("Start Threema Bot")
         data = CovidData(get_connection(config))
         user_manager = UserManager("threema", get_connection(config))
