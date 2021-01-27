@@ -24,7 +24,7 @@ class ThreemaInterface(SimpleTextInterface):
             key=self.threema_key
         )
 
-    async def run(self):
+    def run(self):
         # Create the application and register the handler for incoming messages
         application = create_application(self.connection)
         add_callback_route(self.connection, application, self.handle_threema_msg, path='/gateway_callback')

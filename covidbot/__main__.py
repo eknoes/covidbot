@@ -83,7 +83,7 @@ if __name__ == "__main__":
     if args.signal and args.telegram and args.threema:
         sys.exit(1)
 
-    if not args.signal and not args.telegram and not args.interactive:
+    if not args.signal and not args.telegram and not args.interactive and not args.threema:
         print("You have to specify the used messenger")
         sys.exit(1)
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         data = CovidData(get_connection(config))
         user_manager = UserManager("threema", get_connection(config))
         bot = Bot(data, user_manager)
-        threema_iface = ThreemaInterface(config['THREEMA'].get('ID'), config['THREEMA'].get('SECRECT'),
+        threema_iface = ThreemaInterface(config['THREEMA'].get('ID'), config['THREEMA'].get('SECRET'),
                                          config['THREEMA'].get('PRIVATE_KEY'), bot)
         threema_iface.run()
     elif args.telegram:
