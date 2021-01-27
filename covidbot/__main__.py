@@ -14,6 +14,7 @@ from covidbot.covid_data import CovidData
 from covidbot.signal_interface import SignalInterface
 from covidbot.telegram_interface import TelegramInterface
 from covidbot.text_interface import SimpleTextInterface
+from covidbot.threema_interface import ThreemaInterface
 from covidbot.user_manager import UserManager
 
 
@@ -72,13 +73,14 @@ if __name__ == "__main__":
     parser.add_argument('--specific', help='Just send the message to specific user_ids',
                         metavar='USERS', action='store', nargs="+", type=int)
     parser.add_argument('--interactive', help='Chat with Textbot', action='store_true')
+    parser.add_argument('--threema', help='Use Threema', action='store_true')
     parser.add_argument('--telegram', help='Use Telegram', action='store_true')
     parser.add_argument('--signal', help='Use Signal', action='store_true')
     args = parser.parse_args()
     config = parse_config("config.ini")
     api_key = config['TELEGRAM'].get('API_KEY')
 
-    if args.signal and args.telegram:
+    if args.signal and args.telegram and args.threema:
         sys.exit(1)
 
     if not args.signal and not args.telegram and not args.interactive:
@@ -111,6 +113,14 @@ if __name__ == "__main__":
         signal_interface = SignalInterface(config['SIGNAL'].get('PHONE_NUMBER'),
                                            config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
         asyncio.run(signal_interface.run())
+    elif args.threema:
+        logging.basicConfig(format=logging_format, level=logging_level, filename="threema-bot.log")
+        data = CovidData(get_connection(config))
+        user_manager = UserManager("threema", get_connection(config))
+        bot = Bot(data, user_manager)
+        threema_iface = ThreemaInterface(config['THREEMA'].get('ID'), config['THREEMA'].get('SECRECT'),
+                                         config['THREEMA'].get('PRIVATE_KEY'), bot)
+        threema_iface.run()
     elif args.telegram:
         logging.basicConfig(format=logging_format, level=logging_level, filename="telegram-bot.log")
 
