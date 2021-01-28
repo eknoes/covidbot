@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple, Dict, Any, Union
@@ -17,13 +18,16 @@ class BotUser:
 class UserManager(object):
     connection: MySQLConnection
     platform: str
+    log = logging.getLogger(__name__)
 
     def __init__(self, platform: str, db_connection: MySQLConnection):
         self.connection = db_connection
         self._create_db()
         self.platform = platform
+        self.log.debug(f"UserManager for {platform} initialized")
 
     def _create_db(self):
+        self.log.debug("Creating Tables")
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS bot_user '
                            '(user_id INTEGER PRIMARY KEY AUTO_INCREMENT, '

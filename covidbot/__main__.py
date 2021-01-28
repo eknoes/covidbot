@@ -57,6 +57,8 @@ def send_newsletter(telegram: TelegramInterface, message: str, specific_users: O
 
 if __name__ == "__main__":
     logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(logging.Formatter(logging_format))
     logging_level = logging.INFO
 
     # Set locale
@@ -96,10 +98,11 @@ if __name__ == "__main__":
         print("You can use --specific only with --message or --message-file")
         sys.exit(1)
 
-    if args.interactive:# Setup logging
+    if args.interactive:
         logging.basicConfig(format=logging_format, level=logging_level, filename="interactive-bot.log")
         # Also write to stderr
-        logging.getLogger().addHandler(logging.StreamHandler())
+        logging.getLogger().addHandler(stream_handler)
+        logging.info("### Start Interactive Bot ###")
 
         data = CovidData(get_connection(config))
         user_manager = UserManager("interactive", get_connection(config))
@@ -112,6 +115,9 @@ if __name__ == "__main__":
         sys.exit(0)
     elif args.signal:
         logging.basicConfig(format=logging_format, level=logging_level, filename="signal-bot.log")
+        logging.getLogger().addHandler(stream_handler)
+
+        logging.info("### Start Signal Bot ###")
         data = CovidData(get_connection(config))
         user_manager = UserManager("signal", get_connection(config))
         bot = Bot(data, user_manager)
@@ -130,6 +136,8 @@ if __name__ == "__main__":
         threema_iface.run()
     elif args.telegram:
         logging.basicConfig(format=logging_format, level=logging_level, filename="telegram-bot.log")
+        logging.getLogger().addHandler(stream_handler)
+        logging.info("### Start Telegram Bot ###")
 
         if args.message or args.message_file:
             data = CovidData(get_connection(config), disable_autoupdate=True)

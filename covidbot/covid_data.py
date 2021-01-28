@@ -71,6 +71,7 @@ class CovidData(object):
                     exists = True
 
             if not exists:
+                self.log.info("View covid_data_calculated does not exist, creating it!")
                 cursor.execute('CREATE VIEW covid_data_calculated AS '
                                'SELECT c.rs, c.county_name, c.type, covid_data.date, '
                                'covid_data.total_cases, covid_data.total_cases - y.total_cases as new_cases, '
