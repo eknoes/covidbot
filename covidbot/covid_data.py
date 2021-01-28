@@ -126,6 +126,7 @@ class CovidData(object):
             rs_data.append((int(row['RS']), self.clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
                             row['BEZ'], int(row['EWZ']), int(row['BL_ID'])))
 
+        self.log.debug("Insert new data into counties and covid_data")
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.executemany('INSERT INTO counties (rs, county_name, type, population, parent) '
                                'VALUES (%s, %s, %s, %s, %s) '
@@ -135,8 +136,10 @@ class CovidData(object):
              VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
             self.connection.commit()
         self.calculate_aggregated_values(new_updated)
+        self.log.debug("Finished inserting new data")
 
     def calculate_aggregated_values(self, new_updated: date):
+        self.log.debug("Calculating aggregated values")
         with self.connection.cursor(dictionary=True) as cursor:
             # Calculate all parents, must be executed for every depth
             for i in range(2):
