@@ -50,7 +50,8 @@ class CovidData(object):
             self.fetch_current_data()
 
     def _create_tables(self):
-        with self.connection.cursor(dictionary=True) as cursor:
+        self.log.debug("Creating Tables")
+        with self.connection.cursor(dictionary=False) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS counties '
                            '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30),'
                            'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
@@ -62,21 +63,30 @@ class CovidData(object):
                 'total_cases INT, incidence FLOAT, total_deaths INT,'
                 'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
 
-            cursor.execute('CREATE OR REPLACE VIEW covid_data_calculated AS '
-                           'SELECT c.rs, c.county_name, c.type, covid_data.date, '
-                           'covid_data.total_cases, covid_data.total_cases - y.total_cases as new_cases, '
-                           'covid_data.total_deaths, covid_data.total_deaths - y.total_deaths as new_deaths, '
-                           'covid_data.incidence '
-                           'FROM covid_data '
-                           'LEFT JOIN covid_data y on y.rs = covid_data.rs AND '
-                           'y.date = subdate(covid_data.date, 1) '
-                           'LEFT JOIN counties c on c.rs = covid_data.rs '
-                           'ORDER BY covid_data.date DESC')
+            # Check if view exists
+            cursor.execute("SHOW FULL TABLES WHERE TABLE_TYPE LIKE '%VIEW%';")
+            exists = False
+            for row in cursor.fetchall():
+                if row[0] == "covid_data_calculated":
+                    exists = True
+
+            if not exists:
+                cursor.execute('CREATE VIEW covid_data_calculated AS '
+                               'SELECT c.rs, c.county_name, c.type, covid_data.date, '
+                               'covid_data.total_cases, covid_data.total_cases - y.total_cases as new_cases, '
+                               'covid_data.total_deaths, covid_data.total_deaths - y.total_deaths as new_deaths, '
+                               'covid_data.incidence '
+                               'FROM covid_data '
+                               'LEFT JOIN covid_data y on y.rs = covid_data.rs AND '
+                               'y.date = subdate(covid_data.date, 1) '
+                               'LEFT JOIN counties c on c.rs = covid_data.rs '
+                               'ORDER BY covid_data.date DESC')
 
             # Insert if not exists
             cursor.execute('INSERT IGNORE INTO counties (rs, county_name, type, parent) '
                            'VALUES (0, "Deutschland", "Staat", NULL)')
             self.connection.commit()
+            self.log.debug("Committed Tables")
 
     def add_data(self, filename: str):
         if filename is None:

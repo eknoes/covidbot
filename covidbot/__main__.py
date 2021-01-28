@@ -76,9 +76,14 @@ if __name__ == "__main__":
     parser.add_argument('--threema', help='Use Threema', action='store_true')
     parser.add_argument('--telegram', help='Use Telegram', action='store_true')
     parser.add_argument('--signal', help='Use Signal', action='store_true')
+    parser.add_argument('--verbose', '-v', action='count', default=0)
+
     args = parser.parse_args()
     config = parse_config("config.ini")
     api_key = config['TELEGRAM'].get('API_KEY')
+
+    if args.verbose and args.verbose > 0:
+        logging_level = logging.DEBUG
 
     if args.signal and args.telegram and args.threema:
         sys.exit(1)
