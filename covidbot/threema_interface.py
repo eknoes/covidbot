@@ -52,7 +52,8 @@ class ThreemaInterface(SimpleTextInterface):
             message: TextMessage
             response = self.handle_input(message.text, message.from_id)
             if response.image:
-                response_img = ImageMessage(self.connection, image=self.get_attachment(response.image)['filename'])
+                response_img = ImageMessage(self.connection, image=self.get_attachment(response.image)['filename'],
+                                            to_id=message.from_id)
                 await response_img.send()
 
             response_msg = TextMessage(self.connection, text=response.message, to_id=message.from_id)
