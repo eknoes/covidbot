@@ -50,8 +50,8 @@ class TestBot(TestCase):
         uid1 = self.man.get_user_id(user1)
         uid2 = self.man.get_user_id(user2)
 
-        self.man.set_last_update(uid1, datetime.now() - timedelta(days=1))
-        self.man.set_last_update(uid2, datetime.now() - timedelta(days=1))
+        self.man.set_last_update(uid1, datetime.now() - timedelta(days=2))
+        self.man.set_last_update(uid2, datetime.now() - timedelta(days=2))
 
         update = self.bot.update()
         self.assertEqual(2, len(update), "New data should trigger 2 updates")
