@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import re
@@ -68,6 +69,10 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
 
         for userid, message in unconfirmed_reports:
-            await TextMessage(self.connection, text=adapt_text(message), to_id=userid).send()
-            self.bot.confirm_daily_report_send(userid)
-            self.log.info(f"Sent report to {userid}")
+            report = TextMessage(self.connection, text=adapt_text(message), to_id=userid)
+            asyncio.run(self.sendSingleDailyReport(userid, report))
+
+    async def sendSingleDailyReport(self, userid: str, message: TextMessage):
+        await message.send()
+        self.bot.confirm_daily_report_send(userid)
+        self.log.info(f"Sent report to {userid}")
