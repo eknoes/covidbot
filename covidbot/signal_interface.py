@@ -17,6 +17,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
     phone_number: str
     socket: str
     graphics_tmp_path: str
+    profile_name: str = "Covid Update"
 
     def __init__(self, phone_number: str, socket: str, bot: Bot):
         super().__init__(bot)
@@ -31,7 +32,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         asyncio.run(self._run())
 
     async def _run(self):
-        async with semaphore.Bot(self.phone_number, socket_path=self.socket) as bot:
+        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name) as bot:
             bot.register_handler(re.compile(""), self.text_handler)
             await bot.start()
 
@@ -66,9 +67,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
     async def sendDailyReportsAsync(self, unconfirmed_reports, graph) -> None:
         attachment = self.get_attachment(graph)
-        async with semaphore.Bot(self.phone_number, socket_path=self.socket) as bot:
+        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name) as bot:
             for userid, message in unconfirmed_reports:
-                await bot.send_message(userid, message, attachments=[attachment])
+                await bot.send_message(userid, adapt_text(message), attachments=[attachment])
                 self.bot.confirm_daily_report_send(userid)
                 self.log.info(f"Sent daily report to {userid}")
 
