@@ -3,7 +3,7 @@ import os
 import re
 import string
 from io import BytesIO
-from typing import Dict
+from typing import Dict, List
 
 import threema.gateway as threema
 from aiohttp import web
@@ -34,7 +34,6 @@ class ThreemaInterface(SimpleTextInterface):
         if not os.path.isdir(self.graphics_tmp_path):
             os.makedirs(self.graphics_tmp_path)
 
-
     def run(self):
         logging.info("Run Threema Interface")
         # Create the application and register the handler for incoming messages
@@ -58,9 +57,10 @@ class ThreemaInterface(SimpleTextInterface):
                                             to_id=message.from_id)
                 await response_img.send()
 
-            response_msg = TextMessage(self.connection, text=self.adapt_text(response.message),
-                                       to_id=message.from_id)
-            await response_msg.send()
+            if response.message:
+                response_msg = TextMessage(self.connection, text=self.adapt_text(response.message),
+                                           to_id=message.from_id)
+                await response_msg.send()
 
     def adapt_text(self, text: str) -> str:
         # Replace bold with Unicode bold

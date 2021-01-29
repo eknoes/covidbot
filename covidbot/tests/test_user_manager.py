@@ -42,6 +42,14 @@ class TestSubscriptionManager(TestCase):
         self.assertTrue(self.test_manager.rm_subscription(user_id, 1), "Removing a non-existing subscription should return true")
         self.assertFalse(self.test_manager.rm_subscription(user_id, 1), "Removing an existing subscription should return false")
 
+    def test_activated(self):
+        user_id = self.test_manager.get_user_id("testuser")
+        self.assertFalse(self.test_manager.get_user(user_id).activated)
+
+        test_manager = UserManager("unittest2", self.conn, activated_default=True)
+        user_id = test_manager.get_user_id("testuser")
+        self.assertTrue(test_manager.get_user(user_id).activated)
+
     def test_get_user(self):
         uid1 = self.test_manager.get_user_id("testuser1")
         uid2 = self.test_manager.get_user_id("testuser2")

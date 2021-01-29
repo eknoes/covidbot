@@ -31,6 +31,12 @@ class Bot(object):
         self._manager = subscription_manager
         self._location_service = LocationService('resources/germany_rs.geojson')
 
+    def is_user_activated(self, user_identification: Union[int, str]) -> bool:
+        user_id = self._manager.get_user_id(user_identification)
+        if user_id:
+            return self._manager.get_user(user_id).activated
+        return False
+
     def set_language(self, user_identification: Union[int, str], language: Optional[str]) -> str:
         user_id = self._manager.get_user_id(user_identification)
         if not language:
@@ -89,7 +95,8 @@ class Bot(object):
             name = self._data.get_district(district_id).name
             return None, [(district_id, name)]
 
-    def get_possible_actions(self, user_identification: Union[int, str], district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
+    def get_possible_actions(self, user_identification: Union[int, str], district_id: int) -> Tuple[
+        str, List[Tuple[str, UserDistrictActions]]]:
         actions = [("Daten anzeigen", UserDistrictActions.REPORT)]
         district = self._data.get_district(district_id)
         user_id = self._manager.get_user_id(user_identification)
@@ -372,7 +379,7 @@ class Bot(object):
             i += 1
         message += "\nIm Durchschnitt hat ein:e Nutzer:in {mean} Orte abonniert, " \
                    "die höchste Anzahl an Abos liegt bei {most_subs}."
-        
+
         return message.format(total_user=self._manager.get_total_user_number(),
                               mean=self.format_incidence(self._manager.get_mean_subscriptions()),
                               most_subs=self._manager.get_most_subscriptions())

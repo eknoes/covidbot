@@ -13,17 +13,20 @@ class BotUser:
     last_update: datetime
     language: str
     subscriptions: Optional[List[int]] = None
+    activated: bool = False
 
 
 class UserManager(object):
     connection: MySQLConnection
     platform: str
     log = logging.getLogger(__name__)
+    activated_default: bool
 
-    def __init__(self, platform: str, db_connection: MySQLConnection):
+    def __init__(self, platform: str, db_connection: MySQLConnection, activated_default=False):
         self.connection = db_connection
         self._create_db()
         self.platform = platform
+        self.activated_default = activated_default
         self.log.debug(f"UserManager for {platform} initialized")
 
     def _create_db(self):
@@ -33,7 +36,8 @@ class UserManager(object):
                            '(user_id INTEGER PRIMARY KEY AUTO_INCREMENT, '
                            'last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
                            'language VARCHAR(20) DEFAULT NULL, created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
-                           'platform_id VARCHAR(100), platform VARCHAR(20), UNIQUE(platform_id, platform))')
+                           'platform_id VARCHAR(100), platform VARCHAR(20),'
+                           'activated TINYINT(1) DEFAULT FALSE NOT NULL, UNIQUE(platform_id, platform))')
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
@@ -41,6 +45,11 @@ class UserManager(object):
                            '(id INT AUTO_INCREMENT PRIMARY KEY, user_id INTEGER,'
                            'added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL,'
                            'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
+            self.connection.commit()
+
+    def activate_user(self, user_id: int) -> None:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("UPDATE bot_user SET activated=1 WHERE user_id=%s", [user_id])
             self.connection.commit()
 
     def get_user_id(self, identifier: str, create_if_not_exists=True) -> Optional[int]:
@@ -80,11 +89,11 @@ class UserManager(object):
         result = []
         with self.connection.cursor(dictionary=True) as cursor:
             if with_subscriptions:
-                query = ("SELECT bot_user.user_id, platform_id, last_update, language, rs FROM bot_user "
+                query = ("SELECT bot_user.user_id, platform_id, last_update, language, rs, activated FROM bot_user "
                          "LEFT JOIN subscriptions s on bot_user.user_id = s.user_id "
                          "WHERE platform=%s")
             else:
-                query = "SELECT bot_user.user_id, platform_id, last_update, language FROM bot_user WHERE platform=%s"
+                query = "SELECT bot_user.user_id, platform_id, last_update, language, activated FROM bot_user WHERE platform=%s"
             args = [self.platform]
 
             if filter_id:
@@ -107,7 +116,8 @@ class UserManager(object):
                         language = row['language']
 
                     current_user = BotUser(id=row['user_id'], platform_id=row['platform_id'],
-                                           last_update=row['last_update'], language=language)
+                                           last_update=row['last_update'], language=language,
+                                           activated=row['activated'])
 
                 if with_subscriptions:
                     if not current_user.subscriptions:
@@ -155,8 +165,8 @@ class UserManager(object):
     def create_user(self, identifier: str, last_update=datetime.today(), language=None) -> Union[int, bool]:
         with self.connection.cursor(dictionary=True) as cursor:
             try:
-                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, last_update=%s, language=%s",
-                               [identifier, self.platform, last_update, language])
+                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, last_update=%s, language=%s, activated=%s",
+                               [identifier, self.platform, last_update, language, self.activated_default])
                 if cursor.rowcount == 1:
                     self.connection.commit()
                     return cursor.lastrowid

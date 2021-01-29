@@ -35,7 +35,8 @@ class SignalInterface(SimpleTextInterface):
         if text:
             await ctx.message.typing_started()
             reply = self.handle_input(text, ctx.message.source)
-            await self.reply_message(ctx, reply)
+            if reply:
+                await self.reply_message(ctx, reply)
             await ctx.message.typing_stopped()
 
     async def reply_message(self, ctx: ChatContext, reply: BotResponse):

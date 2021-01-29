@@ -24,12 +24,12 @@ def parse_config(config_file: str):
     return cfg
 
 
-def get_connection(cfg) -> MySQLConnection:
+def get_connection(cfg, autocommit=False) -> MySQLConnection:
     return connect(database=cfg['DATABASE'].get('DATABASE'),
                    user=cfg['DATABASE'].get('USER'),
                    password=cfg['DATABASE'].get('PASSWORD'),
                    port=cfg['DATABASE'].get('PORT'),
-                   host=cfg['DATABASE'].get('HOST', 'localhost'))
+                   host=cfg['DATABASE'].get('HOST', 'localhost'), autocommit=autocommit)
 
 
 def strip_html(text: str) -> str:
@@ -105,12 +105,14 @@ if __name__ == "__main__":
         logging.info("### Start Interactive Bot ###")
 
         data = CovidData(get_connection(config))
-        user_manager = UserManager("interactive", get_connection(config))
+        user_manager = UserManager("interactive", get_connection(config, True), True)
 
         bot = SimpleTextInterface(Bot(data, user_manager))
         user_input = input("Please enter input:\n> ")
         while user_input != "":
-            print(f"{strip_html(bot.handle_input(user_input, '1').message)}")
+            response = bot.handle_input(user_input, '1')
+            if response:
+                print(f"{strip_html(response.message)}")
             user_input = input("> ")
         sys.exit(0)
     elif args.signal:
@@ -119,7 +121,7 @@ if __name__ == "__main__":
 
         logging.info("### Start Signal Bot ###")
         data = CovidData(get_connection(config))
-        user_manager = UserManager("signal", get_connection(config))
+        user_manager = UserManager("signal", get_connection(config, True), activated_default=True)
         bot = Bot(data, user_manager)
         signal_interface = SignalInterface(config['SIGNAL'].get('PHONE_NUMBER'),
                                            config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
@@ -130,7 +132,7 @@ if __name__ == "__main__":
         logging.info("### Start Threema Bot ###")
 
         data = CovidData(get_connection(config))
-        user_manager = UserManager("threema", get_connection(config))
+        user_manager = UserManager("threema", get_connection(config, True), activated_default=False)
         bot = Bot(data, user_manager)
         threema_iface = ThreemaInterface(config['THREEMA'].get('ID'), config['THREEMA'].get('SECRET'),
                                          config['THREEMA'].get('PRIVATE_KEY'), bot)
@@ -144,7 +146,7 @@ if __name__ == "__main__":
             data = CovidData(get_connection(config), disable_autoupdate=True)
         else:
             data = CovidData(get_connection(config))
-        user_manager = UserManager("telegram", get_connection(config))
+        user_manager = UserManager("telegram", get_connection(config, True), activated_default=True)
         bot = Bot(data, user_manager)
 
         telegram_bot = TelegramInterface(bot, api_key=api_key, dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))

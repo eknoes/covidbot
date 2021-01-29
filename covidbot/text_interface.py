@@ -24,6 +24,7 @@ class Handler:
 class ChatBotState:
     WAITING_FOR_COMMAND = 1
     WAITING_FOR_IS_FEEDBACK = 3
+    NOT_ACTIVATED = 4
 
 
 class SimpleTextInterface(object):
@@ -42,7 +43,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("statistik", self.statHandler))
         self.handler_list.append(Handler("", self.directHandler))
 
-    def handle_input(self, user_input: str, user_id: str) -> BotResponse:
+    def handle_input(self, user_input: str, user_id: str) -> Optional[BotResponse]:
         if user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
@@ -59,6 +60,17 @@ class SimpleTextInterface(object):
 
                     if user_input.strip().lower()[:4] == "nein":
                         return BotResponse("Alles klar, deine Nachricht wird nicht weitergeleitet.")
+            elif state[0] == ChatBotState.NOT_ACTIVATED:
+                if self.bot.is_user_activated(user_id):
+                    del self.chat_states[user_id]
+                else:
+                    return None
+
+        # Check whether user has to be activated
+        if not self.bot.is_user_activated(user_id):
+            self.chat_states[user_id] = (ChatBotState.NOT_ACTIVATED, None)
+            return BotResponse("Dein Account wurde noch nicht aktiviert, bitte wende dich an die Entwickler. Bis diese "
+                               "deinen Account aktivieren, kannst du den Bot leider noch nicht nutzen.")
 
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
