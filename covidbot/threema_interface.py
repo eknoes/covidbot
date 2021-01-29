@@ -10,10 +10,11 @@ from aiohttp import web
 from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage
 
 from covidbot.bot import Bot
+from covidbot.messenger_interface import MessengerInterface
 from covidbot.text_interface import SimpleTextInterface
 
 
-class ThreemaInterface(SimpleTextInterface):
+class ThreemaInterface(SimpleTextInterface, MessengerInterface):
     threema_id: str
     secret: str
     private_key: str
@@ -101,3 +102,8 @@ class ThreemaInterface(SimpleTextInterface):
         for i in range(len(replace_list)):
             text = text.replace(replace_list[i][0], replace_list[i][1])
         return text
+
+    def sendDailyReports(self) -> None:
+        # TODO: Implement daily reports
+        pass
+

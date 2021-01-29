@@ -15,6 +15,7 @@ from telegram.error import BadRequest, TelegramError, Unauthorized, TimedOut, Ne
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 from covidbot.bot import Bot, UserDistrictActions
+from covidbot.messenger_interface import MessengerInterface
 
 '''
 Telegram Aktionen:
@@ -39,7 +40,7 @@ class TelegramCallbacks(Enum):
     DISCARD = "discard"
 
 
-class TelegramInterface(object):
+class TelegramInterface(MessengerInterface):
     _bot: Bot
     log = logging.getLogger(__name__)
     dev_chat_id: int
@@ -307,15 +308,14 @@ class TelegramInterface(object):
         markup = InlineKeyboardMarkup(buttons)
         return message, markup
 
-    def updateHandler(self, context: CallbackContext) -> None:
+    def sendDailyReports(self) -> None:
         self.log.info("Check for data update")
         messages = self._bot.update()
         if not messages:
             return
+
         # Empty file cache as there seems to be new content
         self.graph_cache = {}
-
-        # Generate graph for country
 
         # Avoid flood limits of 30 messages / second
         messages_sent = 0
@@ -380,7 +380,6 @@ class TelegramInterface(object):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.location, self.directMessageHandler))
         self.updater.dispatcher.add_error_handler(self.error_callback)
-        self.updater.job_queue.run_repeating(self.updateHandler, interval=1300, first=10)
 
         self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
         self.updater.start_polling()

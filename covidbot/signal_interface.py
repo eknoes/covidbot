@@ -8,10 +8,11 @@ import semaphore
 from semaphore import ChatContext
 
 from covidbot.bot import Bot
+from covidbot.messenger_interface import MessengerInterface
 from covidbot.text_interface import SimpleTextInterface, BotResponse
 
 
-class SignalInterface(SimpleTextInterface):
+class SignalInterface(SimpleTextInterface, MessengerInterface):
     phone_number: str
     socket: str
     graphics_tmp_path: str
@@ -55,7 +56,10 @@ class SignalInterface(SimpleTextInterface):
             f.write(image.getbuffer())
         return {"filename": filename, "width": "900", "height": "600"}
 
-    # TODO: Implement daily updates
+    def sendDailyReports(self) -> None:
+        # TODO: Implement daily updates
+        pass
+
     def adapt_text(self, text: str) -> str:
         # Replace bold with Unicode bold
         bold_pattern = re.compile("<b>(.*?)</b>")
