@@ -34,7 +34,7 @@ class TestBot(TestCase):
             cursor.execute("DROP TABLE IF EXISTS user_feedback;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
 
-        self.man = UserManager("unittest", self.conn)
+        self.man = UserManager("unittest", self.conn, activated_default=True)
         self.bot = Bot(CovidData(self.conn),
                        self.man)
 
