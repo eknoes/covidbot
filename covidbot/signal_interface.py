@@ -61,7 +61,14 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         return {"filename": filename, "width": "900", "height": "600"}
 
     def sendDailyReports(self) -> None:
-        # TODO: Implement daily updates
-        pass
+        unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
+        asyncio.run(self.sendDailyReportsAsync(unconfirmed_reports, self.bot.get_graphical_report(0)))
 
+    async def sendDailyReportsAsync(self, unconfirmed_reports, graph) -> None:
+        attachment = self.get_attachment(graph)
+        async with semaphore.Bot(self.phone_number, socket_path=self.socket) as bot:
+            for userid, message in unconfirmed_reports:
+                await bot.send_message(userid, message, attachments=[attachment])
+                self.bot.confirm_daily_report_send(userid)
+                self.log.info(f"Sent daily report to {userid}")
 
