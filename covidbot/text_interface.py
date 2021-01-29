@@ -180,7 +180,7 @@ class SimpleTextInterface(object):
         return BotResponse(self.bot.get_statistic())
 
     def getUpdates(self) -> List[Tuple[str, BotResponse]]:
-        updates = self.bot.update()
+        updates = self.bot.get_unconfirmed_daily_reports()
         graph = self.bot.get_graphical_report(0)
         return list(map(lambda x: (x[0], BotResponse(x[1], graph)), updates))
 

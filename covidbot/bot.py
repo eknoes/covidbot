@@ -339,26 +339,18 @@ class Bot(object):
         return ("Dieser Befehl wurde nicht verstanden. Nutze <code>/hilfe</code> um einen Überblick über die Funktionen"
                 "zu bekommen!")
 
-    def update(self) -> Optional[List[Tuple[Union[int, str], str]]]:
+    def get_unconfirmed_daily_reports(self) -> Optional[List[Tuple[Union[int, str], str]]]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
         :rtype: Optional[list[Tuple[str, str]]]
         :return: List of (userid, message)
         """
-        self.log.debug("Checking for new data")
-        self.log.info("Current COVID19 data from " + str(self._data.get_last_update()))
         result = []
         data_update = self._data.get_last_update()
         for user in self._manager.get_all_user(with_subscriptions=True):
             if user.last_update is None or user.last_update.date() < data_update:
                 result.append((user.platform_id, self._get_report(user.subscriptions)))
-
-        if len(result) > 0:
-            return result
-
-        if self._data.fetch_current_data():
-            return self.update()
         return result
 
     def confirm_daily_report_send(self, user_identification: Union[int, str]):

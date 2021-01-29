@@ -5,7 +5,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot, UserDistrictActions
-from covidbot.covid_data import CovidData, DistrictData, TrendValue
+from covidbot.covid_data import CovidData, DistrictData, TrendValue, RKIUpdater
 from covidbot.user_manager import UserManager
 
 
@@ -17,6 +17,13 @@ class TestBot(TestCase):
         cfg = parse_config("resources/config.unittest.ini")
         cls.conn = get_connection(cfg)
 
+        with cls.conn.cursor(dictionary=True) as cursor:
+            cursor.execute("DROP TABLE IF EXISTS covid_data;")
+            cursor.execute("DROP TABLE IF EXISTS counties;")
+
+        # Update Data
+        RKIUpdater(cls.conn).fetch_current_data()
+
     @classmethod
     def tearDownClass(cls) -> None:
         cls.conn.close()
@@ -25,9 +32,7 @@ class TestBot(TestCase):
         with self.conn.cursor(dictionary=True) as cursor:
             cursor.execute("DROP TABLE IF EXISTS subscriptions;")
             cursor.execute("DROP TABLE IF EXISTS user_feedback;")
-            cursor.execute("DROP TABLE IF EXISTS covid_data;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
-            cursor.execute("DROP TABLE IF EXISTS counties;")
 
         self.man = UserManager("unittest", self.conn)
         self.bot = Bot(CovidData(self.conn),
@@ -53,7 +58,7 @@ class TestBot(TestCase):
         self.man.set_last_update(uid1, datetime.now() - timedelta(days=2))
         self.man.set_last_update(uid2, datetime.now() - timedelta(days=2))
 
-        update = self.bot.update()
+        update = self.bot.get_unconfirmed_daily_reports()
         self.assertEqual(2, len(update), "New data should trigger 2 updates")
         for u in update:
             if u[0] == 1:
@@ -63,15 +68,15 @@ class TestBot(TestCase):
                 self.assertRegex(u[1], "Bayern", "A subscribed district must be part of the daily report")
                 self.assertEqual(self.bot.get_report(user2), u[1], "The daily report should be equal to the manual report")
 
-        self.assertEqual(2, len(self.bot.update()), "Without setting last_updated, new reports should be generated")
+        self.assertEqual(2, len(self.bot.get_unconfirmed_daily_reports()), "Without setting last_updated, new reports should be generated")
         self.bot.confirm_daily_report_send(user1)
-        self.assertEqual(1, len(self.bot.update()), "Without setting last_updated, new report should be generated")
+        self.assertEqual(1, len(self.bot.get_unconfirmed_daily_reports()), "Without setting last_updated, new report should be generated")
         self.bot.confirm_daily_report_send(user2)
-        self.assertEqual([], self.bot.update(), "If both users already have current report, it should not be "
+        self.assertEqual([], self.bot.get_unconfirmed_daily_reports(), "If both users already have current report, it should not be "
                                                      "sent again")
 
     def test_update_no_subscribers(self):
-        self.assertEqual([], self.bot.update(), "Empty subscribers should generate empty update list")
+        self.assertEqual([], self.bot.get_unconfirmed_daily_reports(), "Empty subscribers should generate empty update list")
 
     def test_no_user(self):
         uid1 = "uid1"

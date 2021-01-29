@@ -309,8 +309,8 @@ class TelegramInterface(MessengerInterface):
         return message, markup
 
     def sendDailyReports(self) -> None:
-        self.log.info("Check for data update")
-        messages = self._bot.update()
+        self.log.debug("Check for new daily reports update")
+        messages = self._bot.get_unconfirmed_daily_reports()
         if not messages:
             return
 
@@ -334,7 +334,7 @@ class TelegramInterface(MessengerInterface):
                 messages_sent += 1
             except Unauthorized:
                 self._bot.delete_user(userid)
-                logging.warning(f"Deleted user {userid}, as he blocked us")
+                logging.warning(f"Deleted user {userid} as he blocked us")
 
     def sendReport(self, userid: int, message=None):
         if not message:

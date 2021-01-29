@@ -43,11 +43,9 @@ class CovidData(object):
     connection: MySQLConnection
     log = logging.getLogger(__name__)
 
-    def __init__(self, connection: MySQLConnection, disable_autoupdate=False) -> None:
+    def __init__(self, connection: MySQLConnection) -> None:
         self.connection = connection
         self._create_tables()
-        if not disable_autoupdate:
-            self.fetch_current_data()
 
     def _create_tables(self):
         self.log.debug("Creating Tables")
@@ -88,92 +86,6 @@ class CovidData(object):
                            'VALUES (0, "Deutschland", "Staat", NULL)')
             self.connection.commit()
             self.log.debug("Committed Tables")
-
-    def add_data(self, filename: str):
-        if filename is None:
-            raise ValueError("filename must be given")
-        elif not os.path.isfile(filename):
-            raise ValueError("File " + filename + "does not exist")
-        else:
-            with open(filename, "r") as rki_csv:
-                self.log.debug("Reading from Data file")
-                reader = csv.DictReader(rki_csv)
-                self._add_data(reader)
-
-    def _add_data(self, reader: csv.DictReader) -> None:
-        covid_data = []
-        rs_data = []
-        added_bl = set()
-        last_update = self.get_last_update()
-        now = datetime.now().date()
-        new_updated = None
-        for row in reader:
-            new_updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr").date()
-            if last_update and new_updated <= last_update or now < new_updated:
-                # Do not take data from future, important for testing
-                continue
-
-            # Gather Bundesland data
-            if row['BL_ID'] not in added_bl:
-                covid_data.append(
-                    (int(row['BL_ID']), new_updated, None, float(row['cases7_bl_per_100k']),
-                     None))
-                rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', None, 0))
-                added_bl.add(row['BL_ID'])
-
-            covid_data.append((int(row['RS']), new_updated, int(row['cases']), float(row['cases7_per_100k']),
-                               int(row['deaths'])))
-            rs_data.append((int(row['RS']), self.clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
-                            row['BEZ'], int(row['EWZ']), int(row['BL_ID'])))
-
-        self.log.debug("Insert new data into counties and covid_data")
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.executemany('INSERT INTO counties (rs, county_name, type, population, parent) '
-                               'VALUES (%s, %s, %s, %s, %s) '
-                               'ON DUPLICATE KEY UPDATE population=VALUES(population)',
-                               rs_data)
-            cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
-             VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
-            self.connection.commit()
-        self.calculate_aggregated_values(new_updated)
-        self.log.debug("Finished inserting new data")
-
-    def calculate_aggregated_values(self, new_updated: date):
-        self.log.debug("Calculating aggregated values")
-        with self.connection.cursor(dictionary=True) as cursor:
-            # Calculate all parents, must be executed for every depth
-            for i in range(2):
-                # Calculate Covid Data
-                cursor.execute('''INSERT INTO covid_data (rs, date, total_cases, total_deaths)
-                                    SELECT new.parent, new_date, new_cases, new_deaths
-                                    FROM
-                                    (SELECT c.parent as parent, date as new_date, SUM(total_cases) as new_cases,
-                                     SUM(total_deaths) as new_deaths FROM covid_data_calculated 
-                                     LEFT JOIN counties c on covid_data_calculated.rs = c.rs
-                                     WHERE c.parent IS NOT NULL AND date = DATE(%s)
-                                     GROUP BY c.parent, date)
-                                    as new
-                                  ON DUPLICATE KEY UPDATE 
-                                  date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths''',
-                               [new_updated])
-                # Calculate Population
-                cursor.execute(
-                    'UPDATE counties, (SELECT ncounties.rs as id, SUM(counties.population) as pop FROM counties\n'
-                    '    LEFT JOIN counties ncounties ON ncounties.rs = counties.parent\n'
-                    'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
-                    'SET population=pop_sum.pop WHERE rs=pop_sum.id')
-                # Calculate Incidence
-                cursor.execute('UPDATE covid_data, '
-                               '(SELECT c.parent as rs, d.date, SUM(c.population * d.incidence) / SUM(c.population) '
-                               'as incidence FROM covid_data as d '
-                               'LEFT JOIN counties c on c.rs = d.rs '
-                               'WHERE c.parent IS NOT NULL '
-                               'GROUP BY date, c.parent) as incidence '
-                               'SET covid_data.incidence = incidence.incidence '
-                               'WHERE covid_data.incidence IS NULL AND covid_data.date = incidence.date '
-                               'AND covid_data.rs = incidence.rs')
-
-            self.connection.commit()
 
     @staticmethod
     def clean_district_name(county_name: str) -> Optional[str]:
@@ -291,8 +203,10 @@ class CovidData(object):
             result = cursor.fetchone()
             return result['last_updated']
 
-    def fetch_current_data(self) -> bool:
-        self.log.info("Start Updating data")
+
+class RKIUpdater(CovidData):
+    def fetch_current_data(self) -> None:
+        self.log.info("Check for new RKI data")
         last_update = self.get_last_update()
         header = {}
         if last_update:
@@ -300,15 +214,89 @@ class CovidData(object):
 
         r = requests.get(self.RKI_LK_CSV, headers=header)
         if r.status_code == 200:
-            self.log.info("Got RKI Data, checking if new")
+            self.log.debug("Got RKI Data, checking if new")
 
             rki_data = codecs.decode(r.content, "utf-8").splitlines()
             reader = csv.DictReader(rki_data)
-            self._add_data(reader)
+            self.add_data(reader)
             if last_update is None or last_update < self.get_last_update():
-                return True
+                logging.info(f"Received new data, data is now from {self.get_last_update()}")
         elif r.status_code == 304:
             self.log.info("RKI has no new data")
         else:
             self.log.warning("RKI CSV Response Status Code is " + str(r.status_code))
-        return False
+
+    def add_data(self, reader: csv.DictReader) -> None:
+        covid_data = []
+        rs_data = []
+        added_bl = set()
+        last_update = self.get_last_update()
+        now = datetime.now().date()
+        new_updated = None
+        for row in reader:
+            new_updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr").date()
+            if last_update and new_updated <= last_update or now < new_updated:
+                # Do not take data from future, important for testing
+                continue
+
+            # Gather Bundesland data
+            if row['BL_ID'] not in added_bl:
+                covid_data.append(
+                    (int(row['BL_ID']), new_updated, None, float(row['cases7_bl_per_100k']),
+                     None))
+                rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', None, 0))
+                added_bl.add(row['BL_ID'])
+
+            covid_data.append((int(row['RS']), new_updated, int(row['cases']), float(row['cases7_per_100k']),
+                               int(row['deaths'])))
+            rs_data.append((int(row['RS']), self.clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
+                            row['BEZ'], int(row['EWZ']), int(row['BL_ID'])))
+
+        self.log.debug("Insert new data into counties and covid_data")
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.executemany('INSERT INTO counties (rs, county_name, type, population, parent) '
+                               'VALUES (%s, %s, %s, %s, %s) '
+                               'ON DUPLICATE KEY UPDATE population=VALUES(population)',
+                               rs_data)
+            cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
+             VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
+            self.connection.commit()
+        self.calculate_aggregated_values(new_updated)
+        self.log.debug("Finished inserting new data")
+
+    def calculate_aggregated_values(self, new_updated: date):
+        self.log.debug("Calculating aggregated values")
+        with self.connection.cursor(dictionary=True) as cursor:
+            # Calculate all parents, must be executed for every depth
+            for i in range(2):
+                # Calculate Covid Data
+                cursor.execute('''INSERT INTO covid_data (rs, date, total_cases, total_deaths)
+                                    SELECT new.parent, new_date, new_cases, new_deaths
+                                    FROM
+                                    (SELECT c.parent as parent, date as new_date, SUM(total_cases) as new_cases,
+                                     SUM(total_deaths) as new_deaths FROM covid_data_calculated 
+                                     LEFT JOIN counties c on covid_data_calculated.rs = c.rs
+                                     WHERE c.parent IS NOT NULL AND date = DATE(%s)
+                                     GROUP BY c.parent, date)
+                                    as new
+                                  ON DUPLICATE KEY UPDATE 
+                                  date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths''',
+                               [new_updated])
+                # Calculate Population
+                cursor.execute(
+                    'UPDATE counties, (SELECT ncounties.rs as id, SUM(counties.population) as pop FROM counties\n'
+                    '    LEFT JOIN counties ncounties ON ncounties.rs = counties.parent\n'
+                    'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
+                    'SET population=pop_sum.pop WHERE rs=pop_sum.id')
+                # Calculate Incidence
+                cursor.execute('UPDATE covid_data, '
+                               '(SELECT c.parent as rs, d.date, SUM(c.population * d.incidence) / SUM(c.population) '
+                               'as incidence FROM covid_data as d '
+                               'LEFT JOIN counties c on c.rs = d.rs '
+                               'WHERE c.parent IS NOT NULL '
+                               'GROUP BY date, c.parent) as incidence '
+                               'SET covid_data.incidence = incidence.incidence '
+                               'WHERE covid_data.incidence IS NULL AND covid_data.date = incidence.date '
+                               'AND covid_data.rs = incidence.rs')
+
+            self.connection.commit()

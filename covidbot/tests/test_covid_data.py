@@ -4,7 +4,7 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import CovidData, DistrictData, TrendValue
+from covidbot.covid_data import CovidData, DistrictData, TrendValue, RKIUpdater
 
 
 class CovidDataTest(TestCase):
@@ -20,7 +20,7 @@ class CovidDataTest(TestCase):
         cls.conn.close()
 
     def setUp(self) -> None:
-        self.data = CovidData(self.conn, disable_autoupdate=True)
+        self.data = CovidData(self.conn)
 
         with self.conn.cursor() as cursor:
             cursor.execute("TRUNCATE TABLE covid_data;")
@@ -34,7 +34,8 @@ class CovidDataTest(TestCase):
                 for stmt in f.readlines():
                     cursor.execute(stmt)
 
-            self.data.calculate_aggregated_values(date.fromisoformat("2021-01-16"))
+            updater = RKIUpdater(self.conn)
+            updater.calculate_aggregated_values(date.fromisoformat("2021-01-16"))
 
     def tearDown(self) -> None:
         del self.data
@@ -50,12 +51,6 @@ class CovidDataTest(TestCase):
                          "Göttingen should match")
         self.assertEqual(1, len(self.data.search_district_by_name("Kassel Land")), "Kassel Land should match LK Kassel")
         self.assertEqual(1, len(self.data.search_district_by_name("Bundesland Hessen")), "Exact match should be chosen")
-
-    def test_update(self):
-        with self.conn.cursor() as cursor:
-            cursor.execute("TRUNCATE covid_data")
-        self.assertTrue(self.data.fetch_current_data(), "Do update if newer data is available")
-        self.assertFalse(self.data.fetch_current_data(), "Do not update if data has not changed")
 
     def test_clean_district_name(self):
         expected = [("Region Hannover", "Hannover"), ("LK Kassel", "Kassel"),
@@ -108,3 +103,23 @@ class CovidDataTest(TestCase):
         self.assertEqual(18678, data.new_cases, "New Cases on 16.01.2020 should be 18,678 for Germany")
         self.assertEqual(980, data.new_deaths, "New Deaths on 16.01.2020 should be 980 for Germany")
         self.assertEqual(139.24, data.incidence, "Incidence on 16.01.2020 should be 139.2 for Germany")
+
+
+class TestRKIUpdater(TestCase):
+    conn: MySQLConnection
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cfg = parse_config("resources/config.unittest.ini")
+        cls.conn = get_connection(cfg)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.conn.close()
+
+    def test_update(self):
+        with self.conn.cursor() as cursor:
+            cursor.execute("TRUNCATE covid_data")
+
+        updater = RKIUpdater(self.conn)
+        self.assertIsNone(updater.fetch_current_data(), "Update should not lead to any exception")
