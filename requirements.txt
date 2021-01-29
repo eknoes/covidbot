@@ -27,7 +27,7 @@ python-dateutil==2.8.1
 python-telegram-bot==13.1
 pytz==2020.5
 requests==2.25.1
-semaphore-bot==0.9.1
+-e git+https://github.com/lwesterhof/semaphore@239d4c422f627053b2f39330eec524ca592604a5#egg=semaphore_bot
 Shapely==1.7.1
 six==1.15.0
 sniffio==1.2.0
