@@ -137,6 +137,7 @@ if __name__ == "__main__":
     elif args.signal:
         interface = get_messenger_interface("signal", config, logging_level)
         logging.info("### Start Signal Bot ###")
+        interface.run()
     elif args.threema:
         interface = get_messenger_interface("threema", config, logging_level)
         logging.info("### Start Threema Bot ###")
