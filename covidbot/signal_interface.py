@@ -1,6 +1,7 @@
 import asyncio
 import os
 import re
+import signal
 from io import BytesIO
 from typing import Dict
 
@@ -34,7 +35,13 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
     async def _run(self):
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name) as bot:
             bot.register_handler(re.compile(""), self.text_handler)
+            bot.set_exception_handler(self.exception_handler)
             await bot.start()
+
+    def exception_handler(self, exception: Exception, ctx: ChatContext):
+        self.log.exception("An exception occurred, exiting...", exc_info=exception)
+        # Just exit on exception
+        os.kill(os.getpid(), signal.SIGINT)
 
     async def text_handler(self, ctx: ChatContext):
         text = ctx.message.get_body()
