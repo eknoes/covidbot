@@ -68,5 +68,6 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
 
         for userid, message in unconfirmed_reports:
-            TextMessage(self.connection, text=adapt_text(message), to_id=userid).send()
+            await TextMessage(self.connection, text=adapt_text(message), to_id=userid).send()
+            self.bot.confirm_daily_report_send(userid)
             self.log.info(f"Sent report to {userid}")
