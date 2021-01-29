@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum
 from io import BytesIO
-from typing import Callable, Dict, List, TypedDict, Union, Optional, Tuple
+from typing import Callable, Dict, List, Union, Optional, Tuple
 
 from covidbot.bot import Bot, UserDistrictActions
+from covidbot.messenger_interface import MessengerInterface
+from covidbot.utils import adapt_text
 
 
 @dataclass
@@ -79,32 +80,32 @@ class SimpleTextInterface(object):
 
     def helpHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(f'Hallo,\n'
-                                  f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                                  f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
-                                  f'<b>🔎 Orte finden</b>\n'
-                                  f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
-                                  f'möchtest. So kannst du nach einer Stadt, Adresse oder auch dem Namen deiner '
-                                  f'Lieblingskneipe suchen.\n\n'
-                                  f'<b>📈 Informationen erhalten</b>\n'
-                                  f'Wählst du "Daten" aus, erhältst Du einmalig Informationen über diesen Ort. Diese '
-                                  f'enthalten eine Grafik, die für diesen Ort generiert wurde.\n'
-                                  f'Wählst du "Abo" aus, wird dieser Ort in deinem '
-                                  f'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
-                                  f'stattdessen angeboten, das Abo wieder zu beenden. '
-                                  f'Du kannst beliebig viele Orte abonnieren!'
-                                  f'\n\n'
-                                  f'<b>💬 Feedback</b>\n'
-                                  f'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
-                                  f'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
-                                  f'<b>🤓 Statistik</b>\n'
-                                  f'Wenn du "Statistik" sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
-                                  f'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
-                                  f'<b>Weiteres</b>\n'
-                                  f'• Sende "Bericht" um deinen Tagesbericht erneut zu erhalten\n'
-                                  f'• Sende "Abo" um deine abonnierten Orte einzusehen\n\n'
-                                  f'Mehr Informationen zu diesem Bot findest du hier: '
-                                  f'https://github.com/eknoes/covid-bot\n\n'
-                                  f'Diesen Hilfetext erhältst du über /hilfe')
+                           f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
+                           f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
+                           f'<b>🔎 Orte finden</b>\n'
+                           f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
+                           f'möchtest. So kannst du nach einer Stadt, Adresse oder auch dem Namen deiner '
+                           f'Lieblingskneipe suchen.\n\n'
+                           f'<b>📈 Informationen erhalten</b>\n'
+                           f'Wählst du "Daten" aus, erhältst Du einmalig Informationen über diesen Ort. Diese '
+                           f'enthalten eine Grafik, die für diesen Ort generiert wurde.\n'
+                           f'Wählst du "Abo" aus, wird dieser Ort in deinem '
+                           f'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
+                           f'stattdessen angeboten, das Abo wieder zu beenden. '
+                           f'Du kannst beliebig viele Orte abonnieren!'
+                           f'\n\n'
+                           f'<b>💬 Feedback</b>\n'
+                           f'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
+                           f'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
+                           f'<b>🤓 Statistik</b>\n'
+                           f'Wenn du "Statistik" sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
+                           f'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
+                           f'<b>Weiteres</b>\n'
+                           f'• Sende "Bericht" um deinen Tagesbericht erneut zu erhalten\n'
+                           f'• Sende "Abo" um deine abonnierten Orte einzusehen\n\n'
+                           f'Mehr Informationen zu diesem Bot findest du hier: '
+                           f'https://github.com/eknoes/covid-bot\n\n'
+                           f'Diesen Hilfetext erhältst du über /hilfe')
 
     def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)
@@ -112,7 +113,7 @@ class SimpleTextInterface(object):
             if set_feedback != 0:
                 self.chat_states[set_feedback] = (ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
                 message += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
-                             "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
+                           "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
             return message
 
         elif len(locations) == 1:
@@ -185,3 +186,16 @@ class SimpleTextInterface(object):
 
     def confirm_daily_report_send(self, user_identification: Union[int, str]):
         return self.bot.confirm_daily_report_send(user_identification)
+
+
+class InteractiveInterface(SimpleTextInterface, MessengerInterface):
+    def sendDailyReports(self) -> None:
+        print("Sending Daily reports is not implemented for interactive interface")
+
+    def run(self) -> None:
+        user_input = input("Please enter input:\n> ")
+        while user_input != "":
+            response = self.handle_input(user_input, '1')
+            if response:
+                print(f"{adapt_text(response.message)}")
+            user_input = input("> ")
