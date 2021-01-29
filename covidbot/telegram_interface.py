@@ -308,7 +308,7 @@ class TelegramInterface(MessengerInterface):
         markup = InlineKeyboardMarkup(buttons)
         return message, markup
 
-    def sendDailyReports(self) -> None:
+    async def sendDailyReports(self) -> None:
         self.log.debug("Check for new daily reports update")
         messages = self._bot.get_unconfirmed_daily_reports()
         if not messages:

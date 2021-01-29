@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class MessengerInterface(ABC):
 
     @abstractmethod
-    def sendDailyReports(self) -> None:
+    async def sendDailyReports(self) -> None:
         pass
 
     @abstractmethod

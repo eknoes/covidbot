@@ -1,17 +1,16 @@
 import argparse
+import asyncio
 import configparser
 import locale
 import logging
-import re
 import sys
 from functools import reduce
-from typing import Optional
+from typing import List
 
 from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, RKIUpdater
-from covidbot.messenger_interface import MessengerInterface
 from covidbot.signal_interface import SignalInterface
 from covidbot.telegram_interface import TelegramInterface
 from covidbot.text_interface import InteractiveInterface
@@ -33,44 +32,73 @@ def get_connection(cfg, autocommit=False) -> MySQLConnection:
                    host=cfg['DATABASE'].get('HOST', 'localhost'), autocommit=autocommit)
 
 
-def get_messenger_interface(name: str, config, loglvl=logging.INFO, setup_logs=True) -> Optional[MessengerInterface]:
-    if setup_logs:
-        # Setup Logging
-        logging.basicConfig(format=logging_format, level=loglvl, filename="signal-bot.log")
+class MessengerBotSetup:
+    connections: List[MySQLConnection] = []
+    name: str
+    config: configparser.ConfigParser
 
-        # Log also to stdout
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(logging.Formatter(logging_format))
-        logging.getLogger().addHandler(stream_handler)
+    def __init__(self, name: str, config, loglvl=logging.INFO, setup_logs=True):
+        if setup_logs:
+            # Setup Logging
+            logging.basicConfig(format=logging_format, level=loglvl, filename=f"{name}-bot.log")
 
-    if name != "signal" and name != "threema" and name != "telegram" and name != "interactive":
-        raise ValueError(f"Invalid messenger interface was requested: {name}")
+            # Log also to stdout
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(logging.Formatter(logging_format))
+            logging.getLogger().addHandler(stream_handler)
 
-    # Do not activate user on Threema automatically
-    users_activated = True
-    if name == "threema":
-        users_activated = False
+        if name != "signal" and name != "threema" and name != "telegram" and name != "interactive":
+            raise ValueError(f"Invalid messenger interface was requested: {name}")
 
-    # Setup CovidData, Bot and UserManager
-    data = CovidData(get_connection(config))
-    user_manager = UserManager(name, get_connection(config, True), activated_default=users_activated)
-    bot = Bot(data, user_manager)
+        self.name = name
+        self.config = config
 
-    # Return specific interface
-    if name == "threema":
-        return ThreemaInterface(config['THREEMA'].get('ID'), config['THREEMA'].get('SECRET'),
-                                config['THREEMA'].get('PRIVATE_KEY'), bot)
+    def __enter__(self):
+        # Do not activate user on Threema automatically
+        users_activated = True
+        if self.name == "threema":
+            users_activated = False
 
-    if name == "signal":
-        return SignalInterface(config['SIGNAL'].get('PHONE_NUMBER'),
-                               config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
+        # Setup CovidData, Bot and UserManager
+        data_conn = get_connection(config)
+        user_conn = get_connection(config, True)
 
-    if name == "telegram":
-        return TelegramInterface(bot, api_key=config['TELEGRAM'].get('API_KEY'),
-                                 dev_chat_id=config['TELEGRAM'].getint("DEV_CHAT"))
+        self.connections.append(data_conn)
+        self.connections.append(user_conn)
 
-    if name == "interactive":
-        return InteractiveInterface(bot)
+        data = CovidData(data_conn)
+        user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
+        bot = Bot(data, user_manager)
+
+        # Return specific interface
+        if self.name == "threema":
+            return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
+                                    self.config['THREEMA'].get('PRIVATE_KEY'), bot)
+
+        if self.name == "signal":
+            return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
+                                   self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
+
+        if self.name == "telegram":
+            return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
+                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
+
+        if self.name == "interactive":
+            return InteractiveInterface(bot)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for conn in self.connections:
+            conn.close()
+
+
+async def sendUpdates():
+    for messenger in ["threema", "signal", "telegram"]:
+        try:
+            with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
+                await interface.sendDailyReports()
+                logging.info(f"Sent daily reports for {messenger}")
+        except Exception as e:
+            logging.error(f"Got exception while sending daily reports for {messenger}: {e}", exc_info=e)
 
 
 if __name__ == "__main__":
@@ -108,6 +136,10 @@ if __name__ == "__main__":
     if args.update:
         if not args.verbose:
             logging_level = logging.WARNING
+        elif args.verbose > 1:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
 
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="updater.log")
@@ -118,31 +150,25 @@ if __name__ == "__main__":
         logging.getLogger().addHandler(stream_handler)
 
         logging.info("### Start Data Update ###")
+        with get_connection(config, autocommit=False) as conn:
+            updater = RKIUpdater(conn)
+            updater.fetch_current_data()
 
-        updater = RKIUpdater(get_connection(config, autocommit=False))
-        updater.fetch_current_data()
-        del updater
+        asyncio.run(sendUpdates())
 
-        for messenger in ["threema", "signal", "telegram"]:
-            try:
-                interface = get_messenger_interface(messenger, config, setup_logs=False)
-                interface.sendDailyReports()
-                logging.info(f"Sent daily reports for {messenger}")
-            except Exception as e:
-                logging.error(f"Got exception while sending daily reports for {messenger}: {e}", exc_info=e)
     elif args.interactive:
-        interface = get_messenger_interface("interactive", config, logging_level)
-        logging.info("### Start Interactive Bot ###")
-        interface.run()
+        with MessengerBotSetup("interactive", config, logging_level) as interface:
+            logging.info("### Start Interactive Bot ###")
+            interface.run()
     elif args.signal:
-        interface = get_messenger_interface("signal", config, logging_level)
-        logging.info("### Start Signal Bot ###")
-        interface.run()
+        with MessengerBotSetup("signal", config, logging_level) as interface:
+            logging.info("### Start Signal Bot ###")
+            interface.run()
     elif args.threema:
-        interface = get_messenger_interface("threema", config, logging_level)
-        logging.info("### Start Threema Bot ###")
-        interface.run()
+        with MessengerBotSetup("threema", config, logging_level) as interface:
+            logging.info("### Start Threema Bot ###")
+            interface.run()
     elif args.telegram:
-        interface = get_messenger_interface("telegram", config, logging_level)
-        logging.info("### Start Telegram Bot ###")
-        interface.run()
+        with MessengerBotSetup("telegram", config, logging_level) as interface:
+            logging.info("### Start Telegram Bot ###")
+            interface.run()

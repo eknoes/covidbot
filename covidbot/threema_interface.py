@@ -1,10 +1,7 @@
-import asyncio
 import logging
 import os
-import re
-import string
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict
 
 import threema.gateway as threema
 from aiohttp import web
@@ -65,11 +62,11 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                                            to_id=message.from_id)
                 await response_msg.send()
 
-    def sendDailyReports(self) -> None:
+    async def sendDailyReports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
 
         for userid, message in unconfirmed_reports:
             report = TextMessage(self.connection, text=adapt_text(message), to_id=userid)
-            asyncio.get_event_loop().run_until_complete(report.send())
+            await report.send()
             self.bot.confirm_daily_report_send(userid)
             self.log.info(f"Sent report to {userid}")
