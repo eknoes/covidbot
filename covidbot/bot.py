@@ -349,6 +349,9 @@ class Bot(object):
         result = []
         data_update = self._data.get_last_update()
         for user in self._manager.get_all_user(with_subscriptions=True):
+            if not user.activated:
+                continue
+
             if user.last_update is None or user.last_update.date() < data_update:
                 result.append((user.platform_id, self._get_report(user.subscriptions)))
         return result
