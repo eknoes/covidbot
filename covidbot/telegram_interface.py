@@ -62,16 +62,7 @@ class TelegramInterface(MessengerInterface):
         self.graph_cache[district_id] = file
 
     def startHandler(self, update: Update, context: CallbackContext):
-        update.message.reply_html(f'Hallo {update.effective_user.first_name},\n'
-                                  f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                                  f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. '
-                                  f'Einen Überblick über alle Befehle erhältst du über /hilfe.\n\n'
-                                  f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
-                                  f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. '
-                                  f'Du kannst auch einen Standort senden! Wenn die Daten des Ortes nur gesammelt für '
-                                  f'eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
-                                  f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
-                                  f' auch die aktuellen Zahlen für andere Orte ansehen.')
+        update.message.reply_html(self._bot.start_message(update.effective_chat.id, update.effective_user.first_name))
         if update.effective_user and update.effective_user.language_code:
             self._bot.set_language(update.effective_chat.id, update.effective_user.language_code)
 

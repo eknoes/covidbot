@@ -24,12 +24,14 @@ class Bot(object):
     _manager: UserManager
     _location_service: LocationService
     DEFAULT_LANG = "de"
+    command_format: str
 
-    def __init__(self, covid_data: CovidData, subscription_manager: UserManager):
+    def __init__(self, covid_data: CovidData, subscription_manager: UserManager, command_format="/{command}"):
         self.log = logging.getLogger(__name__)
         self._data = covid_data
         self._manager = subscription_manager
         self._location_service = LocationService('resources/germany_rs.geojson')
+        self.command_format = command_format
 
     def is_user_activated(self, user_identification: Union[int, str]) -> bool:
         user_id = self._manager.get_user_id(user_identification)
@@ -204,10 +206,11 @@ class Bot(object):
             user = self._manager.get_user(user_id, True)
             if len(user.subscriptions) == 1:
                 message += " "
-                message += ("Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
-                            "einen weiteren Ort!\n\n"
-                            "Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
-                            "erfährst du über den /hilfe Befehl. Danke, dass du unseren Bot benutzt!")
+                message += (f"Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
+                            f"einen weiteren Ort!\n\n"
+                            f"Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
+                            f"erfährst du über den {self.format_command('hilfe')} Befehl. "
+                            f"Danke, dass du unseren Bot benutzt!")
         else:
             message = "Du hast {name} bereits abonniert."
         return message.format(name=self._data.get_district(district_id).name)
@@ -409,13 +412,34 @@ class Bot(object):
         else:
             return ""
 
-    @staticmethod
-    def get_privacy_msg():
+    def get_privacy_msg(self):
         return ("Unsere Datenschutzerklärung findest du hier: "
                 "https://github.com/eknoes/covid-bot/wiki/Datenschutz\n\n"
-                "Außerdem kannst du mit dem Befehl /loeschmich alle deine bei uns gespeicherten "
+                f"Außerdem kannst du mit dem Befehl {self.format_command('hilfe')} alle deine bei uns gespeicherten "
                 "Daten löschen.")
 
     @staticmethod
     def get_error_message():
         return "Leider ist ein unvorhergesehener Fehler aufgetreten."
+
+    @staticmethod
+    def no_delete_user():
+        return "Deine Daten werden nicht gelöscht."
+
+    def start_message(self, user_identification: Union[str, int], username=None):
+        if username:
+            username = " " + username
+        return (f'Hallo{username},\n'
+                f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
+                f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. '
+                f'Einen Überblick über alle Befehle erhältst du über {self.format_command("hilfe")}.\n\n'
+                f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
+                f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. '
+                f'Du kannst auch einen Standort senden! Wenn die Daten des Ortes nur gesammelt für '
+                f'eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
+                f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
+                f' auch die aktuellen Zahlen für andere Orte ansehen.')
+
+    def format_command(self, command: str):
+        if command:
+            return self.command_format.format(command=command)

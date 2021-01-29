@@ -59,6 +59,11 @@ class MessengerBotSetup:
         if self.name == "threema":
             users_activated = False
 
+        if self.name == "telegram":
+            command_format = "/{command}"
+        else:
+            command_format = '"{command}"'
+
         # Setup CovidData, Bot and UserManager
         data_conn = get_connection(config)
         user_conn = get_connection(config, True)
@@ -68,7 +73,7 @@ class MessengerBotSetup:
 
         data = CovidData(data_conn)
         user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
-        bot = Bot(data, user_manager)
+        bot = Bot(data, user_manager, command_format=command_format)
 
         # Return specific interface
         if self.name == "threema":

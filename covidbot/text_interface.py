@@ -26,7 +26,8 @@ class Handler:
 class ChatBotState:
     WAITING_FOR_COMMAND = 1
     WAITING_FOR_IS_FEEDBACK = 3
-    NOT_ACTIVATED = 4
+    WAITING_FOR_DELETE_ME = 4
+    NOT_ACTIVATED = 5
 
 
 class SimpleTextInterface(object):
@@ -37,13 +38,16 @@ class SimpleTextInterface(object):
 
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.handler_list.append(Handler("start", self.startHandler))
         self.handler_list.append(Handler("hilfe", self.helpHandler))
         self.handler_list.append(Handler("/hilfe", self.helpHandler))
         self.handler_list.append(Handler("abo", self.subscribeHandler))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler))
+        self.handler_list.append(Handler("datenschutz", self.privacyHandler))
         self.handler_list.append(Handler("daten", self.currentDataHandler))
         self.handler_list.append(Handler("bericht", self.reportHandler))
         self.handler_list.append(Handler("statistik", self.statHandler))
+        self.handler_list.append(Handler("loeschmich", self.deleteMeHandler))
         self.handler_list.append(Handler("", self.directHandler))
 
     def handle_input(self, user_input: str, user_id: str) -> Optional[BotResponse]:
@@ -68,6 +72,12 @@ class SimpleTextInterface(object):
                     del self.chat_states[user_id]
                 else:
                     return None
+            elif state[0] == ChatBotState.WAITING_FOR_DELETE_ME:
+                del self.chat_states[user_id]
+                if user_input.strip().lower() == "ja":
+                    return BotResponse(self.bot.delete_user(user_id))
+                else:
+                    return BotResponse(self.bot.no_delete_user())
 
         # Check whether user has to be activated
         if not self.bot.is_user_activated(user_id):
@@ -79,6 +89,9 @@ class SimpleTextInterface(object):
             if handler.command == user_input[:len(handler.command)].lower():
                 text_in = user_input[len(handler.command):].strip()
                 return handler.method(text_in, user_id)
+
+    def startHandler(self, user_input: str, user_id: str) -> BotResponse:
+        return BotResponse(self.bot.start_message(user_id))
 
     def helpHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(f'Hallo,\n'
@@ -180,6 +193,13 @@ class SimpleTextInterface(object):
 
     def statHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(self.bot.get_statistic())
+
+    def privacyHandler(self, user_input: str, user_id: str) -> BotResponse:
+        return BotResponse(self.bot.get_privacy_msg())
+
+    def deleteMeHandler(self, user_input: str, user_id: str) -> BotResponse:
+        self.chat_states[user_id] = (ChatBotState.WAITING_FOR_DELETE_ME, None)
+        return BotResponse("Wenn alle deine bei uns gespeicherten Daten gelöscht werden sollen, antworte bitte mit Ja!")
 
     def getUpdates(self) -> List[Tuple[str, BotResponse]]:
         updates = self.bot.get_unconfirmed_daily_reports()
