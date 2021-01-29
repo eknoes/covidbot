@@ -106,6 +106,9 @@ if __name__ == "__main__":
     config = parse_config("config.ini")
 
     if args.update:
+        if not args.verbose:
+            logging_level = logging.WARNING
+
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="updater.log")
 
