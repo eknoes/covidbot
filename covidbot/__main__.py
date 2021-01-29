@@ -130,16 +130,18 @@ if __name__ == "__main__":
                 logging.info(f"Sent daily reports for {messenger}")
             except Exception as e:
                 logging.error(f"Got exception while sending daily reports for {messenger}: {e}", exc_info=e)
-
     elif args.interactive:
+        interface = get_messenger_interface("interactive", config, logging_level)
         logging.info("### Start Interactive Bot ###")
-        get_messenger_interface("interactive", config, logging_level).run()
+        interface.run()
     elif args.signal:
+        interface = get_messenger_interface("signal", config, logging_level)
         logging.info("### Start Signal Bot ###")
-        get_messenger_interface("signal", config, logging_level).run()
     elif args.threema:
+        interface = get_messenger_interface("threema", config, logging_level)
         logging.info("### Start Threema Bot ###")
-        get_messenger_interface("threema", config, logging_level).run()
+        interface.run()
     elif args.telegram:
+        interface = get_messenger_interface("telegram", config, logging_level)
         logging.info("### Start Telegram Bot ###")
-        get_messenger_interface("telegram", config, logging_level).run()
+        interface.run()
