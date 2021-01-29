@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Callable, Dict, List, Union, Optional, Tuple
@@ -32,6 +33,7 @@ class SimpleTextInterface(object):
     bot: Bot
     handler_list: List[Handler] = []
     chat_states: Dict[str, Tuple[ChatBotState, Optional[str]]] = {}
+    log = logging.getLogger(__name__)
 
     def __init__(self, bot: Bot):
         self.bot = bot

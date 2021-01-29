@@ -65,6 +65,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 await response_msg.send()
 
     def sendDailyReports(self) -> None:
-        # TODO: Implement daily reports
-        pass
+        unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
 
+        for userid, message in unconfirmed_reports:
+            TextMessage(self.connection, text=adapt_text(message), to_id=userid).send()
+            self.log.info(f"Sent report to {userid}")
