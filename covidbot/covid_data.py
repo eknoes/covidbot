@@ -140,17 +140,32 @@ class CovidData(object):
             # Add Trend in comparison to last week
             if len(results) >= 7:
                 for i in range(len(results) - 6):
-                    results[i] = self.fill_trend(results[i], results[i + 6])
+                    results[i] = self.fill_trend(results[i], results[i + 7], results[i + 1])
             elif results:
                 cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=(Date(%s) - 7) LIMIT 1',
                                [rs, results[0].date])
                 record = cursor.fetchone()
+                last_week, yesterday = None, None
                 if record:
                     last_week = DistrictData(name=record['county_name'], incidence=record['incidence'],
                                              type=record['type'], total_cases=record['total_cases'],
                                              total_deaths=record['total_deaths'], new_cases=record['new_cases'],
                                              new_deaths=record['new_deaths'], date=record['date'])
-                    results[0] = self.fill_trend(results[0], last_week)
+
+                cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=(Date(%s) - 1) LIMIT 1',
+                               [rs, results[0].date])
+                record = cursor.fetchone()
+                if record:
+                    yesterday = DistrictData(name=record['county_name'], incidence=record['incidence'],
+                                             type=record['type'], total_cases=record['total_cases'],
+                                             total_deaths=record['total_deaths'], new_cases=record['new_cases'],
+                                             new_deaths=record['new_deaths'], date=record['date'])
+
+                if not last_week and yesterday:
+                    last_week = yesterday
+
+                if last_week:
+                    results[0] = self.fill_trend(results[0], last_week, yesterday)
 
             if len(results) < include_past_days + 1:
                 logging.warning(f"No more data available for RS{rs}, requested {include_past_days + 1} days "
@@ -167,7 +182,10 @@ class CovidData(object):
         return self.get_district_data(0)
 
     @staticmethod
-    def fill_trend(today: DistrictData, last_week: DistrictData) -> DistrictData:
+    def fill_trend(today: DistrictData, last_week: DistrictData, yesterday: Optional[DistrictData]) -> DistrictData:
+        if not yesterday:
+            yesterday = last_week
+
         if last_week:
             if not last_week.new_cases or not today.new_cases:
                 today.cases_trend = None
@@ -187,11 +205,12 @@ class CovidData(object):
             else:
                 today.deaths_trend = TrendValue.SAME
 
-            if not last_week.incidence or not today.incidence:
+        if yesterday:
+            if not yesterday.incidence or not today.incidence:
                 today.incidence_trend = None
-            elif last_week.incidence < today.incidence:
+            elif yesterday.incidence < today.incidence:
                 today.incidence_trend = TrendValue.UP
-            elif last_week.incidence > today.incidence:
+            elif yesterday.incidence > today.incidence:
                 today.incidence_trend = TrendValue.DOWN
             else:
                 today.incidence_trend = TrendValue.SAME
