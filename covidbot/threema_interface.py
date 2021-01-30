@@ -1,7 +1,7 @@
 import logging
 import os
 from io import BytesIO
-from typing import Dict
+from typing import Dict, List, Union
 
 import threema.gateway as threema
 from aiohttp import web
@@ -9,7 +9,7 @@ from threema.gateway.e2e import create_application, add_callback_route, TextMess
 
 from covidbot.bot import Bot
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.text_interface import SimpleTextInterface
+from covidbot.text_interface import SimpleTextInterface, BotResponse
 from covidbot.utils import adapt_text
 
 
@@ -52,15 +52,18 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         if type(message) == TextMessage:
             message: TextMessage
             response = self.handle_input(message.text, message.from_id)
-            if response.image:
-                response_img = ImageMessage(self.connection, image_path=self.get_attachment(response.image)['filename'],
-                                            to_id=message.from_id)
-                await response_img.send()
+            await self.send_bot_response(message.from_id, response)
 
-            if response.message:
-                response_msg = TextMessage(self.connection, text=adapt_text(response.message),
-                                           to_id=message.from_id)
-                await response_msg.send()
+    async def send_bot_response(self, user: str, response: BotResponse):
+        if response.image:
+            response_img = ImageMessage(self.connection, image_path=self.get_attachment(response.image)['filename'],
+                                        to_id=user)
+            await response_img.send()
+
+        if response.message:
+            response_msg = TextMessage(self.connection, text=adapt_text(response.message),
+                                       to_id=user)
+            await response_msg.send()
 
     async def sendDailyReports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
@@ -70,3 +73,14 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             await report.send()
             self.bot.confirm_daily_report_send(userid)
             self.log.info(f"Sent report to {userid}")
+
+    async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
+        if not users:
+            users = map(lambda x: x.platform_id, self.bot.get_all_user())
+
+        for user in users:
+            await TextMessage(self.connection, text=adapt_text(message), to_id=user).send()
+
+            if append_report:
+                report = self.reportHandler("", user)
+                await self.send_bot_response(user, report)

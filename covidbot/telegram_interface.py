@@ -376,24 +376,24 @@ class TelegramInterface(MessengerInterface):
         self.updater.start_polling()
         self.updater.idle()
 
-    def message_users(self, report: str, with_report=False, users=None):
+    async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
-            users = map(lambda x: x.id, self._bot.get_all_user())
+            users = map(lambda x: x.platform_id, self._bot.get_all_user())
         no_flood_counter = 0
         for uid in users:
             try:
                 if no_flood_counter % 25 == 0:
                     time.sleep(1)
 
-                self.updater.bot.send_message(uid, report, parse_mode=telegram.ParseMode.HTML)
-                if with_report:
+                self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML)
+                if append_report:
                     no_flood_counter += 2  # Additional message
                     self.sendReport(uid)
 
                 no_flood_counter += 1
-                logging.info(f"Sent message to {str(uid)}")
+                self.log.info(f"Sent message to {str(uid)}")
             except BadRequest as error:
-                logging.warning(f"Could not send message to {str(uid)}: {str(error)}")
+                self.log.warning(f"Could not send message to {str(uid)}: {str(error)}")
 
     def error_callback(self, update: Update, context: CallbackContext):
         # Send all errors to maintainers

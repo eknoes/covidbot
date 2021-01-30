@@ -11,6 +11,7 @@ from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, RKIUpdater
+from covidbot.messenger_interface import MessengerInterface
 from covidbot.signal_interface import SignalInterface
 from covidbot.telegram_interface import TelegramInterface
 from covidbot.text_interface import InteractiveInterface
@@ -53,7 +54,7 @@ class MessengerBotSetup:
         self.name = name
         self.config = config
 
-    def __enter__(self):
+    def __enter__(self) -> MessengerInterface:
         # Do not activate user on Threema automatically
         users_activated = True
         if self.name == "threema":
@@ -101,9 +102,60 @@ async def sendUpdates():
         try:
             with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
                 await interface.sendDailyReports()
-                logging.info(f"Sent daily reports for {messenger}")
+                logging.info(f"Checked for daily reports on {messenger}")
         except Exception as e:
             logging.error(f"Got exception while sending daily reports for {messenger}: {e}", exc_info=e)
+
+
+async def send_all(message: str, recipients: List[str], config, messenger=None):
+    if not messenger and recipients:
+        print("You have to specify a messenger if you want to send a message to certain users!")
+        return
+
+    if messenger and messenger not in ["signal", "threema", "telegram"]:
+        print("Your messenger name is invalid.")
+        return
+
+    if not message:
+        message = ""
+        line = input("Please type a message:\n> ")
+        while line != "":
+            message += f"{line}\n"
+            line = input("> ")
+
+    with_report = False
+    if input("Do you want to append the current report? (y/N): ").lower() == "y":
+        with_report = True
+
+    print("\n\n++ Please confirm ++")
+    print(f"Append Report? {with_report}")
+    print(f"Message:\n{message}")
+    if recipients:
+        print(f"To: {recipients}")
+    else:
+        print("To all users")
+
+    if messenger:
+        print(f"On {messenger}")
+    else:
+        print(f"On all messengers")
+
+    if input("PLEASE CONFIRM SENDING! (y/N)").lower() != "y":
+        print("Aborting...")
+        return
+
+    if messenger:
+        with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
+            await interface.sendMessageTo(message, recipients, with_report)
+
+    else:
+        for messenger in ["telegram", "signal", "threema"]:
+            try:
+                with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
+                    await interface.sendMessageTo(message, recipients, with_report)
+                    logging.info(f"Sent message on {messenger}")
+            except Exception as e:
+                logging.error(f"Got exception while sending message on {messenger}: ", exc_info=e)
 
 
 if __name__ == "__main__":
@@ -125,13 +177,18 @@ if __name__ == "__main__":
     parser.add_argument('--signal', help='Use Signal', action='store_true')
     parser.add_argument('--verbose', '-v', action='count', default=0)
 
+    parser.add_argument('--message-file', help='Send the message from <FILE> to users',
+                        metavar='FILE', action='store')
+    parser.add_argument('--message', help='Send a message to users', action='store_true')
+    parser.add_argument('--specific', help='Just send the message to specific user_ids',
+                        metavar='USERS', action='store', nargs="+", type=str)
     args = parser.parse_args()
 
     if args.verbose and args.verbose > 0:
         logging_level = logging.DEBUG
 
     if reduce(lambda x, y: int(x) + int(y), [args.signal, args.telegram, args.interactive, args.threema]) != 1 \
-            and not args.update:
+            and not (args.update or args.message or args.message_file):
         print("Exactly one interface-flag has to be set, e.g. --telegram")
         sys.exit(1)
 
@@ -160,7 +217,32 @@ if __name__ == "__main__":
             updater.fetch_current_data()
 
         asyncio.run(sendUpdates())
+    elif args.message or args.message_file:
+        # Setup Logging
+        logging.basicConfig(format=logging_format, level=logging_level, filename="message-users.log")
 
+        # Log also to stdout
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(logging.Formatter(logging_format))
+        logging.getLogger().addHandler(stream_handler)
+
+        message = None
+        if args.message_file:
+            with open(args.message_file, "r") as f:
+                message = f.read()
+
+        recipients = []
+        if args.specific:
+            recipients = args.specific
+
+        messenger = None
+        if args.telegram:
+            messenger = "telegram"
+        elif args.threema:
+            messenger = "threema"
+        elif args.signal:
+            messenger = "signal"
+        asyncio.run(send_all(message, recipients, config, messenger))
     elif args.interactive:
         with MessengerBotSetup("interactive", config, logging_level) as interface:
             logging.info("### Start Interactive Bot ###")

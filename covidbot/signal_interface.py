@@ -3,7 +3,7 @@ import os
 import re
 import signal
 from io import BytesIO
-from typing import Dict
+from typing import Dict, List, Union
 
 import semaphore
 from semaphore import ChatContext
@@ -77,3 +77,17 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 self.bot.confirm_daily_report_send(userid)
                 self.log.info(f"Sent daily report to {userid}")
 
+    async def sendMessageTo(self, message: str, users: List[str], append_report=False):
+        if not users:
+            users = map(lambda x: x.platform_id, self.bot.get_all_user())
+
+        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name) as bot:
+            for user in users:
+                await bot.send_message(user, adapt_text(message))
+                if append_report:
+                    response = self.reportHandler("", user)
+                    attachments = []
+                    if response.image:
+                        attachments.append(self.get_attachment(response.image))
+                    await bot.send_message(user, adapt_text(response.message), attachments)
+                self.log.info(f"Sent message to {user}")
