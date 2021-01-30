@@ -58,7 +58,8 @@ class MessengerBotSetup:
         # Do not activate user on Threema automatically
         users_activated = True
         if self.name == "threema":
-            users_activated = False
+            pass
+            #users_activated = False
 
         if self.name == "telegram":
             command_format = "/{command}"
