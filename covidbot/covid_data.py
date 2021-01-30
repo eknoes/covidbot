@@ -138,8 +138,8 @@ class CovidData(object):
                                             new_deaths=record['new_deaths'], date=record['date']))
 
             # Add Trend in comparison to last week
-            if len(results) >= 7:
-                for i in range(len(results) - 6):
+            if len(results) >= 8:
+                for i in range(len(results) - 7):
                     results[i] = self.fill_trend(results[i], results[i + 7], results[i + 1])
             elif results:
                 cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=(Date(%s) - 7) LIMIT 1',
