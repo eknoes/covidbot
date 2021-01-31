@@ -27,7 +27,7 @@ python-dateutil==2.8.1
 python-telegram-bot==13.1
 pytz==2020.5
 requests==2.25.1
--e git+https://github.com/eknoes/semaphore@df4ef6b52024e41b1cc93f584685ce0caa0b5169#egg=semaphore_bot
+-e git+https://github.com/eknoes/semaphore@test#egg=semaphore_bot
 Shapely==1.7.1
 six==1.15.0
 sniffio==1.2.0

@@ -19,6 +19,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
     socket: str
     graphics_tmp_path: str
     profile_name: str = "Covid Update"
+    profile_picture: str = os.path.abspath("resources/logo.png")
 
     def __init__(self, phone_number: str, socket: str, bot: Bot):
         super().__init__(bot)
@@ -33,7 +34,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         asyncio.run(self._run())
 
     async def _run(self):
-        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name) as bot:
+        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
+                                 profile_picture=self.profile_picture) as bot:
             bot.register_handler(re.compile(""), self.text_handler)
             bot.set_exception_handler(self.exception_handler)
             await bot.start()
@@ -71,7 +73,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
     async def sendDailyReports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
         attachment = self.get_attachment(self.bot.get_graphical_report(0))
-        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name) as bot:
+        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
+                                 profile_picture=self.profile_picture) as bot:
             for userid, message in unconfirmed_reports:
                 await bot.send_message(userid, adapt_text(message), attachments=[attachment])
                 self.bot.confirm_daily_report_send(userid)
@@ -81,7 +84,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         if not users:
             users = map(lambda x: x.platform_id, self.bot.get_all_user())
 
-        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name) as bot:
+        async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
+                                 profile_picture=self.profile_picture) as bot:
             for user in users:
                 await bot.send_message(user, adapt_text(message))
                 if append_report:
