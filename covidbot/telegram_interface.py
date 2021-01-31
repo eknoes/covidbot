@@ -46,7 +46,7 @@ class TelegramInterface(MessengerInterface):
     dev_chat_id: int
     graph_cache: Dict[int, PhotoSize] = {}
     feedback_cache: Dict[int, str] = {}
-    answered_callbacks: List[int] = []
+    deleted_callbacks: List[int] = []
 
     def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
         self.dev_chat_id = dev_chat_id
@@ -175,10 +175,9 @@ class TelegramInterface(MessengerInterface):
 
     def callbackHandler(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
-        if query.message.message_id in self.answered_callbacks:
+        if query.message.message_id in self.deleted_callbacks:
             return
 
-        self.answered_callbacks.append(query.message.message_id)
         query.answer()
         # Subscribe Callback
         if query.data.startswith(TelegramCallbacks.SUBSCRIBE.name):
@@ -213,6 +212,7 @@ class TelegramInterface(MessengerInterface):
                 if message.photo:
                     self.addToFileCache(district_id, message.photo[-1])
                 query.delete_message()
+                self.deleted_callbacks.append(query.message.message_id)
             else:
                 query.edit_message_text(message, parse_mode=telegram.ParseMode.HTML)
 
@@ -223,6 +223,7 @@ class TelegramInterface(MessengerInterface):
         # Discard Callback
         elif query.data.startswith(TelegramCallbacks.DISCARD.name):
             query.delete_message()
+            self.deleted_callbacks.append(query.message.message_id)
 
         # ConfirmFeedback Callback
         elif query.data.startswith(TelegramCallbacks.CONFIRM_FEEDBACK.name):
