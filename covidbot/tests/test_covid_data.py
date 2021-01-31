@@ -89,9 +89,10 @@ class CovidDataTest(TestCase):
     def test_fill_trend(self):
         today = DistrictData("Test1", new_cases=5, new_deaths=5, incidence=5)
         last_week = DistrictData("Test1", new_cases=5, new_deaths=6, incidence=4)
+        yesterday = DistrictData("Test1", new_cases=5, new_deaths=6, incidence=6)
 
-        trend_d1 = self.data.fill_trend(today, last_week)
-        self.assertEqual(TrendValue.UP, trend_d1.incidence_trend)
+        trend_d1 = self.data.fill_trend(today, last_week, yesterday)
+        self.assertEqual(TrendValue.DOWN, trend_d1.incidence_trend)
         self.assertEqual(TrendValue.SAME, trend_d1.cases_trend)
         self.assertEqual(TrendValue.DOWN, trend_d1.deaths_trend)
 
