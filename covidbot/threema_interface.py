@@ -1,5 +1,6 @@
 import logging
 import os
+import signal
 from io import BytesIO
 from typing import Dict, List, Union
 
@@ -52,7 +53,22 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         if type(message) == TextMessage:
             message: TextMessage
             response = self.handle_input(message.text, message.from_id)
-            await self.send_bot_response(message.from_id, response)
+            try:
+                await self.send_bot_response(message.from_id, response)
+            except Exception as e:
+                self.log.exception("An error happened while handling a Threema message", exc_info=e)
+                self.log.exception(f"Message from {message.from_id}: {message.text}")
+                self.log.exception("Exiting!")
+
+                try:
+                    response_msg = TextMessage(self.connection, text=adapt_text(self.bot.get_error_message()),
+                                               to_id=message.from_id)
+                    await response_msg.send()
+                except Exception:
+                    self.log.error(f"Could not send message to {message.from_id}")
+
+                # Just exit on exception
+                os.kill(os.getpid(), signal.SIGINT)
 
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.image:
