@@ -88,7 +88,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             report = TextMessage(self.connection, text=adapt_text(message), to_id=userid)
             await report.send()
             self.bot.confirm_daily_report_send(userid)
-            self.log.info(f"Sent report to {userid}")
+            self.log.warning(f"Sent report to {userid}")
 
     async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:

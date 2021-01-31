@@ -90,4 +90,4 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                     if response.image:
                         attachments.append(self.get_attachment(response.image))
                     await bot.send_message(user, adapt_text(response.message), attachments)
-                self.log.info(f"Sent message to {user}")
+                self.log.warning(f"Sent message to {user}")

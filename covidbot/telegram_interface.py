@@ -313,7 +313,7 @@ class TelegramInterface(MessengerInterface):
         messages_sent = 0
         for userid, message in messages:
             if messages_sent > 0 and messages_sent % 25 == 0:
-                self.log.info("Sleep for one second to avoid flood limits")
+                self.log.warning("Sleep for one second to avoid flood limits")
                 time.sleep(1.0)
 
             try:
@@ -322,7 +322,7 @@ class TelegramInterface(MessengerInterface):
                 if sent_msg:
                     self._bot.confirm_daily_report_send(userid)
 
-                self.log.info(f"Sent report to {userid}!")
+                self.log.warning(f"Sent report to {userid}!")
                 messages_sent += 1
             except Unauthorized:
                 self._bot.delete_user(userid)
