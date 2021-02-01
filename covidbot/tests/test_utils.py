@@ -42,3 +42,9 @@ class Test(TestCase):
         actual = adapt_text(test_str)
         expected = "D-64"
         self.assertEqual(expected, actual, "adapt_text should remove all html tags but a,b,i")
+
+    def test_url_in_italic(self):
+        test_str = "<i>Mehr Infos <a href='https://test.de/'>hier</a> und <a href='https://test2.de/'>da</a></i>"
+        actual = adapt_text(test_str)
+        expected = "𝘔𝘦𝘩𝘳 𝘐𝘯𝘧𝘰𝘴 𝘩𝘪𝘦𝘳 (https://test.de/) 𝘶𝘯𝘥 𝘥𝘢 (https://test2.de/)"
+        self.assertEqual(expected, actual, "adapt_text should replace links in italic mode and make them not italic")

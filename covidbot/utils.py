@@ -1,6 +1,7 @@
 import re
 import string
-from typing import List
+from re import Match
+from typing import List, AnyStr
 
 
 def adapt_text(text: str, markdown=False) -> str:
@@ -10,6 +11,13 @@ def adapt_text(text: str, markdown=False) -> str:
     else:
         replace_bold = replace_bold_unicode
         replace_italic = replace_italic_unicode
+
+    # Make <a href=X>text</a> to text (X)
+    a_pattern = re.compile("<a href=[\"']([:/\w\-.]*)[\"']>([ \w\-.]*)</a>")
+    matches = a_pattern.finditer(text)
+    if matches:
+        for match in matches:
+            text = text.replace(match.group(0), f"{match.group(2)} ({match.group(1)})")
 
     bold_pattern = re.compile("<b>(.*?)</b>")
     matches = bold_pattern.finditer(text)
@@ -22,13 +30,6 @@ def adapt_text(text: str, markdown=False) -> str:
     if matches:
         for match in matches:
             text = text.replace(match.group(0), replace_italic(match.group(1)))
-
-    # Make <a href=X>text</a> to text (X)
-    a_pattern = re.compile("<a href=[\"']([:/\w\-.]*)[\"']>([ \w\-.]*)</a>")
-    matches = a_pattern.finditer(text)
-    if matches:
-        for match in matches:
-            text = text.replace(match.group(0), f"{match.group(2)} ({match.group(1)})")
 
     # Strip non bold or italic
     pattern = re.compile("<[^<]+?>")
@@ -61,8 +62,22 @@ def replace_italic_unicode(text: str) -> str:
 
 
 def replace_by_list(text: str, search: List[str], replace: List[str]) -> str:
+
+    # Avoid links
+    link_pattern = re.compile("(http[s]?://)[\w.\-]*([/\w\-.])*")
+    matches = link_pattern.finditer(text)
+    tokens = []
+    if matches:
+        for match in matches:
+            token = f"???!!!?!?!{match.start()}"
+            tokens.append((token, match.group(0)))
+            text = text.replace(match.group(0), token)
+
     replace_list = list(zip(search, replace))
 
     for i in range(len(replace_list)):
         text = text.replace(replace_list[i][0], replace_list[i][1])
+
+    for t in tokens:
+        text = text.replace(t[0], t[1])
     return text
