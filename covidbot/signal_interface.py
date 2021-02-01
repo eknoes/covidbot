@@ -78,7 +78,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             for userid, message in unconfirmed_reports:
                 await bot.send_message(userid, adapt_text(message), attachments=[attachment])
                 self.bot.confirm_daily_report_send(userid)
-                self.log.info(f"Sent daily report to {userid}")
+                self.log.warning(f"Sent daily report to {userid}")
 
     async def sendMessageTo(self, message: str, users: List[str], append_report=False):
         if not users:
