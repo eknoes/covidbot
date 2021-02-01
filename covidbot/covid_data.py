@@ -142,7 +142,7 @@ class CovidData(object):
                 for i in range(len(results) - 7):
                     results[i] = self.fill_trend(results[i], results[i + 7], results[i + 1])
             elif results:
-                cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=(Date(%s) - 7) LIMIT 1',
+                cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=SUBDATE(Date(%s), 7) LIMIT 1',
                                [rs, results[0].date])
                 record = cursor.fetchone()
                 last_week, yesterday = None, None
@@ -152,7 +152,7 @@ class CovidData(object):
                                              total_deaths=record['total_deaths'], new_cases=record['new_cases'],
                                              new_deaths=record['new_deaths'], date=record['date'])
 
-                cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=(Date(%s) - 1) LIMIT 1',
+                cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=SUBDATE(Date(%s), 1) LIMIT 1',
                                [rs, results[0].date])
                 record = cursor.fetchone()
                 if record:
