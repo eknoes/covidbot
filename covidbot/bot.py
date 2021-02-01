@@ -324,8 +324,9 @@ class Bot(object):
         user_id = self._manager.get_user_id(user_identification)
         user = self._manager.get_user(user_id, with_subscriptions=True)
         if not user or not user.subscriptions:
-            message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>/abo</code> kannst du Orte abonnieren, " \
-                      "bspw. <code>/abo Dresden</code> "
+            message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>{subscribe_command}</code> kannst du " \
+                      "Orte abonnieren, bspw. <code>{subscribe_command} Dresden</code> "\
+                .format(subscribe_command=self.format_command("abo"))
             counties = None
         else:
             counties = list(map(lambda s: (s, self._data.get_district(s).name), user.subscriptions))
@@ -337,10 +338,9 @@ class Bot(object):
     def handle_no_input() -> str:
         return 'Diese Aktion benötigt eine Ortsangabe.'
 
-    @staticmethod
-    def unknown_action() -> str:
-        return ("Dieser Befehl wurde nicht verstanden. Nutze <code>/hilfe</code> um einen Überblick über die Funktionen"
-                "zu bekommen!")
+    def unknown_action(self) -> str:
+        return ("Dieser Befehl wurde nicht verstanden. Nutze <code>{help_command}</code> um einen Überblick über die "
+                "Funktionen zu bekommen!").format(help_command=self.format_command("hilfe"))
 
     def get_unconfirmed_daily_reports(self) -> Optional[List[Tuple[Union[int, str], str]]]:
         """
