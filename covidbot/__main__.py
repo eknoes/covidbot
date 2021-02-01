@@ -67,8 +67,8 @@ class MessengerBotSetup:
             command_format = '"{command}"'
 
         # Setup CovidData, Bot and UserManager
-        data_conn = get_connection(config)
-        user_conn = get_connection(config, True)
+        data_conn = get_connection(config, autocommit=True)
+        user_conn = get_connection(config, autocommit=True)
 
         self.connections.append(data_conn)
         self.connections.append(user_conn)
