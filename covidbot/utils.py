@@ -4,15 +4,15 @@ from typing import List
 
 
 def adapt_text(text: str, markdown=False) -> str:
-    # Replace bold with Unicode bold
-    bold_pattern = re.compile("<b>(.*?)</b>")
-    matches = bold_pattern.finditer(text)
     if markdown:
         replace_bold = replace_bold_markdown
         replace_italic = replace_italic_markdown
     else:
         replace_bold = replace_bold_unicode
         replace_italic = replace_italic_unicode
+
+    bold_pattern = re.compile("<b>(.*?)</b>")
+    matches = bold_pattern.finditer(text)
     if matches:
         for match in matches:
             text = text.replace(match.group(0), replace_bold(match.group(1)))
@@ -22,6 +22,13 @@ def adapt_text(text: str, markdown=False) -> str:
     if matches:
         for match in matches:
             text = text.replace(match.group(0), replace_italic(match.group(1)))
+
+    # Make <a href=X>text</a> to text (X)
+    a_pattern = re.compile("<a href=[\"']([:/\w\-.]*)[\"']>([ \w\-.]*)</a>")
+    matches = a_pattern.finditer(text)
+    if matches:
+        for match in matches:
+            text = text.replace(match.group(0), f"{match.group(2)} ({match.group(1)})")
 
     # Strip non bold or italic
     pattern = re.compile("<[^<]+?>")
