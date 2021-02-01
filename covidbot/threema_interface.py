@@ -61,7 +61,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 self.log.exception("Exiting!")
 
                 try:
-                    response_msg = TextMessage(self.connection, text=adapt_text(self.bot.get_error_message()),
+                    response_msg = TextMessage(self.connection, text=adapt_text(self.bot.get_error_message(), True),
                                                to_id=message.from_id)
                     await response_msg.send()
                 except Exception:
@@ -77,7 +77,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             await response_img.send()
 
         if response.message:
-            response_msg = TextMessage(self.connection, text=adapt_text(response.message),
+            response_msg = TextMessage(self.connection, text=adapt_text(response.message, True),
                                        to_id=user)
             await response_msg.send()
 
@@ -85,7 +85,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
 
         for userid, message in unconfirmed_reports:
-            report = TextMessage(self.connection, text=adapt_text(message), to_id=userid)
+            report = TextMessage(self.connection, text=adapt_text(message, True), to_id=userid)
             await report.send()
             self.bot.confirm_daily_report_send(userid)
             self.log.warning(f"Sent report to {userid}")
@@ -95,7 +95,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             users = map(lambda x: x.platform_id, self.bot.get_all_user())
 
         for user in users:
-            await TextMessage(self.connection, text=adapt_text(message), to_id=user).send()
+            await TextMessage(self.connection, text=adapt_text(message, True), to_id=user).send()
 
             if append_report:
                 report = self.reportHandler("", user)
