@@ -215,7 +215,12 @@ if __name__ == "__main__":
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
             updater = RKIUpdater(conn)
-            updater.fetch_current_data()
+            try:
+                updater.fetch_current_data()
+            except ValueError as error:
+                # Data did not make it through plausibility check
+                print(f"Data looks weird, not updating: {error}")
+                sys.exit(1)
 
         asyncio.run(sendUpdates())
     elif args.message or args.message_file:

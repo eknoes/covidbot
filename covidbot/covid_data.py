@@ -279,8 +279,16 @@ class RKIUpdater(CovidData):
                                rs_data)
             cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
              VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
-            self.connection.commit()
         self.calculate_aggregated_values(new_updated)
+
+        # Check for Plausibility, as Dataset has been wrong sometimes
+        germany = self.get_country_data()
+        if germany.new_cases <= 0 or germany.new_deaths <= 0:
+            self.log.error("Data is looking weird! Rolling back data update!")
+            self.connection.rollback()
+            raise ValueError(f"COVID19 {germany.new_cases} new cases and {germany.new_deaths} deaths are not plausible. Aborting!")
+        else:
+            self.connection.commit()
         self.log.debug("Finished inserting new data")
 
     def calculate_aggregated_values(self, new_updated: date):
@@ -317,5 +325,3 @@ class RKIUpdater(CovidData):
                                'SET covid_data.incidence = incidence.incidence '
                                'WHERE covid_data.incidence IS NULL AND covid_data.date = incidence.date '
                                'AND covid_data.rs = incidence.rs')
-
-            self.connection.commit()
