@@ -4,8 +4,8 @@ from re import Match
 from typing import List, AnyStr
 
 
-def adapt_text(text: str, markdown=False) -> str:
-    if markdown:
+def adapt_text(text: str, threema_format=False) -> str:
+    if threema_format:
         replace_bold = replace_bold_markdown
         replace_italic = replace_italic_markdown
     else:
@@ -37,11 +37,23 @@ def adapt_text(text: str, markdown=False) -> str:
 
 
 def replace_bold_markdown(text: str) -> str:
-    return f"**{text}**"
+    # Not real markdown but Threema formatting
+    text = f"*{text}*"
+    # Embed links
+    link_pattern = re.compile("(\(http[s]?://[\w.\-]*([/\w\-.])*\))")
+    text = link_pattern.sub("*\g<1>*", text)
+
+    return text.replace("**", "")
 
 
 def replace_italic_markdown(text: str) -> str:
-    return f"*{text}*"
+    # Not real markdown but Threema formatting
+    text = f"_{text}_"
+    # Embed links
+    link_pattern = re.compile("(\(http[s]?://[\w.\-]*([/\w\-.])*\))")
+    text = link_pattern.sub("_\g<1>_", text)
+
+    return text.replace("__", "")
 
 
 def replace_bold_unicode(text: str) -> str:
@@ -68,7 +80,7 @@ def replace_italic_unicode(text: str) -> str:
 def replace_by_list(text: str, search: List[str], replace: List[str]) -> str:
 
     # Avoid links
-    link_pattern = re.compile("(http[s]?://)[\w.\-]*([/\w\-.])*")
+    link_pattern = re.compile("((http[s]?://)[\w.\-]*([/\w\-.])*)")
     matches = link_pattern.finditer(text)
     tokens = []
     if matches:
