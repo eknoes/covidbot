@@ -385,9 +385,9 @@ class Bot(object):
     def get_debug_report(self, user_identification: Union[int, str]) -> str:
         uid = self._manager.get_user_id(user_identification, False)
         if not uid:
-            return "Für dich sind aktuell keine Debuginformationen verfügbar."
+            return "Für dich sind aktuell keine Debug informationen verfügbar."
 
-        user = self._manager.get_user(uid)
+        user = self._manager.get_user(uid, with_subscriptions=True)
 
         return f"<b>Debug Informationen</b>\n" \
                f"platform_id: {user.platform_id}\n" \
