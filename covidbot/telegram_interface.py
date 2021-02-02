@@ -103,6 +103,9 @@ class TelegramInterface(MessengerInterface):
     def languageHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.set_language(update.effective_chat.id, " ".join(context.args)))
 
+    def debugHandler(self, update: Update, context: CallbackContext) -> None:
+        update.message.reply_html(self._bot.get_debug_report(update.effective_chat.id))
+
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         query = " ".join(context.args)
         msg, districts = self._bot.find_district_id(query)
@@ -367,6 +370,7 @@ class TelegramInterface(MessengerInterface):
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
         self.updater.dispatcher.add_handler(CommandHandler('sprache', self.languageHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('debug', self.debugHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.command, self.unknownHandler))
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.callbackHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.directMessageHandler))

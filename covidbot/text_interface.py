@@ -48,6 +48,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("bericht", self.reportHandler))
         self.handler_list.append(Handler("statistik", self.statHandler))
         self.handler_list.append(Handler("loeschmich", self.deleteMeHandler))
+        self.handler_list.append(Handler("debug", self.debugHandler))
         self.handler_list.append(Handler("", self.directHandler))
 
     def handle_input(self, user_input: str, user_id: str) -> Optional[BotResponse]:
@@ -196,6 +197,9 @@ class SimpleTextInterface(object):
 
     def privacyHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(self.bot.get_privacy_msg())
+
+    def debugHandler(self, user_input: str, user_id: str) -> BotResponse:
+        return BotResponse(self.bot.get_debug_report(user_id))
 
     def deleteMeHandler(self, user_input: str, user_id: str) -> BotResponse:
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_DELETE_ME, None)

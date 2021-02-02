@@ -382,6 +382,20 @@ class Bot(object):
                               mean=self.format_incidence(self._manager.get_mean_subscriptions()),
                               most_subs=self._manager.get_most_subscriptions())
 
+    def get_debug_report(self, user_identification: Union[int, str]) -> str:
+        uid = self._manager.get_user_id(user_identification, False)
+        if not uid:
+            return "Zu deinem Nutzer sind keine Debuginformationen verfügbar."
+
+        user = self._manager.get_user(uid)
+
+        return f"<b>Debug Informationen</b>\n" \
+               f"platform_id: {user.platform_id}\n" \
+               f"user_id: {user.id}\n" \
+               f"lang: {user.language}\n" \
+               f"last_update: {user.last_update}\n" \
+               f"subscriptions: {user.subscriptions}"
+
     def get_all_user(self) -> List[BotUser]:
         return self._manager.get_all_user()
 
