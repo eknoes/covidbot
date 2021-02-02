@@ -63,31 +63,42 @@ class TestBot(TestCase):
         for u in update:
             if u[0] == 1:
                 self.assertRegex(u[1], "Hessen", "A subscribed district must be part of the daily report")
-                self.assertEqual(self.bot.get_report(user1), u[1], "The daily report should be equal to the manual report")
+                self.assertEqual(self.bot.get_report(user1), u[1],
+                                 "The daily report should be equal to the manual report")
             if u[0] == 2:
                 self.assertRegex(u[1], "Bayern", "A subscribed district must be part of the daily report")
-                self.assertEqual(self.bot.get_report(user2), u[1], "The daily report should be equal to the manual report")
+                self.assertEqual(self.bot.get_report(user2), u[1],
+                                 "The daily report should be equal to the manual report")
 
-        self.assertEqual(2, len(self.bot.get_unconfirmed_daily_reports()), "Without setting last_updated, new reports should be generated")
+        self.assertEqual(2, len(self.bot.get_unconfirmed_daily_reports()),
+                         "Without setting last_updated, new reports should be generated")
         self.bot.confirm_daily_report_send(user1)
-        self.assertEqual(1, len(self.bot.get_unconfirmed_daily_reports()), "Without setting last_updated, new report should be generated")
+        self.assertEqual(1, len(self.bot.get_unconfirmed_daily_reports()),
+                         "Without setting last_updated, new report should be generated")
         self.bot.confirm_daily_report_send(user2)
-        self.assertEqual([], self.bot.get_unconfirmed_daily_reports(), "If both users already have current report, it should not be "
-                                                     "sent again")
+        self.assertEqual([], self.bot.get_unconfirmed_daily_reports(), "If both users already have current report, "
+                                                                       "it should not be sent again")
 
     def test_update_no_subscribers(self):
-        self.assertEqual([], self.bot.get_unconfirmed_daily_reports(), "Empty subscribers should generate empty update list")
+        self.assertEqual([], self.bot.get_unconfirmed_daily_reports(), "Empty subscribers should generate empty "
+                                                                       "update list")
+
+    def test_no_update_new_subscriber(self):
+        self.bot.subscribe("user1", 0)
+        self.assertEqual([], self.bot.get_unconfirmed_daily_reports(), "New subscriber should get his first report on "
+                                                                       "next day")
 
     def test_no_user(self):
         uid1 = "uid1"
         self.assertIsNotNone(self.bot.get_overview(uid1), "A not yet existing user should get an overview over their "
-                                                       "subscriptions")
+                                                          "subscriptions")
         self.assertIsNotNone(self.bot.get_district_report(1), "A not yet existing user should get a district report")
         self.assertIsNotNone(self.bot.find_district_id("Berlin"), "A not yet existing user should be able to query for "
                                                                   "a location")
         self.assertIsNotNone(self.bot.get_report(uid1), "A not yet existing user should be able to query for a report")
-        self.assertIsNotNone(self.bot.get_possible_actions(uid1, 2), "A not yet existing user should be able to query for "
-                                                                  "possible actions")
+        self.assertIsNotNone(self.bot.get_possible_actions(uid1, 2),
+                             "A not yet existing user should be able to query for "
+                             "possible actions")
 
     def test_format_int(self):
         expected = "1.121"
@@ -117,8 +128,9 @@ class TestBot(TestCase):
         self.assertIn(200, actual.keys(), "Group for > 200 should exist")
 
         # Bug
-        districts = [DistrictData(name='Göttingen (Landkreis)', type='Landkreis', date=date(2021, 1, 21), incidence=81.5848),
-                     DistrictData(name='Lüneburg (Landkreis)', type='Landkreis', date=date(2021, 1, 21), incidence=30.9549)]
+        districts = [
+            DistrictData(name='Göttingen (Landkreis)', type='Landkreis', date=date(2021, 1, 21), incidence=81.5848),
+            DistrictData(name='Lüneburg (Landkreis)', type='Landkreis', date=date(2021, 1, 21), incidence=30.9549)]
         actual = self.bot.group_districts(districts)
 
         self.assertCountEqual([districts[0]], actual[50])
