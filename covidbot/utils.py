@@ -45,18 +45,22 @@ def replace_italic_markdown(text: str) -> str:
 
 
 def replace_bold_unicode(text: str) -> str:
+    # To work with signal it must be char(776) + letter for umlauts - even if it looks weird in the editor
+    d = chr(776)
     bold_str = [  # Umlauts are 2 unicode characters!
         *"𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵",
-        "̈𝗼", "̈𝘂", "̈𝗮", "̈𝗢", "̈𝗨", "̈𝗔"]
+        "𝗼" + d, "𝘂" + d, "𝗮" + d, "𝗢" + d, "𝗨" + d, "𝗔" + d]
     normal_str = [*(string.ascii_letters + string.digits + "öüäÖÜÄ")]
     return replace_by_list(text, normal_str, bold_str)
 
 
 def replace_italic_unicode(text: str) -> str:
+    # To work with signal it must be char(776) + letter for umlauts - even if it looks weird in the editor
+    d = chr(776)
     # No italic numbers as unicode
     italic_str = [
         *"𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡",
-        "̈𝘢", "̈𝘶", "̈𝘰", "̈𝘈", "̈𝘜", "̈𝘖"]
+        "𝘢" + d, "𝘰" + d, "𝘶" + d, "𝘈" + d, "𝘖" + d, "𝘜" +d]
     normal_str = [*(string.ascii_letters + "äüöÄÜÖ")]
     return replace_by_list(text, normal_str, italic_str)
 
