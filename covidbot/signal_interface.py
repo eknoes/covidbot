@@ -1,7 +1,9 @@
 import asyncio
 import os
+import random
 import re
 import signal
+import time
 from io import BytesIO
 from typing import Dict, List, Union
 
@@ -78,10 +80,22 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         attachment = self.get_attachment(self.bot.get_graphical_report(0))
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
+            flood_count = 0
             for userid, message in unconfirmed_reports:
+                # TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
+                if flood_count % 1 == 0:
+                    sleep_seconds = random.uniform(0.3, 2)
+                    self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
+                    time.sleep(sleep_seconds)
+                    flood_count += 1
                 await bot.send_message(userid, adapt_text(message), attachments=[attachment])
                 self.bot.confirm_daily_report_send(userid)
                 self.log.warning(f"Sent daily report to {userid}")
+
+            # Currently semaphore is not waiting for signald's response, whether a message was successful.
+            # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
+            # but the socket is already closed
+            time.sleep(5)
 
     async def sendMessageTo(self, message: str, users: List[str], append_report=False):
         if not users:
