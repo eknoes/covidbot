@@ -72,6 +72,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
     async def sendDailyReports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
+        if not unconfirmed_reports:
+            return
+
         attachment = self.get_attachment(self.bot.get_graphical_report(0))
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
