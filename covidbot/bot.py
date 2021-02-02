@@ -440,7 +440,7 @@ class Bot(object):
     def no_delete_user():
         return "Deine Daten werden nicht gelöscht."
 
-    def start_message(self, user_identification: Union[str, int], username=None):
+    def start_message(self, user_identification: Union[str, int], username=""):
         if username:
             username = " " + username
         return (f'Hallo{username},\n'
