@@ -5,6 +5,7 @@ venv3.8/*
 
 # Secret configuration
 config.ini
+resources/threema-privateKey.txt
 
 # Generated files
 user.json
