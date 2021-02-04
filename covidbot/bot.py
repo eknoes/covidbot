@@ -434,7 +434,7 @@ class Bot(object):
 
     @staticmethod
     def get_error_message():
-        return "Leider ist ein unvorhergesehener Fehler aufgetreten."
+        return "Leider ist ein unvorhergesehener Fehler aufgetreten. Bitte versuche es erneut."
 
     @staticmethod
     def no_delete_user():
