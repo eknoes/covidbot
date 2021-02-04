@@ -95,7 +95,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             # Currently semaphore is not waiting for signald's response, whether a message was successful.
             # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
             # but the socket is already closed
-            time.sleep(5)
+            time.sleep(60)
 
     async def sendMessageTo(self, message: str, users: List[str], append_report=False):
         if not users:
