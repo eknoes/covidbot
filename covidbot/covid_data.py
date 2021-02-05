@@ -163,8 +163,6 @@ class CovidData(object):
                                             new_deaths=record['new_deaths'], date=record['date'],
                                             vaccinations=vacc_data))
 
-
-
             # Add Trend in comparison to last week
             if len(results) >= 8:
                 for i in range(len(results) - 7):
@@ -260,9 +258,9 @@ class CovidDataUpdater(ABC, CovidData):
         pass
 
 
-
 class RKIUpdater(CovidDataUpdater):
     RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
+    log = logging.getLogger(__name__)
 
     def update(self) -> bool:
         self.log.info("Check for new RKI data")
@@ -270,6 +268,10 @@ class RKIUpdater(CovidDataUpdater):
         header = {}
         if last_update:
             header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
+            if last_update == date.today():
+                self.log.info(f"Do not update as current data is from {last_update}")
+                return False
+
 
         r = requests.get(self.RKI_LK_CSV, headers=header)
         if r.status_code == 200:
@@ -371,6 +373,7 @@ class RKIUpdater(CovidDataUpdater):
 
 
 class VaccinationGermanyUpdater(CovidDataUpdater):
+    log = logging.getLogger(__name__)
     URL = "https://services.arcgis.com/OLiydejKCZTGhvWg/ArcGIS/rest/services/Impftabelle_mit_Zweitimpfungen" \
           "/FeatureServer/0/query?where=1%3D1&objectIds=&time=&resultType=none&outFields=AGS%2C+Bundesland%2C" \
           "+Impfungen_kumulativ%2C+Zweitimpfungen_kumulativ%2C+Differenz_zum_Vortag%2C+Impf_Quote%2C" \
@@ -380,8 +383,18 @@ class VaccinationGermanyUpdater(CovidDataUpdater):
 
     def update(self) -> bool:
         last_update = None
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT updated FROM covid_vaccinations ORDER BY updated DESC LIMIT 1")
+            updated = cursor.fetchone()
+            if updated:
+                last_update = updated[0]
+
         header = {}
         if last_update:
+            if last_update.date() == date.today():
+                self.log.info(f"Do not update as current data is from {last_update}")
+                return False
+
             header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
 
         r = requests.get(self.URL, headers=header)
@@ -402,8 +415,9 @@ class VaccinationGermanyUpdater(CovidDataUpdater):
                         continue
 
                     district_id = district[0][0]
-                    updated = datetime.fromtimestamp(row['Datenstand']//1000)
-                    cursor.execute("SELECT id FROM covid_vaccinations WHERE updated = %s AND district_id=%s", [updated, district_id])
+                    updated = datetime.fromtimestamp(row['Datenstand'] // 1000)
+                    cursor.execute("SELECT id FROM covid_vaccinations WHERE updated = %s AND district_id=%s",
+                                   [updated, district_id])
                     if cursor.fetchone():
                         continue
 
