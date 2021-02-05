@@ -26,6 +26,14 @@ class District:
 
 
 @dataclass
+class VaccinationData:
+    vaccinated_full: int
+    vaccinated_partial: int
+    full_rate: float
+    partial_rate: float
+
+
+@dataclass
 class DistrictData(District):
     date: Optional[datetime.date] = None
     incidence: Optional[float] = None
@@ -36,6 +44,7 @@ class DistrictData(District):
     deaths_trend: Optional[TrendValue] = None
     total_cases: Optional[int] = None
     total_deaths: Optional[int] = None
+    vaccinations: Optional[VaccinationData] = None
 
 
 class CovidData(object):
@@ -137,10 +146,24 @@ class CovidData(object):
 
             results = []
             for record in cursor.fetchall():
+                # Check if vaccination data is available
+                vacc_data = None
+                if include_past_days == 0:
+                    cursor.execute('SELECT vaccinated_full, vaccinated_partial, rate_full, rate_partial '
+                                   'FROM covid_vaccinations WHERE district_id=%s and DATE(updated)=%s',
+                                   [rs, record['date']])
+                    vacc = cursor.fetchone()
+                    if vacc:
+                        vacc_data = VaccinationData(vacc['vaccinated_full'], vacc['vaccinated_partial'],
+                                                    vacc['rate_full'], vacc['rate_partial'])
+
                 results.append(DistrictData(name=record['county_name'], incidence=record['incidence'],
                                             type=record['type'], total_cases=record['total_cases'],
                                             total_deaths=record['total_deaths'], new_cases=record['new_cases'],
-                                            new_deaths=record['new_deaths'], date=record['date']))
+                                            new_deaths=record['new_deaths'], date=record['date'],
+                                            vaccinations=vacc_data))
+
+
 
             # Add Trend in comparison to last week
             if len(results) >= 8:

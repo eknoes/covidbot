@@ -122,28 +122,45 @@ class Bot(object):
         current_data = self._data.get_district_data(district_id)
         message = "<b>{district_name}</b>\n\n"
 
+        message += "<b>🏥 Infektionsdaten</b>\n"
         if current_data.incidence:
-            message += "7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen):" \
-                       " {incidence} {incidence_trend}\n\n"
+            message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen) liegt bei {incidence}" \
+                       " {incidence_trend}.\n\n"
 
         message += "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
                    "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
                    "Neue Todesfälle (seit gestern): {new_deaths} {new_deaths_trend}\n" \
-                   "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n" \
-                   "<i>Stand: {date}</i>\n" \
-                   "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
-                   "findest Du im <a href='https://corona.rki.de/'>Dashboard des RKI</a></i>\n"
+                   "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n"
 
-        return message.format(district_name=current_data.name,
-                              incidence=self.format_incidence(current_data.incidence),
-                              incidence_trend=self.format_data_trend(current_data.incidence_trend),
-                              new_cases=self.format_int(current_data.new_cases),
-                              new_cases_trend=self.format_data_trend(current_data.cases_trend),
-                              total_cases=self.format_int(current_data.total_cases),
-                              new_deaths=self.format_int(current_data.new_deaths),
-                              new_deaths_trend=self.format_data_trend(current_data.deaths_trend),
-                              total_deaths=self.format_int(current_data.total_deaths),
-                              date=current_data.date.strftime("%d.%m.%Y"))
+        message = message.format(district_name=current_data.name,
+                                 incidence=self.format_incidence(current_data.incidence),
+                                 incidence_trend=self.format_data_trend(current_data.incidence_trend),
+                                 new_cases=self.format_int(current_data.new_cases),
+                                 new_cases_trend=self.format_data_trend(current_data.cases_trend),
+                                 total_cases=self.format_int(current_data.total_cases),
+                                 new_deaths=self.format_int(current_data.new_deaths),
+                                 new_deaths_trend=self.format_data_trend(current_data.deaths_trend),
+                                 total_deaths=self.format_int(current_data.total_deaths))
+
+        if current_data.vaccinations:
+            vacc = current_data.vaccinations
+            message += "<b>💉 Impfdaten</b>\n" \
+                       "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
+                       "vollständig geimpft.\n\n" \
+                       "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
+                       "Verabreichte Zweitimpfdosen: {vacc_full}\n\n"\
+                .format(rate_partial=self.format_incidence(vacc.partial_rate * 100),
+                        rate_full=self.format_incidence(vacc.full_rate * 100),
+                        vacc_partial=self.format_int(vacc.vaccinated_partial),
+                        vacc_full=self.format_int(vacc.vaccinated_full))
+
+        message += "<i>Stand: {date}</i>\n" \
+                   "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
+                   "findest Du im <a href='https://corona.rki.de/'>Dashboard des RKI</a> und dem " \
+                   "<a href='https://impfdashboard.de/'>Impfdashboard</a></i>\n" \
+            .format(date=current_data.date.strftime("%d.%m.%Y"))
+
+        return message
 
     def get_graphical_report(self, district_id: int, subtract_days=0) -> Optional[BytesIO]:
         history_data = self._data.get_district_data(district_id, include_past_days=21, subtract_days=0)
@@ -206,11 +223,12 @@ class Bot(object):
             user = self._manager.get_user(user_id, True)
             if len(user.subscriptions) == 1:
                 message += " "
-                message += (f"Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
-                            f"einen weiteren Ort!\n\n"
-                            f"Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
-                            f"erfährst du über den {self.format_command('hilfe')} Befehl. "
-                            f"Danke, dass du unseren Bot benutzt!")
+                message += (
+                    f"Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
+                    f"einen weiteren Ort!\n\n"
+                    f"Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
+                    f"erfährst du über den {self.format_command('hilfe')} Befehl. "
+                    f"Danke, dass du unseren Bot benutzt!")
         else:
             message = "Du hast {name} bereits abonniert."
         return message.format(name=self._data.get_district(district_id).name)
@@ -235,7 +253,15 @@ class Bot(object):
         message = "<b>Corona-Bericht vom {date}</b>\n\n" \
                   "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
                   "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
-                  "{incidence_trend}.\n\n"
+                  "{incidence_trend}."
+        if country.vaccinations:
+            message += "\n\n<b>💉  Impfdaten</b>\n" \
+                       "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft."\
+                .format(rate_full=self.format_incidence(country.vaccinations.full_rate * 100), rate_partial=self.format_incidence(country.vaccinations.partial_rate * 100),
+                        vacc_partial=self.format_int(country.vaccinations.vaccinated_partial),
+                        vacc_full=self.format_int(country.vaccinations.vaccinated_full))
+        message += "\n\n"
         message = message.format(date=self._data.get_last_update().strftime("%d.%m.%Y"),
                                  new_cases=self.format_int(country.new_cases),
                                  new_cases_trend=self.format_data_trend(country.cases_trend),
@@ -265,7 +291,8 @@ class Bot(object):
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
-                   ' im <a href="https://corona.rki.de/">Dashboard des RKI</a></i>'
+                   ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
+                   '<a href="https://impfdashboard.de/">Impfdashboard</a></i>'
 
         return message
 
@@ -325,7 +352,7 @@ class Bot(object):
         user = self._manager.get_user(user_id, with_subscriptions=True)
         if not user or not user.subscriptions:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>{subscribe_command}</code> kannst du " \
-                      "Orte abonnieren, bspw. <code>{subscribe_command} Dresden</code> "\
+                      "Orte abonnieren, bspw. <code>{subscribe_command} Dresden</code> " \
                 .format(subscribe_command=self.format_command("abo"))
             counties = None
         else:
