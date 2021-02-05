@@ -24,6 +24,7 @@ class CovidDataTest(TestCase):
 
         with self.conn.cursor() as cursor:
             cursor.execute("TRUNCATE TABLE covid_data;")
+            cursor.execute("TRUNCATE TABLE covid_vaccinations;")
             # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM counties ORDER BY parent DESC;")
             with open("resources/2021-01-16-testdata-counties.sql", "r") as f:
@@ -123,4 +124,4 @@ class TestRKIUpdater(TestCase):
             cursor.execute("TRUNCATE covid_data")
 
         updater = RKIUpdater(self.conn)
-        self.assertIsNone(updater.fetch_current_data(), "Update should not lead to any exception")
+        self.assertTrue(updater.update(), "Update should not lead to any exception")

@@ -19,6 +19,7 @@ class TestBot(TestCase):
 
         with cls.conn.cursor(dictionary=True) as cursor:
             cursor.execute("DROP TABLE IF EXISTS covid_data;")
+            cursor.execute("DROP TABLE IF EXISTS covid_vaccinations;")
             cursor.execute("DROP TABLE IF EXISTS counties;")
 
         # Update Data
