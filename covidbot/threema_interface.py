@@ -83,8 +83,14 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
 
     async def sendDailyReports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
-
+        daily_graph = self.bot.get_graphical_report(0)
+        attachment = self.get_attachment(daily_graph)
         for userid, message in unconfirmed_reports:
+            if attachment:
+                response_img = ImageMessage(self.connection, image_path=attachment['filename'],
+                                            to_id=userid)
+                await response_img.send()
+
             report = TextMessage(self.connection, text=adapt_text(message, True), to_id=userid)
             await report.send()
             self.bot.confirm_daily_report_send(userid)
