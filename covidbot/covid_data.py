@@ -379,7 +379,7 @@ class VaccinationGermanyUpdater(CovidDataUpdater):
           "+Impfungen_kumulativ%2C+Zweitimpfungen_kumulativ%2C+Differenz_zum_Vortag%2C+Impf_Quote%2C" \
           "+Impf_Quote_Zweitimpfungen%2C+Datenstand&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly" \
           "=false&returnDistinctValues=false&cacheHint=false&orderByFields=Datenstand+DESC&groupByFieldsForStatistics" \
-          "=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token= "
+          "=&outStatistics=&having=&resultOffset=&resultRecordCount=17&sqlFormat=none&f=pjson&token= "
 
     def update(self) -> bool:
         last_update = None
