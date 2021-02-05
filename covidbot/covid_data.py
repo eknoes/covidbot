@@ -1,7 +1,9 @@
 import codecs
 import csv
+import json
 import logging
 import os
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, date
 from enum import Enum
@@ -37,9 +39,6 @@ class DistrictData(District):
 
 
 class CovidData(object):
-    RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
-    DIVI_INTENSIVREGISTER_CSV = "https://opendata.arcgis.com/datasets/8fc79b6cf7054b1b80385bda619f39b8_0.csv"
-
     connection: MySQLConnection
     log = logging.getLogger(__name__)
 
@@ -55,11 +54,17 @@ class CovidData(object):
                            'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
                            'UNIQUE(rs, county_name))')
-            # Raw Data
+            # Raw Infection Data
             cursor.execute(
-                'CREATE TABLE IF NOT EXISTS covid_data (id SERIAL, rs INTEGER, date DATE NULL DEFAULT NULL,'
+                'CREATE TABLE IF NOT EXISTS covid_data (id INTEGER PRIMARY KEY AUTO_INCREMENT, rs INTEGER, date DATE NULL DEFAULT NULL,'
                 'total_cases INT, incidence FLOAT, total_deaths INT,'
                 'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
+
+            # Vaccination Data
+            cursor.execute('CREATE TABLE IF NOT EXISTS covid_vaccinations (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
+                           'district_id INTEGER, updated DATETIME, vaccinated_partial INTEGER, '
+                           'vaccinated_full INTEGER, rate_full FLOAT, rate_partial FLOAT, '
+                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, updated))')
 
             # Check if view exists
             cursor.execute("SHOW FULL TABLES WHERE TABLE_TYPE LIKE '%VIEW%';")
@@ -223,8 +228,20 @@ class CovidData(object):
             return result['last_updated']
 
 
-class RKIUpdater(CovidData):
-    def fetch_current_data(self) -> None:
+class CovidDataUpdater(ABC, CovidData):
+    def __init__(self, conn: MySQLConnection):
+        super().__init__(conn)
+
+    @abstractmethod
+    def update(self) -> bool:
+        pass
+
+
+
+class RKIUpdater(CovidDataUpdater):
+    RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
+
+    def update(self) -> bool:
         self.log.info("Check for new RKI data")
         last_update = self.get_last_update()
         header = {}
@@ -240,10 +257,12 @@ class RKIUpdater(CovidData):
             self.add_data(reader)
             if last_update is None or last_update < self.get_last_update():
                 logging.info(f"Received new data, data is now from {self.get_last_update()}")
+                return True
         elif r.status_code == 304:
             self.log.info("RKI has no new data")
         else:
-            self.log.warning("RKI CSV Response Status Code is " + str(r.status_code))
+            raise ValueError("RKI CSV Response Status Code is " + str(r.status_code))
+        return False
 
     def add_data(self, reader: csv.DictReader) -> None:
         covid_data = []
@@ -286,7 +305,8 @@ class RKIUpdater(CovidData):
         if germany.new_cases and germany.new_cases <= 0 or germany.new_deaths and germany.new_deaths <= 0:
             self.log.error("Data is looking weird! Rolling back data update!")
             self.connection.rollback()
-            raise ValueError(f"COVID19 {germany.new_cases} new cases and {germany.new_deaths} deaths are not plausible. Aborting!")
+            raise ValueError(
+                f"COVID19 {germany.new_cases} new cases and {germany.new_deaths} deaths are not plausible. Aborting!")
         else:
             self.connection.commit()
         self.log.debug("Finished inserting new data")
@@ -325,3 +345,62 @@ class RKIUpdater(CovidData):
                                'SET covid_data.incidence = incidence.incidence '
                                'WHERE covid_data.incidence IS NULL AND covid_data.date = incidence.date '
                                'AND covid_data.rs = incidence.rs')
+
+
+class VaccinationGermanyUpdater(CovidDataUpdater):
+    URL = "https://services.arcgis.com/OLiydejKCZTGhvWg/ArcGIS/rest/services/Impftabelle_mit_Zweitimpfungen" \
+          "/FeatureServer/0/query?where=1%3D1&objectIds=&time=&resultType=none&outFields=AGS%2C+Bundesland%2C" \
+          "+Impfungen_kumulativ%2C+Zweitimpfungen_kumulativ%2C+Differenz_zum_Vortag%2C+Impf_Quote%2C" \
+          "+Impf_Quote_Zweitimpfungen%2C+Datenstand&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly" \
+          "=false&returnDistinctValues=false&cacheHint=false&orderByFields=Datenstand+DESC&groupByFieldsForStatistics" \
+          "=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token= "
+
+    def update(self) -> bool:
+        last_update = None
+        header = {}
+        if last_update:
+            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
+
+        r = requests.get(self.URL, headers=header)
+        if r.status_code == 200:
+            self.log.debug("Got Vaccination Data")
+            data = json.loads(r.content)
+
+            with self.connection.cursor() as cursor:
+                new_data = False
+                for row in data['features']:
+                    row = row['attributes']
+                    if row['Bundesland'] == "Gesamt":
+                        row['Bundesland'] = "Deutschland"
+
+                    district = self.search_district_by_name(row['Bundesland'])
+                    if not district:
+                        self.log.warning(f"Can't find district_id for {row['Bundesland']}!")
+                        continue
+
+                    district_id = district[0][0]
+                    updated = datetime.fromtimestamp(row['Datenstand']//1000)
+                    cursor.execute("SELECT id FROM covid_vaccinations WHERE updated = %s AND district_id=%s", [updated, district_id])
+                    if cursor.fetchone():
+                        continue
+
+                    new_data = True
+                    cursor.execute('SELECT population FROM counties WHERE rs=%s', [district_id])
+                    population = cursor.fetchone()[0]
+                    if not population:
+                        self.log.warning(f"Can't fetch population for {district_id} ({row['Bundesland']})")
+                        continue
+
+                    rate_full, rate_partial = 0, 0
+                    if row['Impfungen_kumulativ']:
+                        rate_partial = row['Impfungen_kumulativ'] / population
+
+                    if row['Zweitimpfungen_kumulativ']:
+                        rate_full = row['Zweitimpfungen_kumulativ'] / population
+
+                    cursor.execute('INSERT INTO covid_vaccinations (district_id, updated, vaccinated_partial, '
+                                   'vaccinated_full, rate_partial, rate_full) VALUE (%s, %s, %s, %s, %s, %s)',
+                                   [district_id, updated, row['Impfungen_kumulativ'],
+                                    row['Zweitimpfungen_kumulativ'], rate_partial, rate_full])
+            self.connection.commit()
+            return new_data

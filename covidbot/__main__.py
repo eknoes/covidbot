@@ -10,7 +10,7 @@ from typing import List
 from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
-from covidbot.covid_data import CovidData, RKIUpdater
+from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyUpdater
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.signal_interface import SignalInterface
 from covidbot.telegram_interface import TelegramInterface
@@ -214,17 +214,17 @@ if __name__ == "__main__":
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
-            updater = RKIUpdater(conn)
-            try:
-                updater.fetch_current_data()
-            except ValueError as error:
-                # Data did not make it through plausibility check
-                print(f"Data looks weird, not updating: {error}")
-                with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
-                    asyncio.run(telegram.sendMessageTo(f"I did not update the RKI data as it is looking strange: {error}",
-                                           [config["TELEGRAM"].get("DEV_CHAT")]))
-            else:
-                asyncio.run(sendUpdates())
+            for updater in [RKIUpdater(conn), VaccinationGermanyUpdater(conn)]:
+                try:
+                    if updater.update():
+                        logging.warning(f"Got new data from {updater.__class__.__name__}")
+                except ValueError as error:
+                    # Data did not make it through plausibility check
+                    print(f"Data looks weird, not updating: {error}")
+                    with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
+                        asyncio.run(telegram.sendMessageTo(f"I did not update the RKI data as it is looking strange: {error}",
+                                               [config["TELEGRAM"].get("DEV_CHAT")]))
+        asyncio.run(sendUpdates())
     elif args.message or args.message_file:
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="message-users.log")
