@@ -224,7 +224,7 @@ if __name__ == "__main__":
                     with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
                         asyncio.run(telegram.sendMessageTo(f"I did not update the RKI data as it is looking strange: {error}",
                                                [config["TELEGRAM"].get("DEV_CHAT")]))
-        #asyncio.run(sendUpdates())
+        asyncio.run(sendUpdates())
     elif args.message or args.message_file:
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="message-users.log")
