@@ -40,7 +40,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         # Create the application and register the handler for incoming messages
         application = create_application(self.connection)
         add_callback_route(self.connection, application, self.handle_threema_msg, path='/gateway_callback')
-        web.run_app(application, port=9000)
+        web.run_app(application, port=9000, access_log=logging.getLogger('threema_api'))
 
     def get_attachment(self, image: BytesIO) -> Dict:
         filename = self.graphics_tmp_path + "/graphic.jpg"
