@@ -151,7 +151,7 @@ async def send_all(message: str, recipients: List[str], config, messenger=None):
             await interface.sendMessageTo(message, recipients, with_report)
 
     else:
-        for messenger in ["telegram", "signal", "threema"]:
+        for messenger in ["signal", "telegram", "threema"]:
             try:
                 with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
                     await interface.sendMessageTo(message, recipients, with_report)
