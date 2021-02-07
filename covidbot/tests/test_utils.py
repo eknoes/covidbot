@@ -57,12 +57,12 @@ class Test(TestCase):
     def test_url_in_markdown(self):
         test_str = "<i>Mehr Infos <a href='https://test.de/'>hier</a> und <a href='https://test2.de/'>da</a></i>"
         actual = adapt_text(test_str, threema_format=True)
-        expected = "_Mehr Infos hier _(https://test.de/)_ und da _(https://test2.de/)"
+        expected = "_Mehr Infos hier_ (https://test.de/) _und da_ (https://test2.de/)"
         self.assertEqual(expected, actual, "adapt_text should omit links in italic mode")
 
         test_str = "<b>Mehr Infos <a href='https://test.de/'>hier</a> und <a href='https://test2.de/'>da</a></b>"
         actual = adapt_text(test_str, threema_format=True)
-        expected = "*Mehr Infos hier *(https://test.de/)* und da *(https://test2.de/)"
+        expected = "*Mehr Infos hier* (https://test.de/) *und da* (https://test2.de/)"
         self.assertEqual(expected, actual, "adapt_text should omit links in italic mode")
 
     def test_format_int(self):

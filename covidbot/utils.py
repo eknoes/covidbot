@@ -41,20 +41,20 @@ def replace_bold_markdown(text: str) -> str:
     # Not real markdown but Threema formatting
     text = f"*{text}*"
     # Embed links
-    link_pattern = re.compile("(\(http[s]?://[\w.\-]*([/\w\-.])*\))")
-    text = link_pattern.sub("*\g<1>*", text)
+    link_pattern = re.compile("\s?(\(http[s]?://[\w.\-]*([/\w\-.])*\))\s?")
+    text = link_pattern.sub("* \g<1> *", text)
 
-    return text.replace("**", "")
-
+    return text.replace("**", "").strip()
+'*Mehr Infos hier* (https://test.de/)  *und da* (https://test2.de/) **'
 
 def replace_italic_markdown(text: str) -> str:
     # Not real markdown but Threema formatting
     text = f"_{text}_"
     # Embed links
-    link_pattern = re.compile("(\(http[s]?://[\w.\-]*([/\w\-.])*\))")
-    text = link_pattern.sub("_\g<1>_", text)
+    link_pattern = re.compile("\s?(\(http[s]?://[\w.\-]*([/\w\-.])*\))\s?")
+    text = link_pattern.sub("_ \g<1> _", text)
 
-    return text.replace("__", "")
+    return text.replace("__", "").strip()
 
 
 def replace_bold_unicode(text: str) -> str:
