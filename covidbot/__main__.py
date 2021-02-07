@@ -57,8 +57,9 @@ class MessengerBotSetup:
     def __enter__(self) -> MessengerInterface:
         # Do not activate user on Threema automatically
         users_activated = True
+        location_feature = True
         if self.name == "threema":
-            pass
+            location_feature = False
             #users_activated = False
 
         if self.name == "telegram":
@@ -75,7 +76,7 @@ class MessengerBotSetup:
 
         data = CovidData(data_conn)
         user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
-        bot = Bot(data, user_manager, command_format=command_format)
+        bot = Bot(data, user_manager, command_format=command_format, location_feature=location_feature)
 
         # Return specific interface
         if self.name == "threema":

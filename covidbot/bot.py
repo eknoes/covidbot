@@ -26,13 +26,16 @@ class Bot(object):
     _location_service: LocationService
     DEFAULT_LANG = "de"
     command_format: str
+    location_feature: bool = False
 
-    def __init__(self, covid_data: CovidData, subscription_manager: UserManager, command_format="/{command}"):
+    def __init__(self, covid_data: CovidData, subscription_manager: UserManager, command_format="/{command}",
+                 location_feature=False):
         self.log = logging.getLogger(__name__)
         self._data = covid_data
         self._manager = subscription_manager
         self._location_service = LocationService('resources/germany_rs.geojson')
         self.command_format = command_format
+        self.location_feature = location_feature
 
     def is_user_activated(self, user_identification: Union[int, str]) -> bool:
         user_id = self._manager.get_user_id(user_identification)
@@ -129,7 +132,7 @@ class Bot(object):
                        " {incidence_trend}."
 
         if current_data.r_value:
-            message += " Der 7-Tage-R-Wert liegt bei {r_value} {r_trend}."\
+            message += " Der 7-Tage-R-Wert liegt bei {r_value} {r_trend}." \
                 .format(r_value=format_float(current_data.r_value.r_value_7day),
                         r_trend=format_data_trend(current_data.r_value.r_trend))
         message += "\n\n"
@@ -154,7 +157,7 @@ class Bot(object):
                        "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
                        "vollständig geimpft.\n\n" \
                        "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
-                       "Verabreichte Zweitimpfdosen: {vacc_full}\n\n"\
+                       "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
                 .format(rate_partial=format_float(vacc.partial_rate * 100),
                         rate_full=format_float(vacc.full_rate * 100),
                         vacc_partial=format_int(vacc.vaccinated_partial),
@@ -261,13 +264,15 @@ class Bot(object):
                   "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
                   "{incidence_trend}."
         if country.r_value:
-            message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value} {r_trend}."\
-                .format(r_value=format_float(country.r_value.r_value_7day), r_trend=format_data_trend(country.r_value.r_trend))
+            message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value} {r_trend}." \
+                .format(r_value=format_float(country.r_value.r_value_7day),
+                        r_trend=format_data_trend(country.r_value.r_trend))
         if country.vaccinations:
             message += "\n\n<b>💉  Impfdaten</b>\n" \
                        "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft."\
-                .format(rate_full=format_float(country.vaccinations.full_rate * 100), rate_partial=format_float(country.vaccinations.partial_rate * 100),
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft." \
+                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
+                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
                         vacc_partial=format_int(country.vaccinations.vaccinated_partial),
                         vacc_full=format_int(country.vaccinations.vaccinated_full))
         message += "\n\n"
@@ -456,16 +461,20 @@ class Bot(object):
     def start_message(self, user_identification: Union[str, int], username=""):
         if username:
             username = " " + username
-        return (f'Hallo{username},\n'
-                f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. '
-                f'Einen Überblick über alle Befehle erhältst du über {self.format_command("hilfe")}.\n\n'
-                f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
-                f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. '
-                f'Du kannst auch einen Standort senden! Wenn die Daten des Ortes nur gesammelt für '
-                f'eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
-                f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
-                f' auch die aktuellen Zahlen für andere Orte ansehen.')
+        message = (f'Hallo{username},\n'
+                   f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
+                   f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. '
+                   f'Einen Überblick über alle Befehle erhältst du über {self.format_command("hilfe")}.\n\n'
+                   f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
+                   f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. ')
+        if self.location_feature:
+            message += f'Du kannst auch einen Standort senden! '
+
+        message += (
+            f'Wenn die Daten des Ortes nur gesammelt für eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
+            f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
+            f' auch die aktuellen Zahlen für andere Orte ansehen.')
+        return message
 
     def format_command(self, command: str):
         if command:
