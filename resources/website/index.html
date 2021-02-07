@@ -1,0 +1,175 @@
+<html lang="de">
+	<head>
+	   <link rel="shortcut icon" type="image/x-icon" href="favicon.png">
+		<style type="text/css">
+
+
+
+body {
+   font-family: 'Lato', sans-serif;
+	background: #fff;
+	margin: 0;
+}
+
+h1, h2, h3 {
+	color: #00abe5;
+}
+
+#logoBackgroundImage {
+    display: block;
+    position: relative;
+    width: 100%;
+	height: 460px;
+	object-fit: cover;
+}
+
+#logo {
+  position: relative;
+  top: -413px;
+  margin-left: 15%;
+}
+
+main {
+	width: 70%;
+	margin: 0 auto;
+	position: relative;
+	top: -300px;
+	background: #fff;
+	padding: 30px;
+   transition: margin 0.2s;
+   border: 1px solid #eee;
+	border-bottom: 0;
+}
+
+#hero img {
+	max-width: 200px;
+	border-radius: 40px;
+	float: left;
+	margin-right: 5em;	
+	margin-bottom: 2em;	
+}
+
+#main-content {
+	clear: both;
+}
+
+#buttons {
+	text-align: center;
+}
+
+button {
+	background: #00b1e6;
+	color: #fff;
+	padding: 1rem;
+	font-weight: bold;
+	margin: 1rem 2rem;
+	min-width: 30%;
+	border: none;
+	transition-duration: 500ms;
+}
+
+button a {
+	text-decoration: none;
+	color: #fff;
+}
+
+button:hover {
+	background: #0095c2;
+	transition-duration: 500ms;
+}
+
+@media only screen and (max-width: 1000px) {
+	button {
+		width: 80%;
+		font-size: 3em;
+	}
+}
+
+
+@media only screen and (min-width: 1001px) {
+	button {
+		width: 250px;
+		font-size: 1.5em;
+	}
+}
+
+footer {
+	margin-top: -300px;
+	background-color: #eee;
+	padding: 1em 0;
+	color: #333333;
+	font-size: 0.9rem;
+}
+
+#footer-content {
+	width: 70%;
+	margin: 0 auto;
+}
+
+#d64vorstellung img {
+	float: left;
+	margin-right: 2em;
+	margin-bottom: 2em;
+}
+
+#legal {
+	clear: both;
+	width: 70%;
+	margin: 0 auto;
+	text-align: center;
+}
+		</style>
+		<link href="fonts.css" rel="stylesheet"> 		
+	   <title>D64 Covidbot</title>
+	</head>
+	<body>
+		<header>
+			<img id="logoBackgroundImage" src="d64-bg.png">				  
+			<a href="https://d-64.org" title="D64" id="logo">
+				<img src="https://d-64.org/wp-content/themes/d64_cluster/assets/img/header-logo.svg" alt="D64" width="202" height="118">
+			</a>
+		</header>
+		<main>
+			<div id="hero">			
+		 		<img src="logo.png" alt="Messaging Text Bubble with text and chart in front of 3 Covid19 Virus">
+				<h1> Der D64 Covidbot</h1>
+			    <p>Ein Bot zu Deinen Diensten: Unser Covidbot versorgt dich einmal am Tag mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir ausgewählten Orte.</p><p>Abonniere ihn einfach in deinem Lieblingsmessenger, indem du den Telegram-Bot startest oder uns bei Signal eine Nachricht schickst, nachdem du den Bot als Kontakt hinzugefügt hast.</p>
+			</div>
+			<div id="main-content">
+			    <br>
+			    <p id="buttons"><button onclick="window.location.href='https://t.me/CovidInzidenzBot'">Telegram</button><button onclick="window.location.href='tel:+4915792453845'">Signal (Beta)</button></p>
+			    <br>
+			    <h2>Wie funktioniert der Bot?</h2>
+			    <p>Das Robert-Koch-Institut (RKI) veröffentlicht jeden Morgen die aktuellen Infektionszahlen für Deutschland. Wir rufen diese ab und schicken Dir die Werte für die Orte, für die du dich interessierst. </p>
+			    <p>Neue Orte kannst Du Deinem Abonnement hinzufügen, in dem Du uns - über den Bot - eine Nachricht mit dem Ort schickt. Wir versenden die Infektionszahlen immer auf Ebene des Stadt- oder Landkreises. Fragst du also ein Dorf an, schicken wir dir die Zahlen des dazugehörigen Landkreises. Auch Bundesländer lassen sich abonnieren. </p>
+			    <h2>Danksagungen</h2>
+			    <p>Der Bot ist ein quelloffenes Projekt. Jede:r kann unseren Quellcode überprüfen. Solche Projekte sind nur möglich, wenn öffentliche Stellen Ihre Daten frei - als Open Data - zur Verfügung stellen.</p>
+<p>Die Informationen über die Corona-Infektionen werden von der offiziellen Schnittstelle des RKI für <a target="_blank" href="https://hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0" rel="nofollow">Landkreise</a> und <a target="_blank" href="https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0" rel="nofollow">Bundesländer</a> abgerufen und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0.
+Weitere Informationen sind auch im <a target="_blank" href="https://corona.rki.de/" rel="nofollow">Dashboard des RKI</a> sowie dem <a target="_blank" href="https://npgeo-corona-npgeo-de.hub.arcgis.com/" rel="nofollow">NPGEO Corona Hub 2020</a> zu finden.</p>
+<p>Welche Bibliotheken und andere Dienste wir noch verwenden, kannst Du unter <a target="_blank" href="https://github.com/eknoes/covid-bot/wiki/Credits">Credits</a> bei Github einsehen.</p>
+			    <h2>Links</h2>
+			    <p><a target="_blank" href="https://github.com/eknoes/covid-bot/">GitHub</a> - <a target="_blank" href="https://github.com/eknoes/covid-bot/wiki/Datenschutz">Datenschutz</a> - <a target="_blank" href="https://github.com/eknoes/covid-bot/wiki/Impressum">Impressum</a> </p>
+			    <h2>Schlüsselverifikation</h2>
+			    <p>Unsere Signal-Sicherheitsnummer:</p>
+			    <p>63924 98065 92222 70496<br>
+				45364 47404 83764 17354<br>
+				85647 36274 54661 31221
+				</p>
+			</div>
+		</main>
+		<footer>
+			<div id="footer-content">
+				<div id="d64vorstellung">
+					<h3>Eine Website von D64 – Zentrum für digitalen Fortschritt e. V.</h3>
+					<a href="https://d-64.org" title="D64">
+						<img src="https://d-64.org/wp-content/themes/d64_cluster/assets/img/header-logo.svg" alt="D64" width="202" height="118">
+					</a>
+						<p>D64 versteht sich als Denkfabrik des digitalen Wandels. Wir sind von der gesamtgesellschaftlichen Auswirkung des Internets auf sämtliche Bereiche des öffentlichen und privaten Lebens überzeugt. D64 will Taktgeber und Ratgeber für die Politik sein, um Deutschland für die digitale Demokratie aufzustellen. Leitgedanke des Vereins ist die Frage, wie das Internet dazu beitragen kann, eine gerechte Gesellschaft zu fördern. Wir finanzieren uns ausschließlich durch Mitgliedsbeiträge. <a target="_blank" href="https://d-64.org/mitglied-werden/">Werde Mitglied und hilf mit, das Internet freier, gerechter und solidarischer zu machen!</a></p>
+				</div>
+			</div>
+			<div id="legal">
+				<span class='copyright'>2021 CC-BY-SA 4.0 D64 – Zentrum für digitalen Fortschritt e.V. | <a href="https://d-64.org/impressum/">Impressum</a> | <a href="https://github.com/eknoes/covid-bot/wiki/Datenschutz">Datenschutzerklärung</a> | <a href="https://d-64.org/kontakt/">Kontakt</a></span>
+			</div>
+		</footer>	
+	</body>
+</html>
