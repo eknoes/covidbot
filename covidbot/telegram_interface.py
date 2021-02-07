@@ -367,7 +367,7 @@ class TelegramInterface(MessengerInterface):
                 if no_flood_counter % 25 == 0:
                     time.sleep(1)
 
-                self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
+                self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML)
                 if append_report:
                     no_flood_counter += 2  # Additional message
                     self.sendReport(uid)
