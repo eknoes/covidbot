@@ -86,6 +86,10 @@ class SimpleTextInterface(object):
             return BotResponse("Dein Account wurde noch nicht aktiviert, bitte wende dich an die Entwickler. Bis diese "
                                "deinen Account aktivieren, kannst du den Bot leider noch nicht nutzen.")
 
+        # Strip / on /command
+        if user_input[0] == "/":
+            user_input = user_input[1:]
+
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
                 text_in = user_input[len(handler.command):].strip()
