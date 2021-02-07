@@ -25,6 +25,7 @@ class CovidDataTest(TestCase):
         with self.conn.cursor() as cursor:
             cursor.execute("TRUNCATE TABLE covid_data;")
             cursor.execute("TRUNCATE TABLE covid_vaccinations;")
+            cursor.execute("TRUNCATE TABLE covid_r_value;")
             # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM counties ORDER BY parent DESC;")
             with open("resources/2021-01-16-testdata-counties.sql", "r") as f:
@@ -105,23 +106,3 @@ class CovidDataTest(TestCase):
         self.assertEqual(18678, data.new_cases, "New Cases on 16.01.2020 should be 18,678 for Germany")
         self.assertEqual(980, data.new_deaths, "New Deaths on 16.01.2020 should be 980 for Germany")
         self.assertEqual(139.24, data.incidence, "Incidence on 16.01.2020 should be 139.2 for Germany")
-
-
-class TestRKIUpdater(TestCase):
-    conn: MySQLConnection
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cfg = parse_config("resources/config.unittest.ini")
-        cls.conn = get_connection(cfg)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.conn.close()
-
-    def test_update(self):
-        with self.conn.cursor() as cursor:
-            cursor.execute("TRUNCATE covid_data")
-
-        updater = RKIUpdater(self.conn)
-        self.assertTrue(updater.update(), "Update should not lead to any exception")

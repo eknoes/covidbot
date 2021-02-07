@@ -143,6 +143,7 @@ class TestSubscriptionManager(TestCase):
         with self.conn.cursor() as cursor:
             cursor.execute("DELETE FROM covid_data")
             cursor.execute("TRUNCATE TABLE covid_vaccinations;")
+            cursor.execute("TRUNCATE TABLE covid_r_value;")
             cursor.execute("DELETE FROM counties ORDER BY parent DESC")
             cursor.executemany("INSERT INTO counties (rs, county_name) VALUES (%s, %s)", [(1, "Test1"), (2, "Test2")])
         self.assertEqual(self.test_manager.get_total_user_number(), 3, "get_total_user should return the number of users")

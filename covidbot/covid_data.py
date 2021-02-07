@@ -2,7 +2,6 @@ import codecs
 import csv
 import json
 import logging
-import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, date
@@ -32,6 +31,11 @@ class VaccinationData:
     full_rate: float
     partial_rate: float
 
+@dataclass
+class RValueData:
+    date: date
+    r_value_7day: float
+    r_trend: Optional[TrendValue] = None
 
 @dataclass
 class DistrictData(District):
@@ -45,6 +49,7 @@ class DistrictData(District):
     total_cases: Optional[int] = None
     total_deaths: Optional[int] = None
     vaccinations: Optional[VaccinationData] = None
+    r_value: Optional[RValueData] = None
 
 
 class CovidData(object):
@@ -169,6 +174,17 @@ class CovidData(object):
                                             new_deaths=record['new_deaths'], date=record['date'],
                                             vaccinations=vacc_data))
 
+            # Add R-Value, which is usually just available for day -4, so we have to work with LIMIT $offset
+            # (see https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/R-Wert-Erlaeuterung.pdf?__blob=publicationFile)
+            if rs == 0 and subtract_days == 0 and include_past_days == 0:
+                for i in range(0, len(results)):
+                    cursor.execute('SELECT r_date, `7day_r_value` FROM covid_r_value WHERE district_id=%s '
+                                   'ORDER BY r_date DESC LIMIT %s,1', [rs, i])
+                    data = cursor.fetchone()
+                    if data:
+                        r_data = RValueData(data['r_date'], data['7day_r_value'])
+                        results[i].r_value = r_data
+
             # Add Trend in comparison to last week
             if len(results) >= 8:
                 for i in range(len(results) - 7):
@@ -184,14 +200,17 @@ class CovidData(object):
                                              total_deaths=record['total_deaths'], new_cases=record['new_cases'],
                                              new_deaths=record['new_deaths'], date=record['date'])
 
-                cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=SUBDATE(Date(%s), 1) LIMIT 1',
-                               [rs, results[0].date])
-                record = cursor.fetchone()
-                if record:
-                    yesterday = DistrictData(name=record['county_name'], incidence=record['incidence'],
-                                             type=record['type'], total_cases=record['total_cases'],
-                                             total_deaths=record['total_deaths'], new_cases=record['new_cases'],
-                                             new_deaths=record['new_deaths'], date=record['date'])
+                if len(results) == 1:
+                    cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=SUBDATE(Date(%s), 1) '
+                                   'LIMIT 1', [rs, results[0].date])
+                    record = cursor.fetchone()
+                    if record:
+                        yesterday = DistrictData(name=record['county_name'], incidence=record['incidence'],
+                                                 type=record['type'], total_cases=record['total_cases'],
+                                                 total_deaths=record['total_deaths'], new_cases=record['new_cases'],
+                                                 new_deaths=record['new_deaths'], date=record['date'])
+                else:
+                    yesterday = results[1]
 
                 if not last_week and yesterday:
                     last_week = yesterday
@@ -246,6 +265,15 @@ class CovidData(object):
                 today.incidence_trend = TrendValue.DOWN
             else:
                 today.incidence_trend = TrendValue.SAME
+
+            if today.r_value and yesterday.r_value:
+                if yesterday.r_value < today.r_value:
+                    today.r_value.r_trend = TrendValue.UP
+                elif yesterday.r_value == today.r_value:
+                    today.r_value.r_trend = TrendValue.SAME
+                if yesterday.r_value > today.r_value:
+                    today.r_value.r_trend = TrendValue.DOWN
+
         return today
 
     def get_last_update(self) -> Optional[date]:
@@ -501,7 +529,7 @@ class RValueGermanyUpdater(CovidDataUpdater):
 
                     r_value = row[self.R_VALUE_7DAY_CSV_KEY]
                     if r_value == '.':
-                        r_value = None
+                        continue
                     else:
                         r_value = float(r_value.replace(",", "."))
 

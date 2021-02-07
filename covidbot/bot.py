@@ -254,6 +254,9 @@ class Bot(object):
                   "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
                   "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
                   "{incidence_trend}."
+        if country.r_value:
+            message += " Der zuletzt gemeldete R-Wert beträgt {r_value} {r_trend}."\
+                .format(r_value=country.r_value.r_value_7day, r_trend=self.format_data_trend(country.r_value.r_trend))
         if country.vaccinations:
             message += "\n\n<b>💉  Impfdaten</b>\n" \
                        "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \

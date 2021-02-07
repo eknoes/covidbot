@@ -5,7 +5,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot, UserDistrictActions
-from covidbot.covid_data import CovidData, DistrictData, TrendValue, RKIUpdater, VaccinationGermanyUpdater
+from covidbot.covid_data import CovidData, DistrictData, TrendValue, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater
 from covidbot.user_manager import UserManager
 
 
@@ -20,11 +20,13 @@ class TestBot(TestCase):
         with cls.conn.cursor(dictionary=True) as cursor:
             cursor.execute("DROP TABLE IF EXISTS covid_data;")
             cursor.execute("DROP TABLE IF EXISTS covid_vaccinations;")
+            cursor.execute("DROP TABLE covid_r_value;")
             cursor.execute("DROP TABLE IF EXISTS counties;")
 
         # Update Data
         RKIUpdater(cls.conn).update()
         VaccinationGermanyUpdater(cls.conn).update()
+        RValueGermanyUpdater(cls.conn).update()
 
     @classmethod
     def tearDownClass(cls) -> None:
