@@ -4,6 +4,7 @@ import random
 import re
 import signal
 import time
+from asyncio import create_subprocess_shell
 from io import BytesIO
 from typing import Dict, List, Union
 
@@ -100,6 +101,20 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
             # but the socket is already closed
             time.sleep(60)
+        await self.restart_service()
+
+    async def restart_service(self):
+        cmd = "supervisorctl restart signalbot"
+        proc = await asyncio.create_subprocess_shell(
+            cmd,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL)
+
+        await proc.wait()
+        if proc.returncode:
+            print(f'[{cmd!r} exited with {proc.returncode}]')
+            return
+        self.log.info("Restarted signalbot service")
 
     async def sendMessageTo(self, message: str, users: List[str], append_report=False):
         if not users:
@@ -107,7 +122,15 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
+            flood_count = 0
             for user in users:
+                # TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
+                if flood_count % 1 == 0:
+                    sleep_seconds = random.uniform(0.3, 2)
+                    self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
+                    time.sleep(sleep_seconds)
+                    flood_count += 1
+
                 await bot.send_message(user, adapt_text(message))
                 if append_report:
                     response = self.reportHandler("", user)
@@ -116,3 +139,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                         attachments.append(self.get_attachment(response.image))
                     await bot.send_message(user, adapt_text(response.message), attachments)
                 self.log.warning(f"Sent message to {user}")
+
+            # Currently semaphore is not waiting for signald's response, whether a message was successful.
+            # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
+            # but the socket is already closed
+            time.sleep(30)
+        await self.restart_service()
