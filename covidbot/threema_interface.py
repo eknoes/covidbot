@@ -108,3 +108,4 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             if append_report:
                 report = self.reportHandler("", user)
                 await self.send_bot_response(user, report)
+            self.log.info(f"Sent message to {user}")
