@@ -51,6 +51,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         text = ctx.message.get_body()
         if text:
             await ctx.message.typing_started()
+            if text.find('\nhttps://maps.google.de'):
+                # This is a location
+                text = re.sub('\nhttps://maps.google.de/.*', '', text) # Strip URL so it is searched for the address
             reply = self.handle_input(text, ctx.message.source)
             if reply:
                 await self.reply_message(ctx, reply)
