@@ -75,6 +75,11 @@ class CovidData(object):
                            'vaccinated_full INTEGER, rate_full FLOAT, rate_partial FLOAT, '
                            'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, updated))')
 
+            # R Value Data
+            cursor.execute('CREATE TABLE IF NOT EXISTS covid_r_value (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
+                           'district_id INTEGER, r_date DATE, 7day_r_value FLOAT, updated DATETIME,'
+                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, r_date))')
+
             # Check if view exists
             cursor.execute("SHOW FULL TABLES WHERE TABLE_TYPE LIKE '%VIEW%';")
             exists = False
@@ -273,7 +278,6 @@ class RKIUpdater(CovidDataUpdater):
                 self.log.info(f"Do not update as current data is from {last_update}")
                 return False
 
-
         r = requests.get(self.RKI_LK_CSV, headers=header)
         if r.status_code == 200:
             self.log.debug("Got RKI Data, checking if new")
@@ -442,3 +446,70 @@ class VaccinationGermanyUpdater(CovidDataUpdater):
                                     row['Zweitimpfungen_kumulativ'], rate_partial, rate_full])
             self.connection.commit()
             return new_data
+
+
+class RValueGermanyUpdater(CovidDataUpdater):
+    log = logging.getLogger(__name__)
+    URL = "https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv?__blob" \
+          "=publicationFile"
+    R_VALUE_7DAY_CSV_KEY = "Schätzer_7_Tage_R_Wert"
+
+    def update(self) -> bool:
+        last_update = None
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT updated FROM covid_r_value ORDER BY updated DESC LIMIT 1")
+            updated = cursor.fetchone()
+            if updated:
+                last_update = updated[0]
+
+        header = {}
+        if last_update:
+            if last_update.date() == date.today():
+                self.log.info(f"Do not update R-Value data, current is from {last_update}")
+                return False
+
+            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
+
+        r = requests.get(self.URL, headers=header)
+        if r.status_code == 200:
+            self.log.debug("Got R-Value Data")
+
+            rki_data = codecs.decode(r.content, "utf-8").splitlines()
+            reader = csv.DictReader(rki_data, delimiter=';', )
+            district_id = self.search_district_by_name("Deutschland")
+            if not district_id:
+                raise ValueError("No district_id for Deutschland")
+            district_id = district_id[0][0]
+
+            with self.connection.cursor() as cursor:
+                for row in reader:
+                    # RKI appends Erläuterungen to Data
+                    if row['Datum'] == 'Erläuterung':
+                        break
+
+                    if row['Datum'] == '':
+                        continue
+
+                    if self.R_VALUE_7DAY_CSV_KEY not in row:
+                        raise ValueError(f"{self.R_VALUE_7DAY_CSV_KEY} is not in CSV!")
+                    r_date = None
+                    try:
+                        r_date = datetime.strptime(row['Datum'], "%d.%m.%Y").date()
+                    except ValueError as e:
+                        self.log.warning(f"Could not get date of string {row['Datum']}")
+                        continue
+
+                    r_value = row[self.R_VALUE_7DAY_CSV_KEY]
+                    if r_value == '.':
+                        r_value = None
+                    else:
+                        r_value = float(r_value.replace(",", "."))
+
+                    cursor.execute("SELECT id FROM covid_r_value WHERE district_id=%s AND r_date=%s",
+                                   [district_id, r_date])
+                    if cursor.fetchone():
+                        continue
+
+                    cursor.execute("INSERT INTO covid_r_value (district_id, r_date, `7day_r_value`, updated) "
+                                   "VALUES (%s, %s, %s, %s)", [district_id, r_date, r_value, datetime.now()])
+            self.connection.commit()
