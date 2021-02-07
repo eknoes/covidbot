@@ -1,129 +1,12 @@
 <html lang="de">
 	<head>
 	   <link rel="shortcut icon" type="image/x-icon" href="favicon.png">
-		<style type="text/css">
-
-
-
-body {
-   font-family: 'Lato', sans-serif;
-	background: #fff;
-	margin: 0;
-}
-
-h1, h2, h3 {
-	color: #00abe5;
-}
-
-#logoBackgroundImage {
-    display: block;
-    position: relative;
-    width: 100%;
-	height: 460px;
-	object-fit: cover;
-}
-
-#logo {
-  position: relative;
-  top: -413px;
-  margin-left: 15%;
-}
-
-main {
-	width: 70%;
-	margin: 0 auto;
-	position: relative;
-	top: -300px;
-	background: #fff;
-	padding: 30px;
-   transition: margin 0.2s;
-   border: 1px solid #eee;
-	border-bottom: 0;
-}
-
-#hero img {
-	max-width: 200px;
-	border-radius: 40px;
-	float: left;
-	margin-right: 5em;	
-	margin-bottom: 2em;	
-}
-
-#main-content {
-	clear: both;
-}
-
-#buttons {
-	text-align: center;
-}
-
-button {
-	background: #00b1e6;
-	color: #fff;
-	padding: 1rem;
-	font-weight: bold;
-	margin: 1rem 2rem;
-	min-width: 30%;
-	border: none;
-	transition-duration: 500ms;
-}
-
-button a {
-	text-decoration: none;
-	color: #fff;
-}
-
-button:hover {
-	background: #0095c2;
-	transition-duration: 500ms;
-}
-
-@media only screen and (max-width: 1000px) {
-	button {
-		width: 80%;
-		font-size: 3em;
-	}
-}
-
-
-@media only screen and (min-width: 1001px) {
-	button {
-		width: 250px;
-		font-size: 1.5em;
-	}
-}
-
-footer {
-	margin-top: -300px;
-	background-color: #eee;
-	padding: 1em 0;
-	color: #333333;
-	font-size: 0.9rem;
-}
-
-#footer-content {
-	width: 70%;
-	margin: 0 auto;
-}
-
-#d64vorstellung img {
-	float: left;
-	margin-right: 2em;
-	margin-bottom: 2em;
-}
-
-#legal {
-	clear: both;
-	width: 70%;
-	margin: 0 auto;
-	text-align: center;
-}
-		</style>
-		<link href="fonts.css" rel="stylesheet"> 		
+		<link href="style.css" rel="stylesheet">
+		<link href="fonts.css" rel="stylesheet">
 		<meta property="og:title" content="D64 Covidbot"/>
-		<meta property="og:description" content="Dein Bot zu Deinen Diensten: Unser Covidbot versorgt dich einmal am Tag mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir ausgew&auml;hlten Orte."/>
+		<meta property="og:description" content="Ein Bot zu Deinen Diensten: Unser Covidbot versorgt dich einmal am Tag mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir ausgew&auml;hlten Orte."/>
 		<meta property="og:image" content="logo.png"/> 		 		
-	   	<title>D64 Covidbot</title>
+	   <title>D64 Covidbot</title>
 	</head>
 	<body>
 		<header>
@@ -135,8 +18,9 @@ footer {
 		<main>
 			<div id="hero">			
 		 		<img src="logo.png" alt="Messaging Text Bubble with text and chart in front of 3 Covid19 Virus">
-				<h1> Der D64 Covidbot</h1>
-			    <p>Ein Bot zu Deinen Diensten: Unser Covidbot versorgt Dich einmal am Tag mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir ausgew&auml;hlten Orte.</p><p>Abonniere ihn einfach in Deinem Lieblingsmessenger, indem Du den Telegram-Bot startest oder uns bei Signal eine Nachricht schickst, nachdem Du den Bot als Kontakt hinzugef&uuml;gt hast.</p>			</div>
+				<h1>Der D64 Covidbot</h1>
+			    <p>Ein Bot zu Deinen Diensten: Unser Covidbot versorgt Dich einmal am Tag mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir ausgew&auml;hlten Orte.</p><p>Abonniere ihn einfach in Deinem Lieblingsmessenger, indem Du den Telegram-Bot startest oder uns bei Signal eine Nachricht schickst, nachdem Du den Bot als Kontakt hinzugef&uuml;gt hast.</p>
+			</div>
 			<div id="main-content">
 			    <br>
 			    <p id="buttons"><button onclick="window.location.href='https://t.me/CovidInzidenzBot'"><a href="https://t.me/CovidInzidenzBot">Telegram</a></button><button onclick="window.location.href='tel:+4915792453845'"><a href="tel:+4915792453845">Signal (Beta)</a></button></p>
