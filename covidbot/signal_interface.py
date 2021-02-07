@@ -51,11 +51,10 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         text = ctx.message.get_body()
         if text:
             await ctx.message.typing_started()
-            self.log.debug(f"Got Message on Signal: {text}")
-            if text.find('https://maps.google.de/maps?q='):
+            if text.find('https://maps.google.com/maps?q='):
                 # This is a location
-                text = re.sub('https://maps.google.de/maps?q=.*', '',
-                              text)  # Strip URL so it is searched for the contained address
+                text = re.sub('\nhttps://maps.google.com/maps\?q=.*', '', text)
+                # Strip URL so it is searched for the contained address
             reply = self.handle_input(text, ctx.message.source)
             if reply:
                 await self.reply_message(ctx, reply)
