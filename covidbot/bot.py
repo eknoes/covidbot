@@ -8,9 +8,10 @@ from typing import Optional, Tuple, List, Dict, Union
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 
-from covidbot.covid_data import CovidData, DistrictData, TrendValue
+from covidbot.covid_data import CovidData, DistrictData
 from covidbot.location_service import LocationService
 from covidbot.user_manager import UserManager, BotUser
+from covidbot.utils import format_data_trend, format_int, format_float
 
 
 class UserDistrictActions(Enum):
@@ -129,8 +130,8 @@ class Bot(object):
 
         if current_data.r_value:
             message += " Der 7-Tage-R-Wert liegt bei {r_value} {r_trend}."\
-                .format(r_value=current_data.r_value.r_value_7day,
-                        r_trend=self.format_data_trend(current_data.r_value.r_trend))
+                .format(r_value=format_float(current_data.r_value.r_value_7day),
+                        r_trend=format_data_trend(current_data.r_value.r_trend))
         message += "\n\n"
         message += "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
                    "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
@@ -138,14 +139,14 @@ class Bot(object):
                    "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n"
 
         message = message.format(district_name=current_data.name,
-                                 incidence=self.format_incidence(current_data.incidence),
-                                 incidence_trend=self.format_data_trend(current_data.incidence_trend),
-                                 new_cases=self.format_int(current_data.new_cases),
-                                 new_cases_trend=self.format_data_trend(current_data.cases_trend),
-                                 total_cases=self.format_int(current_data.total_cases),
-                                 new_deaths=self.format_int(current_data.new_deaths),
-                                 new_deaths_trend=self.format_data_trend(current_data.deaths_trend),
-                                 total_deaths=self.format_int(current_data.total_deaths))
+                                 incidence=format_float(current_data.incidence),
+                                 incidence_trend=format_data_trend(current_data.incidence_trend),
+                                 new_cases=format_int(current_data.new_cases),
+                                 new_cases_trend=format_data_trend(current_data.cases_trend),
+                                 total_cases=format_int(current_data.total_cases),
+                                 new_deaths=format_int(current_data.new_deaths),
+                                 new_deaths_trend=format_data_trend(current_data.deaths_trend),
+                                 total_deaths=format_int(current_data.total_deaths))
 
         if current_data.vaccinations:
             vacc = current_data.vaccinations
@@ -154,10 +155,10 @@ class Bot(object):
                        "vollständig geimpft.\n\n" \
                        "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
                        "Verabreichte Zweitimpfdosen: {vacc_full}\n\n"\
-                .format(rate_partial=self.format_incidence(vacc.partial_rate * 100),
-                        rate_full=self.format_incidence(vacc.full_rate * 100),
-                        vacc_partial=self.format_int(vacc.vaccinated_partial),
-                        vacc_full=self.format_int(vacc.vaccinated_full))
+                .format(rate_partial=format_float(vacc.partial_rate * 100),
+                        rate_full=format_float(vacc.full_rate * 100),
+                        vacc_partial=format_int(vacc.vaccinated_partial),
+                        vacc_full=format_int(vacc.vaccinated_full))
 
         message += "<i>Stand: {date}</i>\n" \
                    "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
@@ -261,22 +262,22 @@ class Bot(object):
                   "{incidence_trend}."
         if country.r_value:
             message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value} {r_trend}."\
-                .format(r_value=country.r_value.r_value_7day, r_trend=self.format_data_trend(country.r_value.r_trend))
+                .format(r_value=format_float(country.r_value.r_value_7day), r_trend=format_data_trend(country.r_value.r_trend))
         if country.vaccinations:
             message += "\n\n<b>💉  Impfdaten</b>\n" \
                        "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
                        "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft."\
-                .format(rate_full=self.format_incidence(country.vaccinations.full_rate * 100), rate_partial=self.format_incidence(country.vaccinations.partial_rate * 100),
-                        vacc_partial=self.format_int(country.vaccinations.vaccinated_partial),
-                        vacc_full=self.format_int(country.vaccinations.vaccinated_full))
+                .format(rate_full=format_float(country.vaccinations.full_rate * 100), rate_partial=format_float(country.vaccinations.partial_rate * 100),
+                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
+                        vacc_full=format_int(country.vaccinations.vaccinated_full))
         message += "\n\n"
         message = message.format(date=self._data.get_last_update().strftime("%d.%m.%Y"),
-                                 new_cases=self.format_int(country.new_cases),
-                                 new_cases_trend=self.format_data_trend(country.cases_trend),
-                                 new_deaths=self.format_int(country.new_deaths),
-                                 new_deaths_trend=self.format_data_trend(country.deaths_trend),
-                                 incidence=self.format_incidence(country.incidence),
-                                 incidence_trend=self.format_data_trend(country.incidence_trend))
+                                 new_cases=format_int(country.new_cases),
+                                 new_cases_trend=format_data_trend(country.cases_trend),
+                                 new_deaths=format_int(country.new_deaths),
+                                 new_deaths_trend=format_data_trend(country.deaths_trend),
+                                 incidence=format_float(country.incidence),
+                                 incidence_trend=format_data_trend(country.incidence_trend))
         if subscriptions and len(subscriptions) > 0:
             message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen in den vergangenen 7 " \
                        "Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten " \
@@ -315,10 +316,10 @@ class Bot(object):
     def format_district_data(district: DistrictData) -> str:
         return "{name}: {incidence} {incidence_trend} ({new_cases} Neuinfektionen, {new_deaths} Todesfälle)" \
             .format(name=district.name,
-                    incidence=Bot.format_incidence(district.incidence),
-                    incidence_trend=Bot.format_data_trend(district.incidence_trend),
-                    new_cases=Bot.format_int(district.new_cases),
-                    new_deaths=Bot.format_int(district.new_deaths))
+                    incidence=format_float(district.incidence),
+                    incidence_trend=format_data_trend(district.incidence_trend),
+                    new_cases=format_int(district.new_cases),
+                    new_deaths=format_int(district.new_deaths))
 
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
@@ -414,7 +415,7 @@ class Bot(object):
                    "die höchste Anzahl an Abos liegt bei {most_subs}."
 
         return message.format(total_user=self._manager.get_total_user_number(),
-                              mean=self.format_incidence(self._manager.get_mean_subscriptions()),
+                              mean=format_float(self._manager.get_mean_subscriptions()),
                               most_subs=self._manager.get_most_subscriptions())
 
     def get_debug_report(self, user_identification: Union[int, str]) -> str:
@@ -437,29 +438,6 @@ class Bot(object):
     def add_user_feedback(self, user_identification: Union[int, str], feedback: str) -> Optional[int]:
         user_id = self._manager.get_user_id(user_identification)
         return self._manager.add_feedback(user_id, feedback)
-
-    @staticmethod
-    def format_incidence(incidence: float) -> str:
-        if incidence is not None:
-            return "{0:.2f}".format(float(incidence)).replace(".", ",")
-        return "Keine Daten"
-
-    @staticmethod
-    def format_int(number: int) -> str:
-        if number is not None:
-            return "{:,}".format(number).replace(",", ".")
-        return "Keine Daten"
-
-    @staticmethod
-    def format_data_trend(value: TrendValue) -> str:
-        if value == TrendValue.UP:
-            return "↗"
-        elif value == TrendValue.SAME:
-            return "➡"
-        elif value == TrendValue.DOWN:
-            return "↘"
-        else:
-            return ""
 
     def get_privacy_msg(self):
         return ("Unsere Datenschutzerklärung findest du hier: "

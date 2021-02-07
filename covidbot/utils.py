@@ -1,7 +1,8 @@
 import re
 import string
-from re import Match
-from typing import List, AnyStr
+from typing import List
+
+from covidbot.covid_data import TrendValue
 
 
 def adapt_text(text: str, threema_format=False) -> str:
@@ -97,3 +98,26 @@ def replace_by_list(text: str, search: List[str], replace: List[str]) -> str:
     for t in tokens:
         text = text.replace(t[0], t[1])
     return text
+
+
+def format_data_trend(value: TrendValue) -> str:
+    if value == TrendValue.UP:
+        return "↗"
+    elif value == TrendValue.SAME:
+        return "➡"
+    elif value == TrendValue.DOWN:
+        return "↘"
+    else:
+        return ""
+
+
+def format_int(number: int) -> str:
+    if number is not None:
+        return "{:,}".format(number).replace(",", ".")
+    return "Keine Daten"
+
+
+def format_float(incidence: float) -> str:
+    if incidence is not None:
+        return "{0:.2f}".format(float(incidence)).replace(".", ",")
+    return "Keine Daten"
