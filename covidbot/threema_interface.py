@@ -69,6 +69,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
 
                 # Just exit on exception
                 os.kill(os.getpid(), signal.SIGINT)
+        else:
+            self.log.debug(f"Received unknown message type {type(message)}: {message}")
 
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.image:
