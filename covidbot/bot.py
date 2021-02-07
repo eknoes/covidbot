@@ -163,11 +163,12 @@ class Bot(object):
                         vacc_partial=format_int(vacc.vaccinated_partial),
                         vacc_full=format_int(vacc.vaccinated_full))
 
-        message += "<i>Stand: {date}</i>\n" \
-                   "<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen " \
-                   "findest Du im <a href='https://corona.rki.de/'>Dashboard des RKI</a> und dem " \
-                   "<a href='https://impfdashboard.de/'>Impfdashboard</a></i>\n" \
-            .format(date=current_data.date.strftime("%d.%m.%Y"))
+        message += '<i>Stand: {date}</i>\n' \
+                   '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
+                   ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
+                   '<a href="https://impfdashboard.de/">Impfdashboard</a>. Sende {info_command} um eine Erläuterung ' \
+                   'der Daten zu erhalten.</i>'\
+            .format(info_command=self.format_command("Info"), date=current_data.date.strftime("%d.%m.%Y"))
 
         return message
 
@@ -204,8 +205,8 @@ class Bot(object):
         plt.figtext(0.8, 0.01, "Stand: {date}\nDaten vom Robert Koch-Institut (RKI)"
                     .format(date=current_date.strftime("%d.%m.%Y")), horizontalalignment='left', fontsize=8,
                     verticalalignment="baseline")
-        plt.figtext(0.05, 0.01, "Folge @CovidInzidenzBot auf Telegram, um tagesaktuelle Daten zu erhalten\n"
-                                "https://t.me/CovidInzidenzBot", horizontalalignment='left', fontsize=8,
+        plt.figtext(0.05, 0.01, "Erhalte kostenlos die tagesaktuellen Daten auf Telegram oder Signal!\n"
+                                "https://covidbot.d-64.org/", horizontalalignment='left', fontsize=8,
                     verticalalignment="baseline")
 
         for direction in ["left", "right", "bottom", "top"]:
@@ -267,14 +268,6 @@ class Bot(object):
             message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value} {r_trend}." \
                 .format(r_value=format_float(country.r_value.r_value_7day),
                         r_trend=format_data_trend(country.r_value.r_trend))
-        if country.vaccinations:
-            message += "\n\n<b>💉  Impfdaten</b>\n" \
-                       "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft." \
-                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
-                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
-                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
-                        vacc_full=format_int(country.vaccinations.vaccinated_full))
         message += "\n\n"
         message = message.format(date=self._data.get_last_update().strftime("%d.%m.%Y"),
                                  new_cases=format_int(country.new_cases),
@@ -284,9 +277,8 @@ class Bot(object):
                                  incidence=format_float(country.incidence),
                                  incidence_trend=format_data_trend(country.incidence_trend))
         if subscriptions and len(subscriptions) > 0:
-            message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen in den vergangenen 7 " \
-                       "Tagen) sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von dir abonnierten " \
-                       "Orte wie folgt aus:\n\n"
+            message += "Die 7-Tage-Inzidenz sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von " \
+                       "dir abonnierten Orte wie folgt aus:\n\n"
 
             # Split Bundeslaender from other
             subscription_data = list(map(lambda rs: self._data.get_district_data(rs), subscriptions))
@@ -304,9 +296,19 @@ class Bot(object):
                 data = map(lambda district: "• " + self.format_district_data(district),
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
+
+        if country.vaccinations:
+            message += "<b>💉  Impfdaten</b>\n" \
+                       "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
+                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
+                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
+                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
+                        vacc_full=format_int(country.vaccinations.vaccinated_full))
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
-                   '<a href="https://impfdashboard.de/">Impfdashboard</a></i>'
+                   '<a href="https://impfdashboard.de/">Impfdashboard</a>. Sende {info_command} um eine Erläuterung ' \
+                   'der Daten zu erhalten.</i>'.format(info_command=self.format_command("Info"))
 
         return message
 
@@ -497,7 +499,9 @@ class Bot(object):
                     'Wählst du "Starte Abo" aus, wird dieser Ort in deinem '
                     'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
                     'stattdessen angeboten, das Abo wieder zu beenden. '
-                    'Du kannst beliebig viele Orte abonnieren!'
+                    'Du kannst beliebig viele Orte abonnieren! '
+                    'Sende {info_command} um die Erläuterung zu den verschiedenen Daten und Quellen mit weiteren '
+                    'Informationen zu erhalten.'
                     '\n\n'
                     '<b>💬 Feedback</b>\n'
                     'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
@@ -509,13 +513,15 @@ class Bot(object):
                     '• Sende {report_command} um deinen Tagesbericht erneut zu erhalten\n'
                     '• Sende {abo_command} um deine abonnierten Orte einzusehen\n'
                     '• Sende {privacy_command} erhältst du mehr Informationen zum Datenschutz und die '
-                    'Möglichkeit, alle deine Daten bei uns zu löschen\n\n'
+                    'Möglichkeit, alle deine Daten bei uns zu löschen\n'
+                    '• Unter https://covidbot.d-64.org/ findest du Informationen zum Bot und die Links um ihn auf Telegram und Signal zu benutzen'
+                    '\n\n'
                     'Mehr Informationen zu diesem Bot findest du hier: '
                     'https://github.com/eknoes/covid-bot\n\n'
                     'Diesen Hilfetext erhältst du über {help_command}')\
             .format(stat_command=self.format_command('Statistik'), report_command=self.format_command('Bericht'),
                     abo_command=self.format_command('Abo'), privacy_command=self.format_command('Datenschutz'),
-                    help_command=self.format_command('Hilfe'))
+                    help_command=self.format_command('Hilfe'), info_command=self.format_command('Info'))
         return message
 
     @staticmethod
