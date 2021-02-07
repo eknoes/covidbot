@@ -95,33 +95,7 @@ class SimpleTextInterface(object):
         return BotResponse(self.bot.start_message(user_id))
 
     def helpHandler(self, user_input: str, user_id: str) -> BotResponse:
-        return BotResponse(f'Hallo,\n'
-                           f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                           f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
-                           f'<b>🔎 Orte finden</b>\n'
-                           f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
-                           f'möchtest. So kannst du nach einer Stadt, Adresse oder auch dem Namen deiner '
-                           f'Lieblingskneipe suchen.\n\n'
-                           f'<b>📈 Informationen erhalten</b>\n'
-                           f'Wählst du "Daten" aus, erhältst Du einmalig Informationen über diesen Ort. Diese '
-                           f'enthalten eine Grafik, die für diesen Ort generiert wurde.\n'
-                           f'Wählst du "Abo" aus, wird dieser Ort in deinem '
-                           f'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
-                           f'stattdessen angeboten, das Abo wieder zu beenden. '
-                           f'Du kannst beliebig viele Orte abonnieren!'
-                           f'\n\n'
-                           f'<b>💬 Feedback</b>\n'
-                           f'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
-                           f'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
-                           f'<b>🤓 Statistik</b>\n'
-                           f'Wenn du "Statistik" sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
-                           f'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
-                           f'<b>Weiteres</b>\n'
-                           f'• Sende "Bericht" um deinen Tagesbericht erneut zu erhalten\n'
-                           f'• Sende "Abo" um deine abonnierten Orte einzusehen\n\n'
-                           f'Mehr Informationen zu diesem Bot findest du hier: '
-                           f'https://github.com/eknoes/covid-bot\n\n'
-                           f'Diesen Hilfetext erhältst du über /hilfe')
+        return BotResponse(self.bot.help_message(user_id))
 
     def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)

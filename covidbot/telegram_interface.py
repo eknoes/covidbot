@@ -67,35 +67,7 @@ class TelegramInterface(MessengerInterface):
             self._bot.set_language(update.effective_chat.id, update.effective_user.language_code)
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_html(f'Hallo {update.effective_user.first_name},\n'
-                                  f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                                  f'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
-                                  f'<b>🔎 Orte finden</b>\n'
-                                  f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
-                                  f'möchtest. So kannst du nach einer Stadt, Adresse oder auch dem Namen deiner '
-                                  f'Lieblingskneipe suchen. Du kannst auch einen Standort senden.\n\n'
-                                  f'<b>📈 Informationen erhalten</b>\n'
-                                  f'Wählst du "Bericht" aus, erhältst Du einmalig Informationen über diesen Ort. Diese '
-                                  f'enthalten eine Grafik die für diesen Ort generiert wurde.\n'
-                                  f'Wenn Du auf "Starte Abo" tippst, wird dieser Ort in deinem '
-                                  f'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
-                                  f'stattdessen angeboten, das Abo wieder zu beenden. '
-                                  f'Du kannst beliebig viele Orte abonnieren!'
-                                  f'\n\n'
-                                  f'<b>💬 Feedback</b>\n'
-                                  f'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
-                                  f'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
-                                  f'<b>🤓 Statistik</b>\n'
-                                  f'Wenn du /statistik sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
-                                  f'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
-                                  f'<b>Weiteres</b>\n'
-                                  f'• Sende /bericht um deinen Tagesbericht erneut zu erhalten\n'
-                                  f'• Sende /abo um deine abonnierten Orte einzusehen\n'
-                                  f'• Mit /datenschutz erhältst du mehr Informationen zum Datenschutz und die '
-                                  f'Möglichkeit, alle deine Daten bei uns zu löschen\n\n'
-                                  f'Mehr Informationen zu diesem Bot findest du hier: '
-                                  f'https://github.com/eknoes/covid-bot\n\n'
-                                  f'Diesen Hilfetext erhältst du über /hilfe')
+        update.message.reply_html(self._bot.help_message(update.effective_chat.id))
 
     def privacyHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_privacy_msg())

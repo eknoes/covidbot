@@ -447,7 +447,7 @@ class Bot(object):
     def get_privacy_msg(self):
         return ("Unsere Datenschutzerklärung findest du hier: "
                 "https://github.com/eknoes/covid-bot/wiki/Datenschutz\n\n"
-                f"Außerdem kannst du mit dem Befehl {self.format_command('hilfe')} alle deine bei uns gespeicherten "
+                f"Außerdem kannst du mit dem Befehl {self.format_command('loeschmich')} alle deine bei uns gespeicherten "
                 "Daten löschen.")
 
     @staticmethod
@@ -464,7 +464,7 @@ class Bot(object):
         message = (f'Hallo{username},\n'
                    f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
                    f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. '
-                   f'Einen Überblick über alle Befehle erhältst du über {self.format_command("hilfe")}.\n\n'
+                   f'Einen Überblick über alle Befehle erhältst du über {self.format_command("Hilfe")}.\n\n'
                    f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
                    f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. ')
         if self.location_feature:
@@ -474,6 +474,48 @@ class Bot(object):
             f'Wenn die Daten des Ortes nur gesammelt für eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
             f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
             f' auch die aktuellen Zahlen für andere Orte ansehen.')
+        return message
+
+    def help_message(self, user_identification: Union[str, int], username="") -> str:
+        if username:
+            username = " " + username
+
+        message = (f'Hallo{username},\n'
+                   'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
+                   'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
+                   '<b>🔎 Orte finden</b>\n'
+                   'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
+                   'möchtest. So kannst du nach einer Stadt, Adresse oder auch dem Namen deiner '
+                   'Lieblingskneipe suchen.')
+        if self.location_feature:
+            message += ' Du kannst auch einen Standort senden.'
+
+        message += ('\n\n'
+                    '<b>📈 Informationen erhalten</b>\n'
+                    'Wählst du "Bericht" aus, erhältst Du einmalig Informationen über diesen Ort. Diese '
+                    'enthalten eine Grafik die für diesen Ort generiert wurde.\n'
+                    'Wählst du "Starte Abo" aus, wird dieser Ort in deinem '
+                    'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
+                    'stattdessen angeboten, das Abo wieder zu beenden. '
+                    'Du kannst beliebig viele Orte abonnieren!'
+                    '\n\n'
+                    '<b>💬 Feedback</b>\n'
+                    'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
+                    'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
+                    '<b>🤓 Statistik</b>\n'
+                    'Wenn du {stat_command} sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
+                    'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
+                    '<b>Weiteres</b>\n'
+                    '• Sende {report_command} um deinen Tagesbericht erneut zu erhalten\n'
+                    '• Sende {abo_command} um deine abonnierten Orte einzusehen\n'
+                    '• Sende {privacy_command} erhältst du mehr Informationen zum Datenschutz und die '
+                    'Möglichkeit, alle deine Daten bei uns zu löschen\n\n'
+                    'Mehr Informationen zu diesem Bot findest du hier: '
+                    'https://github.com/eknoes/covid-bot\n\n'
+                    'Diesen Hilfetext erhältst du über {help_command}')\
+            .format(stat_command=self.format_command('Statistik'), report_command=self.format_command('Bericht'),
+                    abo_command=self.format_command('Abo'), privacy_command=self.format_command('Datenschutz'),
+                    help_command=self.format_command('Hilfe'))
         return message
 
     def format_command(self, command: str):
