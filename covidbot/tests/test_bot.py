@@ -5,7 +5,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot, UserDistrictActions
-from covidbot.covid_data import CovidData, DistrictData, TrendValue, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater
+from covidbot.covid_data import CovidData, DistrictData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater
 from covidbot.user_manager import UserManager
 
 
@@ -103,16 +103,6 @@ class TestBot(TestCase):
         self.assertIsNotNone(self.bot.get_possible_actions(uid1, 2),
                              "A not yet existing user should be able to query for "
                              "possible actions")
-
-    def test_format_int(self):
-        expected = "1.121"
-        actual = format_int(1121)
-        self.assertEqual(expected, actual, "Ints should be formatted for German localization")
-
-    def test_format_incidence(self):
-        expected = "1,21"
-        actual = format_float(1.21)
-        self.assertEqual(expected, actual, "Incidence should be formatted for German localization")
 
     def test_group_districts(self):
         districts = [DistrictData(incidence=0, name="0Incidence"), DistrictData(incidence=35, name="35Incidence"),

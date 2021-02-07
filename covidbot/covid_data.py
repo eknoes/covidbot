@@ -221,6 +221,8 @@ class CovidData(object):
             if len(results) < include_past_days + 1:
                 logging.warning(f"No more data available for RS{rs}, requested {include_past_days + 1} days "
                                 f"but can just provide {len(results)} days")
+            elif len(results) == include_past_days + 2:
+                results.pop()
 
             if not results:
                 return None

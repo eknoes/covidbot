@@ -65,3 +65,13 @@ class Test(TestCase):
         expected = "*Mehr Infos hier *(https://test.de/)* und da *(https://test2.de/)"
         self.assertEqual(expected, actual, "adapt_text should omit links in italic mode")
 
+    def test_format_int(self):
+        expected = "1.121"
+        actual = format_int(1121)
+        self.assertEqual(expected, actual, "Ints should be formatted for German localization")
+
+    def test_format_incidence(self):
+        expected = "1,21"
+        actual = format_float(1.21)
+        self.assertEqual(expected, actual, "Incidence should be formatted for German localization")
+
