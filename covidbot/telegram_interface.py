@@ -69,6 +69,9 @@ class TelegramInterface(MessengerInterface):
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.help_message(update.effective_chat.id))
 
+    def infoHandler(self, update: Update, context: CallbackContext) -> None:
+        update.message.reply_html(self._bot.explain_message())
+
     def privacyHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_privacy_msg())
 
@@ -333,6 +336,7 @@ class TelegramInterface(MessengerInterface):
     def run(self):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('info', self.infoHandler))
         self.updater.dispatcher.add_handler(CommandHandler('loeschmich', self.deleteHandler))
         self.updater.dispatcher.add_handler(CommandHandler('datenschutz', self.privacyHandler))
         self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))

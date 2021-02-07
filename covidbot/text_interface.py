@@ -40,7 +40,7 @@ class SimpleTextInterface(object):
         self.bot = bot
         self.handler_list.append(Handler("start", self.startHandler))
         self.handler_list.append(Handler("hilfe", self.helpHandler))
-        self.handler_list.append(Handler("/hilfe", self.helpHandler))
+        self.handler_list.append(Handler("info", self.infoHandler))
         self.handler_list.append(Handler("abo", self.subscribeHandler))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler))
         self.handler_list.append(Handler("datenschutz", self.privacyHandler))
@@ -96,6 +96,9 @@ class SimpleTextInterface(object):
 
     def helpHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(self.bot.help_message(user_id))
+
+    def infoHandler(self, user_input: str, user_id: str) -> BotResponse:
+        return BotResponse(self.bot.explain_message())
 
     def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)
