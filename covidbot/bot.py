@@ -205,7 +205,7 @@ class Bot(object):
         plt.figtext(0.8, 0.01, "Stand: {date}\nDaten vom Robert Koch-Institut (RKI)"
                     .format(date=current_date.strftime("%d.%m.%Y")), horizontalalignment='left', fontsize=8,
                     verticalalignment="baseline")
-        plt.figtext(0.05, 0.01, "Erhalte kostenlos die tagesaktuellen Daten auf Telegram oder Signal!\n"
+        plt.figtext(0.05, 0.01, "Erhalte kostenlos die tagesaktuellen Daten auf Telegram oder Signal für deine Orte!\n"
                                 "https://covidbot.d-64.org/", horizontalalignment='left', fontsize=8,
                     verticalalignment="baseline")
 
