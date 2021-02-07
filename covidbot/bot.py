@@ -167,7 +167,7 @@ class Bot(object):
                    '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
                    '<a href="https://impfdashboard.de/">Impfdashboard</a>. Sende {info_command} um eine Erläuterung ' \
-                   'der Daten zu erhalten.</i>'\
+                   'der Daten zu erhalten.</i>' \
             .format(info_command=self.format_command("Info"), date=current_data.date.strftime("%d.%m.%Y"))
 
         return message
@@ -260,10 +260,20 @@ class Bot(object):
 
     def _get_report(self, subscriptions: List[int]) -> str:
         country = self._data.get_country_data()
-        message = "<b>Corona-Bericht vom {date}</b>\n\n" \
-                  "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
-                  "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
-                  "{incidence_trend}."
+        message = "<b>Corona-Bericht vom {date}</b>\n\n"
+        if country.vaccinations:
+            message += "<b>💉  Impfdaten</b>\n" \
+                       "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
+                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
+                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
+                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
+                        vacc_full=format_int(country.vaccinations.vaccinated_full))
+
+        message += "<b>🦠 Infektionszahlen</b>\n" \
+                   "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
+                   "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
+                   "{incidence_trend}."
         if country.r_value:
             message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value} {r_trend}." \
                 .format(r_value=format_float(country.r_value.r_value_7day),
@@ -297,14 +307,6 @@ class Bot(object):
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
 
-        if country.vaccinations:
-            message += "<b>💉  Impfdaten</b>\n" \
-                       "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
-                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
-                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
-                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
-                        vacc_full=format_int(country.vaccinations.vaccinated_full))
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
                    '<a href="https://impfdashboard.de/">Impfdashboard</a>. Sende {info_command} um eine Erläuterung ' \
@@ -518,7 +520,7 @@ class Bot(object):
                     '\n\n'
                     'Mehr Informationen zu diesem Bot findest du hier: '
                     'https://github.com/eknoes/covid-bot\n\n'
-                    'Diesen Hilfetext erhältst du über {help_command}')\
+                    'Diesen Hilfetext erhältst du über {help_command}') \
             .format(stat_command=self.format_command('Statistik'), report_command=self.format_command('Bericht'),
                     abo_command=self.format_command('Abo'), privacy_command=self.format_command('Datenschutz'),
                     help_command=self.format_command('Hilfe'), info_command=self.format_command('Info'))
