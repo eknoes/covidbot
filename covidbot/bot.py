@@ -125,8 +125,13 @@ class Bot(object):
         message += "<b>🏥 Infektionsdaten</b>\n"
         if current_data.incidence:
             message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen) liegt bei {incidence}" \
-                       " {incidence_trend}.\n\n"
+                       " {incidence_trend}."
 
+        if current_data.r_value:
+            message += " Der 7-Tage-R-Wert liegt bei {r_value} {r_trend}."\
+                .format(r_value=current_data.r_value.r_value_7day,
+                        r_trend=self.format_data_trend(current_data.r_value.r_trend))
+        message += "\n\n"
         message += "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
                    "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
                    "Neue Todesfälle (seit gestern): {new_deaths} {new_deaths_trend}\n" \
@@ -255,7 +260,7 @@ class Bot(object):
                   "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
                   "{incidence_trend}."
         if country.r_value:
-            message += " Der zuletzt gemeldete R-Wert beträgt {r_value} {r_trend}."\
+            message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value} {r_trend}."\
                 .format(r_value=country.r_value.r_value_7day, r_trend=self.format_data_trend(country.r_value.r_trend))
         if country.vaccinations:
             message += "\n\n<b>💉  Impfdaten</b>\n" \
