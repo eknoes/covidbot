@@ -152,7 +152,7 @@ class CovidData(object):
         """
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT %s,%s',
-                           [rs, subtract_days, include_past_days + 1])
+                           [rs, subtract_days, include_past_days + 2])
 
             results = []
             for record in cursor.fetchall():
@@ -267,11 +267,11 @@ class CovidData(object):
                 today.incidence_trend = TrendValue.SAME
 
             if today.r_value and yesterday.r_value:
-                if yesterday.r_value < today.r_value:
+                if yesterday.r_value.r_value_7day < today.r_value.r_value_7day:
                     today.r_value.r_trend = TrendValue.UP
-                elif yesterday.r_value == today.r_value:
+                elif yesterday.r_value.r_value_7day == today.r_value.r_value_7day:
                     today.r_value.r_trend = TrendValue.SAME
-                if yesterday.r_value > today.r_value:
+                if yesterday.r_value.r_value_7day > today.r_value.r_value_7day:
                     today.r_value.r_trend = TrendValue.DOWN
 
         return today
