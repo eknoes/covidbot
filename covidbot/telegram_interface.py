@@ -67,10 +67,10 @@ class TelegramInterface(MessengerInterface):
             self._bot.set_language(update.effective_chat.id, update.effective_user.language_code)
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_html(self._bot.help_message(update.effective_chat.id))
+        update.message.reply_html(self._bot.help_message(update.effective_chat.id), disable_web_page_preview=True)
 
     def infoHandler(self, update: Update, context: CallbackContext) -> None:
-        update.message.reply_html(self._bot.explain_message())
+        update.message.reply_html(self._bot.explain_message(), disable_web_page_preview=True)
 
     def privacyHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_privacy_msg())
@@ -100,7 +100,7 @@ class TelegramInterface(MessengerInterface):
                 if message.photo:
                     self.addToFileCache(district_id, message.photo[-1])
             else:
-                update.message.reply_html(message)
+                update.message.reply_html(message, disable_web_page_preview=True)
         self.log.debug("Someone called /ort")
 
     @staticmethod
@@ -318,7 +318,7 @@ class TelegramInterface(MessengerInterface):
             else:
                 sent_msg = self.updater.bot.send_photo(chat_id=userid, photo=graph,
                                                        parse_mode=telegram.constants.PARSEMODE_HTML)
-                self.updater.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML)
+                self.updater.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
 
             if sent_msg.photo:
                 self.addToFileCache(0, sent_msg.photo[-1])
@@ -366,7 +366,7 @@ class TelegramInterface(MessengerInterface):
                 if no_flood_counter % 25 == 0:
                     time.sleep(1)
 
-                self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML)
+                self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
                 if append_report:
                     no_flood_counter += 2  # Additional message
                     self.sendReport(uid)
