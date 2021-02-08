@@ -162,11 +162,11 @@ class UserManager(object):
             self.connection.commit()
             return True
 
-    def create_user(self, identifier: str, last_update=datetime.today(), language=None) -> Union[int, bool]:
+    def create_user(self, identifier: str) -> Union[int, bool]:
         with self.connection.cursor(dictionary=True) as cursor:
             try:
-                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, last_update=%s, language=%s, activated=%s",
-                               [identifier, self.platform, last_update, language, self.activated_default])
+                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, activated=%s",
+                               [identifier, self.platform, self.activated_default])
                 if cursor.rowcount == 1:
                     self.connection.commit()
                     return cursor.lastrowid
