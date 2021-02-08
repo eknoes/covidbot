@@ -74,7 +74,7 @@ class TelegramInterface(MessengerInterface):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.location, self.directMessageHandler))
         self.updater.dispatcher.add_error_handler(self.error_callback)
 
-        self.updater.bot.send_message(self.dev_chat_id, "I just started successfully!")
+        self.sendMessageToDev("I just started successfully!")
         self.updater.start_polling()
         self.updater.idle()
 
@@ -238,13 +238,12 @@ class TelegramInterface(MessengerInterface):
                 self._bot.add_user_feedback(update.effective_chat.id, feedback)
                 if update.effective_user:
                     query.edit_message_text("Danke für dein wertvolles Feedback, {name}!"
-                                              .format(name=update.effective_user.first_name))
+                                            .format(name=update.effective_user.first_name))
                 else:
                     query.edit_message_text("Danke für dein wertvolles Feedback!")
 
                 # Send to Devs
-                context.bot.send_message(chat_id=self.dev_chat_id, text=f"<b>Neues Feedback von {uid}!</b>\n{feedback}",
-                                         parse_mode=ParseMode.HTML)
+                self.sendMessageToDev(f"<b>Neues Feedback von {uid}!</b>\n{feedback}")
 
                 del self.feedback_cache[update.effective_chat.id]
         else:
@@ -262,7 +261,7 @@ class TelegramInterface(MessengerInterface):
 
             self.feedback_cache[update.effective_chat.id] = update.message.text
             if update.effective_user:
-                self.feedback_cache[update.effective_chat.id] += "\n— {name}"\
+                self.feedback_cache[update.effective_chat.id] += "\n— {name}" \
                     .format(name=update.effective_user.first_name)
             feedback_markup = InlineKeyboardMarkup(
                 [[InlineKeyboardButton("Ja", callback_data=TelegramCallbacks.CONFIRM_FEEDBACK.name)],
@@ -343,7 +342,8 @@ class TelegramInterface(MessengerInterface):
             else:
                 sent_msg = self.updater.bot.send_photo(chat_id=userid, photo=graph,
                                                        parse_mode=telegram.constants.PARSEMODE_HTML)
-                self.updater.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+                self.updater.bot.send_message(chat_id=userid, text=message, parse_mode=ParseMode.HTML,
+                                              disable_web_page_preview=True)
 
             if sent_msg.photo:
                 self.addToFileCache(0, sent_msg.photo[-1])
@@ -400,7 +400,7 @@ class TelegramInterface(MessengerInterface):
             # Finally, send the message
             self.log.info("Send error message to developers")
             for line in message:
-                if not context.bot.send_message(chat_id=self.dev_chat_id, text=line, parse_mode=ParseMode.HTML):
+                if not self.sendMessageToDev(line):
                     self.log.warning("Can't send message to developers!")
 
             # Inform user that an error happened
@@ -416,7 +416,7 @@ class TelegramInterface(MessengerInterface):
             user_id = 0
             if update and update.effective_chat:
                 user_id = update.effective_chat.id
-            
+
             logging.warning(f"TelegramError: Unauthorized chat_id {user_id}", exc_info=context.error)
             if user_id and self._bot.delete_user(user_id):
                 logging.info(f"Removed {user_id} from users")
@@ -427,3 +427,8 @@ class TelegramInterface(MessengerInterface):
             logging.error(f"Non-Telegram Exception. Exiting!", exc_info=context.error)
             # Stop bot
             os.kill(os.getpid(), signal.SIGINT)
+
+    def sendMessageToDev(self, message: str):
+        if self.updater.bot.send_message(self.dev_chat_id, message, parse_mode=ParseMode.HTML):
+            return True
+        return False

@@ -81,11 +81,13 @@ class MessengerBotSetup:
         # Return specific interface
         if self.name == "threema":
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
-                                    self.config['THREEMA'].get('PRIVATE_KEY'), bot)
+                                    self.config['THREEMA'].get('PRIVATE_KEY'), bot,
+                                    dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
 
         if self.name == "signal":
             return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
-                                   self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot)
+                                   self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot,
+                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'))
 
         if self.name == "telegram":
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),

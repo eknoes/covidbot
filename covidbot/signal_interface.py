@@ -4,9 +4,8 @@ import random
 import re
 import signal
 import time
-from asyncio import create_subprocess_shell
 from io import BytesIO
-from typing import Dict, List, Union
+from typing import Dict, List
 
 import semaphore
 from semaphore import ChatContext
@@ -23,11 +22,13 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
     graphics_tmp_path: str
     profile_name: str = "Covid Update"
     profile_picture: str = os.path.abspath("resources/logo.png")
+    dev_chat: str = None
 
-    def __init__(self, phone_number: str, socket: str, bot: Bot):
+    def __init__(self, phone_number: str, socket: str, bot: Bot, dev_chat: str):
         super().__init__(bot)
         self.phone_number = phone_number
         self.socket = socket
+        self.dev_chat = dev_chat
 
         self.graphics_tmp_path = os.path.abspath("tmp/")
         if not os.path.isdir(self.graphics_tmp_path):
@@ -43,8 +44,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             bot.set_exception_handler(self.exception_handler)
             await bot.start()
 
-    def exception_handler(self, exception: Exception, ctx: ChatContext):
+    async def exception_handler(self, exception: Exception, ctx: ChatContext):
         self.log.exception("An exception occurred, exiting...", exc_info=exception)
+        await self.sendMessageToDev(f"Exception occurred: {exception}", ctx.bot)
         # Just exit on exception
         os.kill(os.getpid(), signal.SIGINT)
 
@@ -145,3 +147,6 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             # but the socket is already closed
             time.sleep(30)
         await self.restart_service()
+
+    async def sendMessageToDev(self, message: str, bot: semaphore.Bot):
+        await bot.send_message(self.dev_chat, adapt_text(message))

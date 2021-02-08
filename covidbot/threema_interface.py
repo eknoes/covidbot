@@ -20,8 +20,9 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
     private_key: str
     bot: Bot
     connection: threema.Connection
+    dev_chat: str
 
-    def __init__(self, threema_id: str, threema_secret: str, threema_key: str, bot: Bot):
+    def __init__(self, threema_id: str, threema_secret: str, threema_key: str, bot: Bot, dev_chat: str):
         super().__init__(bot)
         self.threema_id = threema_id
         self.threema_secret = threema_secret
@@ -31,6 +32,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             secret=self.threema_secret,
             key=self.threema_key
         )
+        self.dev_chat = dev_chat
         self.graphics_tmp_path = os.path.abspath("tmp-threema/")
         if not os.path.isdir(self.graphics_tmp_path):
             os.makedirs(self.graphics_tmp_path)
@@ -66,6 +68,12 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                     await response_msg.send()
                 except Exception:
                     self.log.error(f"Could not send message to {message.from_id}")
+
+                try:
+                    await self.sendMessageToDev(f"An exception occurred: {e}\n"
+                                                f"Message from {message.from_id}: {message.text}")
+                except Exception:
+                    self.log.error(f"Could not send message to developers")
 
                 # Just exit on exception
                 os.kill(os.getpid(), signal.SIGINT)
@@ -109,3 +117,6 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 report = self.reportHandler("", user)
                 await self.send_bot_response(user, report)
             self.log.info(f"Sent message to {user}")
+
+    async def sendMessageToDev(self, message: str):
+        await TextMessage(self.connection, text=adapt_text(message, True), to_id=self.dev_chat).send()
