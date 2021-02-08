@@ -410,8 +410,12 @@ class Bot(object):
         self._manager.set_last_update(user_id, updated)
 
     def get_statistic(self) -> str:
-        message = "Aktuell nutzen {total_user} Personen diesen Bot.\n\n" \
-                  "Die Top 10 der beliebtesten Orte sind:\n"
+        message = "Aktuell nutzen {total_user} Personen diesen Bot, davon "
+        messenger_strings = [f"{c} über {m}" for m, c in self._manager.get_users_per_platform()]
+        message += ", ".join(messenger_strings[:-1])
+        message += f" und {messenger_strings[-1:][0]}.\n\n"
+
+        message += "Die Top 10 der beliebtesten Orte sind:\n"
 
         i = 1
         for county in self._manager.get_ranked_subscriptions()[:10]:
@@ -422,10 +426,13 @@ class Bot(object):
             i += 1
         message += "\nIm Durchschnitt hat ein:e Nutzer:in {mean} Orte abonniert, " \
                    "die höchste Anzahl an Abos liegt bei {most_subs}."
+        message = message.format(total_user=self._manager.get_total_user_number(),
+                       mean=format_float(self._manager.get_mean_subscriptions()),
+                       most_subs=self._manager.get_most_subscriptions())
 
-        return message.format(total_user=self._manager.get_total_user_number(),
-                              mean=format_float(self._manager.get_mean_subscriptions()),
-                              most_subs=self._manager.get_most_subscriptions())
+        message += "\n\nInformationen zur Nutzung des Bots auf anderen Plattformen findest du unter " \
+                   "https://covidbot.d-64.org!"
+        return message
 
     def get_debug_report(self, user_identification: Union[int, str]) -> str:
         uid = self._manager.get_user_id(user_identification, False)

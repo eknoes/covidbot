@@ -213,6 +213,15 @@ class UserManager(object):
                 return row['num_subscriptions']
             return 0
 
+    def get_users_per_platform(self) -> List[Tuple[str, int]]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT COUNT(user_id) as c, platform FROM bot_user WHERE platform NOT LIKE "interactive" '
+                           'GROUP BY platform ORDER BY c DESC')
+            results = []
+            for row in cursor.fetchall():
+                results.append((str(row['platform']).capitalize(), row['c']))
+            return results
+
     def add_feedback(self, user_id: int, feedback: str) -> Optional[int]:
         if not feedback:
             return None
