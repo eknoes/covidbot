@@ -30,6 +30,8 @@ class VaccinationData:
     vaccinated_partial: int
     full_rate: float
     partial_rate: float
+    date: date
+
 
 @dataclass
 class RValueData:
@@ -159,14 +161,15 @@ class CovidData(object):
                 # Check if vaccination data is available
                 vacc_data = None
                 if include_past_days == 0:
-                    cursor.execute('SELECT vaccinated_full, vaccinated_partial, rate_full, rate_partial '
-                                   'FROM covid_vaccinations WHERE district_id=%s and (DATE(updated)=%s OR '
-                                   'DATE(updated)=SUBDATE(%s, 1)) ORDER BY updated DESC LIMIT 1',
-                                   [rs, record['date'], record['date']])
+                    cursor.execute('SELECT vaccinated_full, vaccinated_partial, rate_full, rate_partial, '
+                                   'DATE(updated) as updated '
+                                   'FROM covid_vaccinations WHERE district_id=%s and DATE(updated)<=%s '
+                                   'ORDER BY updated DESC LIMIT 1',
+                                   [rs, record['date']])
                     vacc = cursor.fetchone()
                     if vacc:
                         vacc_data = VaccinationData(vacc['vaccinated_full'], vacc['vaccinated_partial'],
-                                                    vacc['rate_full'], vacc['rate_partial'])
+                                                    vacc['rate_full'], vacc['rate_partial'], vacc['updated'])
 
                 results.append(DistrictData(name=record['county_name'], incidence=record['incidence'],
                                             type=record['type'], total_cases=record['total_cases'],

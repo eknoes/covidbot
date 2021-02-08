@@ -157,13 +157,15 @@ class Bot(object):
                        "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
                        "vollständig geimpft.\n\n" \
                        "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
-                       "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
+                       "Verabreichte Zweitimpfdosen: {vacc_full}\n" \
+                       "Impfdaten vom {vacc_date}\n\n" \
                 .format(rate_partial=format_float(vacc.partial_rate * 100),
                         rate_full=format_float(vacc.full_rate * 100),
                         vacc_partial=format_int(vacc.vaccinated_partial),
-                        vacc_full=format_int(vacc.vaccinated_full))
+                        vacc_full=format_int(vacc.vaccinated_full),
+                        vacc_date=current_data.vaccinations.date.strftime("%d.%m.%Y"))
 
-        message += '<i>Stand: {date}</i>\n' \
+        message += '<i>Infektionsdaten vom {date}</i>\n' \
                    '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
                    '<a href="https://impfdashboard.de/">Impfdashboard</a>. Sende {info_command} um eine Erläuterung ' \
@@ -264,11 +266,12 @@ class Bot(object):
         if country.vaccinations:
             message += "<b>💉  Impfdaten</b>\n" \
                        "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits - Stand {date} - vollständig geimpft.\n\n" \
                 .format(rate_full=format_float(country.vaccinations.full_rate * 100),
                         rate_partial=format_float(country.vaccinations.partial_rate * 100),
                         vacc_partial=format_int(country.vaccinations.vaccinated_partial),
-                        vacc_full=format_int(country.vaccinations.vaccinated_full))
+                        vacc_full=format_int(country.vaccinations.vaccinated_full),
+                        date=country.vaccinations.date.strftime("%d.%m.%Y"))
 
         message += "<b>🦠 Infektionszahlen</b>\n" \
                    "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
