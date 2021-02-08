@@ -4,7 +4,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from enum import Enum
 from typing import Tuple, List, Optional, Union
 
@@ -417,12 +417,13 @@ class VaccinationGermanyUpdater(CovidDataUpdater):
           "+Impfungen_kumulativ%2C+Zweitimpfungen_kumulativ%2C+Differenz_zum_Vortag%2C+Impf_Quote%2C" \
           "+Impf_Quote_Zweitimpfungen%2C+Datenstand&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly" \
           "=false&returnDistinctValues=false&cacheHint=false&orderByFields=Datenstand+DESC&groupByFieldsForStatistics" \
-          "=&outStatistics=&having=&resultOffset=&resultRecordCount=17&sqlFormat=none&f=pjson&token= "
+          "=&outStatistics=&having=&resultOffset=&resultRecordCount=51&sqlFormat=none&f=pjson&token= "
 
     def update(self) -> bool:
         last_update = None
         with self.connection.cursor() as cursor:
-            cursor.execute("SELECT updated FROM covid_vaccinations ORDER BY updated DESC LIMIT 1")
+            cursor.execute("SELECT updated FROM covid_vaccinations WHERE district_id != 0 "
+                           "ORDER BY updated DESC LIMIT 1")
             updated = cursor.fetchone()
             if updated:
                 last_update = updated[0]
@@ -504,6 +505,7 @@ class RValueGermanyUpdater(CovidDataUpdater):
             header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
 
         r = requests.get(self.URL, headers=header)
+        new_data = False
         if r.status_code == 200:
             self.log.debug("Got R-Value Data")
 
@@ -513,7 +515,6 @@ class RValueGermanyUpdater(CovidDataUpdater):
             if not district_id:
                 raise ValueError("No district_id for Deutschland")
             district_id = district_id[0][0]
-            new_data = False
             with self.connection.cursor() as cursor:
                 for row in reader:
                     # RKI appends Erläuterungen to Data
@@ -586,7 +587,8 @@ class VaccinationGermanyImpfdashboardUpdater(CovidDataUpdater):
 
             with self.connection.cursor() as cursor:
                 for row in reader:
-                    updated = datetime.fromisoformat(row['date'])
+                    # The other vaccination source uses another timeformat, so we have to add a day
+                    updated = datetime.fromisoformat(row['date']) + timedelta(days=1)
                     cursor.execute("SELECT id FROM covid_vaccinations WHERE updated = %s AND district_id=%s",
                                    [updated, district_id])
                     if cursor.fetchone():
