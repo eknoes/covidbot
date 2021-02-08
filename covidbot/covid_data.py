@@ -513,7 +513,7 @@ class RValueGermanyUpdater(CovidDataUpdater):
             if not district_id:
                 raise ValueError("No district_id for Deutschland")
             district_id = district_id[0][0]
-
+            new_data = False
             with self.connection.cursor() as cursor:
                 for row in reader:
                     # RKI appends Erläuterungen to Data
@@ -543,9 +543,11 @@ class RValueGermanyUpdater(CovidDataUpdater):
                     if cursor.fetchone():
                         continue
 
+                    new_data = True
                     cursor.execute("INSERT INTO covid_r_value (district_id, r_date, `7day_r_value`, updated) "
                                    "VALUES (%s, %s, %s, %s)", [district_id, r_date, r_value, datetime.now()])
             self.connection.commit()
+        return new_data
 
 
 # As a backup, it provides numbers only for Germany not for the single states, but is more up-to-date
@@ -576,6 +578,7 @@ class VaccinationGermanyImpfdashboardUpdater(CovidDataUpdater):
             header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
 
         r = requests.get(self.URL, headers=header)
+        new_data = False
         if r.status_code == 200:
             self.log.debug("Got Vaccination Data from Impfdashboard")
             dashboard_data = codecs.decode(r.content, "utf-8").splitlines()
@@ -608,4 +611,4 @@ class VaccinationGermanyImpfdashboardUpdater(CovidDataUpdater):
                                    [district_id, updated, row['personen_erst_kumulativ'],
                                     row['personen_voll_kumulativ'], rate_partial, rate_full])
             self.connection.commit()
-            return new_data
+        return new_data
