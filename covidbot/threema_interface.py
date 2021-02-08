@@ -45,8 +45,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         add_callback_route(self.connection, application, self.handle_threema_msg, path='/gateway_callback')
         web.run_app(application, port=9000, access_log=logging.getLogger('threema_api'))
 
-    def get_attachment(self, image: BytesIO) -> Dict:
-        filename = self.graphics_tmp_path + "/graphic.jpg"
+    def get_attachment(self, image: BytesIO, district_id=99) -> Dict:
+        filename = self.graphics_tmp_path + f"/graphic{district_id}.jpg"
         with open(filename, "wb") as f:
             image.seek(0)
             f.write(image.getbuffer())
@@ -98,7 +98,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
     async def sendDailyReports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
         daily_graph = self.bot.get_graphical_report(0)
-        attachment = self.get_attachment(daily_graph)
+        attachment = self.get_attachment(daily_graph, 0)
         for userid, message in unconfirmed_reports:
             if attachment:
                 response_img = ImageMessage(self.connection, image_path=attachment['filename'],
