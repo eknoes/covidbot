@@ -1,6 +1,7 @@
 import logging
 import os
 import signal
+import traceback
 from io import BytesIO
 from typing import Dict, List, Union
 
@@ -70,7 +71,10 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                     self.log.error(f"Could not send message to {message.from_id}")
 
                 try:
-                    await self.sendMessageToDev(f"An exception occurred: {e}\n"
+                    tb_list = traceback.format_exception(None, e, e.__traceback__)
+                    tb_string = ''.join(tb_list)
+
+                    await self.sendMessageToDev(f"An exception occurred: {tb_string}\n"
                                                 f"Message from {message.from_id}: {message.text}")
                 except Exception:
                     self.log.error(f"Could not send message to developers")

@@ -4,6 +4,7 @@ import random
 import re
 import signal
 import time
+import traceback
 from io import BytesIO
 from typing import Dict, List
 
@@ -46,7 +47,11 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
     async def exception_handler(self, exception: Exception, ctx: ChatContext):
         self.log.exception("An exception occurred, exiting...", exc_info=exception)
-        await self.sendMessageToDev(f"Exception occurred: {exception}", ctx.bot)
+        tb_list = traceback.format_exception(None, exception, exception.__traceback__)
+        tb_string = ''.join(tb_list)
+
+        await self.sendMessageToDev(f"Exception occurred: {tb_string}\n\n"
+                                    f"Got message {ctx.message}", ctx.bot)
         # Just exit on exception
         os.kill(os.getpid(), signal.SIGINT)
 
