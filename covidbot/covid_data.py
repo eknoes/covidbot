@@ -546,3 +546,66 @@ class RValueGermanyUpdater(CovidDataUpdater):
                     cursor.execute("INSERT INTO covid_r_value (district_id, r_date, `7day_r_value`, updated) "
                                    "VALUES (%s, %s, %s, %s)", [district_id, r_date, r_value, datetime.now()])
             self.connection.commit()
+
+
+# As a backup, it provides numbers only for Germany not for the single states, but is more up-to-date
+class VaccinationGermanyImpfdashboardUpdater(CovidDataUpdater):
+    log = logging.getLogger(__name__)
+    URL = "https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv"
+
+    def update(self) -> bool:
+        last_update = None
+        district_id = self.search_district_by_name("Deutschland")
+        if not district_id:
+            raise ValueError("No district_id for Deutschland")
+        district_id = district_id[0][0]
+
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT updated FROM covid_vaccinations WHERE district_id=%s ORDER BY updated DESC LIMIT 1",
+                           [district_id])
+            updated = cursor.fetchone()
+            if updated:
+                last_update = updated[0]
+
+        header = {}
+        if last_update:
+            if last_update.date() == date.today():
+                self.log.info(f"Do not update as current data is from {last_update}")
+                return False
+
+            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
+
+        r = requests.get(self.URL, headers=header)
+        if r.status_code == 200:
+            self.log.debug("Got Vaccination Data from Impfdashboard")
+            dashboard_data = codecs.decode(r.content, "utf-8").splitlines()
+            reader = csv.DictReader(dashboard_data, delimiter='\t', quoting=csv.QUOTE_NONE)
+
+            with self.connection.cursor() as cursor:
+                for row in reader:
+                    updated = datetime.fromisoformat(row['date'])
+                    cursor.execute("SELECT id FROM covid_vaccinations WHERE updated = %s AND district_id=%s",
+                                   [updated, district_id])
+                    if cursor.fetchone():
+                        continue
+
+                    new_data = True
+                    cursor.execute('SELECT population FROM counties WHERE rs=%s', [district_id])
+                    population = cursor.fetchone()[0]
+                    if not population:
+                        self.log.warning(f"Can't fetch population for {district_id} ({row['Bundesland']})")
+                        continue
+
+                    rate_full, rate_partial = 0, 0
+                    if row['personen_erst_kumulativ']:
+                        rate_partial = int(row['personen_erst_kumulativ']) / population
+
+                    if row['personen_voll_kumulativ']:
+                        rate_full = int(row['personen_voll_kumulativ']) / population
+
+                    cursor.execute('INSERT INTO covid_vaccinations (district_id, updated, vaccinated_partial, '
+                                   'vaccinated_full, rate_partial, rate_full) VALUE (%s, %s, %s, %s, %s, %s)',
+                                   [district_id, updated, row['personen_erst_kumulativ'],
+                                    row['personen_voll_kumulativ'], rate_partial, rate_full])
+            self.connection.commit()
+            return new_data

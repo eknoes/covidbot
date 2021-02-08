@@ -10,7 +10,8 @@ from typing import List
 from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
-from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater
+from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
+    VaccinationGermanyImpfdashboardUpdater
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.signal_interface import SignalInterface
 from covidbot.telegram_interface import TelegramInterface
@@ -217,7 +218,7 @@ if __name__ == "__main__":
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
-            for updater in [RKIUpdater(conn), VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn)]:
+            for updater in [VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn), VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn)]:
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
