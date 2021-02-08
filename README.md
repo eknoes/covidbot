@@ -1,7 +1,7 @@
 # Der D64 Covidbot
 Ein Bot zu Deinen Diensten: Unser Covidbot versorgt Dich einmal am Tag mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir ausgewählten Orte.
 Abonniere ihn einfach in Deinem Lieblingsmessenger, indem Du den Telegram-Bot startest oder bei Signal oder Threema eine Nachricht mit "Start" schickst, nachdem Du den Bot als Kontakt hinzugefügt hast.
-[Telegram](https://t.me/CovidInzidenzBot) | [Threema](https://threema.id/*COVINFO?text=Start) | [Signal (Beta)](tel:+4915792453845)
+[Telegram](https://t.me/CovidInzidenzBot) | [Threema](https://threema.id/*COVINFO?text=Start) | Signal (Beta): Füge +4915792453845 als Kontakt hinzu
 
 ## Features
 Du kannst einfach eine Nachricht mit dem Stadt-/Landkreis, Bundesland oder einem Standort an den Bot senden.
