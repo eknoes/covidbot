@@ -165,7 +165,8 @@ class UserManager(object):
     def create_user(self, identifier: str) -> Union[int, bool]:
         with self.connection.cursor(dictionary=True) as cursor:
             try:
-                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, activated=%s",
+                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, activated=%s,"
+                               "last_update=(SELECT MAX(date) FROM covid_data)",
                                [identifier, self.platform, self.activated_default])
                 if cursor.rowcount == 1:
                     self.connection.commit()
