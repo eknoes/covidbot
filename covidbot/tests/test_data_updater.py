@@ -1,7 +1,8 @@
 from unittest import TestCase
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import VaccinationGermanyUpdater, RKIUpdater, RValueGermanyUpdater
+from covidbot.covid_data import VaccinationGermanyUpdater, RKIUpdater, RValueGermanyUpdater, \
+    VaccinationGermanyImpfdashboardUpdater
 
 
 class TestVaccinationGermanyUpdater(TestCase):
@@ -20,4 +21,6 @@ class TestVaccinationGermanyUpdater(TestCase):
         updater = VaccinationGermanyUpdater(self.conn)
         updater.update()
         updater = RValueGermanyUpdater(self.conn)
+        updater.update()
+        updater = VaccinationGermanyImpfdashboardUpdater(self.conn)
         updater.update()
