@@ -102,7 +102,7 @@ class MessengerBotSetup:
 
 
 async def sendUpdates():
-    for messenger in ["threema", "signal", "telegram"]:
+    for messenger in ["threema", "telegram", "signal"]:
         try:
             with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
                 await interface.sendDailyReports()

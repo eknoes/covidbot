@@ -77,8 +77,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
         await ctx.message.reply(body=reply.message, attachments=attachment)
 
-    def get_attachment(self, image: BytesIO) -> Dict:
-        filename = self.graphics_tmp_path + "/graphic.jpg"
+    def get_attachment(self, image: BytesIO, district_id=99) -> Dict:
+        filename = self.graphics_tmp_path + f"/graphic{district_id}.jpg"
         with open(filename, "wb") as f:
             image.seek(0)
             f.write(image.getbuffer())
@@ -89,14 +89,14 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         if not unconfirmed_reports:
             return
 
-        attachment = self.get_attachment(self.bot.get_graphical_report(0))
+        attachment = self.get_attachment(self.bot.get_graphical_report(0), 0)
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
             flood_count = 0
             for userid, message in unconfirmed_reports:
                 # TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
                 if flood_count % 1 == 0:
-                    sleep_seconds = random.uniform(0.3, 2)
+                    sleep_seconds = random.uniform(1, 3)
                     self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
                     time.sleep(sleep_seconds)
                     flood_count += 1
