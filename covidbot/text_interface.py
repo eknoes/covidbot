@@ -43,11 +43,13 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("info", self.infoHandler))
         self.handler_list.append(Handler("abo", self.subscribeHandler))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler))
+        self.handler_list.append(Handler("lösche", self.unsubscribeHandler))
         self.handler_list.append(Handler("datenschutz", self.privacyHandler))
         self.handler_list.append(Handler("daten", self.currentDataHandler))
         self.handler_list.append(Handler("bericht", self.reportHandler))
         self.handler_list.append(Handler("statistik", self.statHandler))
         self.handler_list.append(Handler("loeschmich", self.deleteMeHandler))
+        self.handler_list.append(Handler("löschmich", self.deleteMeHandler))
         self.handler_list.append(Handler("debug", self.debugHandler))
         self.handler_list.append(Handler("", self.directHandler))
 
@@ -55,7 +57,7 @@ class SimpleTextInterface(object):
         if user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
-                if user_input.strip().lower() in ["abo", "daten", "beende"]:
+                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche"]:
                     user_input += " " + str(state[1])
                 del self.chat_states[user_id]
             elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
