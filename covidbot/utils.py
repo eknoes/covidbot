@@ -73,8 +73,8 @@ def replace_italic_unicode(text: str) -> str:
     # No italic numbers as unicode
     italic_str = [
         *"𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡",
-        "𝘢" + d, "𝘰" + d, "𝘶" + d, "𝘈" + d, "𝘖" + d, "𝘜" +d]
-    normal_str = [*(string.ascii_letters + "äüöÄÜÖ")]
+        "𝘰" + d, "𝘶" + d, "𝘢" + d, "𝘖" + d, "𝘜" + d, "𝘈" + d]
+    normal_str = [*(string.ascii_letters + "öüäÖÜÄ")]
     return replace_by_list(text, normal_str, italic_str)
 
 
