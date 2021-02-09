@@ -107,10 +107,12 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             # Currently semaphore is not waiting for signald's response, whether a message was successful.
             # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
             # but the socket is already closed
+            self.log.warning("Sleep 60s to avoid signald damage")
             time.sleep(60)
         await self.restart_service()
 
     async def restart_service(self):
+        self.log.warning("Try to restart signald and signalbot")
         cmd = "supervisorctl restart signald signalbot"
         proc = await asyncio.create_subprocess_shell(
             cmd,
@@ -119,9 +121,10 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
         await proc.wait()
         if proc.returncode:
-            print(f'[{cmd!r} exited with {proc.returncode}]')
+            print(f'{cmd} exited with {proc.returncode}')
+            self.log.error(f'{cmd!r} exited with {proc.returncode}')
             return
-        self.log.info("Restarted signalbot service")
+        self.log.warning("Restarted signalbot service")
 
     async def sendMessageTo(self, message: str, users: List[str], append_report=False):
         if not users:
