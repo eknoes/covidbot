@@ -12,6 +12,7 @@ from mysql.connector import connect, MySQLConnection
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
     VaccinationGermanyImpfdashboardUpdater
+from covidbot.feedback_forwarder import FeedbackForwarder
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.signal_interface import SignalInterface
 from covidbot.telegram_interface import TelegramInterface
@@ -49,7 +50,7 @@ class MessengerBotSetup:
             stream_handler.setFormatter(logging.Formatter(logging_format))
             logging.getLogger().addHandler(stream_handler)
 
-        if name != "signal" and name != "threema" and name != "telegram" and name != "interactive":
+        if name != "signal" and name != "threema" and name != "telegram" and name != "interactive" and name != "feedback":
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
@@ -93,6 +94,9 @@ class MessengerBotSetup:
         if self.name == "telegram":
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
+        if self.name == "feedback":
+            return FeedbackForwarder(api_key=self.config['TELEGRAM'].get('API_KEY'),
+                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
 
         if self.name == "interactive":
             return InteractiveInterface(bot)
@@ -103,7 +107,7 @@ class MessengerBotSetup:
 
 
 async def sendUpdates():
-    for messenger in ["threema", "telegram", "signal"]:
+    for messenger in ["threema", "telegram", "signal", "feedback"]:
         try:
             with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
                 await interface.sendDailyReports()
