@@ -238,15 +238,19 @@ class UserManager(object):
 
     def get_not_forwarded_feedback(self) -> List[Tuple[int, str]]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT id, feedback, platform, user_feedback.user_id, user_feedback.added FROM user_feedback "
+            cursor.execute("SELECT id, feedback, platform, platform_id, user_feedback.user_id, user_feedback.added FROM user_feedback "
                            "LEFT JOIN bot_user bu on bu.user_id = user_feedback.user_id "
                            "WHERE forwarded=0")
             results = []
             for row in cursor.fetchall():
                 feedback = f"<b>Neues Feedback von {row['user_id']}</b>\n" \
                            f"{row['feedback']}\n\n" \
-                           f"Datum: {row['added']}" \
-                           f"Plattform: {row['platform']}"
+                           f"Datum: {row['added']}\n" \
+                           f"Plattform: {row['platform']}\n" \
+                           f"Plattform ID: {row['platform']}\n" \
+                           f"Befehl zum Antworten:\n" \
+                           f"<code>python -m covidbot --message --{row['platform']} --specific {row['platform_id']}" \
+                           f"</code>"
                 results.append((row['id'], feedback))
             return results
 
