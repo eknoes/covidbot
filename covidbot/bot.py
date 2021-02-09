@@ -155,10 +155,9 @@ class Bot(object):
             vacc = current_data.vaccinations
             message += "<b>💉 Impfdaten</b>\n" \
                        "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
-                       "vollständig geimpft.\n\n" \
+                       " - Stand {vacc_date} - vollständig geimpft.\n\n" \
                        "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
-                       "Verabreichte Zweitimpfdosen: {vacc_full}\n" \
-                       "Impfdaten vom {vacc_date}\n\n" \
+                       "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
                 .format(rate_partial=format_float(vacc.partial_rate * 100),
                         rate_full=format_float(vacc.full_rate * 100),
                         vacc_partial=format_int(vacc.vaccinated_partial),
