@@ -20,13 +20,8 @@ class FeedbackForwarder(MessengerInterface):
     async def sendDailyReports(self) -> None:
         # This method is not used for daily reports, but to forward feedback to the developers
 
-        # Flood limit, I do not hope we need it for feedback
-        i = 0
         for feedback_id, message in self.user_manager.get_not_forwarded_feedback():
-            if i == 10:
-                i = 0
-                time.sleep(1)
-            i += 1
+            time.sleep(0.5)
 
             sent = self.updater.bot.send_message(chat_id=self.dev_chat_id, text=message, parse_mode=ParseMode.HTML)
             if sent:
