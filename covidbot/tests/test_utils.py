@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from covidbot.utils import *
 
 
@@ -74,4 +75,3 @@ class Test(TestCase):
         expected = "1,21"
         actual = format_float(1.21)
         self.assertEqual(expected, actual, "Incidence should be formatted for German localization")
-

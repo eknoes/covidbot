@@ -40,21 +40,21 @@ class MessengerBotSetup:
     name: str
     config: configparser.ConfigParser
 
-    def __init__(self, name: str, config, loglvl=logging.INFO, setup_logs=True):
+    def __init__(self, name: str, config_dict, loglvl=logging.INFO, setup_logs=True):
         if setup_logs:
             # Setup Logging
             logging.basicConfig(format=logging_format, level=loglvl, filename=f"{name}-bot.log")
 
             # Log also to stdout
-            stream_handler = logging.StreamHandler()
-            stream_handler.setFormatter(logging.Formatter(logging_format))
-            logging.getLogger().addHandler(stream_handler)
+            stream_log_handler = logging.StreamHandler()
+            stream_log_handler.setFormatter(logging.Formatter(logging_format))
+            logging.getLogger().addHandler(stream_log_handler)
 
         if name != "signal" and name != "threema" and name != "telegram" and name != "interactive" and name != "feedback":
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
-        self.config = config
+        self.config = config_dict
 
     def __enter__(self) -> MessengerInterface:
         # Do not activate user on Threema automatically
@@ -62,7 +62,7 @@ class MessengerBotSetup:
         location_feature = True
         if self.name == "threema":
             location_feature = False
-            #users_activated = False
+            # users_activated = False
 
         if self.name == "telegram":
             command_format = "/{command}"
@@ -102,26 +102,26 @@ class MessengerBotSetup:
             return InteractiveInterface(bot)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for conn in self.connections:
-            conn.close()
+        for db_conn in self.connections:
+            db_conn.close()
 
 
 async def sendUpdates():
-    for messenger in ["threema", "telegram", "signal", "feedback"]:
+    for messenger_iface in ["threema", "telegram", "signal", "feedback"]:
         try:
-            with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
-                await interface.sendDailyReports()
-                logging.info(f"Checked for daily reports on {messenger}")
+            with MessengerBotSetup(messenger_iface, config, setup_logs=False) as iface:
+                await iface.sendDailyReports()
+                logging.info(f"Checked for daily reports on {messenger_iface}")
         except Exception as e:
-            logging.error(f"Got exception while sending daily reports for {messenger}: {e}", exc_info=e)
+            logging.error(f"Got exception while sending daily reports for {messenger_iface}: {e}", exc_info=e)
 
 
-async def send_all(message: str, recipients: List[str], config, messenger=None):
-    if not messenger and recipients:
+async def send_all(message: str, recipients: List[str], config_dict, messenger_interface=None):
+    if not messenger_interface and recipients:
         print("You have to specify a messenger if you want to send a message to certain users!")
         return
 
-    if messenger and messenger not in ["signal", "threema", "telegram"]:
+    if messenger_interface and messenger_interface not in ["signal", "threema", "telegram"]:
         print("Your messenger name is invalid.")
         return
 
@@ -144,8 +144,8 @@ async def send_all(message: str, recipients: List[str], config, messenger=None):
     else:
         print("To all users")
 
-    if messenger:
-        print(f"On {messenger}")
+    if messenger_interface:
+        print(f"On {messenger_interface}")
     else:
         print(f"On all messengers")
 
@@ -153,18 +153,18 @@ async def send_all(message: str, recipients: List[str], config, messenger=None):
         print("Aborting...")
         return
 
-    if messenger:
-        with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
-            await interface.sendMessageTo(message, recipients, with_report)
+    if messenger_interface:
+        with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
+            await iface.sendMessageTo(message, recipients, with_report)
 
     else:
-        for messenger in ["signal", "telegram", "threema"]:
+        for messenger_interface in ["signal", "telegram", "threema"]:
             try:
-                with MessengerBotSetup(messenger, config, setup_logs=False) as interface:
-                    await interface.sendMessageTo(message, recipients, with_report)
-                    logging.info(f"Sent message on {messenger}")
+                with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
+                    await iface.sendMessageTo(message, recipients, with_report)
+                    logging.info(f"Sent message on {messenger_interface}")
             except Exception as e:
-                logging.error(f"Got exception while sending message on {messenger}: ", exc_info=e)
+                logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
 
 
 if __name__ == "__main__":
@@ -222,7 +222,8 @@ if __name__ == "__main__":
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
-            for updater in [VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn), VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn)]:
+            for updater in [VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn),
+                            VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn)]:
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
@@ -232,7 +233,7 @@ if __name__ == "__main__":
                     with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
                         asyncio.run(telegram.sendMessageTo(f"Exception happened on Data Update with "
                                                            f"{updater.__class__.__name__}: {error}",
-                                               [config["TELEGRAM"].get("DEV_CHAT")]))
+                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
         asyncio.run(sendUpdates())
     elif args.message or args.message_file:
         # Setup Logging
@@ -243,14 +244,14 @@ if __name__ == "__main__":
         stream_handler.setFormatter(logging.Formatter(logging_format))
         logging.getLogger().addHandler(stream_handler)
 
-        message = None
+        message_input = None
         if args.message_file:
             with open(args.message_file, "r") as f:
-                message = f.read()
+                message_input = f.read()
 
-        recipients = []
+        recipients_input = []
         if args.specific:
-            recipients = args.specific
+            recipients_input = args.specific
 
         messenger = None
         if args.telegram:
@@ -259,7 +260,7 @@ if __name__ == "__main__":
             messenger = "threema"
         elif args.signal:
             messenger = "signal"
-        asyncio.run(send_all(message, recipients, config, messenger))
+        asyncio.run(send_all(message_input, recipients_input, config, messenger))
     elif args.interactive:
         with MessengerBotSetup("interactive", config, logging_level) as interface:
             logging.info("### Start Interactive Bot ###")

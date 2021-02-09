@@ -45,7 +45,10 @@ def replace_bold_markdown(text: str) -> str:
     text = link_pattern.sub("* \g<1> *", text)
 
     return text.replace("**", "").strip()
+
+
 '*Mehr Infos hier* (https://test.de/)  *und da* (https://test2.de/) **'
+
 
 def replace_italic_markdown(text: str) -> str:
     # Not real markdown but Threema formatting
@@ -79,7 +82,6 @@ def replace_italic_unicode(text: str) -> str:
 
 
 def replace_by_list(text: str, search: List[str], replace: List[str]) -> str:
-
     # Avoid links
     link_pattern = re.compile("((http[s]?://)[\w.\-]*([/\w\-.])*)")
     matches = link_pattern.finditer(text)

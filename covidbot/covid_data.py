@@ -39,6 +39,7 @@ class RValueData:
     r_value_7day: float
     r_trend: Optional[TrendValue] = None
 
+
 @dataclass
 class DistrictData(District):
     date: Optional[datetime.date] = None
@@ -108,8 +109,8 @@ class CovidData(object):
                                'ORDER BY covid_data.date DESC')
 
             # Insert if not exists
-            cursor.execute('INSERT IGNORE INTO counties (rs, county_name, type, parent) '
-                           'VALUES (0, "Deutschland", "Staat", NULL)')
+            cursor.execute("INSERT IGNORE INTO counties (rs, county_name, type, parent) "
+                           "VALUES (0, 'Deutschland', 'Staat', NULL)")
             self.connection.commit()
             self.log.debug("Committed Tables")
 
@@ -526,11 +527,11 @@ class RValueGermanyUpdater(CovidDataUpdater):
 
                     if self.R_VALUE_7DAY_CSV_KEY not in row:
                         raise ValueError(f"{self.R_VALUE_7DAY_CSV_KEY} is not in CSV!")
-                    r_date = None
+
                     try:
                         r_date = datetime.strptime(row['Datum'], "%d.%m.%Y").date()
                     except ValueError as e:
-                        self.log.warning(f"Could not get date of string {row['Datum']}")
+                        self.log.error(f"Could not get date of string {row['Datum']}", exc_info=e)
                         continue
 
                     r_value = row[self.R_VALUE_7DAY_CSV_KEY]

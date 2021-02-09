@@ -54,6 +54,10 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("", self.directHandler))
 
     def handle_input(self, user_input: str, user_id: str) -> Optional[BotResponse]:
+        # Strip / on /command
+        if user_input[0] == "/":
+            user_input = user_input[1:]
+
         if user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
@@ -87,10 +91,6 @@ class SimpleTextInterface(object):
             self.chat_states[user_id] = (ChatBotState.NOT_ACTIVATED, None)
             return BotResponse("Dein Account wurde noch nicht aktiviert, bitte wende dich an die Entwickler. Bis diese "
                                "deinen Account aktivieren, kannst du den Bot leider noch nicht nutzen.")
-
-        # Strip / on /command
-        if user_input[0] == "/":
-            user_input = user_input[1:]
 
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():

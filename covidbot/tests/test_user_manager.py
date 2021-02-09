@@ -33,14 +33,18 @@ class TestSubscriptionManager(TestCase):
 
     def test_add_subscription(self):
         user_id = self.test_manager.get_user_id("testuser")
-        self.assertTrue(self.test_manager.add_subscription(user_id, 1), "Adding a non-existing subscription should return true")
-        self.assertFalse(self.test_manager.add_subscription(user_id, 1), "Adding an existing subscription should return false")
+        self.assertTrue(self.test_manager.add_subscription(user_id, 1),
+                        "Adding a non-existing subscription should return true")
+        self.assertFalse(self.test_manager.add_subscription(user_id, 1),
+                         "Adding an existing subscription should return false")
 
     def test_rm_subscription(self):
         user_id = self.test_manager.get_user_id("testuser")
         self.test_manager.add_subscription(user_id, 1)
-        self.assertTrue(self.test_manager.rm_subscription(user_id, 1), "Removing a non-existing subscription should return true")
-        self.assertFalse(self.test_manager.rm_subscription(user_id, 1), "Removing an existing subscription should return false")
+        self.assertTrue(self.test_manager.rm_subscription(user_id, 1),
+                        "Removing a non-existing subscription should return true")
+        self.assertFalse(self.test_manager.rm_subscription(user_id, 1),
+                         "Removing an existing subscription should return false")
 
     def test_activated(self):
         user_id = self.test_manager.get_user_id("testuser")
@@ -100,11 +104,13 @@ class TestSubscriptionManager(TestCase):
         self.test_manager.add_subscription(uid1, 1)
         self.test_manager.add_subscription(uid1, 2)
         self.test_manager.add_subscription(uid2, 1)
-        self.assertTrue(self.test_manager.delete_user(uid1), "Deleting an existing user with subscriptions should return true")
+        self.assertTrue(self.test_manager.delete_user(uid1),
+                        "Deleting an existing user with subscriptions should return true")
         self.assertFalse(self.test_manager.delete_user(uid1), "Deleting an non-existing user should return false")
 
         self.test_manager.add_feedback(uid2, "Testfeedback")
-        self.assertTrue(self.test_manager.delete_user(uid2), "Deleting an existing user with feedback should return true")
+        self.assertTrue(self.test_manager.delete_user(uid2),
+                        "Deleting an existing user with feedback should return true")
 
     def test_get_all_user(self):
         uid1 = self.test_manager.get_user_id("testuser1")
@@ -118,11 +124,13 @@ class TestSubscriptionManager(TestCase):
                               "All users with subscriptions should be returned")
 
         self.test_manager.rm_subscription(uid2, 1)
-        self.assertEqual(uid2, len(self.test_manager.get_all_user()), "Users with removed subscriptions should still exist")
+        self.assertEqual(uid2, len(self.test_manager.get_all_user()),
+                         "Users with removed subscriptions should still exist")
 
         self.test_manager.delete_user(uid1)
         self.test_manager.delete_user(uid2)
-        self.assertListEqual([], self.test_manager.get_all_user(), "If no subscribers exist, list of user should be empty")
+        self.assertListEqual([], self.test_manager.get_all_user(),
+                             "If no subscribers exist, list of user should be empty")
 
     def test_statistic(self):
         self.assertEqual(self.test_manager.get_total_user_number(), 0,
@@ -139,16 +147,20 @@ class TestSubscriptionManager(TestCase):
 
         # Make sure table exists
         CovidData(self.conn)
-    
+
         with self.conn.cursor() as cursor:
+            # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM covid_data")
             cursor.execute("TRUNCATE TABLE covid_vaccinations;")
             cursor.execute("TRUNCATE TABLE covid_r_value;")
+            # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM counties ORDER BY parent DESC")
             cursor.executemany("INSERT INTO counties (rs, county_name) VALUES (%s, %s)", [(1, "Test1"), (2, "Test2")])
-        self.assertEqual(self.test_manager.get_total_user_number(), 3, "get_total_user should return the number of users")
-        self.assertEqual(len(self.test_manager.get_ranked_subscriptions()), 2, "len(get_ranked_subscriptions) should return "
-                                                                          "the number of subscribed counties")
+        self.assertEqual(self.test_manager.get_total_user_number(), 3,
+                         "get_total_user should return the number of users")
+        self.assertEqual(len(self.test_manager.get_ranked_subscriptions()), 2,
+                         "len(get_ranked_subscriptions) should return "
+                         "the number of subscribed counties")
         self.assertCountEqual(self.test_manager.get_ranked_subscriptions(), [(3, "Test1"), (1, "Test2")],
                               "get_ranked_subscriptions should return a ranking of subscriptions")
         self.assertEqual(self.test_manager.get_ranked_subscriptions()[0], (3, "Test1"),
@@ -159,21 +171,24 @@ class TestSubscriptionManager(TestCase):
         feedback = "I quite like it!"
 
         self.assertIsNotNone(self.test_manager.add_feedback(user_id, feedback), "Feedback should be added successfully")
-        self.assertIsNotNone(self.test_manager.add_feedback(user_id, feedback), "Same Feedback should be added successfully")
+        self.assertIsNotNone(self.test_manager.add_feedback(user_id, feedback),
+                             "Same Feedback should be added successfully")
         self.assertIsNone(self.test_manager.add_feedback(user_id, ""), "Null Feedback should not be added successfully")
-        
+
         feedback_id = self.test_manager.add_feedback(user_id, feedback)
         self.assertTrue(self.test_manager.rm_feedback(feedback_id), "Removing feedback should be successful")
-        self.assertFalse(self.test_manager.rm_feedback(feedback_id), "Removing non-existent feedback should not be successful")
-    
+        self.assertFalse(self.test_manager.rm_feedback(feedback_id),
+                         "Removing non-existent feedback should not be successful")
+
     def test_get_most_subscriptions(self):
         self.assertEqual(0, self.test_manager.get_most_subscriptions(), "Without users 0 should be the number of most "
-                                                                   "subscriptions")
+                                                                        "subscriptions")
 
         uid1 = self.test_manager.get_user_id("testuser1")
         uid2 = self.test_manager.get_user_id("testuser2")
-        self.assertEqual(0, self.test_manager.get_most_subscriptions(), "Without subscriptions 0 should be the number of most "
-                                                                   "subscriptions")
+        self.assertEqual(0, self.test_manager.get_most_subscriptions(),
+                         "Without subscriptions 0 should be the number of most "
+                         "subscriptions")
 
         self.test_manager.add_subscription(uid1, 1)
         self.test_manager.add_subscription(uid1, 2)

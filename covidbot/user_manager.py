@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple, Dict, Any, Union
+from typing import List, Optional, Tuple, Union
 
 from mysql.connector import MySQLConnection, IntegrityError
 
@@ -217,8 +217,8 @@ class UserManager(object):
 
     def get_users_per_platform(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT COUNT(user_id) as c, platform FROM bot_user WHERE platform NOT LIKE "interactive" '
-                           'GROUP BY platform ORDER BY c DESC')
+            cursor.execute("SELECT COUNT(user_id) as c, platform FROM bot_user WHERE platform NOT LIKE 'interactive' "
+                           "GROUP BY platform ORDER BY c DESC")
             results = []
             for row in cursor.fetchall():
                 results.append((str(row['platform']).capitalize(), row['c']))
@@ -238,9 +238,10 @@ class UserManager(object):
 
     def get_not_forwarded_feedback(self) -> List[Tuple[int, str]]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT id, feedback, platform, platform_id, user_feedback.user_id, user_feedback.added FROM user_feedback "
-                           "LEFT JOIN bot_user bu on bu.user_id = user_feedback.user_id "
-                           "WHERE forwarded=0")
+            cursor.execute(
+                "SELECT id, feedback, platform, platform_id, user_feedback.user_id, user_feedback.added FROM user_feedback "
+                "LEFT JOIN bot_user bu on bu.user_id = user_feedback.user_id "
+                "WHERE forwarded=0")
             results = []
             for row in cursor.fetchall():
                 feedback = f"<b>Neues Feedback von {row['user_id']}</b>\n" \

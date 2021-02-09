@@ -2,8 +2,8 @@ import json
 import logging
 from typing import List, Optional
 
-from shapely.geometry import shape, Point
 import requests
+from shapely.geometry import shape, Point
 
 
 class LocationService:

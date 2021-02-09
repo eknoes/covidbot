@@ -206,8 +206,9 @@ class Bot(object):
         plt.figtext(0.8, 0.01, "Stand: {date}\nDaten vom Robert Koch-Institut (RKI)"
                     .format(date=current_date.strftime("%d.%m.%Y")), horizontalalignment='left', fontsize=8,
                     verticalalignment="baseline")
-        plt.figtext(0.05, 0.01, "Erhalte kostenlos die tagesaktuellen Daten auf Telegram, Signal oder Threema für deine Orte!\n"
-                                "https://covidbot.d-64.org/", horizontalalignment='left', fontsize=8,
+        plt.figtext(0.05, 0.01,
+                    "Erhalte kostenlos die tagesaktuellen Daten auf Telegram, Signal oder Threema für deine Orte!\n"
+                    "https://covidbot.d-64.org/", horizontalalignment='left', fontsize=8,
                     verticalalignment="baseline")
 
         for direction in ["left", "right", "bottom", "top"]:
@@ -430,8 +431,8 @@ class Bot(object):
         message += "\nIm Durchschnitt hat ein:e Nutzer:in {mean} Orte abonniert, " \
                    "die höchste Anzahl an Abos liegt bei {most_subs}."
         message = message.format(total_user=self._manager.get_total_user_number(),
-                       mean=format_float(self._manager.get_mean_subscriptions()),
-                       most_subs=self._manager.get_most_subscriptions())
+                                 mean=format_float(self._manager.get_mean_subscriptions()),
+                                 most_subs=self._manager.get_most_subscriptions())
 
         message += "\n\nInformationen zur Nutzung des Bots auf anderen Plattformen findest du unter " \
                    "https://covidbot.d-64.org!"
