@@ -10,7 +10,7 @@ from io import BytesIO
 from typing import Tuple, List, Dict, Union
 
 import telegram
-from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, ChatAction
+from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, ChatAction, MessageEntity
 from telegram.error import BadRequest, TelegramError, Unauthorized
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
@@ -250,6 +250,15 @@ class TelegramInterface(MessengerInterface):
             msg, districts = self._bot.find_district_id_from_geolocation(update.message.location.longitude,
                                                                          update.message.location.latitude)
         else:
+            # Make Commands without / available
+            # See #82: https://github.com/eknoes/covid-bot/issues/82
+            cmd_with_args = update.message.text.split()
+            if cmd_with_args[0].lower() in ["hilfe", "info", "loeschmich", "datenschutz", "start", "bericht", "ort",
+                                            "abo", "beende", "statistik", "sprache", "debug"]:
+                update.message.text = f"/{update.message.text}"
+                update.message.entities = [MessageEntity(MessageEntity.BOT_COMMAND, offset=0, length=len(cmd_with_args[0]) + 1)]
+                return self.updater.dispatcher.process_update(update)
+
             msg, districts = self._bot.find_district_id(update.message.text)
 
         if not districts:
