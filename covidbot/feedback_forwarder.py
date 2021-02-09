@@ -20,10 +20,14 @@ class FeedbackForwarder(MessengerInterface):
     async def sendDailyReports(self) -> None:
         # This method is not used for daily reports, but to forward feedback to the developers
 
+        i = 0
         for feedback_id, message in self.user_manager.get_not_forwarded_feedback():
-            time.sleep(0.5)
+            if i == 20:
+                time.sleep(1)
+            i += 1
 
-            sent = self.updater.bot.send_message(chat_id=self.dev_chat_id, text=message, parse_mode=ParseMode.HTML)
+            sent = self.updater.bot.send_message(chat_id=self.dev_chat_id, text=message, parse_mode=ParseMode.HTML,
+                                                 timeout=10)
             if sent:
                 self.user_manager.confirm_feedback_forwarded(feedback_id)
             else:
