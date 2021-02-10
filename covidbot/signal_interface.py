@@ -88,8 +88,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
         if not unconfirmed_reports:
             return
-
+        self.log.warning(f"{len(unconfirmed_reports)} to send!")
         attachment = self.get_attachment(self.bot.get_graphical_report(0), 0)
+        i = 1
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
             flood_count = 0
@@ -100,9 +101,11 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                     self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
                     time.sleep(sleep_seconds)
                     flood_count += 1
+                self.log.info(f"Try to send report {i}")
                 await bot.send_message(userid, adapt_text(message), attachments=[attachment])
                 self.bot.confirm_daily_report_send(userid)
-                self.log.warning(f"Sent daily report to {userid}")
+                self.log.warning(f"({i}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
+                i += 1
 
             # Currently semaphore is not waiting for signald's response, whether a message was successful.
             # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
