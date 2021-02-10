@@ -37,6 +37,7 @@ class UserManager(object):
                            'last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
                            'language VARCHAR(20) DEFAULT NULL, created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
                            'platform_id VARCHAR(100), platform VARCHAR(20),'
+                           'sent_report DATETIME(6) DEFAULT NULL, '
                            'activated TINYINT(1) DEFAULT FALSE NOT NULL, UNIQUE(platform_id, platform))')
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
@@ -149,7 +150,8 @@ class UserManager(object):
 
     def set_last_update(self, user_id: int, last_update: datetime) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("UPDATE bot_user SET last_update=%s WHERE user_id=%s", [last_update, user_id])
+            cursor.execute("UPDATE bot_user SET last_update=%s, sent_report=%s WHERE user_id=%s",
+                           [last_update, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), user_id])
             if cursor.rowcount == 0:
                 return False
             self.connection.commit()
