@@ -91,8 +91,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         self.log.warning(f"{len(unconfirmed_reports)} to send!")
         attachment = self.get_attachment(self.bot.get_graphical_report(0), 0)
 
-        # Flooding - just send 20 in a batch
-        unconfirmed_reports = unconfirmed_reports[:20]
+        # Flooding - just send 30 in a batch
+        unconfirmed_reports = unconfirmed_reports[:30]
         self.log.warning(f"Just send {len(unconfirmed_reports)} this batch")
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
@@ -109,7 +109,11 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 #  TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
                 #  See #84 https://github.com/eknoes/covid-bot/issues/84
                 #  See #67 https://github.com/eknoes/covid-bot/issues/67
-                sleep_seconds = random.uniform(1, 3)
+                #  Sleep with p(x) = 6.25% for 5 to 15s, otherwise between 1s and 3s
+                if flood_count % 4 == random.randint(0, 3):
+                    sleep_seconds = random.uniform(5, 15)
+                else:
+                    sleep_seconds = random.uniform(1, 3)
                 self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
                 time.sleep(sleep_seconds)
                 flood_count += 1
