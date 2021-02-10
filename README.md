@@ -24,6 +24,25 @@ Die aktuelle Version kann man unter [@CovidInzidenzBot](https://t.me/CovidInzide
 Für einen eigenen Telegrambot muss die Konfiguration von `resources/config.default.ini` nach `config.ini` kopiert und ausgefüllt werden.
 Danach kann er über `python3 -m covidbot` gestartet werden.
 
+### Cronjobs
+Unser Bot verlässt sich darauf, dass er regelmäßig mit Flags gestartet wird um
+* Daten zu updaten (`--update`)
+* Berichte zu versenden (`--daily-reports --MESSENGER`)
+
+Es kann zu Problemen kommen, wenn der Update Prozess oder der Report Prozess eines einzelnen Messengers parallel läuft.
+Um das zu verhindern, nutzen wir Lockfiles mit Flock.
+
+```shell
+# Data Update
+*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n dataupdate.lock python -m covidbot --update'
+
+# Messenger
+*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n signalreports.lock python -m covidbot --daily-reports --signal'
+*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n threemareports.lock python -m covidbot --daily-reports --threema'
+*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n telegramreports.lock python -m covidbot --daily-reports --telegram'
+
+```
+
 ## Credits
 Die Informationen über die Corona-Infektionen werden von der offiziellen Schnittstelle des RKI für [Landkreise](https://hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0) und [Bundesländer](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/ef4b445a53c1406892257fe63129a8ea_0) abgerufen und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0.
 Weitere Informationen sind auch im [Dashboard des RKI](https://corona.rki.de/) sowie dem [NPGEO Corona Hub 2020](https://npgeo-corona-npgeo-de.hub.arcgis.com/) zu finden.
