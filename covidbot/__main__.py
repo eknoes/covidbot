@@ -161,7 +161,7 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
             try:
                 with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
                     await iface.sendMessageTo(message, recipients, with_report)
-                    logging.info(f"Sent message on {messenger_interface}")
+                    logging.info(f"Checked for daily reports on {messenger_interface}")
             except Exception as e:
                 logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
 
