@@ -115,8 +115,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         await self.restart_service()
 
     async def restart_service(self):
-        self.log.warning("Try to restart and signalbot")
-        cmd = "supervisorctl restart signalbot"
+        self.log.warning("Try to restart signald and signalbot")
+        cmd = "supervisorctl restart signald signalbot"
         proc = await asyncio.create_subprocess_shell(
             cmd,
             stdout=asyncio.subprocess.DEVNULL,
