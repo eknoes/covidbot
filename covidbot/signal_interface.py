@@ -139,11 +139,12 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             for user in users:
                 # TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
                 if flood_count % 1 == 0:
-                    sleep_seconds = random.uniform(0.3, 2)
+                    sleep_seconds = random.uniform(1, 3)
                     self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
                     time.sleep(sleep_seconds)
                     flood_count += 1
 
+                self.log.info(f"Try to send message to user {user}")
                 await bot.send_message(user, adapt_text(message))
                 if append_report:
                     response = self.reportHandler("", user)
@@ -157,7 +158,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
             # but the socket is already closed
             time.sleep(30)
-        await self.restart_service()
+        #await self.restart_service()
 
     async def sendMessageToDev(self, message: str, bot: semaphore.Bot):
         await bot.send_message(self.dev_chat, adapt_text(message))
