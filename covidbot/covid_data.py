@@ -22,6 +22,7 @@ class TrendValue(Enum):
 class District:
     name: str
     type: Optional[str] = None
+    parent: Optional[int] = None
 
 
 @dataclass
@@ -140,9 +141,9 @@ class CovidData(object):
 
     def get_district(self, rs: int) -> District:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT county_name, type FROM counties WHERE rs=%s', [int(rs)])
+            cursor.execute('SELECT county_name, type, parent FROM counties WHERE rs=%s', [int(rs)])
             data = cursor.fetchone()
-            return District(data['county_name'], type=data['type'])
+            return District(data['county_name'], type=data['type'], parent=data['parent'])
 
     def get_district_data(self, rs: int, include_past_days=0, subtract_days=0) \
             -> Optional[Union[DistrictData, List[DistrictData]]]:

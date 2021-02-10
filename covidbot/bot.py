@@ -69,8 +69,11 @@ class Bot(object):
             online_match = True
             osm_results = self._location_service.find_location(district_query)
             possible_district = []
-            for d in osm_results:
-                possible_district.append((d, self._data.get_district(d).name))
+            for district_id in osm_results:
+                district = self._data.get_district(district_id)
+                possible_district.append((district_id, district.name))
+                if district.parent and district.parent not in [d[0] for d in possible_district]:
+                    possible_district.append((district.parent, self._data.get_district(district.parent).name))
 
         if not possible_district:
             message = 'Leider konnte kein Ort gefunden werden. Bitte beachte, ' \
@@ -92,14 +95,19 @@ class Bot(object):
 
     def find_district_id_from_geolocation(self, lon, lat) -> Tuple[Optional[str], Optional[List[Tuple[int, str]]]]:
         district_id = self._location_service.find_rs(lon, lat)
-        # ToDo: Also return parent locations
         if not district_id:
             return ('Leider konnte kein Ort in den RKI Corona Daten zu {location} gefunden werden. Bitte beachte, '
                     'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location="deinem Standort"),
                     None)
         else:
-            name = self._data.get_district(district_id).name
-            return None, [(district_id, name)]
+            district = self._data.get_district(district_id)
+            results = [(district_id, district.name)]
+
+            message = None
+            if district.parent:
+                message = "Die Daten für die folgenden Orte und Regionen sind für deinen Standort verfügbar"
+                results.append((district.parent, self._data.get_district(district.parent).name))
+            return message, results
 
     def get_possible_actions(self, user_identification: Union[int, str], district_id: int) -> Tuple[
         str, List[Tuple[str, UserDistrictActions]]]:
