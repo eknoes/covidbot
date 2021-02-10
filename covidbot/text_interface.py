@@ -21,6 +21,7 @@ class BotResponse:
 class Handler:
     command: str
     method: Callable[[str, str], BotResponse]
+    has_args: bool
 
 
 class ChatBotState:
@@ -38,20 +39,20 @@ class SimpleTextInterface(object):
 
     def __init__(self, bot: Bot):
         self.bot = bot
-        self.handler_list.append(Handler("start", self.startHandler))
-        self.handler_list.append(Handler("hilfe", self.helpHandler))
-        self.handler_list.append(Handler("info", self.infoHandler))
-        self.handler_list.append(Handler("abo", self.subscribeHandler))
-        self.handler_list.append(Handler("beende", self.unsubscribeHandler))
-        self.handler_list.append(Handler("lösche", self.unsubscribeHandler))
-        self.handler_list.append(Handler("datenschutz", self.privacyHandler))
-        self.handler_list.append(Handler("daten", self.currentDataHandler))
-        self.handler_list.append(Handler("bericht", self.reportHandler))
-        self.handler_list.append(Handler("statistik", self.statHandler))
-        self.handler_list.append(Handler("loeschmich", self.deleteMeHandler))
-        self.handler_list.append(Handler("löschmich", self.deleteMeHandler))
-        self.handler_list.append(Handler("debug", self.debugHandler))
-        self.handler_list.append(Handler("", self.directHandler))
+        self.handler_list.append(Handler("start", self.startHandler, False))
+        self.handler_list.append(Handler("hilfe", self.helpHandler, False))
+        self.handler_list.append(Handler("info", self.infoHandler, False))
+        self.handler_list.append(Handler("abo", self.subscribeHandler, True))
+        self.handler_list.append(Handler("beende", self.unsubscribeHandler, True))
+        self.handler_list.append(Handler("lösche", self.unsubscribeHandler, True))
+        self.handler_list.append(Handler("datenschutz", self.privacyHandler, False))
+        self.handler_list.append(Handler("daten", self.currentDataHandler, True))
+        self.handler_list.append(Handler("bericht", self.reportHandler, False))
+        self.handler_list.append(Handler("statistik", self.statHandler, False))
+        self.handler_list.append(Handler("loeschmich", self.deleteMeHandler, False))
+        self.handler_list.append(Handler("löschmich", self.deleteMeHandler, False))
+        self.handler_list.append(Handler("debug", self.debugHandler, False))
+        self.handler_list.append(Handler("", self.directHandler, True))
 
     def handle_input(self, user_input: str, user_id: str) -> Optional[BotResponse]:
         # Strip / on /command
@@ -94,6 +95,11 @@ class SimpleTextInterface(object):
 
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
+                # If no args should be given, check if input has no args. Otherwise it might be handled by
+                # the direct message handler
+                if not handler.has_args and not len(user_input.strip()) == len(handler.command):
+                    continue
+
                 text_in = user_input[len(handler.command):].strip()
                 return handler.method(text_in, user_id)
 
