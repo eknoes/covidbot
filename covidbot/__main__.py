@@ -106,14 +106,13 @@ class MessengerBotSetup:
             db_conn.close()
 
 
-async def sendUpdates():
-    for messenger_iface in ["threema", "telegram", "signal", "feedback"]:
-        try:
-            with MessengerBotSetup(messenger_iface, config, setup_logs=False) as iface:
-                await iface.sendDailyReports()
-                logging.info(f"Checked for daily reports on {messenger_iface}")
-        except Exception as e:
-            logging.error(f"Got exception while sending daily reports for {messenger_iface}: {e}", exc_info=e)
+async def sendUpdates(messenger_iface: str):
+    try:
+        with MessengerBotSetup(messenger_iface, config, setup_logs=False) as iface:
+            await iface.sendDailyReports()
+            logging.info(f"Checked for daily reports on {messenger_iface}")
+    except Exception as e:
+        logging.error(f"Got exception while sending daily reports for {messenger_iface}: {e}", exc_info=e)
 
 
 async def send_all(message: str, recipients: List[str], config_dict, messenger_interface=None):
@@ -179,7 +178,8 @@ if __name__ == "__main__":
 
     # Parse Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--update', help='Check for data updates and new daily reports', action='store_true')
+    parser.add_argument('--update', help='Check for data updates', action='store_true')
+    parser.add_argument('--daily-report', help='Check for new daily reports', action='store_true')
     parser.add_argument('--interactive', help='Chat with Textbot', action='store_true')
     parser.add_argument('--threema', help='Use Threema', action='store_true')
     parser.add_argument('--telegram', help='Use Telegram', action='store_true')
@@ -234,7 +234,13 @@ if __name__ == "__main__":
                         asyncio.run(telegram.sendMessageTo(f"Exception happened on Data Update with "
                                                            f"{updater.__class__.__name__}: {error}",
                                                            [config["TELEGRAM"].get("DEV_CHAT")]))
-        asyncio.run(sendUpdates())
+    elif args.daily_report:
+        if args.signal:
+            asyncio.run(sendUpdates("signal"))
+        elif args.threema:
+            asyncio.run(sendUpdates("threema"))
+        elif args.telegram:
+            asyncio.run(sendUpdates("telegram"))
     elif args.message or args.message_file:
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="message-users.log")
