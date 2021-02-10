@@ -37,9 +37,9 @@ Um das zu verhindern, nutzen wir Lockfiles mit Flock.
 */15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n dataupdate.lock python -m covidbot --update'
 
 # Messenger
-*/5 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n signalreports.lock python -m covidbot --daily-reports --signal'
-*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n threemareports.lock python -m covidbot --daily-reports --threema'
-*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n telegramreports.lock python -m covidbot --daily-reports --telegram'
+*/5 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n signalreports.lock python -m covidbot --daily-report --signal'
+*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n threemareports.lock python -m covidbot --daily-report --threema'
+*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n telegramreports.lock python -m covidbot --daily-report --telegram'
 ```
 
 Signals Update läuft alle 5 Minuten, da hier maximal 30 Nachrichten versandt werden, siehe #84.
