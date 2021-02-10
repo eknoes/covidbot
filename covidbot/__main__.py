@@ -178,7 +178,7 @@ if __name__ == "__main__":
 
     # Parse Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--update', help='Check for data updates', action='store_true')
+    parser.add_argument('--update', help='Check for data updates and send Feedback', action='store_true')
     parser.add_argument('--daily-report', help='Check for new daily reports', action='store_true')
     parser.add_argument('--interactive', help='Chat with Textbot', action='store_true')
     parser.add_argument('--threema', help='Use Threema', action='store_true')
@@ -234,13 +234,38 @@ if __name__ == "__main__":
                         asyncio.run(telegram.sendMessageTo(f"Exception happened on Data Update with "
                                                            f"{updater.__class__.__name__}: {error}",
                                                            [config["TELEGRAM"].get("DEV_CHAT")]))
+
+        # Forward Feedback
+        with MessengerBotSetup("feedback", config, setup_logs=False) as iface:
+            asyncio.run(iface.sendDailyReports())
+
     elif args.daily_report:
+        if not args.verbose:
+            logging_level = logging.WARNING
+        elif args.verbose > 1:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
+
         if args.signal:
-            asyncio.run(sendUpdates("signal"))
+            messenger = "signal"
         elif args.threema:
-            asyncio.run(sendUpdates("threema"))
+            messenger = "threema"
         elif args.telegram:
-            asyncio.run(sendUpdates("telegram"))
+            messenger = "telegram"
+        else:
+            raise ValueError("You have to specify a valid messenger to send daily reports")
+
+        # Setup Logging
+        logging.basicConfig(format=logging_format, level=logging_level, filename=f"reports-{messenger}.log")
+
+        # Log also to stdout
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(logging.Formatter(logging_format))
+        logging.getLogger().addHandler(stream_handler)
+
+        asyncio.run(sendUpdates(messenger))
+
     elif args.message or args.message_file:
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="message-users.log")
