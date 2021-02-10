@@ -139,24 +139,24 @@ class CovidData(object):
                 results.append((row['rs'], row['county_name']))
         return results
 
-    def get_district(self, rs: int) -> District:
+    def get_district(self, district_id: int) -> District:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT county_name, type, parent FROM counties WHERE rs=%s', [int(rs)])
+            cursor.execute('SELECT county_name, type, parent FROM counties WHERE rs=%s', [int(district_id)])
             data = cursor.fetchone()
             return District(data['county_name'], type=data['type'], parent=data['parent'])
 
-    def get_district_data(self, rs: int, include_past_days=0, subtract_days=0) \
+    def get_district_data(self, district_id: int, include_past_days=0, subtract_days=0) \
             -> Optional[Union[DistrictData, List[DistrictData]]]:
         """
         Fetches the Covid19 data for a certain district for today.
-        :param rs: ID of the district
+        :param district_id: ID of the district
         :param include_past_days: Provide history data. If > 0 will return List[DistrictData] with len = today + past_days
         :param subtract_days: Do not fetch for today, but for today - subtract_days
         :return: DistrictData or List[DistrictData]
         """
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT %s,%s',
-                           [rs, subtract_days, include_past_days + 2])
+                           [district_id, subtract_days, include_past_days + 2])
 
             results = []
             for record in cursor.fetchall():
@@ -167,7 +167,7 @@ class CovidData(object):
                                    'DATE(updated) as updated '
                                    'FROM covid_vaccinations WHERE district_id=%s and DATE(updated)<=%s '
                                    'ORDER BY updated DESC LIMIT 1',
-                                   [rs, record['date']])
+                                   [district_id, record['date']])
                     vacc = cursor.fetchone()
                     if vacc:
                         vacc_data = VaccinationData(vacc['vaccinated_full'], vacc['vaccinated_partial'],
@@ -181,10 +181,10 @@ class CovidData(object):
 
             # Add R-Value, which is usually just available for day -4, so we have to work with LIMIT $offset
             # (see https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/R-Wert-Erlaeuterung.pdf?__blob=publicationFile)
-            if rs == 0 and subtract_days == 0 and include_past_days == 0:
+            if district_id == 0 and subtract_days == 0 and include_past_days == 0:
                 for i in range(0, len(results)):
                     cursor.execute('SELECT r_date, `7day_r_value` FROM covid_r_value WHERE district_id=%s '
-                                   'ORDER BY r_date DESC LIMIT %s,1', [rs, i])
+                                   'ORDER BY r_date DESC LIMIT %s,1', [district_id, i])
                     data = cursor.fetchone()
                     if data:
                         r_data = RValueData(data['r_date'], data['7day_r_value'])
@@ -196,7 +196,7 @@ class CovidData(object):
                     results[i] = self.fill_trend(results[i], results[i + 7], results[i + 1])
             elif results:
                 cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=SUBDATE(Date(%s), 7) LIMIT 1',
-                               [rs, results[0].date])
+                               [district_id, results[0].date])
                 record = cursor.fetchone()
                 last_week, yesterday = None, None
                 if record:
@@ -207,7 +207,7 @@ class CovidData(object):
 
                 if len(results) == 1:
                     cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s AND date=SUBDATE(Date(%s), 1) '
-                                   'LIMIT 1', [rs, results[0].date])
+                                   'LIMIT 1', [district_id, results[0].date])
                     record = cursor.fetchone()
                     if record:
                         yesterday = DistrictData(name=record['county_name'], incidence=record['incidence'],
@@ -224,7 +224,7 @@ class CovidData(object):
                     results[0] = self.fill_trend(results[0], last_week, yesterday)
 
             if len(results) < include_past_days + 1:
-                logging.warning(f"No more data available for RS{rs}, requested {include_past_days + 1} days "
+                logging.warning(f"No more data available for District#{district_id}, requested {include_past_days + 1} days "
                                 f"but can just provide {len(results)} days")
             elif len(results) == include_past_days + 2:
                 results.pop()
