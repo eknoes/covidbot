@@ -317,20 +317,25 @@ class TelegramInterface(MessengerInterface):
         self.graph_cache = {}
 
         # Avoid flood limits of 30 messages / second
-        messages_sent = 0
+        sliding_flood_window = []
         for userid, message in messages:
-            if messages_sent > 0 and messages_sent % 25 == 0:
-                self.log.warning("Sleep for one second to avoid flood limits")
-                time.sleep(1.0)
+            if len(sliding_flood_window) >= 25:
+                # We want to send 25 messages per second max
+                flood_window_diff = time.perf_counter() - sliding_flood_window.pop(0)
+                if flood_window_diff < 1.05:  # safety margin
+                    self.log.info(f"Sleep for {1.05 - flood_window_diff}s")
+                    time.sleep(1.05 - flood_window_diff)
 
             try:
                 sent_msg = self.sendReport(userid, message)
-
                 if sent_msg:
                     self._bot.confirm_daily_report_send(userid)
+                    # Add to flood window, on message > 1024 characters, 2 messages are sent
+                    sliding_flood_window.append(time.perf_counter())
+                    if len(message) > 1024:
+                        sliding_flood_window.append(time.perf_counter())
 
                 self.log.warning(f"Sent report to {userid}!")
-                messages_sent += 1
             except Unauthorized:
                 self._bot.delete_user(userid)
                 logging.warning(f"Deleted user {userid} as he blocked us")
@@ -366,18 +371,24 @@ class TelegramInterface(MessengerInterface):
     async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
             users = map(lambda x: x.platform_id, self._bot.get_all_user())
-        no_flood_counter = 0
+        sliding_flood_window = []
         for uid in users:
             try:
-                if no_flood_counter % 25 == 0:
-                    time.sleep(1)
+                if len(sliding_flood_window) >= 5:
+                    # We want to send 25 messages per second max (might be even more due to append_report)
+                    flood_window_diff = time.perf_counter() - sliding_flood_window.pop(0)
+                    if flood_window_diff < 1.05: # safety margin
+                        self.log.info(f"Sleep for {1.05 - flood_window_diff}s")
+                        time.sleep(1.05 - flood_window_diff)
 
                 self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML)
                 if append_report:
-                    no_flood_counter += 2  # Additional message
                     self.sendReport(uid)
+                    # As 2 messages are sent
+                    sliding_flood_window.append(time.perf_counter())
+                    sliding_flood_window.append(time.perf_counter())
 
-                no_flood_counter += 1
+                sliding_flood_window.append(time.perf_counter())
                 self.log.info(f"Sent message to {str(uid)}")
             except BadRequest as error:
                 self.log.warning(f"Could not send message to {str(uid)}: {str(error)}")
