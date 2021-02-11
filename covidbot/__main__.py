@@ -218,6 +218,8 @@ if __name__ == "__main__":
         # Log also to stdout
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(logging.Formatter(logging_format))
+        if not args.verbose:
+            stream_handler.setLevel(logging.ERROR)
         logging.getLogger().addHandler(stream_handler)
 
         logging.info("### Start Data Update ###")
@@ -262,6 +264,8 @@ if __name__ == "__main__":
         # Log also to stdout
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(logging.Formatter(logging_format))
+        if not args.verbose:
+            stream_handler.setLevel(logging.ERROR)
         logging.getLogger().addHandler(stream_handler)
 
         asyncio.run(sendUpdates(messenger))
