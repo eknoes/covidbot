@@ -159,18 +159,26 @@ class Bot(object):
                                  new_deaths_trend=format_data_trend(current_data.deaths_trend),
                                  total_deaths=format_int(current_data.total_deaths))
 
+        related_vaccinations = None
         if current_data.vaccinations:
-            vacc = current_data.vaccinations
-            message += "<b>💉 Impfdaten</b>\n" \
-                       "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
+            related_vaccinations = current_data.vaccinations
+            message += "<b>💉 Impfdaten</b>\n"
+        else:
+            if current_data.parent:
+                parent_district = self._data.get_district_data(current_data.parent)
+                related_vaccinations = parent_district.vaccinations
+                message += f"<b>💉 Impfdaten für {parent_district.name}</b>\n"
+
+        if related_vaccinations:
+            message += "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
                        " - Stand {vacc_date} - vollständig geimpft.\n\n" \
                        "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
                        "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
-                .format(rate_partial=format_float(vacc.partial_rate * 100),
-                        rate_full=format_float(vacc.full_rate * 100),
-                        vacc_partial=format_int(vacc.vaccinated_partial),
-                        vacc_full=format_int(vacc.vaccinated_full),
-                        vacc_date=current_data.vaccinations.date.strftime("%d.%m.%Y"))
+                .format(rate_partial=format_float(related_vaccinations.partial_rate * 100),
+                        rate_full=format_float(related_vaccinations.full_rate * 100),
+                        vacc_partial=format_int(related_vaccinations.vaccinated_partial),
+                        vacc_full=format_int(related_vaccinations.vaccinated_full),
+                        vacc_date=related_vaccinations.date.strftime("%d.%m.%Y"))
 
         message += '<i>Infektionsdaten vom {date}</i>\n' \
                    '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \

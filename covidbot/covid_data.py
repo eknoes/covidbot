@@ -99,7 +99,7 @@ class CovidData(object):
             if not exists:
                 self.log.info("View covid_data_calculated does not exist, creating it!")
                 cursor.execute('CREATE VIEW covid_data_calculated AS '
-                               'SELECT c.rs, c.county_name, c.type, covid_data.date, '
+                               'SELECT c.rs, c.county_name, c.type, c.parent, covid_data.date, '
                                'covid_data.total_cases, covid_data.total_cases - y.total_cases as new_cases, '
                                'covid_data.total_deaths, covid_data.total_deaths - y.total_deaths as new_deaths, '
                                'covid_data.incidence '
@@ -174,10 +174,10 @@ class CovidData(object):
                                                     vacc['rate_full'], vacc['rate_partial'], vacc['updated'])
 
                 results.append(DistrictData(name=record['county_name'], incidence=record['incidence'],
-                                            type=record['type'], total_cases=record['total_cases'],
-                                            total_deaths=record['total_deaths'], new_cases=record['new_cases'],
-                                            new_deaths=record['new_deaths'], date=record['date'],
-                                            vaccinations=vacc_data))
+                                            parent=record['parent'], type=record['type'],
+                                            total_cases=record['total_cases'], total_deaths=record['total_deaths'],
+                                            new_cases=record['new_cases'], new_deaths=record['new_deaths'],
+                                            date=record['date'], vaccinations=vacc_data))
 
             # Add R-Value, which is usually just available for day -4, so we have to work with LIMIT $offset
             # (see https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/R-Wert-Erlaeuterung.pdf?__blob=publicationFile)
@@ -224,8 +224,9 @@ class CovidData(object):
                     results[0] = self.fill_trend(results[0], last_week, yesterday)
 
             if len(results) < include_past_days + 1:
-                logging.warning(f"No more data available for District#{district_id}, requested {include_past_days + 1} days "
-                                f"but can just provide {len(results)} days")
+                logging.warning(
+                    f"No more data available for District#{district_id}, requested {include_past_days + 1} days "
+                    f"but can just provide {len(results)} days")
             elif len(results) == include_past_days + 2:
                 results.pop()
 
