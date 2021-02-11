@@ -2,6 +2,7 @@ import datetime
 import logging
 import re
 from enum import Enum
+from functools import reduce
 from io import BytesIO
 from typing import Optional, Tuple, List, Dict, Union
 
@@ -129,6 +130,42 @@ class Bot(object):
         else:
             message = "Möchtest du die aktuellen Daten von {name} erhalten?".format(name=district.name)
         return message, actions
+
+    def get_vaccination_overview(self, district_id: int) -> str:
+        parent_data = self._data.get_district_data(district_id)
+        if not parent_data.vaccinations:
+            return f"Leider kann für {parent_data.name} keine Impfübersicht generiert werden, da keine Daten vorliegen."
+
+        children_data = self._data.get_children_data(district_id)
+        message = f"<b>💉 Impfdaten ({parent_data.name})</b>\n"
+        message += "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
+                   " - Stand {vacc_date} - vollständig geimpft.\n\n" \
+                   "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
+                   "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
+            .format(rate_partial=format_float(parent_data.vaccinations.partial_rate * 100),
+                    rate_full=format_float(parent_data.vaccinations.full_rate * 100),
+                    vacc_partial=format_int(parent_data.vaccinations.vaccinated_partial),
+                    vacc_full=format_int(parent_data.vaccinations.vaccinated_full),
+                    vacc_date=parent_data.vaccinations.date.strftime("%d.%m.%Y"))
+
+        earliest_data = reduce(lambda x, y: x if x.vaccinations.date < y.vaccinations.date else y, children_data)
+        message += "<b>💉 Impfdaten der Länder</b>\n" \
+                   "Angegeben ist der Anteil der Bevölkerung, die mindestens eine Impfung erhalten hat, sowie der " \
+                   "Anteil der Bevölkerung, der einen vollen Impfschutz hat.\n\n"
+        children_data.sort(key=lambda x: x.name)
+        for child in children_data:
+            message += "• {rate_partial}% / {rate_full}% ({district})\n" \
+                .format(district=child.name,
+                        rate_partial=format_float(child.vaccinations.partial_rate * 100),
+                        rate_full=format_float(child.vaccinations.full_rate * 100))
+
+        message += '\n\n' \
+                   '<i>Stand: {earliest_vacc_date}. Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
+                   ' im <a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
+                   'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
+            .format(info_command=self.format_command("Info"),
+                    earliest_vacc_date=parent_data.vaccinations.date.strftime("%d.%m.%Y"))
+        return message
 
     def get_district_report(self, district_id: int) -> str:
         current_data = self._data.get_district_data(district_id)

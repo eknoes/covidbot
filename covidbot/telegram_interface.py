@@ -63,6 +63,7 @@ class TelegramInterface(MessengerInterface):
         self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
         self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('impfungen', self.vaccHandler))
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('statistik', self.statHandler))
@@ -367,6 +368,9 @@ class TelegramInterface(MessengerInterface):
 
     def statHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_statistic())
+
+    def vaccHandler(self, update: Update, context: CallbackContext) -> None:
+        update.message.reply_html(self._bot.get_vaccination_overview(0), disable_web_page_preview=True)
 
     async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:

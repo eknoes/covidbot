@@ -145,6 +145,18 @@ class CovidData(object):
             data = cursor.fetchone()
             return District(data['county_name'], type=data['type'], parent=data['parent'])
 
+    def get_children_data(self, district_id: int) -> Optional[List[DistrictData]]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT rs FROM counties WHERE parent=%s', [int(district_id)])
+            children = []
+            for row in cursor.fetchall():
+                children.append(row['rs'])
+        if children:
+            children_data = []
+            for child in children:
+                children_data.append((self.get_district_data(child)))
+            return children_data
+
     def get_district_data(self, district_id: int, include_past_days=0, subtract_days=0) \
             -> Optional[Union[DistrictData, List[DistrictData]]]:
         """
