@@ -44,16 +44,16 @@
             <a href="#faq_signal">in unserem FAQ</a>. Mit dem Befehl "Bericht" kannst du jederzeit deinen personalisierten Bericht abrufen - unabh&auml;ngig davon, ob er am Vormittag automatisiert zugestellt wurde.</p>
         <h2 id="faq">Fragen und Antworten (FAQ)</h2>
         <h3 id="faq_allgemein">Allgemein</h3>
-        <h4>Wie starte ich den Bot?</h4>
+        <h4 id="faq-wie">Wie starte ich den Bot?</h4>
         <p>Du kannst einfach eine Nachricht mit dem Stadt-/Landkreis, Bundesland oder einem Standort (nicht bei Threema) an den Bot senden. Dann erhältst du eine Liste mit möglichen Orten oder Aktionen, bspw. "Daten" für die aktuellen Daten oder "Abo" um diesen zu deinem täglichen Abonnement hinzuzufügen.</p>
-        <h4>Wann erhalte ich meinen täglichen Bericht?</h4>
+        <h4 id="faq-wann">Wann erhalte ich meinen täglichen Bericht?</h4>
         <p>Wir versenden den Bericht, sobald die Infektionsdaten vom Robert-Koch-Institut (RKI) veröffentlicht wurden. Regelmäßig ist das zwischen 05 und 06 Uhr morgens der Fall. Solltest du um 09 Uhr noch keinen Bericht erhalten haben, ist vielleicht ein Fehler aufgetreten.
             <a href="#kontakt">Schick uns dann gerne eine Nachricht!</a></p>
-        <h4>Welche Art von Berichten gibt es?</h4>
+        <h4 id="faq-berichte-und-daten">Welche Art von Berichten gibt es?</h4>
         <p>Grundsätzlich erhältst du einmal am Tag einen Überblicksbericht (täglichen Bericht) über alle von dir abonnierten Orte sowie die Zahlen für ganz Deutschland. Möchtest du weitere, detailliertere Informationen zu einem bestimmten Ort abrufen, wähle "Daten" aus, nachdem du den Ort an den Bot geschickt hast. Dieser Detailbericht ist unabhängig von den von dir abonnierten Orten.</p>
-	<h4>Was zeigen die Pfeile hinter den Zahlen an?</h4>
+	<h4 id="faq-tendenz">Was zeigen die Pfeile hinter den Zahlen an?</h4>
 	<p>Die Pfeile dienen der Visualisierung des Verlaufs des Wertes, geben also eine Tendenz an. Neuinfektionen und Todesfälle werden mit dem Wert von vor einer Woche verglichen, weil die Gesundheitsämter je nach Wochentag unterschiedlich aktiv melden. Durchschnittswerte wie die 7-Tages-Inzidenz oder der R-Wert vergleichen wir dagegen mit dem letzten verfügbaren Wert, in der Regel also mit gestern.</p>
-        <h4>Woher stammen die verschiedenen Informationen?&nbsp;Handelt es sich um seriöse Quellen?</h4>
+        <h4 id="faq-quellen">Woher stammen die verschiedenen Informationen?&nbsp;Handelt es sich um seriöse Quellen?</h4>
         <p>Wir beziehen unsere Daten ausschließlich von offiziellen Stellen bzw. deren Kooperationspartnern:</p>
         <ul>
             <li>Neuinfektionen,
@@ -71,24 +71,24 @@
         </ul>
         <p>Projekte wie dieser Bot sind nur möglich, wenn öffentliche
             Stellen Ihre Daten frei - als Open Data - zur Verfügung stellen. Wir sind der Meinung, dass alle Daten, die öffentlichen Institutionen zur Verfügung stehen, grundsätzlich frei für alle abrufbar und verwendbar sein sollten.</p>
-        <h4>Was bedeuten die verschiedenen Informationen?</h4>
+        <h4 id="faq-bedeutung">Was bedeuten die verschiedenen Informationen?</h4>
         <p>
             <strong>Infektionszahlen</strong><br>Die 7-Tage Inzidenz ist die Anzahl der Covid19-Infektionen in den vergangenen 7 Tagen je 100.000 Einwohner:innen. Im Gegensatz zu den Neuinfektionszahlen und Todesfällen lässt sich dieser Wert gut täglich vergleichen. Das liegt daran, dass es ein Wert ist, der sich auf die letzten 7 Tage bezieht und so nicht den tagesabhängigen Schwankungen unterliegt. Die Neuinfektionszahlen und die Todesfälle lassen sich dahingegen am besten mit den Zahlen von vor einer Woche vergleichen, da diese auf Grund des Meldeverzugs tagesabhängigen Schwankungen unterliegen. So werden bspw. am Wochenende weniger Zahlen gemeldet.<br>Mehr Informationen zur Bedeutung der Infektionszahlen findest du im
             <a href="https://www.rki.de/SharedDocs/FAQ/NCOV2019/gesamt.html" target="_blank">Informationsportal des RKI</a>.<strong><br>Impfzahlen</strong><br>Bei den aktuell verfügbaren Impfstoffen werden zwei Impfdosen benötigt um einen vollen Schutz zu genießen. Aus diesem Grund unterscheiden wir zwischen Erst- und Zweitimpfungen. Die Anzahl der Erstimpfungen beinhaltet also auch die Menschen, die bereits eine zweite Impfdosis erhalten haben.<br>Mehr Informationen zu den Impfungen findest du im
             <a href="https://www.zusammengegencorona.de/impfen" target="_blank">Informationsportal der Bundesregierung</a>.<strong><br>R-Wert</strong><br>Wir verwenden den 7-Tage-R-Wert des RKI. Dieser beschreibt die Anzahl an Menschen, die von einer infizierten Person angesteckt werden. Dieser Wert ist eine Schätzung und wird aus den geschätzten Infektionszahlen der letzten Tage berechnet.<br>Mehr Informationen zum R-Wert stellt bspw.
             <a href="https://www.tagesschau.de/faktenfinder/r-wert-101.html" target="_blank">die Tagesschau</a> zur Verfügung.
         </p>
-        <h4>Auf der Webseite meiner Stadt/dem ZDF/meiner Lokalzeitung werden anderen Daten angezeigt, wie kann das sein?</h4>
+        <h4  id="faq-andere-zahlen">Auf der Webseite meiner Stadt/dem ZDF/meiner Lokalzeitung werden anderen Daten angezeigt, wie kann das sein?</h4>
         <p>Wir rufen einmal am Tag die Daten vom Robert-Koch-Institut (RKI) ab. Dem RKI werden die Daten von den Gesundheitsämtern übermittelt. Teilweise zeigen die Webseiten der lokalen Gesundheitsämter oder Lokalzeitungen aktuellere Daten an, weil sie mehrfach am Tag aktualisiert werden. Teilweise werden auch andere Quellen verwendet, so zeigt
             <a href="https://www.zdf.de/nachrichten/politik/coronavirus-inzidenz-landkreise-100.html" target="_blank">ZDF heute</a> bspw. nicht die Daten vom RKI an, sondern von
             <a href="http://www.risklayer-explorer.com/event/100/detail" target="_blank"></a><em><a href="http://www.risklayer-explorer.com/event/100/detail" target="_blank">Risklayer/CEDIM (KIT)</a>.
             </em>Unseren Daten sollten aber stets mit denen
             <a href="https://www.tagesschau.de/inland/coronavirus-karte-deutschland-101.html" target="_blank">der Tagesschau</a> und des
             <a href="https://corona.rki.de/" target="_blank">Covid 19-Dashboards des RKI</a> übereinstimmen.</p>
-        <h4>Könnte der Bericht zu einem Ort nicht auch eine Übersicht der aktuellen Corona-Maßnahmen der Landesregierung bzw. der regionalen Behörde beinhalten?</h4>
+        <h4 id="faq-massnahmen">Könnte der Bericht zu einem Ort nicht auch eine Übersicht der aktuellen Corona-Maßnahmen der Landesregierung bzw. der regionalen Behörde beinhalten?</h4>
         <p>Das würden grundsätzlich sehr gerne anbieten! Leider werden diese Informationen von den Behörden nicht in maschinenlesbarer Form zur Verfügung gestellt. Wir sind derzeit am Überlegen, wie wir sie mit vertretbaren Aufwand einbauen können. Wenn du eine Idee hast,
             <a href="#kontakt">schreib uns gerne</a>!</p>
-        <h4>Ich fände es gut, wenn der Bot noch xyz könnte!</h4>
+        <h4 id="faq-vorschlag">Ich fände es gut, wenn der Bot noch xyz könnte!</h4>
         <p>Wir finden das wahrscheinlich auch gut, hatten diese Idee aber noch nicht.
             <a href="#kontakt">Schick sie uns gerne!</a><br></p>
         <h3 id="faq_signal">Signal</h3>
