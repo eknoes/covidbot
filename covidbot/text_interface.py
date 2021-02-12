@@ -42,6 +42,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("start", self.startHandler, False))
         self.handler_list.append(Handler("hilfe", self.helpHandler, False))
         self.handler_list.append(Handler("info", self.infoHandler, False))
+        self.handler_list.append(Handler("impfungen", self.vaccHandler, False))
         self.handler_list.append(Handler("abo", self.subscribeHandler, True))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler, True))
         self.handler_list.append(Handler("lösche", self.unsubscribeHandler, True))
@@ -111,6 +112,9 @@ class SimpleTextInterface(object):
 
     def infoHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(self.bot.explain_message())
+
+    def vaccHandler(self, user_input: str, user_id: str) -> BotResponse:
+        return BotResponse(self.bot.get_vaccination_overview(0))
 
     def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)

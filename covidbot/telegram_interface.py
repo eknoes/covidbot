@@ -255,7 +255,7 @@ class TelegramInterface(MessengerInterface):
             # See #82: https://github.com/eknoes/covid-bot/issues/82
             cmd_with_args = update.message.text.split()
             if cmd_with_args[0].lower() in ["hilfe", "info", "loeschmich", "datenschutz", "start", "bericht", "ort",
-                                            "abo", "beende", "statistik", "sprache", "debug"]:
+                                            "abo", "beende", "statistik", "sprache", "debug", "impfungen"]:
                 update.message.text = f"/{update.message.text}"
                 update.message.entities = [MessageEntity(MessageEntity.BOT_COMMAND, offset=0, length=len(cmd_with_args[0]) + 1)]
                 return self.updater.dispatcher.process_update(update)

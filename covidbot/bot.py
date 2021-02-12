@@ -576,18 +576,21 @@ class Bot(object):
                     'Wenn du {stat_command} sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
                     'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
                     '<b>Weiteres</b>\n'
-                    '• Sende {report_command} um deinen Tagesbericht erneut zu erhalten\n'
+                    '• Sende {vacc_command} für eine Übersicht der Impfsituation\n'
+                    '• Sende {report_command} für deinen Tagesbericht\n'
                     '• Sende {abo_command} um deine abonnierten Orte einzusehen\n'
                     '• Sende {privacy_command} erhältst du mehr Informationen zum Datenschutz und die '
                     'Möglichkeit, alle deine Daten bei uns zu löschen\n'
-                    '• Unter https://covidbot.d-64.org/ findest du Informationen zum Bot und die Links um ihn auf Telegram und Signal zu benutzen'
+                    '• Unter https://covidbot.d-64.org/ findest du Informationen zum Bot und die Links für alle anderen'
+                    ' verfügbaren Messenger'
                     '\n\n'
                     'Mehr Informationen zu diesem Bot findest du hier: '
                     'https://github.com/eknoes/covid-bot\n\n'
                     'Diesen Hilfetext erhältst du über {help_command}') \
             .format(stat_command=self.format_command('Statistik'), report_command=self.format_command('Bericht'),
                     abo_command=self.format_command('Abo'), privacy_command=self.format_command('Datenschutz'),
-                    help_command=self.format_command('Hilfe'), info_command=self.format_command('Info'))
+                    help_command=self.format_command('Hilfe'), info_command=self.format_command('Info'),
+                    vacc_command=self.format_command('Impfungen'))
         return message
 
     @staticmethod
