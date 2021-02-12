@@ -584,12 +584,10 @@ class Bot(object):
                     '• Sende {abo_command} um deine abonnierten Orte einzusehen\n'
                     '• Sende {privacy_command} erhältst du mehr Informationen zum Datenschutz und die '
                     'Möglichkeit, alle deine Daten bei uns zu löschen\n'
-                    '• Unter https://covidbot.d-64.org/ findest du Informationen zum Bot und die Links für alle anderen'
-                    ' verfügbaren Messenger'
+                    '• Unter https://github.com/eknoes/covid-bot findest du den Quelltext des Bots\n'
                     '\n\n'
-                    'Mehr Informationen zu diesem Bot findest du hier: '
-                    'https://github.com/eknoes/covid-bot\n\n'
-                    'Diesen Hilfetext erhältst du über {help_command}') \
+                    'Auf https://covidbot.d-64.org/ gibt es mehr Informationen zum Bot und die Links für alle '
+                    'anderen verfügbaren Messenger. Diesen Hilfetext erhältst du über {help_command}') \
             .format(stat_command=self.format_command('Statistik'), report_command=self.format_command('Bericht'),
                     abo_command=self.format_command('Abo'), privacy_command=self.format_command('Datenschutz'),
                     help_command=self.format_command('Hilfe'), info_command=self.format_command('Info'),
