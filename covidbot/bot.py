@@ -572,6 +572,9 @@ class Bot(object):
                     '<b>💬 Feedback</b>\n'
                     'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
                     'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
+                    '<b>👋 Abmelden</b>\n'
+                    'Wenn du von unserem Bot keine Nachrichten mehr empfangen möchtest, kannst du alle deine Daten '
+                    'bei uns löschen indem du {deleteme_command} sendest.\n\n'
                     '<b>🤓 Statistik</b>\n'
                     'Wenn du {stat_command} sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
                     'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
@@ -590,7 +593,7 @@ class Bot(object):
             .format(stat_command=self.format_command('Statistik'), report_command=self.format_command('Bericht'),
                     abo_command=self.format_command('Abo'), privacy_command=self.format_command('Datenschutz'),
                     help_command=self.format_command('Hilfe'), info_command=self.format_command('Info'),
-                    vacc_command=self.format_command('Impfungen'))
+                    vacc_command=self.format_command('Impfungen'), deleteme_command=self.format_command('Loeschmich'))
         return message
 
     @staticmethod
