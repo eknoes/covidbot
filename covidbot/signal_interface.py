@@ -6,6 +6,7 @@ import signal
 import time
 import traceback
 from io import BytesIO
+from math import ceil
 from typing import Dict, List, Optional
 
 import semaphore
@@ -91,42 +92,31 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         self.log.warning(f"{len(unconfirmed_reports)} to send!")
         attachment = self.get_attachment(self.bot.get_graphical_report(0), 0)
 
-        # Flooding - just send 30 random reports in a batch
         # This way, if we are blocked from a single user or such, we should reach all other users
         random.shuffle(unconfirmed_reports)
-        unconfirmed_reports = unconfirmed_reports[:30]
-        self.log.warning(f"Just send {len(unconfirmed_reports)} this batch")
+
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
-            flood_count = 0
+            backoff_time = random.uniform(0.5, 2)
+            message_counter = 0
             for userid, message in unconfirmed_reports:
-                self.log.info(f"Try to send report {flood_count}")
+                self.log.info(f"Try to send report {message_counter}")
 
                 success = await bot.send_message(userid, adapt_text(message), attachments=[attachment])
                 if success:
                     self.bot.confirm_daily_report_send(userid)
-                    self.log.warning(f"({flood_count}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
+                    self.log.warning(f"({message_counter}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
+                    if backoff_time > 1:
+                        backoff_time = 0.7 * backoff_time
                 else:
-                    self.log.error(f"({flood_count}/{len(unconfirmed_reports)}) Error sending daily report to {userid}")
-                    break
+                    self.log.error(f"({message_counter}/{len(unconfirmed_reports)}) Error sending daily report to {userid}")
+                    backoff_time = 2 ^ ceil(backoff_time)
 
-                #  TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
-                #  See #84 https://github.com/eknoes/covid-bot/issues/84
-                #  See #67 https://github.com/eknoes/covid-bot/issues/67
-                #  Sleep with p(x) = 6.25% for 5 to 15s, otherwise between 1s and 3s
-                if flood_count % 4 == random.randint(0, 3):
-                    sleep_seconds = random.uniform(10, 30)
-                else:
-                    sleep_seconds = random.uniform(3, 5)
+                sleep_seconds = backoff_time
                 self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
                 time.sleep(sleep_seconds)
-                flood_count += 1
+                message_counter += 1
 
-            # Currently semaphore is not waiting for signald's response, whether a message was successful.
-            # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
-            # but the socket is already closed
-            self.log.warning("Sleep 15s to avoid signald damage")
-            time.sleep(15)
         await self.restart_service()
 
     async def restart_service(self):
