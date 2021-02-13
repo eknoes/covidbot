@@ -102,8 +102,12 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
                 #  We do not receive a confirmation, if report was successful
                 #  See https://github.com/lwesterhof/semaphore/issues/28
-                await bot.send_message(userid, adapt_text(message), attachments=[attachment])
-                self.bot.confirm_daily_report_send(userid)
+                success = await bot.send_message(userid, adapt_text(message), attachments=[attachment])
+                if success:
+                    self.bot.confirm_daily_report_send(userid)
+                else:
+                    self.log.error(f"Could not send daily report to {userid}")
+
                 self.log.warning(f"({flood_count}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
 
                 #  TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
