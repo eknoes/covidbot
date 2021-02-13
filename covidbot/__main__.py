@@ -193,8 +193,12 @@ if __name__ == "__main__":
                         metavar='USERS', action='store', nargs="+", type=str)
     args = parser.parse_args()
 
-    if args.verbose and args.verbose > 0:
+    if not args.verbose:
+        logging_level = logging.WARNING
+    elif args.verbose > 1:
         logging_level = logging.DEBUG
+    else:
+        logging_level = logging.INFO
 
     if reduce(lambda x, y: int(x) + int(y), [args.signal, args.telegram, args.interactive, args.threema]) != 1 \
             and not (args.update or args.message or args.message_file):
@@ -205,13 +209,6 @@ if __name__ == "__main__":
     config = parse_config("config.ini")
 
     if args.update:
-        if not args.verbose:
-            logging_level = logging.WARNING
-        elif args.verbose > 1:
-            logging_level = logging.DEBUG
-        else:
-            logging_level = logging.INFO
-
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="updater.log")
 
@@ -242,13 +239,6 @@ if __name__ == "__main__":
             asyncio.run(iface.sendDailyReports())
 
     elif args.daily_report:
-        if not args.verbose:
-            logging_level = logging.WARNING
-        elif args.verbose > 1:
-            logging_level = logging.DEBUG
-        else:
-            logging_level = logging.INFO
-
         if args.signal:
             messenger = "signal"
         elif args.threema:
