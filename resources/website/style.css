@@ -71,6 +71,11 @@ button:hover {
 	transition-duration: 500ms;
 }
 
+button.disabled {
+	background: #eee;
+	color: #aaa;
+}
+
 @media only screen and (max-width: 1000px) {
 	button {
 		width: 80%;
