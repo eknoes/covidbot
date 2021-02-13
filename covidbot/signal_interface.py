@@ -91,7 +91,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         self.log.warning(f"{len(unconfirmed_reports)} to send!")
         attachment = self.get_attachment(self.bot.get_graphical_report(0), 0)
 
-        # Flooding - just send 30 in a batch
+        # Flooding - just send 30 random reports in a batch
+        # This way, if we are blocked from a single user or such, we should reach all other users
+        random.shuffle(unconfirmed_reports)
         unconfirmed_reports = unconfirmed_reports[:30]
         self.log.warning(f"Just send {len(unconfirmed_reports)} this batch")
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
@@ -100,15 +102,13 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             for userid, message in unconfirmed_reports:
                 self.log.info(f"Try to send report {flood_count}")
 
-                #  We do not receive a confirmation, if report was successful
-                #  See https://github.com/lwesterhof/semaphore/issues/28
                 success = await bot.send_message(userid, adapt_text(message), attachments=[attachment])
                 if success:
                     self.bot.confirm_daily_report_send(userid)
+                    self.log.warning(f"({flood_count}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
                 else:
-                    self.log.error(f"Could not send daily report to {userid}")
-
-                self.log.warning(f"({flood_count}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
+                    self.log.error(f"({flood_count}/{len(unconfirmed_reports)}) Error sending daily report to {userid}")
+                    break
 
                 #  TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
                 #  See #84 https://github.com/eknoes/covid-bot/issues/84
