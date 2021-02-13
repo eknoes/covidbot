@@ -69,8 +69,15 @@ class TestSubscriptionManager(TestCase):
         self.assertListEqual([1], user2.subscriptions)
         self.assertIsNone(self.test_manager.get_user(3), "Return None for a non existing user")
 
-        self.assertEqual(datetime.today().date(), user1.last_update.date(),
-                         "After user creation, last_update should be the current day")
+        last_update = None
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT MAX(date) FROM covid_data")
+            row = cursor.fetchone()
+            if row:
+                last_update = row[0]
+
+        self.assertEqual(last_update, user1.last_update.date(),
+                         "After user creation, last_update should be the last_update of CovidData")
 
         expected_update = datetime.now()
         expected_language = "en"
