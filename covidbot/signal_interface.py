@@ -6,7 +6,7 @@ import signal
 import time
 import traceback
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import semaphore
 from semaphore import ChatContext
@@ -21,8 +21,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
     phone_number: str
     socket: str
     graphics_tmp_path: str
-    profile_name: str = "Covid Update"
-    profile_picture: str = os.path.abspath("resources/logo.png")
+    profile_name: Optional[str] = None  # = "Covid Update"
+    profile_picture: Optional[str] = None  # = os.path.abspath("resources/logo.png")
     dev_chat: str = None
 
     def __init__(self, phone_number: str, socket: str, bot: Bot, dev_chat: str):
@@ -115,9 +115,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 #  See #67 https://github.com/eknoes/covid-bot/issues/67
                 #  Sleep with p(x) = 6.25% for 5 to 15s, otherwise between 1s and 3s
                 if flood_count % 4 == random.randint(0, 3):
-                    sleep_seconds = random.uniform(5, 15)
+                    sleep_seconds = random.uniform(10, 30)
                 else:
-                    sleep_seconds = random.uniform(1, 3)
+                    sleep_seconds = random.uniform(3, 5)
                 self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
                 time.sleep(sleep_seconds)
                 flood_count += 1
