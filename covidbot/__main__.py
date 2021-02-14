@@ -178,21 +178,23 @@ if __name__ == "__main__":
 
     # Parse Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--update', help='Check for data updates and send Feedback', action='store_true')
-    parser.add_argument('--daily-report', help='Check for new daily reports', action='store_true')
-    parser.add_argument('--interactive', help='Chat with Textbot', action='store_true')
-    parser.add_argument('--threema', help='Use Threema', action='store_true')
-    parser.add_argument('--telegram', help='Use Telegram', action='store_true')
-    parser.add_argument('--signal', help='Use Signal', action='store_true')
     parser.add_argument('--verbose', '-v', action='count', default=0)
+    parser.add_argument('--config', '-c', action='store', default='config.ini', metavar='CONFIG_FILE')
 
-    parser.add_argument('--message-file', help='Send the message from <FILE> to users',
-                        metavar='FILE', action='store')
-    parser.add_argument('--message', help='Send a message to users', action='store_true')
-    parser.add_argument('--specific', help='Just send the message to specific user_ids',
-                        metavar='USERS', action='store', nargs="+", type=str)
+    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'shell'], nargs=1,
+                        help='Platform that should be used', type=str, action='store')
+    parser.add_argument('--check-updates', help='Run platform independent jobs, such as checking for new data',
+                        action='store_true')
+    parser.add_argument('--daily-report', help='Send daily reports if available, requires --platform',
+                        action='store_true')
+    parser.add_argument('--message-user', help='Send a message to users', action='store_true')
+    parser.add_argument('--file', help='Message, requires --message-user', metavar='MESSAGE_FILE', action='store')
+    parser.add_argument('--all', help='Intended receivers, requires --platform', action='store_true')
+    parser.add_argument('--specific', help='Intended receivers, requires --platform', metavar='USER',
+                        action='store', nargs="+", type=str)
     args = parser.parse_args()
-
+    if args.platform:
+        args.platform = args.platform[0]
     if not args.verbose:
         logging_level = logging.WARNING
     elif args.verbose > 1:
@@ -200,15 +202,30 @@ if __name__ == "__main__":
     else:
         logging_level = logging.INFO
 
-    if reduce(lambda x, y: int(x) + int(y), [args.signal, args.telegram, args.interactive, args.threema]) != 1 \
-            and not (args.update or args.message or args.message_file):
+    if not args.platform and not (args.check_updates or args.message_user):
         print("Exactly one interface-flag has to be set, e.g. --telegram")
         sys.exit(1)
 
-    # Read Config
-    config = parse_config("config.ini")
+    if args.check_updates and (args.platform or args.message_user):
+        print("--check-updates can't be combined with other flags")
+        sys.exit(1)
 
-    if args.update:
+    if args.message_user and not (args.specific or args.all):
+        print("--message-user has to be combined with either --specific USER1 USER2 ... or --all")
+        sys.exit(1)
+
+    if args.all and args.specific:
+        print("You can't send a message to --all and --specific")
+        sys.exit(1)
+
+    if args.specific and not args.platform:
+        print("--Platform required for --specific USER1 USER2 ...")
+        sys.exit(1)
+
+    # Read Config
+    config = parse_config(args.config)
+
+    if args.check_updates:
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="updater.log")
 
@@ -239,17 +256,8 @@ if __name__ == "__main__":
             asyncio.run(iface.sendDailyReports())
 
     elif args.daily_report:
-        if args.signal:
-            messenger = "signal"
-        elif args.threema:
-            messenger = "threema"
-        elif args.telegram:
-            messenger = "telegram"
-        else:
-            raise ValueError("You have to specify a valid messenger to send daily reports")
-
         # Setup Logging
-        logging.basicConfig(format=logging_format, level=logging_level, filename=f"reports-{messenger}.log")
+        logging.basicConfig(format=logging_format, level=logging_level, filename=f"reports-{args.platform}.log")
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
@@ -258,9 +266,9 @@ if __name__ == "__main__":
             stream_handler.setLevel(logging.ERROR)
         logging.getLogger().addHandler(stream_handler)
 
-        asyncio.run(sendUpdates(messenger))
+        asyncio.run(sendUpdates(args.platform))
 
-    elif args.message or args.message_file:
+    elif args.message_user:
         # Setup Logging
         logging.basicConfig(format=logging_format, level=logging_level, filename="message-users.log")
 
@@ -270,35 +278,29 @@ if __name__ == "__main__":
         logging.getLogger().addHandler(stream_handler)
 
         message_input = None
-        if args.message_file:
-            with open(args.message_file, "r") as f:
+        if args.file:
+            with open(args.file, "r") as f:
                 message_input = f.read()
 
         recipients_input = []
         if args.specific:
             recipients_input = args.specific
 
-        messenger = None
-        if args.telegram:
-            messenger = "telegram"
-        elif args.threema:
-            messenger = "threema"
-        elif args.signal:
-            messenger = "signal"
+        messenger = args.platform
         asyncio.run(send_all(message_input, recipients_input, config, messenger))
-    elif args.interactive:
+    elif args.platform == "shell":
         with MessengerBotSetup("interactive", config, logging_level) as interface:
             logging.info("### Start Interactive Bot ###")
             interface.run()
-    elif args.signal:
+    elif args.platform == "signal":
         with MessengerBotSetup("signal", config, logging_level) as interface:
             logging.info("### Start Signal Bot ###")
             interface.run()
-    elif args.threema:
+    elif args.platform == "threema":
         with MessengerBotSetup("threema", config, logging_level) as interface:
             logging.info("### Start Threema Bot ###")
             interface.run()
-    elif args.telegram:
+    elif args.platform == "telegram":
         with MessengerBotSetup("telegram", config, logging_level) as interface:
             logging.info("### Start Telegram Bot ###")
             interface.run()
