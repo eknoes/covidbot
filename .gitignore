@@ -14,3 +14,6 @@ data.csv
 *.log
 /covidbot/tests/current_test.csv
 *.pyc
+
+# Sphinx documentation
+docs/_build/
