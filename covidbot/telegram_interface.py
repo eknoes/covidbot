@@ -21,10 +21,11 @@ from covidbot.messenger_interface import MessengerInterface
 Telegram Aktionen:
 hilfe - Infos zur Benutzung
 info - Erläuterung der Zahlen
-ort - Aktuelle Zahlen für den Ort
+daten - Aktuelle Zahlen für den Ort
 abo - Abonniere Ort
 beende - Widerrufe Abonnement
 bericht - Aktueller Bericht
+impfungen - Zeige Impfbericht
 statistik - Nutzungsstatistik
 datenschutz - Datenschutzerklärung
 loeschmich - Lösche alle Daten
@@ -62,6 +63,7 @@ class TelegramInterface(MessengerInterface):
         self.updater.dispatcher.add_handler(CommandHandler('datenschutz', self.privacyHandler))
         self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('daten', self.currentHandler))
         self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
         self.updater.dispatcher.add_handler(CommandHandler('impfungen', self.vaccHandler))
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
@@ -127,7 +129,6 @@ class TelegramInterface(MessengerInterface):
                     self.addToFileCache(district_id, message.photo[-1])
             else:
                 update.message.reply_html(message, disable_web_page_preview=True)
-        self.log.debug("Someone called /ort")
 
     @staticmethod
     def deleteHandler(update: Update, context: CallbackContext) -> None:
@@ -255,7 +256,7 @@ class TelegramInterface(MessengerInterface):
             # See #82: https://github.com/eknoes/covid-bot/issues/82
             cmd_with_args = update.message.text.split()
             if cmd_with_args[0].lower() in ["hilfe", "info", "loeschmich", "datenschutz", "start", "bericht", "ort",
-                                            "abo", "beende", "statistik", "sprache", "debug", "impfungen"]:
+                                            "abo", "beende", "statistik", "sprache", "debug", "impfungen", "daten"]:
                 update.message.text = f"/{update.message.text}"
                 update.message.entities = [MessageEntity(MessageEntity.BOT_COMMAND, offset=0, length=len(cmd_with_args[0]) + 1)]
                 return self.updater.dispatcher.process_update(update)

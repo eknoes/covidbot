@@ -560,7 +560,7 @@ class Bot(object):
 
         message += ('\n\n'
                     '<b>📈 Informationen erhalten</b>\n'
-                    'Wählst du "Bericht" aus, erhältst Du einmalig Informationen über diesen Ort. Diese '
+                    'Wählst du "Daten" aus, erhältst Du einmalig Informationen über diesen Ort. Diese '
                     'enthalten eine Grafik die für diesen Ort generiert wurde.\n'
                     'Wählst du "Starte Abo" aus, wird dieser Ort in deinem '
                     'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '

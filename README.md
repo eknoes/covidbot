@@ -90,9 +90,13 @@ Um das zu verhindern, nutzen wir Lockfiles mit Flock.
 */15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n resources/tmp/data-update.lock python -m covidbot --check-updates'
 
 # Messenger
-*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n resources/tmp/signal-reports.lock python -m covidbot --daily-report --platform signal'
-*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n resources/tmp/threema-reports.lock python -m covidbot --daily-report --platform threema'
-*/15 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n resources/tmp/telegram-reports.lock python -m covidbot --daily-report --platform telegram'
+*/5 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n resources/tmp/signal-reports.lock python -m covidbot --daily-report --platform signal'
+*/5 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n resources/tmp/threema-reports.lock python -m covidbot --daily-report --platform threema'
+*/5 * * * * /usr/bin/env bash -c 'cd /home/covidbot/covid-bot && source venv/bin/activate && /usr/bin/flock -n resources/tmp/telegram-reports.lock python -m covidbot --daily-report --platform telegram'
+
+# Restart due to graph cache currently not dependent on date
+20 8 * * * supervisorctl restart telegrambot
+20 8 * * * supervisorctl restart threemabot
 ```
 
 ## Architektur
