@@ -12,7 +12,7 @@ from threema.gateway.e2e import create_application, add_callback_route, TextMess
 from covidbot.bot import Bot
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.text_interface import SimpleTextInterface, BotResponse
-from covidbot.utils import adapt_text
+from covidbot.utils import adapt_text, str_bytelen
 
 
 class ThreemaInterface(SimpleTextInterface, MessengerInterface):
@@ -97,6 +97,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
 
     async def sendDailyReports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
+        if not unconfirmed_reports:
+            return
         daily_graph = self.bot.get_graphical_report(0)
         attachment = self.get_attachment(daily_graph, 0)
         for userid, message in unconfirmed_reports:
@@ -105,8 +107,23 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                                             to_id=userid)
                 await response_img.send()
 
-            report = TextMessage(self.connection, text=adapt_text(message, True), to_id=userid)
-            await report.send()
+            # Max len of 3500 bytes
+            split_message = message.split('\n')
+            send_message = ""
+            for part in split_message:
+                if str_bytelen(part) + str_bytelen(send_message) + str_bytelen('\n') < 3500:
+                    send_message += part + '\n'
+                else:
+                    self.log.info(f"Message to {userid} has to be split")
+                    send_message.strip('\n')
+                    message_part = TextMessage(self.connection, text=adapt_text(send_message, True), to_id=userid)
+                    await message_part.send()
+                    send_message = ""
+
+            if send_message:
+                send_message.strip('\n')
+                report = TextMessage(self.connection, text=adapt_text(send_message, True), to_id=userid)
+                await report.send()
             self.bot.confirm_daily_report_send(userid)
             self.log.warning(f"Sent report to {userid}")
 

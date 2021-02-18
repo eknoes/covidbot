@@ -123,3 +123,7 @@ def format_float(incidence: float) -> str:
     if incidence is not None:
         return "{0:.2f}".format(float(incidence)).replace(".", ",")
     return "Keine Daten"
+
+
+def str_bytelen(s) -> int:
+    return len(s.encode('utf-8'))
