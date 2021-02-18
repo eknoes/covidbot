@@ -91,9 +91,10 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             await response_img.send()
 
         if response.message:
-            response_msg = TextMessage(self.connection, text=adapt_text(response.message, True),
-                                       to_id=user)
-            await response_msg.send()
+            message_parts = self.split_messages(response.message)
+            for m in message_parts:
+                response_msg = TextMessage(self.connection, text=m, to_id=user)
+                await response_msg.send()
 
     async def sendDailyReports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
@@ -107,25 +108,29 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                                             to_id=userid)
                 await response_img.send()
 
-            # Max len of 3500 bytes
-            split_message = message.split('\n')
-            send_message = ""
-            for part in split_message:
-                if str_bytelen(part) + str_bytelen(send_message) + str_bytelen('\n') < 3500:
-                    send_message += part + '\n'
-                else:
-                    self.log.info(f"Message to {userid} has to be split")
-                    send_message.strip('\n')
-                    message_part = TextMessage(self.connection, text=adapt_text(send_message, True), to_id=userid)
-                    await message_part.send()
-                    send_message = ""
-
-            if send_message:
-                send_message.strip('\n')
-                report = TextMessage(self.connection, text=adapt_text(send_message, True), to_id=userid)
+            message_parts = self.split_messages(message)
+            for m in message_parts:
+                report = TextMessage(self.connection, text=m, to_id=userid)
                 await report.send()
             self.bot.confirm_daily_report_send(userid)
             self.log.warning(f"Sent report to {userid}")
+
+    @staticmethod
+    def split_messages(message: str) -> List[str]:
+        # Max len of 3500 bytes
+        current_part = ""
+        message = adapt_text(message, True)
+        split_message = []
+        for part in message.split('\n'):
+            if str_bytelen(part) + str_bytelen(current_part) + str_bytelen('\n') < 3500:
+                current_part += part + '\n'
+            else:
+                current_part.strip('\n')
+                split_message.append(current_part)
+                current_part = ""
+        if current_part:
+            split_message.append(current_part.strip('\n'))
+        return split_message
 
     async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
