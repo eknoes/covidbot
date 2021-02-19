@@ -252,7 +252,7 @@ class UserManager(object):
                            f"Plattform: {row['platform']}\n" \
                            f"Plattform ID: {row['platform_id']}\n" \
                            f"Befehl zum Antworten:\n" \
-                           f"<code>python -m covidbot --message --{row['platform']} --specific {row['platform_id']}" \
+                           f"<code>python -m covidbot --message-user --platform {row['platform']} --specific {row['platform_id']}" \
                            f"</code>"
                 results.append((row['id'], feedback))
             return results
