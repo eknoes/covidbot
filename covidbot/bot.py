@@ -44,6 +44,12 @@ class Bot(object):
             return self._manager.get_user(user_id).activated
         return False
 
+    def activate_user(self, user_identification: Union[int, str]):
+        self._manager.set_user_activated(user_identification)
+
+    def disable_user(self, user_identification: Union[int, str]):
+        self._manager.set_user_activated(user_identification, activated=False)
+
     def set_language(self, user_identification: Union[int, str], language: Optional[str]) -> str:
         user_id = self._manager.get_user_id(user_identification)
         if not language:

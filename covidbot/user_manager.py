@@ -49,9 +49,9 @@ class UserManager(object):
                            'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             self.connection.commit()
 
-    def activate_user(self, user_id: int) -> None:
+    def set_user_activated(self, user_id: int, activated=True) -> None:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("UPDATE bot_user SET activated=1 WHERE user_id=%s", [user_id])
+            cursor.execute("UPDATE bot_user SET activated=%s WHERE user_id=%s", [activated, user_id])
             self.connection.commit()
 
     def get_user_id(self, identifier: str, create_if_not_exists=True) -> Optional[int]:

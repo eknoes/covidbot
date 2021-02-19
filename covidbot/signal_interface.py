@@ -64,7 +64,13 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 # This is a location
                 text = re.sub('\nhttps://maps.google.com/maps\?q=.*', '', text)
                 # Strip URL so it is searched for the contained address
-            reply = self.handle_input(text, ctx.message.source)
+            platform_id = ctx.message.source
+            # Currently, we disable user that produce errors on sending the daily report
+            # If they would query our bot, we'd like to have them activated before we process their query
+            # This is a hacky workaround for https://github.com/eknoes/covidbot/issues/103
+            if not self.bot.is_user_activated(platform_id):
+                self.bot.activate_user(platform_id)
+            reply = self.handle_input(text, platform_id)
             if reply:
                 await self.reply_message(ctx, reply)
             await ctx.message.typing_stopped()
@@ -111,6 +117,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 else:
                     self.log.error(f"({message_counter}/{len(unconfirmed_reports)}) Error sending daily report to {userid}")
                     backoff_time = 2 ^ ceil(backoff_time)
+                    # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
+                    self.bot.disable_user(userid)
 
                 sleep_seconds = backoff_time
                 self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
