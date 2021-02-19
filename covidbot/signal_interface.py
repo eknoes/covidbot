@@ -69,7 +69,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             # If they would query our bot, we'd like to have them activated before we process their query
             # This is a hacky workaround for https://github.com/eknoes/covidbot/issues/103
             if not self.bot.is_user_activated(platform_id):
-                self.bot.activate_user(platform_id)
+                self.bot.enable_user(platform_id)
             reply = self.handle_input(text, platform_id)
             if reply:
                 await self.reply_message(ctx, reply)
