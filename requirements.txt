@@ -1,4 +1,4 @@
-aiohttp==3.7.3
+aiohttp==3.7.4
 anyio==2.1.0
 APScheduler==3.6.3
 async-timeout==3.0.1
