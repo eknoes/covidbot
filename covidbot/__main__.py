@@ -242,8 +242,9 @@ if __name__ == "__main__":
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
-                        asyncio.run(telegram.sendMessageTo(f"Got new data from {updater.__class__.__name__}",
-                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
+                        with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
+                            asyncio.run(telegram.sendMessageTo(f"Got new data from {updater.__class__.__name__}",
+                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
                 except ValueError as error:
                     # Data did not make it through plausibility check
                     print(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}")
