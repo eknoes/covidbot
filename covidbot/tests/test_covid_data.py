@@ -4,7 +4,8 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import CovidData, DistrictData, TrendValue, RKIUpdater
+from covidbot.covid_data import CovidData, DistrictData, TrendValue
+from covidbot.covid_data_updater import RKIUpdater
 
 
 class CovidDataTest(TestCase):
