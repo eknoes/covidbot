@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   covidbot.covid_data
    covidbot.tests
 
 Submodules
@@ -16,14 +17,6 @@ covidbot.bot module
 -------------------
 
 .. automodule:: covidbot.bot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-covidbot.covid\_data module
----------------------------
-
-.. automodule:: covidbot.covid_data
    :members:
    :undoc-members:
    :show-inheritance:
