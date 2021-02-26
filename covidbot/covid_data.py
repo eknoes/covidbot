@@ -380,7 +380,7 @@ class RKIUpdater(CovidDataUpdater):
 
         # Check for Plausibility, as Dataset has been wrong sometimes
         germany = self.get_country_data()
-        if germany.new_cases and germany.new_cases <= 0 or germany.new_cases >= 100000 \
+        if germany.new_cases and (germany.new_cases <= 0 or germany.new_cases >= 100000) \
                 or germany.new_deaths and germany.new_deaths <= 0:
             self.log.error("Data is looking weird! Rolling back data update!")
             self.connection.rollback()
