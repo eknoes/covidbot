@@ -161,7 +161,6 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
             try:
                 with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
                     await iface.sendMessageTo(message, recipients, with_report)
-                    logging.info(f"Checked for daily reports on {messenger_interface}")
             except Exception as e:
                 logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
 
@@ -243,6 +242,8 @@ if __name__ == "__main__":
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
+                        asyncio.run(telegram.sendMessageTo(f"Got new data from {updater.__class__.__name__}",
+                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
                 except ValueError as error:
                     # Data did not make it through plausibility check
                     print(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}")
