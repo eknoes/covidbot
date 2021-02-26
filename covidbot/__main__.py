@@ -9,9 +9,8 @@ from typing import List
 from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
-from covidbot.covid_data import CovidData
-from covidbot.covid_data_updater import RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
-    VaccinationGermanyImpfdashboardUpdater
+from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, VaccinationGermanyImpfdashboardUpdater, \
+    RValueGermanyUpdater, RKIUpdater
 from covidbot.feedback_forwarder import FeedbackForwarder
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.signal_interface import SignalInterface

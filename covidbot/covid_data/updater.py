@@ -8,10 +8,10 @@ from datetime import date, datetime, timedelta
 import requests
 from mysql.connector import MySQLConnection
 
-from covidbot.covid_data import CovidData
+from covidbot.covid_data.covid_data import CovidData
 
 
-class CovidDataUpdater(ABC, CovidData):
+class Updater(ABC, CovidData):
     def __init__(self, conn: MySQLConnection):
         super().__init__(conn)
 
@@ -20,7 +20,7 @@ class CovidDataUpdater(ABC, CovidData):
         pass
 
 
-class RKIUpdater(CovidDataUpdater):
+class RKIUpdater(Updater):
     RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
     log = logging.getLogger(__name__)
 
@@ -134,7 +134,7 @@ class RKIUpdater(CovidDataUpdater):
                                'AND covid_data.rs = incidence.rs')
 
 
-class VaccinationGermanyUpdater(CovidDataUpdater):
+class VaccinationGermanyUpdater(Updater):
     log = logging.getLogger(__name__)
     URL = "https://services.arcgis.com/OLiydejKCZTGhvWg/ArcGIS/rest/services/Impftabelle_mit_Zweitimpfungen" \
           "/FeatureServer/0/query?where=1%3D1&objectIds=&time=&resultType=none&outFields=AGS%2C+Bundesland%2C" \
@@ -206,7 +206,7 @@ class VaccinationGermanyUpdater(CovidDataUpdater):
             return new_data
 
 
-class RValueGermanyUpdater(CovidDataUpdater):
+class RValueGermanyUpdater(Updater):
     log = logging.getLogger(__name__)
     URL = "https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv?__blob" \
           "=publicationFile"
@@ -275,7 +275,7 @@ class RValueGermanyUpdater(CovidDataUpdater):
         return new_data
 
 # As a backup, it provides numbers only for Germany not for the single states, but is more up-to-date
-class VaccinationGermanyImpfdashboardUpdater(CovidDataUpdater):
+class VaccinationGermanyImpfdashboardUpdater(Updater):
     log = logging.getLogger(__name__)
     URL = "https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv"
 

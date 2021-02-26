@@ -3,7 +3,7 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data_updater import RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
+from covidbot.covid_data import RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
     VaccinationGermanyImpfdashboardUpdater
 
 

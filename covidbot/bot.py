@@ -158,7 +158,7 @@ class Bot(object):
                     vacc_full=format_int(parent_data.vaccinations.vaccinated_full),
                     vacc_date=parent_data.vaccinations.date.strftime("%d.%m.%Y"))
 
-        earliest_data = reduce(lambda x, y: x if x.vaccinations.date < y.vaccinations.date else y, children_data)
+        earliest_data = reduce(lambda x, y: x.vaccinations.date if x.vaccinations.date < y.vaccinations.date else y.vaccinations.date, children_data)
         message += "<b>💉 Impfdaten der Länder</b>\n" \
                    "Angegeben ist der Anteil der Bevölkerung, die mindestens eine Impfung erhalten hat, sowie der " \
                    "Anteil der Bevölkerung, der einen vollen Impfschutz hat.\n\n"
@@ -174,7 +174,7 @@ class Bot(object):
                    ' im <a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
                    'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
             .format(info_command=self.format_command("Info"),
-                    earliest_vacc_date=parent_data.vaccinations.date.strftime("%d.%m.%Y"))
+                    earliest_vacc_date=earliest_data.strftime("%d.%m.%Y"))
         return message
 
     def get_district_report(self, district_id: int) -> str:
