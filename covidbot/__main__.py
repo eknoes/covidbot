@@ -157,7 +157,7 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
             await iface.sendMessageTo(message, recipients, with_report)
 
     else:
-        for messenger_interface in ["signal", "telegram", "threema"]:
+        for messenger_interface in ["telegram", "threema", "signal"]:
             try:
                 with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
                     await iface.sendMessageTo(message, recipients, with_report)
