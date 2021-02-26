@@ -394,7 +394,7 @@ class TelegramInterface(MessengerInterface):
                     sliding_flood_window.append(time.perf_counter())
 
                 sliding_flood_window.append(time.perf_counter())
-                self.log.info(f"Sent message to {str(uid)}")
+                self.log.warning(f"Sent message to {str(uid)}")
             except BadRequest as error:
                 self.log.warning(f"Could not send message to {str(uid)}: {str(error)}")
 
