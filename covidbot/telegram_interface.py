@@ -391,12 +391,14 @@ class TelegramInterface(MessengerInterface):
                     self.sendReport(uid)
                     # As 2 messages are sent
                     sliding_flood_window.append(time.perf_counter())
-                    sliding_flood_window.append(time.perf_counter())
 
                 sliding_flood_window.append(time.perf_counter())
                 self.log.warning(f"Sent message to {str(uid)}")
             except BadRequest as error:
                 self.log.warning(f"Could not send message to {str(uid)}: {str(error)}")
+            except Unauthorized:
+                self._bot.delete_user(uid)
+                self.log.warning(f"Could not send message to {str(uid)} as he blocked us")
 
     def error_callback(self, update: Update, context: CallbackContext):
         # Send all errors to maintainers
