@@ -115,7 +115,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                     if backoff_time > 1:
                         backoff_time = 0.7 * backoff_time
                 else:
-                    self.log.error(f"({message_counter}/{len(unconfirmed_reports)}) Error sending daily report to {userid}")
+                    self.log.error(
+                        f"({message_counter}/{len(unconfirmed_reports)}) Error sending daily report to {userid}")
                     backoff_time = 2 ^ ceil(backoff_time)
                     # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
                     self.bot.disable_user(userid)
@@ -148,29 +149,47 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
-            flood_count = 0
+            backoff_time = random.uniform(0.5, 2)
+            message_counter = 0
             for user in users:
-                # TODO: Find out more about Signals Flood limits -> this is very conservative, but also very slow
-                if flood_count % 1 == 0:
-                    sleep_seconds = random.uniform(0.3, 2)
-                    self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
-                    time.sleep(sleep_seconds)
-                    flood_count += 1
+                success = await bot.send_message(user, adapt_text(message))
+                if success:
+                    self.log.warning(f"Sent message to {user}")
+                    if backoff_time > 1:
+                        backoff_time = 0.7 * backoff_time
+                else:
+                    self.log.error(f"Error sending message to {user}")
+                    backoff_time = 2 ^ ceil(backoff_time)
+                    # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
+                    self.bot.disable_user(user)
 
-                self.log.info(f"Try to send message to user {user}")
-                await bot.send_message(user, adapt_text(message))
+                sleep_seconds = backoff_time
+                self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
+                time.sleep(sleep_seconds)
+                message_counter += 1
+
                 if append_report:
                     response = self.reportHandler("", user)
                     attachments = []
                     if response.image:
                         attachments.append(self.get_attachment(response.image))
-                    await bot.send_message(user, adapt_text(response.message), attachments)
-                self.log.warning(f"Sent message to {user}")
+                    success = await bot.send_message(user, adapt_text(response.message), attachments)
 
-            # Currently semaphore is not waiting for signald's response, whether a message was successful.
-            # Closing the socket immediately after sending leads to an exception on signald, as it sends a SendResponse
-            # but the socket is already closed
-            time.sleep(10)
+                    if success:
+                        self.log.warning(f"Sent message to {user}")
+                        if backoff_time > 1:
+                            backoff_time = 0.7 * backoff_time
+                    else:
+                        self.log.error(f"Error sending message to {user}")
+                        backoff_time = 2 ^ ceil(backoff_time)
+                        # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
+                        self.bot.disable_user(user)
+
+                    sleep_seconds = backoff_time
+                    self.log.info(f"Sleeping {sleep_seconds}s to avoid server limitations")
+                    time.sleep(sleep_seconds)
+                    message_counter += 1
+
         await self.restart_service()
 
     async def sendMessageToDev(self, message: str, bot: semaphore.Bot):
