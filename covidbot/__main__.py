@@ -249,7 +249,7 @@ if __name__ == "__main__":
                     print(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}")
                     with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
                         asyncio.run(telegram.send_message(f"Exception happened on Data Update with "
-                                                           f"{updater.__class__.__name__}: {error}",
+                                                          f"{updater.__class__.__name__}: {error}",
                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Forward Feedback

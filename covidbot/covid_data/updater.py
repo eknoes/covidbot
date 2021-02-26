@@ -4,6 +4,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
+from typing import Optional
 
 import requests
 from mysql.connector import MySQLConnection
@@ -15,6 +16,18 @@ class Updater(ABC, CovidData):
     def __init__(self, conn: MySQLConnection):
         super().__init__(conn)
 
+    def get_resource(self, url: str, last_update: Optional[datetime]) -> Optional[bytes]:
+        header = {}
+        if last_update:
+            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
+        response = requests.get(url, headers=header)
+        if response.status_code == 200:
+            return response.content
+        elif response.status_code == 304:
+            self.log.info("No new data available")
+        else:
+            raise ValueError("Updater Response Status Code is " + str(response.status_code))
+
     @abstractmethod
     def update(self) -> bool:
         pass
@@ -25,29 +38,17 @@ class RKIUpdater(Updater):
     log = logging.getLogger(__name__)
 
     def update(self) -> bool:
-        self.log.info("Check for new RKI data")
         last_update = self.get_last_update()
-        header = {}
-        if last_update:
-            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
-            if last_update == date.today():
-                self.log.info(f"Do not update as current data is from {last_update}")
-                return False
 
-        r = requests.get(self.RKI_LK_CSV, headers=header)
-        if r.status_code == 200:
+        response = self.get_resource(self.RKI_LK_CSV, last_update)
+        if response:
             self.log.debug("Got RKI Data, checking if new")
-
-            rki_data = codecs.decode(r.content, "utf-8").splitlines()
+            rki_data = codecs.decode(response, "utf-8").splitlines()
             reader = csv.DictReader(rki_data)
             self.add_data(reader)
             if last_update is None or last_update < self.get_last_update():
                 logging.info(f"Received new data, data is now from {self.get_last_update()}")
                 return True
-        elif r.status_code == 304:
-            self.log.info("RKI has no new data")
-        else:
-            raise ValueError("RKI CSV Response Status Code is " + str(r.status_code))
         return False
 
     def add_data(self, reader: csv.DictReader) -> None:
@@ -151,22 +152,14 @@ class VaccinationGermanyUpdater(Updater):
             updated = cursor.fetchone()
             if updated:
                 last_update = updated[0]
+        new_data = False
 
-        header = {}
-        if last_update:
-            if last_update.date() == date.today():
-                self.log.info(f"Do not update as current data is from {last_update}")
-                return False
-
-            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
-
-        r = requests.get(self.URL, headers=header)
-        if r.status_code == 200:
+        response = self.get_resource(self.URL, last_update)
+        if response:
             self.log.debug("Got Vaccination Data")
-            data = json.loads(r.content)
+            data = json.loads(response)
 
             with self.connection.cursor() as cursor:
-                new_data = False
                 for row in data['features']:
                     row = row['attributes']
                     if row['Bundesland'] == "Gesamt":
@@ -203,7 +196,7 @@ class VaccinationGermanyUpdater(Updater):
                                    [district_id, updated, row['Impfungen_kumulativ'],
                                     row['Zweitimpfungen_kumulativ'], rate_partial, rate_full])
             self.connection.commit()
-            return new_data
+        return new_data
 
 
 class RValueGermanyUpdater(Updater):
@@ -219,21 +212,14 @@ class RValueGermanyUpdater(Updater):
             updated = cursor.fetchone()
             if updated:
                 last_update = updated[0]
-
-        header = {}
-        if last_update:
-            if last_update.date() == date.today():
-                self.log.info(f"Do not update R-Value data, current is from {last_update}")
-                return False
-
-            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
-
-        r = requests.get(self.URL, headers=header)
         new_data = False
-        if r.status_code == 200:
+
+        response = self.get_resource(self.URL, last_update)
+
+        if response:
             self.log.debug("Got R-Value Data")
 
-            rki_data = codecs.decode(r.content, "utf-8").splitlines()
+            rki_data = codecs.decode(response, "utf-8").splitlines()
             reader = csv.DictReader(rki_data, delimiter=';', )
             district_id = self.search_district_by_name("Deutschland")
             if not district_id:
@@ -274,6 +260,7 @@ class RValueGermanyUpdater(Updater):
             self.connection.commit()
         return new_data
 
+
 # As a backup, it provides numbers only for Germany not for the single states, but is more up-to-date
 class VaccinationGermanyImpfdashboardUpdater(Updater):
     log = logging.getLogger(__name__)
@@ -292,20 +279,12 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
             updated = cursor.fetchone()
             if updated:
                 last_update = updated[0]
-
-        header = {}
-        if last_update:
-            if last_update.date() == date.today():
-                self.log.info(f"Do not update as current data is from {last_update}")
-                return False
-
-            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
-
-        r = requests.get(self.URL, headers=header)
         new_data = False
-        if r.status_code == 200:
+
+        response = self.get_resource(self.URL, last_update)
+        if response:
             self.log.debug("Got Vaccination Data from Impfdashboard")
-            dashboard_data = codecs.decode(r.content, "utf-8").splitlines()
+            dashboard_data = codecs.decode(response, "utf-8").splitlines()
             reader = csv.DictReader(dashboard_data, delimiter='\t', quoting=csv.QUOTE_NONE)
 
             with self.connection.cursor() as cursor:

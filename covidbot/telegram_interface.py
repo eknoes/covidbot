@@ -258,7 +258,8 @@ class TelegramInterface(MessengerInterface):
             if cmd_with_args[0].lower() in ["hilfe", "info", "loeschmich", "datenschutz", "start", "bericht", "ort",
                                             "abo", "beende", "statistik", "sprache", "debug", "impfungen", "daten"]:
                 update.message.text = f"/{update.message.text}"
-                update.message.entities = [MessageEntity(MessageEntity.BOT_COMMAND, offset=0, length=len(cmd_with_args[0]) + 1)]
+                update.message.entities = [
+                    MessageEntity(MessageEntity.BOT_COMMAND, offset=0, length=len(cmd_with_args[0]) + 1)]
                 return self.updater.dispatcher.process_update(update)
 
             msg, districts = self._bot.find_district_id(update.message.text)
@@ -382,7 +383,7 @@ class TelegramInterface(MessengerInterface):
                 if len(sliding_flood_window) >= 5:
                     # We want to send 25 messages per second max (might be even more due to append_report)
                     flood_window_diff = time.perf_counter() - sliding_flood_window.pop(0)
-                    if flood_window_diff < 1.05: # safety margin
+                    if flood_window_diff < 1.05:  # safety margin
                         self.log.info(f"Sleep for {1.05 - flood_window_diff}s")
                         time.sleep(1.05 - flood_window_diff)
 
