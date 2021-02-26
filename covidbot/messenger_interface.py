@@ -6,14 +6,14 @@ class MessengerInterface(ABC):
     """Interface to implement the bot on a certain platform"""
 
     @abstractmethod
-    async def sendDailyReports(self) -> None:
+    async def send_daily_reports(self) -> None:
         """Checks :py:meth:`covidbot.Bot.get_unconfirmed_daily_reports` for new reports and sends them to the users of
         the implemented platform.
         """
         pass
 
     @abstractmethod
-    async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
         """Sends a message to a set of users
 
         Args:

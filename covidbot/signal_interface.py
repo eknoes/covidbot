@@ -91,7 +91,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             f.write(image.getbuffer())
         return {"filename": filename, "width": "900", "height": "600"}
 
-    async def sendDailyReports(self) -> None:
+    async def send_daily_reports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
         if not unconfirmed_reports:
             return
@@ -143,7 +143,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             return
         self.log.warning("Restarted signalbot service")
 
-    async def sendMessageTo(self, message: str, users: List[str], append_report=False):
+    async def send_message(self, message: str, users: List[str], append_report=False):
         if not users:
             users = map(lambda x: x.platform_id, self.bot.get_all_user())
 

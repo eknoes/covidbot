@@ -309,7 +309,7 @@ class TelegramInterface(MessengerInterface):
         markup = InlineKeyboardMarkup(buttons)
         return message, markup
 
-    async def sendDailyReports(self) -> None:
+    async def send_daily_reports(self) -> None:
         self.log.debug("Check for new daily reports update")
         messages = self._bot.get_unconfirmed_daily_reports()
         if not messages:
@@ -373,7 +373,7 @@ class TelegramInterface(MessengerInterface):
     def vaccHandler(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_html(self._bot.get_vaccination_overview(0), disable_web_page_preview=True)
 
-    async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
             users = map(lambda x: x.platform_id, self._bot.get_all_user())
         sliding_flood_window = []

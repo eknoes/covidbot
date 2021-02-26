@@ -17,7 +17,7 @@ class FeedbackForwarder(MessengerInterface):
         self.user_manager = user_manager
         self.updater = Updater(api_key)
 
-    async def sendDailyReports(self) -> None:
+    async def send_daily_reports(self) -> None:
         # This method is not used for daily reports, but to forward feedback to the developers
 
         i = 0
@@ -33,7 +33,7 @@ class FeedbackForwarder(MessengerInterface):
             else:
                 self.log.error(f"Could not forward feedback {feedback_id}")
 
-    async def sendMessageTo(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
         raise NotImplementedError("This is just an interface to forward feedback from users to developers")
 
     def run(self) -> None:

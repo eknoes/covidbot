@@ -4,7 +4,6 @@ import configparser
 import locale
 import logging
 import sys
-from functools import reduce
 from typing import List
 
 from mysql.connector import connect, MySQLConnection
@@ -109,7 +108,7 @@ class MessengerBotSetup:
 async def sendUpdates(messenger_iface: str):
     try:
         with MessengerBotSetup(messenger_iface, config, setup_logs=False) as iface:
-            await iface.sendDailyReports()
+            await iface.send_daily_reports()
             logging.info(f"Checked for daily reports on {messenger_iface}")
     except Exception as e:
         logging.error(f"Got exception while sending daily reports for {messenger_iface}: {e}", exc_info=e)
@@ -154,13 +153,13 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
 
     if messenger_interface:
         with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
-            await iface.sendMessageTo(message, recipients, with_report)
+            await iface.send_message(message, recipients, with_report)
 
     else:
         for messenger_interface in ["telegram", "threema", "signal"]:
             try:
                 with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
-                    await iface.sendMessageTo(message, recipients, with_report)
+                    await iface.send_message(message, recipients, with_report)
             except Exception as e:
                 logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
 
@@ -243,19 +242,19 @@ if __name__ == "__main__":
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
                         with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
-                            asyncio.run(telegram.sendMessageTo(f"Got new data from {updater.__class__.__name__}",
-                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
+                            asyncio.run(telegram.send_message(f"Got new data from {updater.__class__.__name__}",
+                                                              [config["TELEGRAM"].get("DEV_CHAT")]))
                 except ValueError as error:
                     # Data did not make it through plausibility check
                     print(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}")
                     with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
-                        asyncio.run(telegram.sendMessageTo(f"Exception happened on Data Update with "
+                        asyncio.run(telegram.send_message(f"Exception happened on Data Update with "
                                                            f"{updater.__class__.__name__}: {error}",
-                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
+                                                          [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Forward Feedback
         with MessengerBotSetup("feedback", config, setup_logs=False) as iface:
-            asyncio.run(iface.sendDailyReports())
+            asyncio.run(iface.send_daily_reports())
 
     elif args.daily_report:
         # Setup Logging
