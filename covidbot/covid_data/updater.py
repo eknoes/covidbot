@@ -4,6 +4,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
+import random
 from typing import Optional
 
 import requests
@@ -16,7 +17,11 @@ class Updater(ABC, CovidData):
     def __init__(self, conn: MySQLConnection):
         super().__init__(conn)
 
-    def get_resource(self, url: str, last_update: Optional[datetime]) -> Optional[bytes]:
+    def get_resource(self, url: str, last_update: Optional[datetime], chance: Optional[float] = 1.0) -> Optional[bytes]:
+        # Just fetch for a certain chance, 100% by default
+        if random.uniform(0.0, 1.0) > chance:
+            return None
+
         header = {}
         if last_update:
             header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
@@ -40,6 +45,10 @@ class RKIUpdater(Updater):
 
     def update(self) -> bool:
         last_update = self.get_last_update()
+
+        # Do not fetch if data is from today
+        if last_update == date.today():
+            return False
 
         response = self.get_resource(self.RKI_LK_CSV, last_update)
         if response:
@@ -153,6 +162,9 @@ class VaccinationGermanyUpdater(Updater):
             updated = cursor.fetchone()
             if updated:
                 last_update = updated[0]
+                if last_update.date() == date.today():
+                    return False
+
         new_data = False
 
         response = self.get_resource(self.URL, last_update)
@@ -213,9 +225,11 @@ class RValueGermanyUpdater(Updater):
             updated = cursor.fetchone()
             if updated:
                 last_update = updated[0]
-        new_data = False
+                if last_update.date() == date.today():
+                    return False
 
-        response = self.get_resource(self.URL, last_update)
+        new_data = False
+        response = self.get_resource(self.URL, last_update, 0.3)
 
         if response:
             self.log.debug("Got R-Value Data")
@@ -280,8 +294,10 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
             updated = cursor.fetchone()
             if updated:
                 last_update = updated[0]
-        new_data = False
+                if last_update.date() == date.today():
+                    return False
 
+        new_data = False
         response = self.get_resource(self.URL, last_update)
         if response:
             self.log.debug("Got Vaccination Data from Impfdashboard")
