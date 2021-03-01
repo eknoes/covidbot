@@ -22,7 +22,7 @@ class Updater(ABC, CovidData):
         if random.uniform(0.0, 1.0) > chance:
             return None
 
-        header = {}
+        header = {"user-agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
         if last_update:
             header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
         self.log.debug(f"Requesting url {url}")
