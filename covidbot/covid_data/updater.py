@@ -20,13 +20,14 @@ class Updater(ABC, CovidData):
         header = {}
         if last_update:
             header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
+        self.log.debug(f"Requesting url {url}")
         response = requests.get(url, headers=header)
         if response.status_code == 200:
             return response.content
         elif response.status_code == 304:
             self.log.info("No new data available")
         else:
-            raise ValueError("Updater Response Status Code is " + str(response.status_code))
+            raise ValueError(f"Updater Response Status Code is {response.status_code}: {response.reason}")
 
     @abstractmethod
     def update(self) -> bool:
