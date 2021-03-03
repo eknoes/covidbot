@@ -237,7 +237,7 @@ if __name__ == "__main__":
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
             for updater in [VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn),
-                            VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn)]:
+                            VaccinationGermanyUpdater(conn)]:  # TODO: RValueGermanyUpdater(conn)]:
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
