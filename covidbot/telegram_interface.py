@@ -189,7 +189,14 @@ class TelegramInterface(MessengerInterface):
         elif update.edited_channel_post:
             update.message = update.edited_channel_post
             update.edited_channel_post = None
-        self.updater.dispatcher.process_update(update)
+
+        entities = update.message.parse_entities()
+        for entity in entities:
+            if entity.type == entity.MENTION and context.bot.username == entities[entity][1:]:
+                # Strip mention from message
+                update.message.text = (update.message.text[0:entity.offset] + update.message.text[entity.length:]).strip()
+                self.updater.dispatcher.process_update(update)
+                return
 
     def callbackHandler(self, update: Update, context: CallbackContext) -> None:
         query = update.callback_query
