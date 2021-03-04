@@ -57,6 +57,7 @@ class TelegramInterface(MessengerInterface):
 
     def run(self):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.update.channel_posts, self.channelPostHandler))
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
         self.updater.dispatcher.add_handler(CommandHandler('info', self.infoHandler))
         self.updater.dispatcher.add_handler(CommandHandler('loeschmich', self.deleteHandler))
@@ -90,7 +91,10 @@ class TelegramInterface(MessengerInterface):
         self.graph_cache[district_id] = file
 
     def startHandler(self, update: Update, context: CallbackContext):
-        update.message.reply_html(self._bot.start_message(update.effective_chat.id, update.effective_user.first_name))
+        name = ""
+        if update.effective_user:
+            name = update.effective_user.first_name
+        update.message.reply_html(self._bot.start_message(update.effective_chat.id, name))
         if update.effective_user and update.effective_user.language_code:
             self._bot.set_language(update.effective_chat.id, update.effective_user.language_code)
 
@@ -176,6 +180,15 @@ class TelegramInterface(MessengerInterface):
     def editedMessageHandler(self, update: Update, context: CallbackContext) -> None:
         update.message = update.edited_message
         update.edited_message = None
+        self.updater.dispatcher.process_update(update)
+
+    def channelPostHandler(self, update: Update, context: CallbackContext) -> None:
+        if update.channel_post:
+            update.message = update.channel_post
+            update.channel_post = None
+        elif update.edited_channel_post:
+            update.message = update.edited_channel_post
+            update.edited_channel_post = None
         self.updater.dispatcher.process_update(update)
 
     def callbackHandler(self, update: Update, context: CallbackContext) -> None:
