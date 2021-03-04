@@ -194,7 +194,7 @@ class TelegramInterface(MessengerInterface):
         for entity in entities:
             if entity.type == entity.MENTION and context.bot.username == entities[entity][1:]:
                 # Strip mention from message
-                update.message.text = (update.message.text[0:entity.offset] + update.message.text[entity.length:]).strip()
+                update.message.text = (update.message.text[0:entity.offset] + update.message.text[entity.offset + entity.length:]).strip()
                 self.updater.dispatcher.process_update(update)
                 return
 
