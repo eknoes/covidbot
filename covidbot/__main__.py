@@ -312,4 +312,4 @@ if __name__ == "__main__":
             interface.run()
     elif args.graphic_test:
         vis = Visualization(get_connection(config), os.path.abspath("tmp/"))
-        vis.bot_user_graph()
+        vis.vaccination_graph(0)

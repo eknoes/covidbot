@@ -206,6 +206,49 @@ class Visualization:
             plt.clf()
             return filepath
 
+    def vaccination_graph(self, district_id: int) -> str:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute(
+                "SELECT vaccinated_partial, vaccinated_full, date(updated) as updated FROM covid_vaccinations WHERE district_id=%s ORDER BY updated", [district_id])
+
+            y_data_full = []
+            y_data_partial = []
+            x_data = []
+            today = datetime.date.today()
+            for row in cursor.fetchall():
+                if not row['vaccinated_partial']:
+                    row['vaccinated_partial'] = 0
+
+                if not row['vaccinated_full']:
+                    row['vaccinated_full'] = 0
+                y_data_partial.append(row['vaccinated_partial'])
+                y_data_full.append(row['vaccinated_full'])
+                x_data.append(row['updated'])
+
+            filepath = os.path.join(self.graphics_dir, f"vaccinations-{x_data[-1].isoformat()}-{district_id}.jpg")
+
+            # Do not draw new graphic if its cached
+            # if os.path.isfile(filepath):
+            # return filepath
+
+            fig, ax1 = self.setup_plot(x_data[-1], f"Impfungen {district_id}", "Anzahl Impfungen")
+            # Plot data
+            plt.xticks(x_data, rotation='30', ha='right')
+            ax1.fill_between(x_data, y_data_partial, color="#1fa2de", zorder=3)
+            ax1.fill_between(x_data, y_data_full, color="#222222", zorder=3)
+
+            # One tick every 7 days for easier comparison
+            formatter = mdates.DateFormatter("%a, %d.%m.")
+            ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=x_data[-1].weekday()))
+            ax1.xaxis.set_major_formatter(formatter)
+            ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
+
+            # Save to file
+            plt.savefig(filepath, format='JPEG')
+            plt.show()
+            plt.clf()
+            return filepath
+
     @staticmethod
     def tick_formatter_german_numbers(tick_value, position) -> str:
         return utils.format_int(int(tick_value))
