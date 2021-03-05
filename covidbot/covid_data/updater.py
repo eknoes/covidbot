@@ -22,11 +22,18 @@ class Updater(ABC, CovidData):
         if random.uniform(0.0, 1.0) > chance:
             return None
 
-        header = {"user-agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
+        header = {"User-Agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
         if last_update:
-            header = {"If-Modified-Since": last_update.strftime('%a, %d %b %Y %H:%M:%S GMT')}
+            # need to use our own day/month, as locale can't be changed on the fly and we have to ensure not asking for
+            # Mär in March
+            day = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][last_update.weekday()]
+            month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            month = month[last_update.month - 1]
+            header["If-Modified-Since"] = day + ", " + last_update.strftime(f'%d {month} %Y %H:%M:%S GMT')
+
         self.log.debug(f"Requesting url {url}")
         response = requests.get(url, headers=header)
+
         if response.status_code == 200:
             return response.content
         elif response.status_code == 304:
@@ -229,7 +236,7 @@ class RValueGermanyUpdater(Updater):
                     return False
 
         new_data = False
-        response = self.get_resource(self.URL, last_update, 0.3)
+        response = self.get_resource(self.URL, last_update, 1)
 
         if response:
             self.log.debug("Got R-Value Data")
