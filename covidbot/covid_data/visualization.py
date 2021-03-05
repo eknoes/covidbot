@@ -29,19 +29,20 @@ class Visualization:
         self.graphics_dir = directory
 
     @staticmethod
-    def setup_plot(current_date: datetime.date, title: str, y_label: str) -> Tuple[Figure, Axes]:
+    def setup_plot(current_date: Optional[datetime.date], title: str, y_label: str) -> Tuple[Figure, Axes]:
         fig = plt.figure(figsize=(8, 5), dpi=200)
         gs = gridspec.GridSpec(15, 3)
 
-        # Second subplot just for Source and current date
-        ax2 = fig.add_subplot(gs[14, 0])
-        plt.axis('off')
-        ax2.annotate("Stand: {date}\nQuelle: Robert-Koch-Institut"
-                     .format(date=current_date.strftime("%d.%m.%Y")),
-                     color="#6e6e6e",
-                     xy=(0, -4.5), xycoords='axes fraction',
-                     horizontalalignment='left',
-                     verticalalignment='bottom')
+        if current_date:
+            # Second subplot just for Source and current date
+            ax2 = fig.add_subplot(gs[14, 0])
+            plt.axis('off')
+            ax2.annotate("Stand: {date}\nQuelle: Robert-Koch-Institut"
+                         .format(date=current_date.strftime("%d.%m.%Y")),
+                         color="#6e6e6e",
+                         xy=(0, -4.5), xycoords='axes fraction',
+                         horizontalalignment='left',
+                         verticalalignment='bottom')
 
         # Third subplot for Link
         ax3 = fig.add_subplot(gs[14:, 1])
@@ -148,6 +149,54 @@ class Visualization:
             # One tick every 7 days for easier comparison
             formatter = mdates.DateFormatter("%a, %d.%m.")
             ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=current_date.weekday()))
+            ax1.xaxis.set_major_formatter(formatter)
+            ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
+
+            # Save to file
+            plt.savefig(filepath, format='JPEG')
+            plt.show()
+            plt.clf()
+            return filepath
+
+    def bot_user_graph(self) -> str:
+        now = datetime.datetime.now()
+        filepath = os.path.join(self.graphics_dir, f"botuser-{now.strftime('%Y-%m-%d-%H-00')}.jpg")
+        if os.path.isfile(filepath):
+            return filepath
+
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT COUNT(b.user_id) as count, bot_date FROM "
+                           "(SELECT DISTINCT date(added) as bot_date FROM bot_user) as dates "
+                           "LEFT JOIN bot_user b ON date(b.added) <= bot_date GROUP BY bot_date ORDER BY bot_date")
+
+            y_data = []
+            x_data = []
+            today = datetime.date.today()
+            current = None
+            for row in cursor.fetchall():
+                if not current:
+                    current = row['bot_date']
+                else:
+                    while row['bot_date'] != current + datetime.timedelta(days=1):
+                        current += datetime.timedelta(days=1)
+                        y_data.append(y_data[-1])
+                        x_data.append(current)
+                current = row['bot_date']
+                y_data.append(row['count'])
+                x_data.append(row['bot_date'])
+
+            while x_data[-1] != today:
+                y_data.append(y_data[-1])
+                x_data.append(x_data[-1] + datetime.timedelta(days=1))
+
+            fig, ax1 = self.setup_plot(None, f"Nutzer:innen des Covidbots", "Anzahl")
+            # Plot data
+            plt.xticks(x_data, rotation='30', ha='right')
+            ax1.fill_between(x_data, y_data, color="#1fa2de", zorder=3)
+
+            # One tick every 7 days for easier comparison
+            formatter = mdates.DateFormatter("%a, %d.%m.")
+            ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=today.weekday()))
             ax1.xaxis.set_major_formatter(formatter)
             ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 
