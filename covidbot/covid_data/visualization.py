@@ -3,14 +3,14 @@ import logging
 import os
 from typing import Optional, Tuple
 
-from matplotlib import gridspec, cbook
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+from matplotlib import gridspec
 from matplotlib.axes import Axes
 from matplotlib.cbook import get_sample_data
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from mysql.connector import MySQLConnection
-import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
 
 from covidbot import utils
 from covidbot.utils import format_int
@@ -36,7 +36,7 @@ class Visualization:
         # Second subplot just for Source and current date
         ax2 = fig.add_subplot(gs[14, 0])
         plt.axis('off')
-        ax2.annotate("Stand: {date}\nDaten des RKI"
+        ax2.annotate("Stand: {date}\nQuelle: Robert-Koch-Institut"
                      .format(date=current_date.strftime("%d.%m.%Y")),
                      color="#6e6e6e",
                      xy=(0, -4.5), xycoords='axes fraction',
@@ -129,7 +129,7 @@ class Visualization:
             if os.path.isfile(filepath):
                 return filepath
 
-            fig, ax1 = self.setup_plot(current_date, f"Neuinfektionen in {district_name}", "Neuinfektionen")
+            fig, ax1 = self.setup_plot(current_date, f"Neuinfektionen {district_name}", "Neuinfektionen")
             # Plot data
             plt.xticks(x_data, rotation='30', ha='right')
 
@@ -141,7 +141,7 @@ class Visualization:
                 height = rect.get_height()
                 ax1.annotate(format_int(int(height)),
                              xy=(rect.get_x() + rect.get_width() / 2., height),
-                             xytext=(0, 25), textcoords='offset points',
+                             xytext=(0, 30), textcoords='offset points',
                              arrowprops=dict(arrowstyle="-", facecolor='black'),
                              horizontalalignment='center', verticalalignment='top', bbox=props)
 
