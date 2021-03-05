@@ -1,10 +1,12 @@
 import datetime
 import logging
 import os
-from typing import Optional
+from typing import Optional, Tuple
 
 from matplotlib import gridspec, cbook
+from matplotlib.axes import Axes
 from matplotlib.cbook import get_sample_data
+from matplotlib.figure import Figure
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from mysql.connector import MySQLConnection
 import matplotlib.dates as mdates
@@ -25,6 +27,64 @@ class Visualization:
             raise NotADirectoryError(f"Path {directory} is not a directory")
 
         self.graphics_dir = directory
+
+    @staticmethod
+    def setup_plot(current_date: datetime.date, title: str, y_label: str) -> Tuple[Figure, Axes]:
+        fig = plt.figure(figsize=(8, 5), dpi=200)
+        gs = gridspec.GridSpec(15, 3)
+
+        # Second subplot just for Source and current date
+        ax2 = fig.add_subplot(gs[14, 0])
+        plt.axis('off')
+        ax2.annotate("Stand: {date}\nDaten des RKI"
+                     .format(date=current_date.strftime("%d.%m.%Y")),
+                     color="#6e6e6e",
+                     xy=(0, -4.5), xycoords='axes fraction',
+                     horizontalalignment='left',
+                     verticalalignment='bottom')
+
+        # Third subplot for Link
+        ax3 = fig.add_subplot(gs[14:, 1])
+        plt.axis('off')
+
+        ax3.annotate("Tägliche Updates:\n"
+                     "https://covidbot.d-64.org",
+                     color="#6e6e6e",
+                     xy=(0, -4.5), xycoords='axes fraction',
+                     horizontalalignment='left',
+                     verticalalignment='bottom')
+
+        # 4th subplot for Logo
+        ax4 = fig.add_subplot(gs[14:, 2])
+        plt.axis('off')
+
+        # Annotate the 2nd position with another image (a Grace Hopper portrait)
+        with get_sample_data(os.path.abspath('resources/d64-logo.png')) as logo:
+            arr_img = plt.imread(logo, format='png')
+
+        imagebox = OffsetImage(arr_img, zoom=0.3)
+        imagebox.image.axes = ax4
+
+        ab = AnnotationBbox(imagebox, xy=(0, 0), frameon=False, xybox=(1, -2.5), xycoords='axes fraction',
+                            box_alignment=(1, 1))
+
+        ax4.add_artist(ab)
+
+        ax1 = fig.add_subplot(gs[:14, :])
+
+        # Set title and labels
+        fig.suptitle(title, fontweight="bold")
+        plt.ylabel(y_label)
+
+        # Styling
+        for direction in ["left", "right", "bottom", "top"]:
+            ax1.spines[direction].set_visible(False)
+        plt.grid(axis="y", zorder=0)
+        fig.patch.set_facecolor("#eeeeee")
+        ax1.patch.set_facecolor("#eeeeee")
+        fig.subplots_adjust(bottom=0.2)
+
+        return fig, ax1
 
     def infections_graph(self, district_id: int, duration: int = 49) -> str:
         district_name: Optional[str]
@@ -63,10 +123,13 @@ class Visualization:
                 else:
                     y_data_infections.append(-1)
 
-            fig = plt.figure(figsize=(8, 5), dpi=200)
-            gs = gridspec.GridSpec(15, 3)
+            filepath = os.path.join(self.graphics_dir, f"infections-{current_date.isoformat()}-{district_id}.jpg")
 
-            ax1 = fig.add_subplot(gs[:14, :])
+            # Do not draw new graphic if its cached
+            if os.path.isfile(filepath):
+                return filepath
+
+            fig, ax1 = self.setup_plot(current_date, f"Neuinfektionen in {district_name}", "Neuinfektionen")
             # Plot data
             plt.xticks(x_data, rotation='30', ha='right')
 
@@ -77,10 +140,10 @@ class Visualization:
                 rect = bars[i]
                 height = rect.get_height()
                 ax1.annotate(format_int(int(height)),
-                            xy=(rect.get_x() + rect.get_width() / 2., height),
-                            xytext=(0, 25), textcoords='offset points',
-                            arrowprops=dict(arrowstyle="-", facecolor='black'),
-                            horizontalalignment='center', verticalalignment='top', bbox=props)
+                             xy=(rect.get_x() + rect.get_width() / 2., height),
+                             xytext=(0, 25), textcoords='offset points',
+                             arrowprops=dict(arrowstyle="-", facecolor='black'),
+                             horizontalalignment='center', verticalalignment='top', bbox=props)
 
             # One tick every 7 days for easier comparison
             formatter = mdates.DateFormatter("%a, %d.%m.")
@@ -88,57 +151,7 @@ class Visualization:
             ax1.xaxis.set_major_formatter(formatter)
             ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 
-            # Set title and labels
-            fig.suptitle("Neuinfektionen ({location})".format(location=district_name), fontweight="bold")
-            plt.ylabel("Neuinfektionen")
-
-            # Styling
-            for direction in ["left", "right", "bottom", "top"]:
-                ax1.spines[direction].set_visible(False)
-            plt.grid(axis="y", zorder=0)
-            fig.patch.set_facecolor("#eeeeee")
-            ax1.patch.set_facecolor("#eeeeee")
-            fig.subplots_adjust(bottom=0.2)
-
-            # Second subplot just for Source and current date
-            ax2 = fig.add_subplot(gs[14, 0])
-            plt.axis('off')
-            ax2.annotate("Stand: {date}\nDaten des RKI"
-                         .format(date=current_date.strftime("%d.%m.%Y")),
-                         color="#6e6e6e",
-                         xy=(0, -4.5), xycoords='axes fraction',
-                         horizontalalignment='left',
-                         verticalalignment='bottom')
-
-            # Third subplot for Link
-            ax3 = fig.add_subplot(gs[14:, 1])
-            plt.axis('off')
-
-            ax3.annotate("Tägliche Updates:\n"
-                         "https://covidbot.d-64.org",
-                         color="#6e6e6e",
-                         xy=(0, -4.5), xycoords='axes fraction',
-                         horizontalalignment='left',
-                         verticalalignment='bottom')
-
-            # 4th subplot for Logo
-            ax4 = fig.add_subplot(gs[14:, 2])
-            plt.axis('off')
-
-            # Annotate the 2nd position with another image (a Grace Hopper portrait)
-            with get_sample_data(os.path.abspath('resources/d64-logo.png')) as logo:
-                arr_img = plt.imread(logo, format='png')
-
-            imagebox = OffsetImage(arr_img, zoom=0.3)
-            imagebox.image.axes = ax4
-
-            ab = AnnotationBbox(imagebox, xy=(0, 0), frameon=False, xybox=(1, -2.5), xycoords='axes fraction',
-                                box_alignment=(1, 1))
-
-            ax4.add_artist(ab)
-
             # Save to file
-            filepath = os.path.join(self.graphics_dir, f"infections-{current_date.isoformat()}-{district_id}.jpg")
             plt.savefig(filepath, format='JPEG')
             plt.show()
             plt.clf()
