@@ -11,6 +11,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 
 from covidbot import utils
+from covidbot.utils import format_int
 
 
 class Visualization:
@@ -25,7 +26,7 @@ class Visualization:
 
         self.graphics_dir = directory
 
-    def infections_graph(self, district_id: int, duration: int = 21) -> str:
+    def infections_graph(self, district_id: int, duration: int = 42) -> str:
         district_name: Optional[str]
         current_date: Optional[datetime.date]
 
@@ -68,7 +69,16 @@ class Visualization:
             ax1 = fig.add_subplot(gs[:14, :])
             # Plot data
             plt.xticks(x_data)
-            plt.bar(x_data, y_data_infections, color="#1fa2de", width=0.8, zorder=3)
+
+            # Add a label every 7 days
+            bars = plt.bar(x_data, y_data_infections, color="#1fa2de", width=0.8, zorder=3)
+            props = dict(boxstyle='round', facecolor='#ffffff', alpha=0.7, edgecolor='#ffffff')
+            for i in range(0, len(bars), 7):
+                rect = bars[i]
+                height = rect.get_height()
+                ax1.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
+                         format_int(int(height)),
+                         ha='center', va='bottom', bbox=props)
 
             # One tick every 7 days for easier comparison
             formatter = mdates.DateFormatter("%a, %d.%m.")
@@ -122,7 +132,8 @@ class Visualization:
             imagebox = OffsetImage(arr_img, zoom=0.3)
             imagebox.image.axes = ax4
 
-            ab = AnnotationBbox(imagebox, xy=(0, 0), frameon=False, xybox=(1, -1), xycoords='axes fraction', box_alignment=(1, 1))
+            ab = AnnotationBbox(imagebox, xy=(0, 0), frameon=False, xybox=(1, -1), xycoords='axes fraction',
+                                box_alignment=(1, 1))
 
             ax4.add_artist(ab)
 
