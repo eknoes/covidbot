@@ -26,7 +26,7 @@ class Visualization:
 
         self.graphics_dir = directory
 
-    def infections_graph(self, district_id: int, duration: int = 42) -> str:
+    def infections_graph(self, district_id: int, duration: int = 49) -> str:
         district_name: Optional[str]
         current_date: Optional[datetime.date]
 
@@ -68,7 +68,7 @@ class Visualization:
 
             ax1 = fig.add_subplot(gs[:14, :])
             # Plot data
-            plt.xticks(x_data)
+            plt.xticks(x_data, rotation='30', ha='right')
 
             # Add a label every 7 days
             bars = plt.bar(x_data, y_data_infections, color="#1fa2de", width=0.8, zorder=3)
@@ -76,20 +76,20 @@ class Visualization:
             for i in range(0, len(bars), 7):
                 rect = bars[i]
                 height = rect.get_height()
-                ax1.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
-                         format_int(int(height)),
-                         ha='center', va='bottom', bbox=props)
+                ax1.annotate(format_int(int(height)),
+                            xy=(rect.get_x() + rect.get_width() / 2., height),
+                            xytext=(0, 25), textcoords='offset points',
+                            arrowprops=dict(arrowstyle="-", facecolor='black'),
+                            horizontalalignment='center', verticalalignment='top', bbox=props)
 
             # One tick every 7 days for easier comparison
             formatter = mdates.DateFormatter("%a, %d.%m.")
             ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=current_date.weekday()))
             ax1.xaxis.set_major_formatter(formatter)
-
             ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 
             # Set title and labels
-            fig.suptitle("Neuinfektionen der letzten " + str(len(y_data_infections) - 1) + " Tage\n({location})"
-                         .format(location=district_name))
+            fig.suptitle("Neuinfektionen ({location})".format(location=district_name), fontweight="bold")
             plt.ylabel("Neuinfektionen")
 
             # Styling
@@ -106,7 +106,7 @@ class Visualization:
             ax2.annotate("Stand: {date}\nDaten des RKI"
                          .format(date=current_date.strftime("%d.%m.%Y")),
                          color="#6e6e6e",
-                         xy=(0, -3), xycoords='axes fraction',
+                         xy=(0, -4.5), xycoords='axes fraction',
                          horizontalalignment='left',
                          verticalalignment='bottom')
 
@@ -117,7 +117,7 @@ class Visualization:
             ax3.annotate("Tägliche Updates:\n"
                          "https://covidbot.d-64.org",
                          color="#6e6e6e",
-                         xy=(0, -3), xycoords='axes fraction',
+                         xy=(0, -4.5), xycoords='axes fraction',
                          horizontalalignment='left',
                          verticalalignment='bottom')
 
@@ -132,7 +132,7 @@ class Visualization:
             imagebox = OffsetImage(arr_img, zoom=0.3)
             imagebox.image.axes = ax4
 
-            ab = AnnotationBbox(imagebox, xy=(0, 0), frameon=False, xybox=(1, -1), xycoords='axes fraction',
+            ab = AnnotationBbox(imagebox, xy=(0, 0), frameon=False, xybox=(1, -2.5), xycoords='axes fraction',
                                 box_alignment=(1, 1))
 
             ax4.add_artist(ab)
