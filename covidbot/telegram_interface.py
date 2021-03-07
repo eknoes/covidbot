@@ -164,7 +164,6 @@ class TelegramInterface(MessengerInterface):
             self.answer_update(update, msg, reply_markup=markup)
         else:
             district_id = districts[0][0]
-            graph = self._viz.infections_graph(district_id)
             message = self._bot.get_district_report(district_id)
             self.answer_update(update, message, [self._viz.infections_graph(district_id),
                                                  self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
