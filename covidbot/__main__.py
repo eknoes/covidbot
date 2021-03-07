@@ -91,7 +91,7 @@ class MessengerBotSetup:
         if self.name == "signal":
             return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
                                    self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot,
-                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'))
+                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'),  data_visualization=visualization)
 
         if self.name == "telegram":
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
