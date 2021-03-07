@@ -317,7 +317,7 @@ class Visualization:
             plt.xticks(x_data, rotation='30', ha='right')
 
             # Add a label every 7 days
-            plt.plot(x_data, y_data, color="#1fa2de", zorder=3)
+            plt.plot(x_data, y_data, color="#1fa2de", zorder=3, linewidth=3)
 
             # One tick every 7 days for easier comparison
             formatter = mdates.DateFormatter("%a, %d.%m.")
