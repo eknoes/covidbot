@@ -299,4 +299,7 @@ class Visualization:
     # noinspection PyUnusedLocal
     @staticmethod
     def tick_formatter_german_numbers(tick_value, position) -> str:
+        if tick_value > 999999:
+            tick_value = int(tick_value / 1000000)
+            return str(tick_value) + " Mio."
         return utils.format_int(int(tick_value))

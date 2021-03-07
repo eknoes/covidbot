@@ -312,5 +312,5 @@ if __name__ == "__main__":
             logging.info("### Start Telegram Bot ###")
             interface.run()
     elif args.graphic_test:
-        vis = Visualization(get_connection(config), os.path.abspath("tmp/"))
-        vis.incidence_graph(0)
+        vis = Visualization(get_connection(config), os.path.abspath("graphics/"))
+        vis.vaccination_graph(0)
