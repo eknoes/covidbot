@@ -78,6 +78,7 @@ class MessengerBotSetup:
         self.connections.append(user_conn)
 
         data = CovidData(data_conn)
+        visualization = Visualization(data_conn, config['GENERAL'].get('CACHE_DIR', 'graphics'))
         user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
         bot = Bot(data, user_manager, command_format=command_format, location_feature=location_feature)
 
@@ -94,7 +95,7 @@ class MessengerBotSetup:
 
         if self.name == "telegram":
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
-                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
+                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), data_visualization=visualization)
         if self.name == "feedback":
             return FeedbackForwarder(api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
