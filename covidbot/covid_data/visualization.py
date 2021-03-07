@@ -125,7 +125,7 @@ class Visualization:
                 else:
                     y_data_infections.append(-1)
 
-            filepath = os.path.join(self.graphics_dir, f"infections-{current_date.isoformat()}-{district_id}.jpg")
+            filepath = os.path.abspath(os.path.join(self.graphics_dir, f"infections-{current_date.isoformat()}-{district_id}.jpg"))
 
             # Do not draw new graphic if its cached
             if os.path.isfile(filepath):
@@ -155,13 +155,12 @@ class Visualization:
 
             # Save to file
             plt.savefig(filepath, format='JPEG')
-            plt.show()
             plt.clf()
             return filepath
 
     def bot_user_graph(self) -> str:
         now = datetime.datetime.now()
-        filepath = os.path.join(self.graphics_dir, f"botuser-{now.strftime('%Y-%m-%d-%H-00')}.jpg")
+        filepath = os.path.abspath(os.path.join(self.graphics_dir, f"botuser-{now.strftime('%Y-%m-%d-%H-00')}.jpg"))
         if os.path.isfile(filepath):
             return filepath
 
@@ -203,7 +202,6 @@ class Visualization:
 
             # Save to file
             plt.savefig(filepath, format='JPEG')
-            plt.show()
             plt.clf()
             return filepath
 
@@ -234,7 +232,7 @@ class Visualization:
 
                 x_data.append(row['updated'])
 
-            filepath = os.path.join(self.graphics_dir, f"vaccinations-{x_data[-1].isoformat()}-{district_id}.jpg")
+            filepath = os.path.abspath(os.path.join(self.graphics_dir, f"vaccinations-{x_data[-1].isoformat()}-{district_id}.jpg"))
 
             # Do not draw new graphic if its cached
             if os.path.isfile(filepath):
@@ -267,7 +265,6 @@ class Visualization:
 
             # Save to file
             plt.savefig(filepath, format='JPEG')
-            plt.show()
             plt.clf()
             return filepath
 
@@ -306,7 +303,7 @@ class Visualization:
                 else:
                     y_data.append(-1)
 
-            filepath = os.path.join(self.graphics_dir, f"incidence-{current_date.isoformat()}-{district_id}.jpg")
+            filepath = os.path.abspath(os.path.join(self.graphics_dir, f"incidence-{current_date.isoformat()}-{district_id}.jpg"))
 
             # Do not draw new graphic if its cached
             if os.path.isfile(filepath):
@@ -327,7 +324,6 @@ class Visualization:
 
             # Save to file
             plt.savefig(filepath, format='JPEG')
-            plt.show()
             plt.clf()
             return filepath
 
