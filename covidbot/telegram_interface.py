@@ -65,8 +65,8 @@ class TelegramInterface(MessengerInterface):
             return self.cache[filename]
 
         with open(filename, "rb") as f:
-            self.cache[filename] = InputFile(f)
-        return self.get_input_media_photo(filename)
+            self.cache[filename] = InputFile(f.read(), filename=filename)
+        return self.cache[filename]
 
     def set_photoid(self, filename: str, photo_size: PhotoSize):
         self.cache[filename] = photo_size
