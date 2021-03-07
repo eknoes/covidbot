@@ -119,7 +119,9 @@ class TelegramInterface(MessengerInterface):
                     self.set_photoid(photo, message_obj.photo[0])
 
                 if caption:
-                    return message_obj is True
+                    if message_obj:
+                        return True
+                    return False
             else:
                 files = []
                 for photo in photos:
@@ -127,9 +129,11 @@ class TelegramInterface(MessengerInterface):
 
                 self.updater.bot.send_media_group(chat_id, files)
 
-        return self.updater.bot.send_message(chat_id, message, parse_mode=ParseMode.HTML,
+        if self.updater.bot.send_message(chat_id, message, parse_mode=ParseMode.HTML,
                                              disable_web_page_preview=disable_web_page_preview,
-                                             reply_markup=reply_markup) is True
+                                             reply_markup=reply_markup):
+            return True
+        return False
 
     def startHandler(self, update: Update, context: CallbackContext):
         name = ""
