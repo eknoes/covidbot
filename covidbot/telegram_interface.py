@@ -109,9 +109,17 @@ class TelegramInterface(MessengerInterface):
             self.updater.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
             if len(photos) == 1:
                 photo = photos[0]
-                message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo))
+                caption = None
+                if len(message) <= 1024:
+                    caption = message
+
+                message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo),
+                                                          caption=caption, parse_mode=ParseMode.HTML)
                 if message_obj.photo[0]:
                     self.set_photoid(photo, message_obj.photo[0])
+
+                if caption:
+                    return message_obj is True
             else:
                 files = []
                 for photo in photos:
