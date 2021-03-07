@@ -29,7 +29,7 @@ class Visualization:
         self.graphics_dir = directory
 
     @staticmethod
-    def setup_plot(current_date: Optional[datetime.date], title: str, y_label: str) -> Tuple[Figure, Axes]:
+    def setup_plot(current_date: Optional[datetime.date], title: str, y_label: str, source: str = "Robert-Koch-Institut") -> Tuple[Figure, Axes]:
         fig = plt.figure(figsize=(8, 5), dpi=200)
         gs = gridspec.GridSpec(15, 3)
 
@@ -37,8 +37,8 @@ class Visualization:
             # Second subplot just for Source and current date
             ax2 = fig.add_subplot(gs[14, 0])
             plt.axis('off')
-            ax2.annotate("Stand: {date}\nQuelle: Robert-Koch-Institut"
-                         .format(date=current_date.strftime("%d.%m.%Y")),
+            ax2.annotate("Stand: {date}\nQuelle: {source}"
+                         .format(date=current_date.strftime("%d.%m.%Y"), source=source),
                          color="#6e6e6e",
                          xy=(0, -4.5), xycoords='axes fraction',
                          horizontalalignment='left',
@@ -214,15 +214,22 @@ class Visualization:
             y_data_full = []
             y_data_partial = []
             x_data = []
-            today = datetime.date.today()
             for row in cursor.fetchall():
                 if not row['vaccinated_partial']:
                     row['vaccinated_partial'] = 0
 
                 if not row['vaccinated_full']:
                     row['vaccinated_full'] = 0
+
+                if len(y_data_partial) > 1 and y_data_partial[-1] > row['vaccinated_partial']:
+                    row['vaccinated_partial'] = y_data_partial[-1]
+
+                if len(y_data_full) > 1 and y_data_full[-1] > row['vaccinated_full']:
+                    row['vaccinated_full'] = y_data_full[-1]
+
                 y_data_partial.append(row['vaccinated_partial'])
                 y_data_full.append(row['vaccinated_full'])
+
                 x_data.append(row['updated'])
 
             filepath = os.path.join(self.graphics_dir, f"vaccinations-{x_data[-1].isoformat()}-{district_id}.jpg")
@@ -231,11 +238,24 @@ class Visualization:
             # if os.path.isfile(filepath):
             # return filepath
 
-            fig, ax1 = self.setup_plot(x_data[-1], f"Impfungen {district_id}", "Anzahl Impfungen")
+            cursor.execute("SELECT county_name FROM counties WHERE rs=%s", [district_id])
+            district_name = cursor.fetchone()['county_name']
+
+            if district_id == 0:
+                source = "impfdashboard.de"
+            else:
+                source = "Robert-Koch-Institut"
+            fig, ax1 = self.setup_plot(x_data[-1], f"Impfungen {district_name}", "Anzahl Impfungen", source=source)
             # Plot data
             plt.xticks(x_data, rotation='30', ha='right')
-            ax1.fill_between(x_data, y_data_partial, color="#1fa2de", zorder=3)
-            ax1.fill_between(x_data, y_data_full, color="#222222", zorder=3)
+            ax1.fill_between(x_data, y_data_partial, color="#1fa2de", zorder=3, label="Erstimpfungen")
+
+            i = 0
+            while y_data_full[i] == 0:
+                i += 1
+
+            ax1.fill_between(x_data[i:], y_data_full[i:], color="#384955", zorder=3, label="Vollständige Impfungen")
+            ax1.legend(loc="upper left")
 
             # One tick every 7 days for easier comparison
             formatter = mdates.DateFormatter("%a, %d.%m.")
