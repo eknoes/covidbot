@@ -244,7 +244,7 @@ class Visualization:
 
         # Add a label every 7 days
         plt.plot(x_data, y_data, color="#1fa2de", zorder=3, linewidth=3)
-
+        ax1.set_ylim(bottom=0)
         self.set_weekday_formatter(ax1, current_date.weekday())
 
         # Save to file
