@@ -13,6 +13,7 @@ import semaphore
 from semaphore import ChatContext
 
 from covidbot.bot import Bot
+from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.text_interface import SimpleTextInterface, BotResponse
 from covidbot.utils import adapt_text
@@ -21,20 +22,15 @@ from covidbot.utils import adapt_text
 class SignalInterface(SimpleTextInterface, MessengerInterface):
     phone_number: str
     socket: str
-    graphics_tmp_path: str
     profile_name: Optional[str] = None  # = "Covid Update"
     profile_picture: Optional[str] = None  # = os.path.abspath("resources/logo.png")
     dev_chat: str = None
 
-    def __init__(self, phone_number: str, socket: str, bot: Bot, dev_chat: str):
-        super().__init__(bot)
+    def __init__(self, phone_number: str, socket: str, bot: Bot, dev_chat: str,  data_visualization: Visualization):
+        super().__init__(bot, data_visualization)
         self.phone_number = phone_number
         self.socket = socket
         self.dev_chat = dev_chat
-
-        self.graphics_tmp_path = os.path.abspath("tmp/")
-        if not os.path.isdir(self.graphics_tmp_path):
-            os.makedirs(self.graphics_tmp_path)
 
     def run(self):
         asyncio.run(self.run_async())
@@ -86,25 +82,16 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
         attachment = []
         if reply.image:
-            attachment.append(self.get_attachment_path(reply.image))
+            attachment.append(self.get_attachment(reply.image))
 
         await ctx.message.reply(body=reply.message, attachments=attachment)
 
-    def get_attachment_path(self, image: BytesIO, district_id=99) -> Dict:
+    @staticmethod
+    def get_attachment(filename: str) -> Dict:
         """
         Returns an attachement dict to send an image with signald, containing a file path to the graphic
-        Args:
-            image: Image
-            district_id: ID which should be used for caching
-
-        Returns:
-
         """
-        filename = self.graphics_tmp_path + f"/graphic{district_id}.jpg"
-        with open(filename, "wb") as f:
-            image.seek(0)
-            f.write(image.getbuffer())
-        return {"filename": filename, "width": "900", "height": "600"}
+        return {"filename": filename, "width": "1600", "height": "1000"}
 
     async def send_daily_reports(self) -> None:
         """
@@ -117,7 +104,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
         # Get the current graph as attachement dict
         self.log.warning(f"{len(unconfirmed_reports)} to send!")
-        country_graph = self.get_attachment_path(self.bot.get_graphical_report(0), 0)
+        country_graph = self.get_attachment(self.viz.infections_graph(0))
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
@@ -160,7 +147,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                     response = self.reportHandler("", user)
                     attachments = []
                     if response.image:
-                        attachments.append(self.get_attachment_path(response.image))
+                        attachments.append(self.get_attachment(response.image))
                     success = await bot.send_message(user, adapt_text(response.message), attachments)
                     backoff_time = self.backoff_timer(backoff_time, not success, user)
 

@@ -3,6 +3,7 @@ import asyncio
 import configparser
 import locale
 import logging
+import os
 import sys
 from typing import List
 
@@ -11,6 +12,7 @@ from mysql.connector import connect, MySQLConnection
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, VaccinationGermanyImpfdashboardUpdater, \
     RValueGermanyUpdater, RKIUpdater
+from covidbot.covid_data.visualization import Visualization
 from covidbot.feedback_forwarder import FeedbackForwarder
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.signal_interface import SignalInterface
@@ -76,6 +78,7 @@ class MessengerBotSetup:
         self.connections.append(user_conn)
 
         data = CovidData(data_conn)
+        visualization = Visualization(data_conn, config['GENERAL'].get('CACHE_DIR', 'graphics'))
         user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
         bot = Bot(data, user_manager, command_format=command_format, location_feature=location_feature)
 
@@ -83,16 +86,16 @@ class MessengerBotSetup:
         if self.name == "threema":
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
                                     self.config['THREEMA'].get('PRIVATE_KEY'), bot,
-                                    dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
+                                    dev_chat=self.config['THREEMA'].get('DEV_CHAT'), data_visualization=visualization)
 
         if self.name == "signal":
             return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
                                    self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot,
-                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'))
+                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'), data_visualization=visualization)
 
         if self.name == "telegram":
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
-                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
+                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), data_visualization=visualization)
         if self.name == "feedback":
             return FeedbackForwarder(api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
@@ -190,6 +193,9 @@ if __name__ == "__main__":
     parser.add_argument('--all', help='Intended receivers, requires --platform', action='store_true')
     parser.add_argument('--specific', help='Intended receivers, requires --platform', metavar='USER',
                         action='store', nargs="+", type=str)
+
+    # Just for testing
+    parser.add_argument('--graphic-test', help='Generate graphic for testing', action='store_true')
     args = parser.parse_args()
     if args.platform:
         args.platform = args.platform[0]
@@ -200,8 +206,8 @@ if __name__ == "__main__":
     else:
         logging_level = logging.INFO
 
-    if not args.platform and not (args.check_updates or args.message_user):
-        print("Exactly one interface-flag has to be set, e.g. --telegram")
+    if not args.platform and not (args.check_updates or args.message_user or args.graphic_test):
+        print("Exactly one platform has to be set, e.g. --platform telegram")
         sys.exit(1)
 
     if args.check_updates and (args.platform or args.message_user):
@@ -305,3 +311,6 @@ if __name__ == "__main__":
         with MessengerBotSetup("telegram", config, logging_level) as interface:
             logging.info("### Start Telegram Bot ###")
             interface.run()
+    elif args.graphic_test:
+        vis = Visualization(get_connection(config), os.path.abspath("tmp/"))
+        vis.incidence_graph(0)

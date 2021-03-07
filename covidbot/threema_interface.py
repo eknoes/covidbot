@@ -10,6 +10,7 @@ from aiohttp import web
 from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage
 
 from covidbot.bot import Bot
+from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.text_interface import SimpleTextInterface, BotResponse
 from covidbot.utils import adapt_text, str_bytelen
@@ -23,8 +24,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
     connection: threema.Connection
     dev_chat: str
 
-    def __init__(self, threema_id: str, threema_secret: str, threema_key: str, bot: Bot, dev_chat: str):
-        super().__init__(bot)
+    def __init__(self, threema_id: str, threema_secret: str, threema_key: str, bot: Bot, dev_chat: str, data_visualization: Visualization):
+        super().__init__(bot, data_visualization)
         self.threema_id = threema_id
         self.threema_secret = threema_secret
         self.threema_key = threema_key
@@ -34,9 +35,6 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             key=self.threema_key
         )
         self.dev_chat = dev_chat
-        self.graphics_tmp_path = os.path.abspath("tmp-threema/")
-        if not os.path.isdir(self.graphics_tmp_path):
-            os.makedirs(self.graphics_tmp_path)
 
     def run(self):
         logging.info("Run Threema Interface")
@@ -44,13 +42,6 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         application = create_application(self.connection)
         add_callback_route(self.connection, application, self.handle_threema_msg, path='/gateway_callback')
         web.run_app(application, port=9000, access_log=logging.getLogger('threema_api'))
-
-    def get_attachment(self, image: BytesIO, district_id=99) -> Dict:
-        filename = self.graphics_tmp_path + f"/graphic{district_id}.jpg"
-        with open(filename, "wb") as f:
-            image.seek(0)
-            f.write(image.getbuffer())
-        return {"filename": filename, "width": "900", "height": "600"}
 
     async def handle_threema_msg(self, message: Message):
         if type(message) == TextMessage:
@@ -86,8 +77,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
 
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.image:
-            response_img = ImageMessage(self.connection, image_path=self.get_attachment(response.image)['filename'],
-                                        to_id=user)
+            response_img = ImageMessage(self.connection, image_path=response.image, to_id=user)
             await response_img.send()
 
         if response.message:
@@ -100,11 +90,10 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
         if not unconfirmed_reports:
             return
-        daily_graph = self.bot.get_graphical_report(0)
-        attachment = self.get_attachment(daily_graph, 0)
+        daily_graph = self.viz.infections_graph(0)
         for userid, message in unconfirmed_reports:
-            if attachment:
-                response_img = ImageMessage(self.connection, image_path=attachment['filename'],
+            if daily_graph:
+                response_img = ImageMessage(self.connection, image_path=daily_graph,
                                             to_id=userid)
                 await response_img.send()
 
