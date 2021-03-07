@@ -29,7 +29,8 @@ class Visualization:
         self.graphics_dir = directory
 
     @staticmethod
-    def setup_plot(current_date: Optional[datetime.date], title: str, y_label: str, source: str = "Robert-Koch-Institut") -> Tuple[Figure, Axes]:
+    def setup_plot(current_date: Optional[datetime.date], title: str, y_label: str,
+                   source: str = "Robert-Koch-Institut") -> Tuple[Figure, Axes]:
         fig = plt.figure(figsize=(8, 5), dpi=200)
         gs = gridspec.GridSpec(15, 3)
 
@@ -209,7 +210,8 @@ class Visualization:
     def vaccination_graph(self, district_id: int) -> str:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute(
-                "SELECT vaccinated_partial, vaccinated_full, date(updated) as updated FROM covid_vaccinations WHERE district_id=%s ORDER BY updated", [district_id])
+                "SELECT vaccinated_partial, vaccinated_full, date(updated) as updated FROM covid_vaccinations WHERE district_id=%s ORDER BY updated",
+                [district_id])
 
             y_data_full = []
             y_data_partial = []
@@ -235,8 +237,8 @@ class Visualization:
             filepath = os.path.join(self.graphics_dir, f"vaccinations-{x_data[-1].isoformat()}-{district_id}.jpg")
 
             # Do not draw new graphic if its cached
-            # if os.path.isfile(filepath):
-            # return filepath
+            if os.path.isfile(filepath):
+                return filepath
 
             cursor.execute("SELECT county_name FROM counties WHERE rs=%s", [district_id])
             district_name = cursor.fetchone()['county_name']
@@ -260,6 +262,66 @@ class Visualization:
             # One tick every 7 days for easier comparison
             formatter = mdates.DateFormatter("%a, %d.%m.")
             ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=x_data[-1].weekday()))
+            ax1.xaxis.set_major_formatter(formatter)
+            ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
+
+            # Save to file
+            plt.savefig(filepath, format='JPEG')
+            plt.show()
+            plt.clf()
+            return filepath
+
+    def incidence_graph(self, district_id: int, duration: int = 49) -> str:
+        district_name: Optional[str]
+        current_date: Optional[datetime.date]
+
+        with self.connection.cursor(dictionary=True) as cursor:
+            oldest_date = datetime.date.today() - datetime.timedelta(days=duration)
+            cursor.execute(
+                "SELECT incidence, county_name, date FROM covid_data_calculated WHERE rs=%s AND date >= %s ORDER BY date",
+                [district_id, oldest_date])
+
+            y_data = []
+            x_data = []
+            district_name = None
+            current_date = None
+            for row in cursor.fetchall():
+                if not district_name:
+                    district_name = row['county_name']
+
+                if not current_date:
+                    current_date = row['date']
+                else:
+                    while current_date + datetime.timedelta(days=1) != row['date']:
+                        # We do not have data for that day, so set -1
+                        current_date += datetime.timedelta(days=1)
+                        self.log.warning(f"We do not have incidence data for requested {current_date}")
+                        x_data.append(current_date)
+                        y_data.append(-1)
+                    current_date = row['date']
+
+                x_data.append(current_date)
+                if row['incidence']:
+                    y_data.append(row['incidence'])
+                else:
+                    y_data.append(-1)
+
+            filepath = os.path.join(self.graphics_dir, f"incidence-{current_date.isoformat()}-{district_id}.jpg")
+
+            # Do not draw new graphic if its cached
+            if os.path.isfile(filepath):
+                return filepath
+
+            fig, ax1 = self.setup_plot(current_date, f"7-Tage-Inzidenz {district_name}", "7-Tage-Inzidenz")
+            # Plot data
+            plt.xticks(x_data, rotation='30', ha='right')
+
+            # Add a label every 7 days
+            plt.plot(x_data, y_data, color="#1fa2de", zorder=3)
+
+            # One tick every 7 days for easier comparison
+            formatter = mdates.DateFormatter("%a, %d.%m.")
+            ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=current_date.weekday()))
             ax1.xaxis.set_major_formatter(formatter)
             ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 
