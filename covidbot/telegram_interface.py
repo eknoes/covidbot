@@ -10,11 +10,13 @@ from io import BytesIO
 from typing import Tuple, List, Dict, Union
 
 import telegram
-from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, ChatAction, MessageEntity
+from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, ChatAction, \
+    MessageEntity, InputFile
 from telegram.error import BadRequest, TelegramError, Unauthorized
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 from covidbot.bot import Bot, UserDistrictActions
+from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 
 '''
@@ -44,16 +46,30 @@ class TelegramCallbacks(Enum):
 
 class TelegramInterface(MessengerInterface):
     _bot: Bot
+    _viz: Visualization
+    cache: Dict[str, Union[InputFile, PhotoSize]] = {}
     log = logging.getLogger(__name__)
     dev_chat_id: int
     graph_cache: Dict[int, PhotoSize] = {}
     feedback_cache: Dict[int, str] = {}
     deleted_callbacks: List[int] = []
 
-    def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
+    def __init__(self, bot: Bot, api_key: str, dev_chat_id: int, data_visualization: Visualization):
         self.dev_chat_id = dev_chat_id
         self._bot = bot
+        self._viz = data_visualization
         self.updater = Updater(api_key)
+
+    def get_input_media_photo(self, filename: str) -> Union[InputFile, PhotoSize]:
+        if filename in self.cache.keys():
+            return self.cache[filename]
+
+        with open(filename, "rb") as f:
+            self.cache[filename] = InputFile(f)
+        return self.get_input_media_photo(filename)
+
+    def set_photoid(self, filename: str, photo_size: PhotoSize):
+        self.cache[filename] = photo_size
 
     def run(self):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
