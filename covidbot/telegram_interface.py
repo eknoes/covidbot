@@ -47,7 +47,7 @@ class TelegramCallbacks(Enum):
 class TelegramInterface(MessengerInterface):
     _bot: Bot
     _viz: Visualization
-    cache: Dict[str, Union[InputFile, PhotoSize]] = {}
+    cache: Dict[str, Union[InputMediaPhoto]] = {}
     log = logging.getLogger(__name__)
     dev_chat_id: int
     graph_cache: Dict[int, PhotoSize] = {}
@@ -60,16 +60,16 @@ class TelegramInterface(MessengerInterface):
         self._viz = data_visualization
         self.updater = Updater(api_key)
 
-    def get_input_media_photo(self, filename: str) -> Union[InputFile, PhotoSize]:
+    def get_input_media_photo(self, filename: str) -> Union[InputMediaPhoto]:
         if filename in self.cache.keys():
             return self.cache[filename]
 
         with open(filename, "rb") as f:
-            self.cache[filename] = InputFile(f.read(), filename=filename)
+            self.cache[filename] = InputMediaPhoto(f, filename=filename)
         return self.cache[filename]
 
     def set_photoid(self, filename: str, photo_size: PhotoSize):
-        self.cache[filename] = photo_size
+        self.cache[filename] = InputMediaPhoto(photo_size)
 
     def run(self):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
@@ -113,7 +113,7 @@ class TelegramInterface(MessengerInterface):
                 if len(message) <= 1024:
                     caption = message
 
-                message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo),
+                message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo).media,
                                                           caption=caption, parse_mode=ParseMode.HTML)
                 if message_obj.photo[0]:
                     self.set_photoid(photo, message_obj.photo[0])
@@ -123,7 +123,7 @@ class TelegramInterface(MessengerInterface):
             else:
                 files = []
                 for photo in photos:
-                    files.append(InputMediaPhoto(self.get_input_media_photo(photo)))
+                    files.append(self.get_input_media_photo(photo))
 
                 self.updater.bot.send_media_group(chat_id, files)
 
@@ -227,8 +227,7 @@ class TelegramInterface(MessengerInterface):
         for entity in entities:
             if entity.type == entity.MENTION and context.bot.username == entities[entity][1:]:
                 # Strip mention from message
-                update.message.text = (update.message.text[0:entity.offset] + update.message.text[
-                                                                              entity.offset + entity.length:]).strip()
+                update.message.text = (update.message.text[0:entity.offset] + update.message.text[entity.offset + entity.length:]).strip()
                 self.updater.dispatcher.process_update(update)
                 return
 
@@ -263,9 +262,7 @@ class TelegramInterface(MessengerInterface):
         elif query.data.startswith(TelegramCallbacks.REPORT.name):
             district_id = int(query.data[len(TelegramCallbacks.REPORT.name):])
             message = self._bot.get_district_report(district_id)
-            self.answer_update(update, message,
-                               [self._viz.infections_graph(district_id), self._viz.incidence_graph(district_id)],
-                               disable_web_page_preview=True)
+            self.answer_update(update, message, [self._viz.infections_graph(district_id), self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
 
             query.delete_message()
             self.deleted_callbacks.append(query.message.message_id)
