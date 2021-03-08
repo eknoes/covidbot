@@ -12,7 +12,7 @@ from threema.gateway.e2e import create_application, add_callback_route, TextMess
 from covidbot.bot import Bot
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT
+from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT, BOT_RESPONSE_TIME
 from covidbot.text_interface import SimpleTextInterface, BotResponse
 from covidbot.utils import adapt_text, str_bytelen
 
@@ -44,6 +44,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         add_callback_route(self.connection, application, self.handle_threema_msg, path='/gateway_callback')
         web.run_app(application, port=9000, access_log=logging.getLogger('threema_api'))
 
+    @BOT_RESPONSE_TIME.time()
     async def handle_threema_msg(self, message: Message):
         if type(message) == TextMessage:
             RECV_MESSAGE_COUNT.inc()

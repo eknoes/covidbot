@@ -15,7 +15,7 @@ from semaphore import ChatContext
 from covidbot.bot import Bot
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT
+from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
 from covidbot.text_interface import SimpleTextInterface, BotResponse
 from covidbot.utils import adapt_text
 
@@ -53,6 +53,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         # Just exit on exception
         os.kill(os.getpid(), signal.SIGINT)
 
+    @BOT_RESPONSE_TIME.time()
     async def message_handler(self, ctx: ChatContext):
         """
         Handles a text message received by the bot
