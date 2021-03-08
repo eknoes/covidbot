@@ -240,60 +240,6 @@ class Bot(object):
 
         return message
 
-    def get_graphical_report(self, district_id: int, subtract_days=0) -> Optional[BytesIO]:
-        history_data = self._data.get_district_data(district_id, include_past_days=21, subtract_days=0)
-        if not history_data:
-            return None
-
-        y = []
-        current_date = None
-        for day_data in history_data:
-            if not current_date or day_data.date > current_date:
-                current_date = day_data.date
-
-            if day_data.new_cases is not None:
-                y.append(day_data.new_cases)
-            else:
-                continue
-        if not y:
-            return None
-
-        x = [current_date - datetime.timedelta(days=i) for i in range(len(y))]
-
-        px = 1 / plt.rcParams['figure.dpi']
-        fig, ax1 = plt.subplots(figsize=(900 * px, 600 * px))
-
-        plt.xticks(x)
-        plt.bar(x, y, color="#003f5c", width=0.95, zorder=3)
-
-        # Styling
-        plt.title("Neuinfektionen seit " + str(len(y) - 1) + " Tagen in {location}"
-                  .format(location=history_data[0].name))
-        plt.ylabel("Neuinfektionen")
-        plt.figtext(0.8, 0.01, "Stand: {date}\nDaten vom Robert Koch-Institut (RKI)"
-                    .format(date=current_date.strftime("%d.%m.%Y")), horizontalalignment='left', fontsize=8,
-                    verticalalignment="baseline")
-        plt.figtext(0.05, 0.01,
-                    "Erhalte kostenlos die tagesaktuellen Daten auf Telegram, Signal oder Threema für deine Orte!\n"
-                    "https://covidbot.d-64.org/", horizontalalignment='left', fontsize=8,
-                    verticalalignment="baseline")
-
-        for direction in ["left", "right", "bottom", "top"]:
-            ax1.spines[direction].set_visible(False)
-        plt.grid(axis="y", zorder=0)
-
-        # One tick every 7 days for easier comparison
-        formatter = mdates.DateFormatter("%a, %d %b")
-        ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=current_date.weekday()))
-        ax1.xaxis.set_major_formatter(formatter)
-
-        # Save to buffer
-        buf = BytesIO()
-        plt.savefig(buf, format='JPEG')
-        buf.seek(0)
-        plt.clf()
-        return buf
-
     def subscribe(self, user_identification: Union[int, str], district_id: int) -> str:
         user_id = self._manager.get_user_id(user_identification)
         if self._manager.add_subscription(user_id, district_id):
