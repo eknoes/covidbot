@@ -189,6 +189,11 @@ class Bot(object):
         if current_data.incidence:
             message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen) liegt bei {incidence}" \
                        " {incidence_trend}."
+            if current_data.incidence_interval_since:
+                interval_length = current_data.date - current_data.incidence_interval_since
+                message += " Die Inzidenz ist damit seit {interval_length} unter {interval}."\
+                    .format(interval_length=format_noun(interval_length.days, FormattableNoun.DAYS),
+                            interval=current_data.incidence_interval_upper_value)
 
         if current_data.r_value:
             message += " Der 7-Tage-R-Wert liegt bei {r_value} {r_trend}." \
