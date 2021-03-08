@@ -77,6 +77,7 @@ class TelegramInterface(MessengerInterface):
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
         self.updater.dispatcher.add_handler(CommandHandler('info', self.infoHandler))
         self.updater.dispatcher.add_handler(CommandHandler('loeschmich', self.deleteHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('stop', self.deleteHandler))
         self.updater.dispatcher.add_handler(CommandHandler('datenschutz', self.privacyHandler))
         self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))

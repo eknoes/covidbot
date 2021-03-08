@@ -55,6 +55,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("statistik", self.statHandler, False))
         self.handler_list.append(Handler("loeschmich", self.deleteMeHandler, False))
         self.handler_list.append(Handler("löschmich", self.deleteMeHandler, False))
+        self.handler_list.append(Handler("stop", self.deleteMeHandler, False))
         self.handler_list.append(Handler("debug", self.debugHandler, False))
         self.handler_list.append(Handler("", self.directHandler, True))
 
