@@ -13,6 +13,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from mysql.connector import MySQLConnection
 
 from covidbot import utils
+from covidbot.metrics import CACHED_GRAPHS, CREATED_GRAPHS
 from covidbot.utils import format_int
 
 
@@ -96,7 +97,9 @@ class Visualization:
 
         # Do not draw new graphic if its cached
         if os.path.isfile(filepath):
+            CACHED_GRAPHS.labels(type='infections').inc()
             return filepath
+        CREATED_GRAPHS.labels(type='infections').inc()
 
         fig, ax1 = self.setup_plot(current_date, f"Neuinfektionen {district_name}", "Neuinfektionen")
         # Plot data
@@ -125,7 +128,9 @@ class Visualization:
         now = datetime.datetime.now()
         filepath = os.path.abspath(os.path.join(self.graphics_dir, f"botuser-{now.strftime('%Y-%m-%d-%H-00')}.jpg"))
         if os.path.isfile(filepath):
+            CACHED_GRAPHS.labels(type='botuser').inc()
             return filepath
+        CREATED_GRAPHS.labels(type='botuser').inc()
 
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(b.user_id) as count, bot_date FROM "
@@ -197,7 +202,9 @@ class Visualization:
 
             # Do not draw new graphic if its cached
             if os.path.isfile(filepath):
+                CACHED_GRAPHS.labels(type='vaccinations').inc()
                 return filepath
+            CREATED_GRAPHS.labels(type='vaccinations').inc()
 
             cursor.execute("SELECT county_name FROM counties WHERE rs=%s", [district_id])
             district_name = cursor.fetchone()['county_name']
@@ -236,7 +243,9 @@ class Visualization:
 
         # Do not draw new graphic if its cached
         if os.path.isfile(filepath):
+            CACHED_GRAPHS.labels(type='incidence').inc()
             return filepath
+        CREATED_GRAPHS.labels(type='incidence').inc()
 
         fig, ax1 = self.setup_plot(current_date, f"7-Tage-Inzidenz {district_name}", "7-Tage-Inzidenz")
         # Plot data
