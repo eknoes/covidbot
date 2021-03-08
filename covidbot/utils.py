@@ -155,4 +155,6 @@ def format_noun(number: int, noun: FormattableNoun) -> str:
 
     if number == 1:
         return f"{format_int(number)} {singular}"
+    if number == 0 and noun == FormattableNoun.DAYS:
+        return "heute"
     return f"{format_int(number)} {plural}"
