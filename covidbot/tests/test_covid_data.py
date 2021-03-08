@@ -73,20 +73,8 @@ class CovidDataTest(TestCase):
         self.assertIsNotNone(data.deaths_trend, "Trend for today must be available")
         self.assertIsNotNone(data.incidence_trend, "Trend for today must be available")
 
-        yesterday = self.data.get_district_data(11, subtract_days=1)
-        self.assertIsNotNone(yesterday, "Data for District#11 from yesterday must be available")
-
-        long_time_ago = self.data.get_district_data(11, subtract_days=9999)
-        self.assertIsNone(long_time_ago, "get_district_data should return None for non-existing data")
-
         non_existent = self.data.get_district_data(9999999999999)
         self.assertIsNone(non_existent, "get_district_data should return None for non-existing data")
-
-        history = self.data.get_district_data(1, include_past_days=13)
-        self.assertEqual(14, len(history), "GetCovidDataHistory should return 14 DistrictData items")
-
-        history = self.data.get_district_data(3151, include_past_days=14)
-        self.assertEqual(15, len(history), "GetCovidDataHistory should return 15 DistrictData items")
 
     def test_fill_trend(self):
         today = DistrictData("Test1", new_cases=5, new_deaths=5, incidence=5)
