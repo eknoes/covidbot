@@ -258,7 +258,7 @@ if __name__ == "__main__":
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
-                        with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
+                        with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
                             asyncio.run(telegram.send_message(f"Got new data from {updater.__class__.__name__}",
                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
                 except ValueError as error:
