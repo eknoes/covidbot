@@ -7,6 +7,8 @@ import os
 import sys
 from typing import List
 
+import prometheus_client
+from prometheus_client import Info
 from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
@@ -56,6 +58,12 @@ class MessengerBotSetup:
 
         self.name = name
         self.config = config_dict
+
+        monitor_port = self.config.getint(name.upper(), "PROMETHEUS_PORT", fallback=0)
+        if monitor_port > 0:
+            prometheus_client.start_http_server(monitor_port)
+            i = Info('platform', 'Bot Platform')
+            i.info({'platform': self.name})
 
     def __enter__(self) -> MessengerInterface:
         # Do not activate user on Threema automatically
