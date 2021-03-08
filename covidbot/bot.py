@@ -445,7 +445,7 @@ class Bot(object):
             counties = None
         else:
             counties = list(map(lambda s: (s, self._data.get_district(s).name), user.subscriptions))
-            message = "Du hast aktuell {abo_count} Orte abonniert."\
+            message = "Du hast aktuell {abo_count} abonniert."\
                 .format(abo_count=format_noun(len(user.subscriptions), FormattableNoun.DISTRICT))
 
         return message, counties
