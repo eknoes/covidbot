@@ -13,64 +13,7 @@ class CovidData(object):
 
     def __init__(self, connection: MySQLConnection) -> None:
         self.connection = connection
-        self._create_tables()
-
-    def _create_tables(self):
-        self.log.debug("Creating Tables")
-        with self.connection.cursor(dictionary=False) as cursor:
-            cursor.execute('CREATE TABLE IF NOT EXISTS counties '
-                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30),'
-                           'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
-                           'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
-                           'UNIQUE(rs, county_name))')
-            # Raw Infection Data
-            cursor.execute(
-                'CREATE TABLE IF NOT EXISTS covid_data (id INTEGER PRIMARY KEY AUTO_INCREMENT, rs INTEGER, date DATE NULL DEFAULT NULL,'
-                'total_cases INT, incidence FLOAT, total_deaths INT,'
-                'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
-
-            # Vaccination Data
-            cursor.execute('CREATE TABLE IF NOT EXISTS covid_vaccinations (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
-                           'district_id INTEGER, updated DATETIME, vaccinated_partial INTEGER, '
-                           'vaccinated_full INTEGER, rate_full FLOAT, rate_partial FLOAT, '
-                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, updated))')
-
-            # R Value Data
-            cursor.execute('CREATE TABLE IF NOT EXISTS covid_r_value (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
-                           'district_id INTEGER, r_date DATE, 7day_r_value FLOAT, updated DATETIME,'
-                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, r_date))')
-
-            # Check if view exists
-            cursor.execute("SHOW FULL TABLES WHERE TABLE_TYPE LIKE '%VIEW%';")
-            exists = False
-            for row in cursor.fetchall():
-                if row[0] == "covid_data_calculated":
-                    exists = True
-
-            if not exists:
-                self.log.info("View covid_data_calculated does not exist, creating it!")
-                cursor.execute('CREATE VIEW covid_data_calculated AS '
-                               'SELECT c.rs, c.county_name, c.type, c.parent, covid_data.date, '
-                               'covid_data.total_cases, covid_data.total_cases - y.total_cases as new_cases, '
-                               'covid_data.total_deaths, covid_data.total_deaths - y.total_deaths as new_deaths, '
-                               'covid_data.incidence '
-                               'FROM covid_data '
-                               'LEFT JOIN covid_data y on y.rs = covid_data.rs AND '
-                               'y.date = subdate(covid_data.date, 1) '
-                               'LEFT JOIN counties c on c.rs = covid_data.rs '
-                               'ORDER BY covid_data.date DESC')
-
-            # Insert if not exists
-            cursor.execute("INSERT IGNORE INTO counties (rs, county_name, type, parent) "
-                           "VALUES (0, 'Deutschland', 'Staat', NULL)")
-            self.connection.commit()
-            self.log.debug("Committed Tables")
-
-    @staticmethod
-    def clean_district_name(county_name: str) -> Optional[str]:
-        if county_name is not None and county_name.count(" ") > 0:
-            return " ".join(county_name.split(" ")[1:])
-        return county_name
+        CovidDatabaseCreator(self.connection)
 
     def search_district_by_name(self, search_str: str) -> List[Tuple[int, str]]:
         search_str = search_str.lower()
@@ -242,3 +185,58 @@ class CovidData(object):
             cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data')
             result = cursor.fetchone()
             return result['last_updated']
+
+
+class CovidDatabaseCreator:
+
+    def __init__(self, connection: MySQLConnection):
+        log = logging.getLogger(str(self.__class__))
+        log.debug("Creating Tables")
+        with connection.cursor(dictionary=False) as cursor:
+            cursor.execute('CREATE TABLE IF NOT EXISTS counties '
+                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30),'
+                           'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
+                           'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
+                           'UNIQUE(rs, county_name))')
+            # Raw Infection Data
+            cursor.execute(
+                'CREATE TABLE IF NOT EXISTS covid_data (id INTEGER PRIMARY KEY AUTO_INCREMENT, rs INTEGER, date DATE NULL DEFAULT NULL,'
+                'total_cases INT, incidence FLOAT, total_deaths INT,'
+                'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
+
+            # Vaccination Data
+            cursor.execute('CREATE TABLE IF NOT EXISTS covid_vaccinations (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
+                           'district_id INTEGER, updated DATETIME, vaccinated_partial INTEGER, '
+                           'vaccinated_full INTEGER, rate_full FLOAT, rate_partial FLOAT, '
+                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, updated))')
+
+            # R Value Data
+            cursor.execute('CREATE TABLE IF NOT EXISTS covid_r_value (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
+                           'district_id INTEGER, r_date DATE, 7day_r_value FLOAT, updated DATETIME,'
+                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, r_date))')
+
+            # Check if view exists
+            cursor.execute("SHOW FULL TABLES WHERE TABLE_TYPE LIKE '%VIEW%';")
+            exists = False
+            for row in cursor.fetchall():
+                if row[0] == "covid_data_calculated":
+                    exists = True
+
+            if not exists:
+                log.info("View covid_data_calculated does not exist, creating it!")
+                cursor.execute('CREATE VIEW covid_data_calculated AS '
+                               'SELECT c.rs, c.county_name, c.type, c.parent, covid_data.date, '
+                               'covid_data.total_cases, covid_data.total_cases - y.total_cases as new_cases, '
+                               'covid_data.total_deaths, covid_data.total_deaths - y.total_deaths as new_deaths, '
+                               'covid_data.incidence '
+                               'FROM covid_data '
+                               'LEFT JOIN covid_data y on y.rs = covid_data.rs AND '
+                               'y.date = subdate(covid_data.date, 1) '
+                               'LEFT JOIN counties c on c.rs = covid_data.rs '
+                               'ORDER BY covid_data.date DESC')
+
+            # Insert if not exists
+            cursor.execute("INSERT IGNORE INTO counties (rs, county_name, type, parent) "
+                           "VALUES (0, 'Deutschland', 'Staat', NULL)")
+            connection.commit()
+            log.debug("Committed Tables")

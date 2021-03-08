@@ -54,14 +54,6 @@ class CovidDataTest(TestCase):
         self.assertEqual(1, len(self.data.search_district_by_name("Kassel Land")), "Kassel Land should match LK Kassel")
         self.assertEqual(1, len(self.data.search_district_by_name("Bundesland Hessen")), "Exact match should be chosen")
 
-    def test_clean_district_name(self):
-        expected = [("Region Hannover", "Hannover"), ("LK Kassel", "Kassel"),
-                    ("LK Dillingen a.d.Donau", "Dillingen a.d.Donau"),
-                    ("LK Bad Tölz-Wolfratshausen", "Bad Tölz-Wolfratshausen"), ("Berlin", "Berlin")]
-        for item in expected:
-            self.assertEqual(item[1], self.data.clean_district_name(item[0]),
-                             "Clean name of " + item[0] + " should be " + item[1])
-
     def test_get_district_data(self):
         data = self.data.get_district_data(3151)
 

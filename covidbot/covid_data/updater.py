@@ -2,27 +2,33 @@ import codecs
 import csv
 import json
 import logging
+import random
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
-import random
 from typing import Optional
 
 import requests
 from mysql.connector import MySQLConnection
 
-from covidbot.covid_data.covid_data import CovidData
+from covidbot.covid_data.covid_data import CovidDatabaseCreator
 
 
-class Updater(ABC, CovidData):
+class Updater(ABC):
+    connection: MySQLConnection
+    log: logging.Logger
+
     def __init__(self, conn: MySQLConnection):
-        super().__init__(conn)
+        self.connection = conn
+        self.log = logging.getLogger(str(self.__class__.__name__))
+        CovidDatabaseCreator(self.connection)
 
-    def get_resource(self, url: str, last_update: Optional[datetime], chance: Optional[float] = 1.0) -> Optional[bytes]:
+    def get_resource(self, url: str, chance: Optional[float] = 1.0) -> Optional[bytes]:
         # Just fetch for a certain chance, 100% by default
         if random.uniform(0.0, 1.0) > chance:
             return None
 
         header = {"User-Agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
+        last_update = self.get_last_update()
         if last_update:
             # need to use our own day/month, as locale can't be changed on the fly and we have to ensure not asking for
             # Mär in March
@@ -45,10 +51,28 @@ class Updater(ABC, CovidData):
     def update(self) -> bool:
         pass
 
+    @abstractmethod
+    def get_last_update(self) -> Optional[datetime]:
+        pass
+
+    def get_district_id(self, district_name: str) -> Optional[int]:
+        with self.connection.cursor() as cursor:
+            cursor.execute('SELECT rs FROM counties WHERE county_name LIKE %s LIMIT 1', ["%" + district_name + "%"])
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
 
 class RKIUpdater(Updater):
     RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
     log = logging.getLogger(__name__)
+
+    def get_last_update(self) -> Optional[datetime]:
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT MAX(date) FROM covid_data")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
 
     def update(self) -> bool:
         last_update = self.get_last_update()
@@ -57,7 +81,7 @@ class RKIUpdater(Updater):
         if last_update == date.today():
             return False
 
-        response = self.get_resource(self.RKI_LK_CSV, last_update)
+        response = self.get_resource(self.RKI_LK_CSV)
         if response:
             self.log.debug("Got RKI Data, checking if new")
             rki_data = codecs.decode(response, "utf-8").splitlines()
@@ -91,7 +115,7 @@ class RKIUpdater(Updater):
 
             covid_data.append((int(row['RS']), new_updated, int(row['cases']), float(row['cases7_per_100k']),
                                int(row['deaths'])))
-            rs_data.append((int(row['RS']), self.clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
+            rs_data.append((int(row['RS']), clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
                             row['BEZ'], int(row['EWZ']), int(row['BL_ID'])))
 
         self.log.debug("Insert new data into counties and covid_data")
@@ -105,15 +129,18 @@ class RKIUpdater(Updater):
         self.calculate_aggregated_values(new_updated)
 
         # Check for Plausibility, as Dataset has been wrong sometimes
-        germany = self.get_country_data()
-        if germany.new_cases and (germany.new_cases <= 0 or germany.new_cases >= 100000) \
-                or germany.new_deaths and germany.new_deaths <= 0:
-            self.log.error("Data is looking weird! Rolling back data update!")
-            self.connection.rollback()
-            raise ValueError(
-                f"COVID19 {germany.new_cases} new cases and {germany.new_deaths} deaths are not plausible. Aborting!")
-        else:
-            self.connection.commit()
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT new_cases, new_deaths FROM covid_data_calculated '
+                           'WHERE rs=%s ORDER BY date DESC LIMIT 1', [self.get_district_id("Deutschland")])
+            germany = cursor.fetchone()
+            if germany['new_cases'] and (germany['new_cases'] <= 0 or germany['new_cases'] >= 100000) \
+                    or germany['new_deaths'] and germany['new_deaths'] <= 0:
+                self.log.error("Data is looking weird! Rolling back data update!")
+                self.connection.rollback()
+                raise ValueError(
+                    f"COVID19 {germany['new_cases']} new cases and {germany['new_deaths']} deaths are not plausible. Aborting!")
+            else:
+                self.connection.commit()
         self.log.debug("Finished inserting new data")
 
     def calculate_aggregated_values(self, new_updated: date):
@@ -161,20 +188,18 @@ class VaccinationGermanyUpdater(Updater):
           "=false&returnDistinctValues=false&cacheHint=false&orderByFields=Datenstand+DESC&groupByFieldsForStatistics" \
           "=&outStatistics=&having=&resultOffset=&resultRecordCount=51&sqlFormat=none&f=pjson&token= "
 
-    def update(self) -> bool:
-        last_update = None
+    def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
-            cursor.execute("SELECT updated FROM covid_vaccinations WHERE district_id != 0 "
-                           "ORDER BY updated DESC LIMIT 1")
-            updated = cursor.fetchone()
-            if updated:
-                last_update = updated[0]
-                if last_update.date() == date.today():
-                    return False
+            cursor.execute("SELECT MAX(updated) FROM covid_vaccinations WHERE district_id != 0")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
 
+    def update(self) -> bool:
+        self.get_last_update()
         new_data = False
 
-        response = self.get_resource(self.URL, last_update)
+        response = self.get_resource(self.URL)
         if response:
             self.log.debug("Got Vaccination Data")
             data = json.loads(response)
@@ -185,12 +210,11 @@ class VaccinationGermanyUpdater(Updater):
                     if row['Bundesland'] == "Gesamt":
                         row['Bundesland'] = "Deutschland"
 
-                    district = self.search_district_by_name(row['Bundesland'])
-                    if not district:
+                    district_id = self.get_district_id(row['Bundesland'])
+                    if district_id is None:
                         self.log.warning(f"Can't find district_id for {row['Bundesland']}!")
                         continue
 
-                    district_id = district[0][0]
                     updated = datetime.fromtimestamp(row['Datenstand'] // 1000)
                     cursor.execute("SELECT id FROM covid_vaccinations WHERE updated = %s AND district_id=%s",
                                    [updated, district_id])
@@ -225,6 +249,13 @@ class RValueGermanyUpdater(Updater):
           "=publicationFile"
     R_VALUE_7DAY_CSV_KEY = "Schätzer_7_Tage_R_Wert"
 
+    def get_last_update(self) -> Optional[datetime]:
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT MAX(updated) FROM covid_r_value")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
     def update(self) -> bool:
         last_update = None
         with self.connection.cursor() as cursor:
@@ -236,17 +267,17 @@ class RValueGermanyUpdater(Updater):
                     return False
 
         new_data = False
-        response = self.get_resource(self.URL, last_update, 1)
+        response = self.get_resource(self.URL, 1)
 
         if response:
             self.log.debug("Got R-Value Data")
 
             rki_data = codecs.decode(response, "utf-8").splitlines()
             reader = csv.DictReader(rki_data, delimiter=';', )
-            district_id = self.search_district_by_name("Deutschland")
-            if not district_id:
+            district_id = self.get_district_id("Deutschland")
+            if district_id is None:
                 raise ValueError("No district_id for Deutschland")
-            district_id = district_id[0][0]
+
             with self.connection.cursor() as cursor:
                 for row in reader:
                     # RKI appends Erläuterungen to Data
@@ -288,24 +319,25 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
     log = logging.getLogger(__name__)
     URL = "https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv"
 
-    def update(self) -> bool:
-        last_update = None
-        district_id = self.search_district_by_name("Deutschland")
-        if not district_id:
-            raise ValueError("No district_id for Deutschland")
-        district_id = district_id[0][0]
-
+    def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
-            cursor.execute("SELECT updated FROM covid_vaccinations WHERE district_id=%s ORDER BY updated DESC LIMIT 1",
-                           [district_id])
-            updated = cursor.fetchone()
-            if updated:
-                last_update = updated[0]
-                if last_update.date() == date.today():
-                    return False
+            germany_id = self.get_district_id("Deutschland")
+            cursor.execute("SELECT MAX(updated) FROM covid_vaccinations WHERE district_id=%s", [germany_id])
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
+    def update(self) -> bool:
+        last_update = self.get_last_update()
+        district_id = self.get_district_id("Deutschland")
+        if district_id is None:
+            raise ValueError("No district_id for Deutschland")
+
+        if last_update - datetime.now() < timedelta(hours=12):
+            return False
 
         new_data = False
-        response = self.get_resource(self.URL, last_update)
+        response = self.get_resource(self.URL)
         if response:
             self.log.debug("Got Vaccination Data from Impfdashboard")
             dashboard_data = codecs.decode(response, "utf-8").splitlines()
@@ -340,3 +372,9 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
                                     row['personen_voll_kumulativ'], rate_partial, rate_full])
             self.connection.commit()
         return new_data
+
+
+def clean_district_name(county_name: str) -> Optional[str]:
+    if county_name is not None and county_name.count(" ") > 0:
+        return " ".join(county_name.split(" ")[1:])
+    return county_name
