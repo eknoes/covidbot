@@ -43,7 +43,7 @@ class MessengerBotSetup:
     name: str
     config: configparser.ConfigParser
 
-    def __init__(self, name: str, config_dict, loglvl=logging.INFO, setup_logs=True):
+    def __init__(self, name: str, config_dict, loglvl=logging.INFO, setup_logs=True, monitoring=True):
         if setup_logs:
             # Setup Logging
             logging.basicConfig(format=logging_format, level=loglvl, filename=f"{name}-bot.log")
@@ -60,7 +60,7 @@ class MessengerBotSetup:
         self.config = config_dict
 
         monitor_port = self.config.getint(name.upper(), "PROMETHEUS_PORT", fallback=0)
-        if monitor_port > 0:
+        if monitoring and monitor_port > 0:
             try:
                 prometheus_client.start_http_server(monitor_port, '0.0.0.0')
             except OSError as e:
@@ -121,7 +121,7 @@ class MessengerBotSetup:
 
 async def sendUpdates(messenger_iface: str):
     try:
-        with MessengerBotSetup(messenger_iface, config, setup_logs=False) as iface:
+        with MessengerBotSetup(messenger_iface, config, setup_logs=False, monitoring=False) as iface:
             await iface.send_daily_reports()
             logging.info(f"Checked for daily reports on {messenger_iface}")
     except Exception as e:
@@ -166,13 +166,13 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
         return
 
     if messenger_interface:
-        with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
+        with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
             await iface.send_message(message, recipients, with_report)
 
     else:
         for messenger_interface in ["telegram", "threema", "signal"]:
             try:
-                with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False) as iface:
+                with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
                     await iface.send_message(message, recipients, with_report)
             except Exception as e:
                 logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
@@ -264,13 +264,13 @@ if __name__ == "__main__":
                 except ValueError as error:
                     # Data did not make it through plausibility check
                     print(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}")
-                    with MessengerBotSetup("telegram", config, setup_logs=False) as telegram:
+                    with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
                         asyncio.run(telegram.send_message(f"Exception happened on Data Update with "
                                                           f"{updater.__class__.__name__}: {error}",
                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Forward Feedback
-        with MessengerBotSetup("feedback", config, setup_logs=False) as iface:
+        with MessengerBotSetup("feedback", config, setup_logs=False, monitoring=False) as iface:
             asyncio.run(iface.send_daily_reports())
 
     elif args.daily_report:
