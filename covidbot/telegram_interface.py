@@ -18,6 +18,7 @@ from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandle
 from covidbot.bot import Bot, UserDistrictActions
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
+from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_COMMAND_COUNT, RECV_MESSAGE_COUNT
 
 '''
 Telegram Aktionen:
@@ -116,6 +117,8 @@ class TelegramInterface(MessengerInterface):
 
                 message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo).media,
                                                           caption=caption, parse_mode=ParseMode.HTML)
+                SENT_IMAGES_COUNT.inc(len(photos))
+
                 if message_obj.photo[0]:
                     self.set_photoid(photo, message_obj.photo[0])
 
@@ -129,14 +132,17 @@ class TelegramInterface(MessengerInterface):
                     files.append(self.get_input_media_photo(photo))
 
                 self.updater.bot.send_media_group(chat_id, files)
+                SENT_IMAGES_COUNT.inc(len(photos))
 
         if self.updater.bot.send_message(chat_id, message, parse_mode=ParseMode.HTML,
-                                             disable_web_page_preview=disable_web_page_preview,
-                                             reply_markup=reply_markup):
+                                         disable_web_page_preview=disable_web_page_preview,
+                                         reply_markup=reply_markup):
+            SENT_MESSAGE_COUNT.inc()
             return True
         return False
 
     def startHandler(self, update: Update, context: CallbackContext):
+        BOT_COMMAND_COUNT.labels('start').inc()
         name = ""
         if update.effective_user:
             name = update.effective_user.first_name
@@ -145,21 +151,27 @@ class TelegramInterface(MessengerInterface):
             self._bot.set_language(update.effective_chat.id, update.effective_user.language_code)
 
     def helpHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('help').inc()
         self.answer_update(update, self._bot.help_message(update.effective_chat.id), disable_web_page_preview=True)
 
     def infoHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('info').inc()
         self.answer_update(update, self._bot.explain_message(), disable_web_page_preview=True)
 
     def privacyHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('privacy').inc()
         self.answer_update(update, self._bot.get_privacy_msg())
 
     def languageHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('set_language').inc()
         self.answer_update(update, self._bot.set_language(update.effective_chat.id, " ".join(context.args)))
 
     def debugHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('debug').inc()
         self.answer_update(update, self._bot.get_debug_report(update.effective_chat.id))
 
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('district_data').inc()
         query = " ".join(context.args)
         msg, districts = self._bot.find_district_id(query)
         if not districts:
@@ -174,12 +186,14 @@ class TelegramInterface(MessengerInterface):
                                                  self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
 
     def deleteHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('delete_me').inc()
         markup = InlineKeyboardMarkup([[InlineKeyboardButton("Ja, alle meine Daten löschen",
                                                              callback_data=TelegramCallbacks.DELETE_ME.name)],
                                        [InlineKeyboardButton("Nein", callback_data=TelegramCallbacks.DISCARD.name)]])
         self.answer_update(update, "Sollen alle deine Abonnements und Daten gelöscht werden?", reply_markup=markup)
 
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('subscribe').inc()
         if not context.args:
             msg, districts = self._bot.get_overview(update.effective_chat.id)
         else:
@@ -198,6 +212,7 @@ class TelegramInterface(MessengerInterface):
             self.answer_update(update, self._bot.subscribe(update.effective_chat.id, districts[0][0]))
 
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('unsubscribe').inc()
         query = " ".join(context.args)
         msg, districts = self._bot.find_district_id(query)
         if not districts:
@@ -209,9 +224,11 @@ class TelegramInterface(MessengerInterface):
             self.answer_update(update, self._bot.unsubscribe(update.effective_chat.id, districts[0][0]))
 
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('report').inc()
         self.sendReport(update.effective_chat.id)
 
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('unknown').inc()
         self.answer_update(update, self._bot.unknown_action())
         self.log.info("Someone called an unknown action: " + update.message.text)
 
@@ -232,7 +249,8 @@ class TelegramInterface(MessengerInterface):
         for entity in entities:
             if entity.type == entity.MENTION and context.bot.username == entities[entity][1:]:
                 # Strip mention from message
-                update.message.text = (update.message.text[0:entity.offset] + update.message.text[entity.offset + entity.length:]).strip()
+                update.message.text = (update.message.text[0:entity.offset] + update.message.text[
+                                                                              entity.offset + entity.length:]).strip()
                 self.updater.dispatcher.process_update(update)
                 return
 
@@ -244,18 +262,21 @@ class TelegramInterface(MessengerInterface):
         query.answer()
         # Subscribe Callback
         if query.data.startswith(TelegramCallbacks.SUBSCRIBE.name):
+            BOT_COMMAND_COUNT.labels('subscribe').inc()
             district_id = int(query.data[len(TelegramCallbacks.SUBSCRIBE.name):])
             query.edit_message_text(self._bot.subscribe(update.effective_chat.id, district_id),
                                     parse_mode=telegram.ParseMode.HTML)
 
         # Unsubscribe Callback
         elif query.data.startswith(TelegramCallbacks.UNSUBSCRIBE.name):
+            BOT_COMMAND_COUNT.labels('unsubscribe').inc()
             district_id = int(query.data[len(TelegramCallbacks.UNSUBSCRIBE.name):])
             query.edit_message_text(self._bot.unsubscribe(update.effective_chat.id, district_id),
                                     parse_mode=telegram.ParseMode.HTML)
 
         # Choose Action Callback
         elif query.data.startswith(TelegramCallbacks.CHOOSE_ACTION.name):
+            BOT_COMMAND_COUNT.labels('choose_action').inc()
             district_id = int(query.data[len(TelegramCallbacks.CHOOSE_ACTION.name):])
             text, markup = self.chooseActionBtnGenerator(district_id, update.effective_chat.id)
             if markup is not None:
@@ -265,24 +286,30 @@ class TelegramInterface(MessengerInterface):
 
         # Send Report Callback
         elif query.data.startswith(TelegramCallbacks.REPORT.name):
+            BOT_COMMAND_COUNT.labels('report').inc()
             district_id = int(query.data[len(TelegramCallbacks.REPORT.name):])
             message = self._bot.get_district_report(district_id)
-            self.answer_update(update, message, [self._viz.infections_graph(district_id), self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
+            self.answer_update(update, message,
+                               [self._viz.infections_graph(district_id), self._viz.incidence_graph(district_id)],
+                               disable_web_page_preview=True)
 
             query.delete_message()
             self.deleted_callbacks.append(query.message.message_id)
 
         # DeleteMe Callback
         elif query.data.startswith(TelegramCallbacks.DELETE_ME.name):
+            BOT_COMMAND_COUNT.labels('delete_me').inc()
             query.edit_message_text(self._bot.delete_user(update.effective_chat.id), parse_mode=telegram.ParseMode.HTML)
 
         # Discard Callback
         elif query.data.startswith(TelegramCallbacks.DISCARD.name):
+            BOT_COMMAND_COUNT.labels('discard_callback').inc()
             query.delete_message()
             self.deleted_callbacks.append(query.message.message_id)
 
         # ConfirmFeedback Callback
         elif query.data.startswith(TelegramCallbacks.CONFIRM_FEEDBACK.name):
+            BOT_COMMAND_COUNT.labels('send_feedback').inc()
             if update.effective_chat.id not in self.feedback_cache:
                 query.edit_message_text(self._bot.get_error_message(), parse_mode=telegram.ParseMode.HTML)
             else:
@@ -296,9 +323,11 @@ class TelegramInterface(MessengerInterface):
 
                 del self.feedback_cache[update.effective_chat.id]
         else:
+            BOT_COMMAND_COUNT.labels('unknown_callback').inc()
             query.edit_message_text(self._bot.get_error_message(), parse_mode=telegram.ParseMode.HTML)
 
     def directMessageHandler(self, update: Update, context: CallbackContext) -> None:
+        RECV_MESSAGE_COUNT.inc()
         if update.message.location:
             msg, districts = self._bot.find_district_id_from_geolocation(update.message.location.longitude,
                                                                          update.message.location.latitude)
@@ -406,9 +435,11 @@ class TelegramInterface(MessengerInterface):
         return False
 
     def statHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('statistic').inc()
         self.answer_update(update, self._bot.get_statistic(), [self._viz.bot_user_graph()])
 
     def vaccHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('vaccinations').inc()
         self.answer_update(update, self._bot.get_vaccination_overview(0), [self._viz.vaccination_graph(0)],
                            disable_web_page_preview=True)
 

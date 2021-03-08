@@ -15,6 +15,7 @@ from semaphore import ChatContext
 from covidbot.bot import Bot
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
+from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT
 from covidbot.text_interface import SimpleTextInterface, BotResponse
 from covidbot.utils import adapt_text
 
@@ -56,6 +57,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         """
         Handles a text message received by the bot
         """
+        RECV_MESSAGE_COUNT.inc()
         text = ctx.message.get_body()
         if text:
             await ctx.message.typing_started()
@@ -84,8 +86,10 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         if reply.images:
             for image in reply.images:
                 attachment.append(self.get_attachment(image))
+                SENT_IMAGES_COUNT.inc()
 
         await ctx.message.reply(body=reply.message, attachments=attachment)
+        SENT_MESSAGE_COUNT.inc()
 
     @staticmethod
     def get_attachment(filename: str) -> Dict:
