@@ -14,6 +14,7 @@ from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButt
     MessageEntity, InputFile, Message, InputMediaPhoto
 from telegram.error import BadRequest, TelegramError, Unauthorized
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
+from telegram.ext.dispatcher import DEFAULT_GROUP
 
 from covidbot.bot import Bot, UserDistrictActions
 from covidbot.covid_data.visualization import Visualization
@@ -73,6 +74,7 @@ class TelegramInterface(MessengerInterface):
         self.cache[filename] = InputMediaPhoto(photo_size)
 
     def run(self):
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.update, callback=self.countRecvMessagesHandler), group=DEFAULT_GROUP + 1)
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.channel_posts, self.channelPostHandler))
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
@@ -140,6 +142,10 @@ class TelegramInterface(MessengerInterface):
             SENT_MESSAGE_COUNT.inc()
             return True
         return False
+
+    @staticmethod
+    def countRecvMessagesHandler(update: Update, context: CallbackContext):
+        RECV_MESSAGE_COUNT.inc()
 
     def startHandler(self, update: Update, context: CallbackContext):
         BOT_COMMAND_COUNT.labels('start').inc()
@@ -327,7 +333,6 @@ class TelegramInterface(MessengerInterface):
             query.edit_message_text(self._bot.get_error_message(), parse_mode=telegram.ParseMode.HTML)
 
     def directMessageHandler(self, update: Update, context: CallbackContext) -> None:
-        RECV_MESSAGE_COUNT.inc()
         if update.message.location:
             msg, districts = self._bot.find_district_id_from_geolocation(update.message.location.longitude,
                                                                          update.message.location.latitude)
