@@ -88,7 +88,9 @@ class Bot(object):
 
         if not possible_district:
             message = 'Leider konnte kein Ort gefunden werden. Bitte beachte, ' \
-                      'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location=district_query)
+                      'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind. Mit {help_cmd} erhältst du ' \
+                      'einen Überblick über die Funktionsweise des Bots.'\
+                .format(location=district_query, help_cmd=self.format_command("hilfe"))
             return message, None
         elif len(possible_district) == 1:
             return None, possible_district
@@ -453,7 +455,7 @@ class Bot(object):
         return 'Diese Aktion benötigt eine Ortsangabe.'
 
     def unknown_action(self) -> str:
-        return ("Dieser Befehl wurde nicht verstanden. Nutze <code>{help_command}</code> um einen Überblick über die "
+        return ("Dieser Befehl wurde nicht verstanden. Sende <code>{help_command}</code> um einen Überblick über die "
                 "Funktionen zu bekommen!").format(help_command=self.format_command("hilfe"))
 
     def get_unconfirmed_daily_reports(self) -> Optional[List[Tuple[Union[int, str], str]]]:
