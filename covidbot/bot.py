@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from covidbot.covid_data import CovidData, DistrictData
 from covidbot.location_service import LocationService
 from covidbot.user_manager import UserManager, BotUser
-from covidbot.utils import format_data_trend, format_int, format_float
+from covidbot.utils import format_data_trend, format_int, format_float, format_noun, FormattableNoun
 
 
 class UserDistrictActions(Enum):
@@ -341,7 +341,7 @@ class Bot(object):
                         date=country.vaccinations.date.strftime("%d.%m.%Y"))
 
         message += "<b>🦠 Infektionszahlen</b>\n" \
-                   "Insgesamt wurden bundesweit {new_cases} Neuinfektionen {new_cases_trend} und " \
+                   "Insgesamt wurden bundesweit {new_cases} {new_cases_trend} und " \
                    "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
                    "{incidence_trend}."
         if country.r_value:
@@ -350,9 +350,9 @@ class Bot(object):
                         r_trend=format_data_trend(country.r_value.r_trend))
         message += "\n\n"
         message = message.format(date=self._data.get_last_update().strftime("%d.%m.%Y"),
-                                 new_cases=format_int(country.new_cases),
+                                 new_cases=format_noun(country.new_cases, FormattableNoun.INFECTIONS),
                                  new_cases_trend=format_data_trend(country.cases_trend),
-                                 new_deaths=format_int(country.new_deaths),
+                                 new_deaths=format_noun(country.new_cases, FormattableNoun.DEATHS),
                                  new_deaths_trend=format_data_trend(country.deaths_trend),
                                  incidence=format_float(country.incidence),
                                  incidence_trend=format_data_trend(country.incidence_trend))
@@ -394,13 +394,12 @@ class Bot(object):
 
     @staticmethod
     def format_district_data(district: DistrictData) -> str:
-        return "{name}: {incidence} {incidence_trend} ({new_cases} Neuinfektionen, {new_deaths} Todesfälle)" \
+        return "{name}: {incidence} {incidence_trend} ({new_cases}, {new_deaths})" \
             .format(name=district.name,
                     incidence=format_float(district.incidence),
                     incidence_trend=format_data_trend(district.incidence_trend),
-                    new_cases=format_int(district.new_cases),
-                    new_deaths=format_int(district.new_deaths))
-
+                    new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
+                    new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
         districts.sort(key=lambda d: d.name)
@@ -446,7 +445,8 @@ class Bot(object):
             counties = None
         else:
             counties = list(map(lambda s: (s, self._data.get_district(s).name), user.subscriptions))
-            message = "Du hast aktuell <b>{abo_count}</b> Orte abonniert.".format(abo_count=len(user.subscriptions))
+            message = "Du hast aktuell {abo_count} Orte abonniert."\
+                .format(abo_count=format_noun(len(user.subscriptions), FormattableNoun.DISTRICT))
 
         return message, counties
 

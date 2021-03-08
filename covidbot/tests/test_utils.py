@@ -75,3 +75,28 @@ class Test(TestCase):
         expected = "1,21"
         actual = format_float(1.21)
         self.assertEqual(expected, actual, "Incidence should be formatted for German localization")
+
+    def test_format_noun(self):
+        expected = "1 Neuinfektion"
+        actual = format_noun(1, FormattableNoun.INFECTIONS)
+        self.assertEqual(expected, actual)
+
+        expected = "2 Neuinfektionen"
+        actual = format_noun(2, FormattableNoun.INFECTIONS)
+        self.assertEqual(expected, actual)
+
+        expected = "0 Neuinfektionen"
+        actual = format_noun(0, FormattableNoun.INFECTIONS)
+        self.assertEqual(expected, actual)
+
+        expected = "1 Todesfall"
+        actual = format_noun(1, FormattableNoun.DEATHS)
+        self.assertEqual(expected, actual)
+
+        expected = "2 Todesfälle"
+        actual = format_noun(2, FormattableNoun.DEATHS)
+        self.assertEqual(expected, actual)
+
+        expected = "0 Todesfälle"
+        actual = format_noun(0, FormattableNoun.DEATHS)
+        self.assertEqual(expected, actual)

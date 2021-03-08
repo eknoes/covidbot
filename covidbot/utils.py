@@ -1,6 +1,7 @@
 import re
 import string
-from typing import List
+from enum import Enum
+from typing import List, Union, Optional
 
 from covidbot.covid_data import TrendValue
 
@@ -127,3 +128,27 @@ def format_float(incidence: float) -> str:
 
 def str_bytelen(s) -> int:
     return len(s.encode('utf-8'))
+
+
+class FormattableNoun(Enum):
+    INFECTIONS = 1
+    DEATHS = 2
+    DISTRICT = 3
+
+
+def format_noun(number: int, noun: FormattableNoun) -> str:
+    singular: Optional[str] = None
+    plural: Optional[str] = None
+    if noun == FormattableNoun.INFECTIONS:
+        singular = "Neuinfektion"
+        plural = "Neuinfektionen"
+    elif noun == FormattableNoun.DEATHS:
+        singular = "Todesfall"
+        plural = "Todesfälle"
+    elif noun == FormattableNoun.DISTRICT:
+        singular = "Ort"
+        plural = "Orte"
+
+    if number == 1:
+        return f"{format_int(number)} {singular}"
+    return f"{format_int(number)} {plural}"
