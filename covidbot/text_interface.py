@@ -20,7 +20,7 @@ class BotResponse:
 @dataclass
 class Handler:
     command: str
-    method: Callable[[str, str], BotResponse]
+    method: Callable[[str, str], Union[BotResponse, List[BotResponse]]]
     has_args: bool
 
 
@@ -58,7 +58,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("debug", self.debugHandler, False))
         self.handler_list.append(Handler("", self.directHandler, True))
 
-    def handle_input(self, user_input: str, user_id: str) -> Optional[BotResponse]:
+    def handle_input(self, user_input: str, user_id: str) -> Optional[List[BotResponse]]:
         # Strip / on /command
         if user_input[0] == "/":
             user_input = user_input[1:]
@@ -73,12 +73,12 @@ class SimpleTextInterface(object):
                 if user_input.lower().strip() == "ja":
                     self.bot.add_user_feedback(user_id, state[1])
                     del self.chat_states[user_id]
-                    return BotResponse("Danke für dein wertvolles Feedback!")
+                    return [BotResponse("Danke für dein wertvolles Feedback!")]
                 else:
                     del self.chat_states[user_id]
 
                     if user_input.strip().lower()[:4] == "nein":
-                        return BotResponse("Alles klar, deine Nachricht wird nicht weitergeleitet.")
+                        return [BotResponse("Alles klar, deine Nachricht wird nicht weitergeleitet.")]
             elif state[0] == ChatBotState.NOT_ACTIVATED:
                 if self.bot.is_user_activated(user_id):
                     del self.chat_states[user_id]
@@ -87,15 +87,16 @@ class SimpleTextInterface(object):
             elif state[0] == ChatBotState.WAITING_FOR_DELETE_ME:
                 del self.chat_states[user_id]
                 if user_input.strip().lower() == "ja":
-                    return BotResponse(self.bot.delete_user(user_id))
+                    return [BotResponse(self.bot.delete_user(user_id))]
                 else:
-                    return BotResponse(self.bot.no_delete_user())
+                    return [BotResponse(self.bot.no_delete_user())]
 
         # Check whether user has to be activated
         if not self.bot.is_user_activated(user_id):
             self.chat_states[user_id] = (ChatBotState.NOT_ACTIVATED, None)
-            return BotResponse("Dein Account wurde noch nicht aktiviert, bitte wende dich an die Entwickler. Bis diese "
-                               "deinen Account aktivieren, kannst du den Bot leider noch nicht nutzen.")
+            return [
+                BotResponse("Dein Account wurde noch nicht aktiviert, bitte wende dich an die Entwickler. Bis diese "
+                            "deinen Account aktivieren, kannst du den Bot leider noch nicht nutzen.")]
 
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
@@ -105,7 +106,10 @@ class SimpleTextInterface(object):
                     continue
 
                 text_in = user_input[len(handler.command):].strip()
-                return handler.method(text_in, user_id)
+                responses = handler.method(text_in, user_id)
+                if type(responses) is BotResponse:
+                    return [responses]
+                return responses
 
     def startHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(self.bot.start_message(user_id))
@@ -220,7 +224,7 @@ class InteractiveInterface(SimpleTextInterface, MessengerInterface):
     def run(self) -> None:
         user_input = input("Please enter input:\n> ")
         while user_input != "":
-            response = self.handle_input(user_input, '1')
-            if response:
+            responses = self.handle_input(user_input, '1')
+            for response in responses:
                 print(f"{adapt_text(response.message)}")
             user_input = input("> ")

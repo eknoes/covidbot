@@ -69,8 +69,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             # This is a hacky workaround for https://github.com/eknoes/covidbot/issues/103
             if not self.bot.is_user_activated(platform_id):
                 self.bot.enable_user(platform_id)
-            reply = self.handle_input(text, platform_id)
-            if reply:
+            replies = self.handle_input(text, platform_id)
+            for reply in replies:
                 await self.send_reply(ctx, reply)
             await ctx.message.typing_stopped()
 

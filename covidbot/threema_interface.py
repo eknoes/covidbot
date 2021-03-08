@@ -47,8 +47,9 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         if type(message) == TextMessage:
             message: TextMessage
             try:
-                response = self.handle_input(message.text, message.from_id)
-                await self.send_bot_response(message.from_id, response)
+                responses = self.handle_input(message.text, message.from_id)
+                for response in responses:
+                    await self.send_bot_response(message.from_id, response)
             except Exception as e:
                 self.log.exception("An error happened while handling a Threema message", exc_info=e)
                 self.log.exception(f"Message from {message.from_id}: {message.text}")
