@@ -81,8 +81,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         reply.message = adapt_text(reply.message)
 
         attachment = []
-        if reply.image:
-            attachment.append(self.get_attachment(reply.image))
+        if reply.images:
+            for image in reply.images:
+                attachment.append(self.get_attachment(image))
 
         await ctx.message.reply(body=reply.message, attachments=attachment)
 
@@ -146,8 +147,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 if append_report:
                     response = self.reportHandler("", user)
                     attachments = []
-                    if response.image:
-                        attachments.append(self.get_attachment(response.image))
+                    if response.images:
+                        for image in response.images:
+                            attachments.append(self.get_attachment(image))
                     success = await bot.send_message(user, adapt_text(response.message), attachments)
                     backoff_time = self.backoff_timer(backoff_time, not success, user)
 

@@ -76,9 +76,10 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             self.log.debug(f"Received unknown message type {type(message)}: {message}")
 
     async def send_bot_response(self, user: str, response: BotResponse):
-        if response.image:
-            response_img = ImageMessage(self.connection, image_path=response.image, to_id=user)
-            await response_img.send()
+        if response.images:
+            for image in response.images:
+                response_img = ImageMessage(self.connection, image_path=image, to_id=user)
+                await response_img.send()
 
         if response.message:
             message_parts = self.split_messages(response.message)

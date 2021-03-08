@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass
-from io import BytesIO
 from typing import Callable, Dict, List, Union, Optional, Tuple
 
 from covidbot.bot import Bot, UserDistrictActions
@@ -12,7 +11,7 @@ from covidbot.utils import adapt_text
 @dataclass
 class BotResponse:
     message: str
-    image: Optional[str] = None
+    images: Optional[List[str]] = None
 
     def __str__(self):
         return self.message
@@ -118,7 +117,7 @@ class SimpleTextInterface(object):
         return BotResponse(self.bot.explain_message())
 
     def vaccHandler(self, user_input: str, user_id: str) -> BotResponse:
-        return BotResponse(self.bot.get_vaccination_overview(0), self.viz.vaccination_graph(0))
+        return BotResponse(self.bot.get_vaccination_overview(0), [self.viz.vaccination_graph(0)])
 
     def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[str, int]:
         message, locations = self.bot.find_district_id(location_query)
@@ -164,14 +163,14 @@ class SimpleTextInterface(object):
         location = self.parseLocationInput(user_input)
         if type(location) == int:
             message = self.bot.get_district_report(location)
-            image = self.viz.infections_graph(location)
-            return BotResponse(message, image)
+            images = [self.viz.infections_graph(location), self.viz.incidence_graph(location)]
+            return BotResponse(message, images)
         return BotResponse(location)
 
     def reportHandler(self, user_input: str, user_id: str) -> BotResponse:
         message = self.bot.get_report(user_id)
-        graph = self.viz.infections_graph(0)
-        return BotResponse(message, graph)
+        images = [self.viz.infections_graph(0)]
+        return BotResponse(message, images)
 
     def directHandler(self, user_input: str, user_id: str) -> BotResponse:
         location = self.parseLocationInput(user_input, set_feedback=user_id)
@@ -190,7 +189,7 @@ class SimpleTextInterface(object):
         return BotResponse(location)
 
     def statHandler(self, user_input: str, user_id: str) -> BotResponse:
-        return BotResponse(self.bot.get_statistic(), self.viz.bot_user_graph())
+        return BotResponse(self.bot.get_statistic(), [self.viz.bot_user_graph()])
 
     def privacyHandler(self, user_input: str, user_id: str) -> BotResponse:
         return BotResponse(self.bot.get_privacy_msg())
@@ -204,8 +203,8 @@ class SimpleTextInterface(object):
 
     def getUpdates(self) -> List[Tuple[str, BotResponse]]:
         updates = self.bot.get_unconfirmed_daily_reports()
-        graph = self.viz.infections_graph(0)
-        return list(map(lambda x: (x[0], BotResponse(x[1], graph)), updates))
+        images = [self.viz.infections_graph(0)]
+        return list(map(lambda x: (x[0], BotResponse(x[1], images)), updates))
 
     def confirm_daily_report_send(self, user_identification: Union[int, str]):
         return self.bot.confirm_daily_report_send(user_identification)
