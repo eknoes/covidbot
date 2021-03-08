@@ -144,7 +144,7 @@ class SimpleTextInterface(object):
                               f"auch die ID nutzen, also bspw. Abo {locations[0][0]} für {locations[0][1]}"
             return locations_list
 
-    def subscribeHandler(self, user_input: str, user_id: str) -> BotResponse:
+    def subscribeHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
         if not user_input:
             message, locations = self.bot.get_overview(user_id)
             if locations:
@@ -154,7 +154,7 @@ class SimpleTextInterface(object):
             return BotResponse(message)
         location = self.parseLocationInput(user_input)
         if type(location) == int:
-            return BotResponse(self.bot.subscribe(user_id, location))
+            return [BotResponse(self.bot.subscribe(user_id, location)), self.currentDataHandler(user_input, user_id)]
         return BotResponse(location)
 
     def unsubscribeHandler(self, user_input: str, user_id: str) -> BotResponse:
