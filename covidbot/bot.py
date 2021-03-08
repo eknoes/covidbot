@@ -342,7 +342,7 @@ class Bot(object):
 
         message += "<b>🦠 Infektionszahlen</b>\n" \
                    "Insgesamt wurden bundesweit {new_cases} {new_cases_trend} und " \
-                   "{new_deaths} Todesfälle {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
+                   "{new_deaths} {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
                    "{incidence_trend}."
         if country.r_value:
             message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value} {r_trend}." \
@@ -352,7 +352,7 @@ class Bot(object):
         message = message.format(date=self._data.get_last_update().strftime("%d.%m.%Y"),
                                  new_cases=format_noun(country.new_cases, FormattableNoun.INFECTIONS),
                                  new_cases_trend=format_data_trend(country.cases_trend),
-                                 new_deaths=format_noun(country.new_cases, FormattableNoun.DEATHS),
+                                 new_deaths=format_noun(country.new_deaths, FormattableNoun.DEATHS),
                                  new_deaths_trend=format_data_trend(country.deaths_trend),
                                  incidence=format_float(country.incidence),
                                  incidence_trend=format_data_trend(country.incidence_trend))
