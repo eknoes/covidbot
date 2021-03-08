@@ -224,7 +224,7 @@ class TelegramInterface(MessengerInterface):
             self.answer_update(update, self._bot.unsubscribe(update.effective_chat.id, districts[0][0]))
 
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
-        BOT_COMMAND_COUNT.labels('get_report').inc()
+        BOT_COMMAND_COUNT.labels('report').inc()
         self.sendReport(update.effective_chat.id)
 
     def unknownHandler(self, update: Update, context: CallbackContext) -> None:
@@ -286,7 +286,7 @@ class TelegramInterface(MessengerInterface):
 
         # Send Report Callback
         elif query.data.startswith(TelegramCallbacks.REPORT.name):
-            BOT_COMMAND_COUNT.labels('get_report').inc()
+            BOT_COMMAND_COUNT.labels('report').inc()
             district_id = int(query.data[len(TelegramCallbacks.REPORT.name):])
             message = self._bot.get_district_report(district_id)
             self.answer_update(update, message,

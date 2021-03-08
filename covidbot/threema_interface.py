@@ -12,6 +12,7 @@ from threema.gateway.e2e import create_application, add_callback_route, TextMess
 from covidbot.bot import Bot
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
+from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT
 from covidbot.text_interface import SimpleTextInterface, BotResponse
 from covidbot.utils import adapt_text, str_bytelen
 
@@ -45,6 +46,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
 
     async def handle_threema_msg(self, message: Message):
         if type(message) == TextMessage:
+            RECV_MESSAGE_COUNT.inc()
             message: TextMessage
             try:
                 responses = self.handle_input(message.text, message.from_id)
@@ -74,19 +76,21 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 # Just exit on exception
                 os.kill(os.getpid(), signal.SIGINT)
         else:
-            self.log.debug(f"Received unknown message type {type(message)}: {message}")
+            self.log.warning(f"Received unknown message type {type(message)}: {message}")
 
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.images:
             for image in response.images:
                 response_img = ImageMessage(self.connection, image_path=image, to_id=user)
                 await response_img.send()
+                SENT_IMAGES_COUNT.inc()
 
         if response.message:
             message_parts = self.split_messages(response.message)
             for m in message_parts:
                 response_msg = TextMessage(self.connection, text=m, to_id=user)
                 await response_msg.send()
+                SENT_MESSAGE_COUNT.inc()
 
     async def send_daily_reports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()

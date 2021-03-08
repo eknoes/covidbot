@@ -5,6 +5,7 @@ from typing import Callable, Dict, List, Union, Optional, Tuple
 from covidbot.bot import Bot, UserDistrictActions
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
+from covidbot.metrics import BOT_COMMAND_COUNT
 from covidbot.utils import adapt_text
 
 
@@ -73,6 +74,7 @@ class SimpleTextInterface(object):
                 if user_input.lower().strip() == "ja":
                     self.bot.add_user_feedback(user_id, state[1])
                     del self.chat_states[user_id]
+                    BOT_COMMAND_COUNT.labels('send_feedback').inc()
                     return [BotResponse("Danke für dein wertvolles Feedback!")]
                 else:
                     del self.chat_states[user_id]
@@ -87,6 +89,7 @@ class SimpleTextInterface(object):
             elif state[0] == ChatBotState.WAITING_FOR_DELETE_ME:
                 del self.chat_states[user_id]
                 if user_input.strip().lower() == "ja":
+                    BOT_COMMAND_COUNT.labels('delete_me').inc()
                     return [BotResponse(self.bot.delete_user(user_id))]
                 else:
                     return [BotResponse(self.bot.no_delete_user())]
@@ -112,15 +115,19 @@ class SimpleTextInterface(object):
                 return responses
 
     def startHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('start').inc()
         return BotResponse(self.bot.start_message(user_id))
 
     def helpHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('help').inc()
         return BotResponse(self.bot.help_message(user_id))
 
     def infoHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('info').inc()
         return BotResponse(self.bot.explain_message())
 
     def vaccHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('vaccinations').inc()
         return BotResponse(self.bot.get_vaccination_overview(0), [self.viz.vaccination_graph(0)])
 
     def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[str, int]:
@@ -145,6 +152,7 @@ class SimpleTextInterface(object):
             return locations_list
 
     def subscribeHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
+        BOT_COMMAND_COUNT.labels('subscribe').inc()
         if not user_input:
             message, locations = self.bot.get_overview(user_id)
             if locations:
@@ -158,12 +166,14 @@ class SimpleTextInterface(object):
         return BotResponse(location)
 
     def unsubscribeHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('unsubscribe').inc()
         location = self.parseLocationInput(user_input)
         if type(location) == int:
             return BotResponse(self.bot.unsubscribe(user_id, location))
         return BotResponse(location)
 
     def currentDataHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('district_data').inc()
         location = self.parseLocationInput(user_input)
         if type(location) == int:
             message = self.bot.get_district_report(location)
@@ -172,6 +182,7 @@ class SimpleTextInterface(object):
         return BotResponse(location)
 
     def reportHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('report').inc()
         message = self.bot.get_report(user_id)
         images = [self.viz.infections_graph(0)]
         return BotResponse(message, images)
@@ -193,15 +204,19 @@ class SimpleTextInterface(object):
         return BotResponse(location)
 
     def statHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('statistic').inc()
         return BotResponse(self.bot.get_statistic(), [self.viz.bot_user_graph()])
 
     def privacyHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('privacy').inc()
         return BotResponse(self.bot.get_privacy_msg())
 
     def debugHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('debug').inc()
         return BotResponse(self.bot.get_debug_report(user_id))
 
     def deleteMeHandler(self, user_input: str, user_id: str) -> BotResponse:
+        BOT_COMMAND_COUNT.labels('delete_me').inc()
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_DELETE_ME, None)
         return BotResponse("Wenn alle deine bei uns gespeicherten Daten gelöscht werden sollen, antworte bitte mit Ja!")
 

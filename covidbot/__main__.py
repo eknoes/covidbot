@@ -61,7 +61,10 @@ class MessengerBotSetup:
 
         monitor_port = self.config.getint(name.upper(), "PROMETHEUS_PORT", fallback=0)
         if monitor_port > 0:
-            prometheus_client.start_http_server(monitor_port)
+            try:
+                prometheus_client.start_http_server(monitor_port)
+            except OSError as e:
+                logging.error("Error while starting Prometheus Endpoint", exc_info=e)
             i = Info('platform', 'Bot Platform')
             i.info({'platform': self.name})
 
