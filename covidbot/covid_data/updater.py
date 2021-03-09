@@ -410,6 +410,15 @@ class ICUGermanyUpdater(Updater):
                 for row in results:
                     cursor.execute("INSERT INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
                                    " covid_ventilated, updated) VALUES (%s, %s, %s, %s, %s, %s, %s)", row)
+
+                # Calculate aggregated values for states
+                for i in range(2):
+                    cursor.execute("INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid, covid_ventilated, updated) "
+                                   "SELECT c.parent, date, SUM(clear), SUM(occupied), SUM(occupied_covid), "
+                                   "SUM(covid_ventilated), updated FROM icu_beds "
+                                   "INNER JOIN counties c on c.rs = icu_beds.district_id "
+                                   "GROUP BY c.parent "
+                                   "HAVING (COUNT(c.parent) = (SELECT COUNT(*) FROM counties WHERE parent=c.parent) OR c.parent > 0) AND parent IS NOT NULL")
             self.connection.commit()
         return new_data
 

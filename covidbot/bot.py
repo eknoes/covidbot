@@ -190,7 +190,7 @@ class Bot(object):
 
         message = "<b>{district_name}</b>\n\n"
 
-        message += "<b>🏥 Infektionsdaten</b>\n"
+        message += "<b>🦠 Infektionsdaten</b>\n"
         if current_data.incidence:
             message += "Die 7-Tage-Inzidenz liegt bei {incidence} {incidence_trend}."
             if current_data.incidence_interval_since:
@@ -220,7 +220,7 @@ class Bot(object):
                                  total_deaths=format_int(current_data.total_deaths))
 
         if current_data.icu_data:
-            message += f"<b>🏥 Intensivbetten</b>\n" \
+            message += f"<b>🏥️ Intensivbetten</b>\n" \
                        f"{format_float(current_data.icu_data.percent_occupied())}% " \
                        f"({format_noun(current_data.icu_data.occupied_beds, FormattableNoun.BEDS)}) der " \
                        f"Intensivbetten sind aktuell belegt. " \
@@ -309,6 +309,16 @@ class Bot(object):
                         vacc_full=format_int(country.vaccinations.vaccinated_full),
                         date=country.vaccinations.date.strftime("%d.%m.%Y"))
 
+        if country.icu_data:
+            message += f"<b>🏥 Intensivbetten</b>\n" \
+                       f"{format_float(country.icu_data.percent_occupied())}% " \
+                       f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)}) der " \
+                       f"Intensivbetten sind aktuell belegt. " \
+                       f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
+                       f"({format_float(country.icu_data.percent_covid())}%) liegen Patienten" \
+                       f" mit COVID-19, davon müssen {country.icu_data.covid_ventilated} beatmet werden. " \
+                       f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
+
         message += "<b>🦠 Infektionszahlen</b>\n" \
                    "Insgesamt wurden bundesweit {new_cases} {new_cases_trend} und " \
                    "{new_deaths} {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
@@ -348,7 +358,9 @@ class Bot(object):
 
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
-                   '<a href="https://impfdashboard.de/">Impfdashboard</a>. Sende {info_command} um eine Erläuterung ' \
+                   '<a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
+                   'Intensivbettendaten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.' \
+                   '\n\nSende {info_command} um eine Erläuterung ' \
                    'der Daten zu erhalten. Ein Service von <a href="d-64.org/">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
 
