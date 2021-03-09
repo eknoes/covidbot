@@ -374,6 +374,46 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
         return new_data
 
 
+# As a backup, it provides numbers only for Germany not for the single states, but is more up-to-date
+class ICUGermanyUpdater(Updater):
+    log = logging.getLogger(__name__)
+    URL = "https://diviexchange.blob.core.windows.net/%24web/DIVI_Intensivregister_Auszug_pro_Landkreis.csv"
+
+    def get_last_update(self) -> Optional[datetime]:
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT MAX(updated) FROM icu_beds")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
+    def update(self) -> bool:
+        last_update = self.get_last_update()
+
+        if last_update and last_update - datetime.now() < timedelta(hours=12):
+            return False
+
+        new_data = False
+        response = self.get_resource(self.URL)
+        if response:
+            self.log.debug("Got ICU Data from DIVI")
+            divi_data = codecs.decode(response, "utf-8").splitlines()
+            reader = csv.DictReader(divi_data)
+            results = []
+            for row in reader:
+                # Berlin is here AGS = 11000
+                if row['gemeindeschluessel'] == '11000':
+                    row['gemeindeschluessel'] = 11
+                results.append((row['gemeindeschluessel'], row['daten_stand'], row['betten_frei'], row['betten_belegt'],
+                                row['faelle_covid_aktuell'], row['faelle_covid_aktuell_beatmet'], row['daten_stand']))
+
+            with self.connection.cursor() as cursor:
+                for row in results:
+                    cursor.execute("INSERT INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
+                                   " covid_ventilated, updated) VALUES (%s, %s, %s, %s, %s, %s, %s)", row)
+            self.connection.commit()
+        return new_data
+
+
 def clean_district_name(county_name: str) -> Optional[str]:
     if county_name is not None and county_name.count(" ") > 0:
         return " ".join(county_name.split(" ")[1:])
