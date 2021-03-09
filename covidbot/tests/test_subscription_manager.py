@@ -160,6 +160,7 @@ class TestSubscriptionManager(TestCase):
             cursor.execute("DELETE FROM covid_data")
             cursor.execute("TRUNCATE TABLE covid_vaccinations;")
             cursor.execute("TRUNCATE TABLE covid_r_value;")
+            cursor.execute("TRUNCATE TABLE icu_beds;")
             # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM counties ORDER BY parent DESC")
             cursor.executemany("INSERT INTO counties (rs, county_name) VALUES (%s, %s)", [(1, "Test1"), (2, "Test2")])
