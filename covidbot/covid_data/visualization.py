@@ -89,6 +89,11 @@ class Visualization:
 
         return fig, ax1
 
+    @staticmethod
+    def teardown_plt(figure: Figure):
+        figure.clear()
+        plt.close(figure)
+
     def infections_graph(self, district_id: int, duration: int = 49) -> str:
         district_name, current_date, x_data, y_data = self._get_covid_data("new_cases", district_id, duration)
 
@@ -121,7 +126,7 @@ class Visualization:
 
         # Save to file
         plt.savefig(filepath, format='JPEG')
-        plt.clf()
+        self.teardown_plt(fig)
         return filepath
 
     def bot_user_graph(self) -> str:
@@ -167,7 +172,7 @@ class Visualization:
 
             # Save to file
             plt.savefig(filepath, format='JPEG')
-            plt.clf()
+            self.teardown_plt(fig)
             return filepath
 
     def vaccination_graph(self, district_id: int) -> str:
@@ -233,7 +238,7 @@ class Visualization:
 
             # Save to file
             plt.savefig(filepath, format='JPEG')
-            plt.clf()
+            self.teardown_plt(fig)
             return filepath
 
     def incidence_graph(self, district_id: int, duration: int = 49) -> str:
@@ -258,7 +263,7 @@ class Visualization:
 
         # Save to file
         plt.savefig(filepath, format='JPEG')
-        plt.clf()
+        self.teardown_plt(fig)
         return filepath
 
     def _get_covid_data(self, field: str, district_id: int, duration: int) -> Tuple[
