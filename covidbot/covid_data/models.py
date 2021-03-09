@@ -34,6 +34,24 @@ class RValueData:
 
 
 @dataclass
+class ICUData:
+    date: date
+    clear_beds: int
+    occupied_beds: int
+    occupied_covid: int
+    covid_ventilated: int
+
+    def total_beds(self) -> int:
+        return self.clear_beds + self.occupied_beds
+
+    def percent_occupied(self) -> float:
+        return self.occupied_beds / self.total_beds() * 100
+
+    def percent_covid(self) -> float:
+        return self.occupied_covid / self.total_beds() * 100
+
+
+@dataclass
 class DistrictData(District):
     date: Optional[datetime.date] = None
     incidence: Optional[float] = None
@@ -48,3 +66,4 @@ class DistrictData(District):
     total_deaths: Optional[int] = None
     vaccinations: Optional[VaccinationData] = None
     r_value: Optional[RValueData] = None
+    icu_data: Optional[ICUData] = None

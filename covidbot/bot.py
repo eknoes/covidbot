@@ -89,7 +89,7 @@ class Bot(object):
         if not possible_district:
             message = 'Leider konnte kein Ort gefunden werden. Bitte beachte, ' \
                       'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind. Mit {help_cmd} erhältst du ' \
-                      'einen Überblick über die Funktionsweise des Bots.'\
+                      'einen Überblick über die Funktionsweise des Bots.' \
                 .format(location=district_query, help_cmd=self.format_command("hilfe"))
             return message, None
         elif len(possible_district) == 1:
@@ -183,15 +183,19 @@ class Bot(object):
 
     def get_district_report(self, district_id: int) -> str:
         current_data = self._data.get_district_data(district_id)
+        sources = [f'Infektionsdaten vom {current_data.date.strftime("%d.%m.%Y")}. '
+                   f'Infektionsdaten und R-Wert vom Robert Koch-Institut (RKI), '
+                   'Lizenz: dl-de/by-2-0. '
+                   'Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a>.']
+
         message = "<b>{district_name}</b>\n\n"
 
         message += "<b>🏥 Infektionsdaten</b>\n"
         if current_data.incidence:
-            message += "Die 7-Tage-Inzidenz (Anzahl der Infektionen je 100.000 Einwohner:innen) liegt bei {incidence}" \
-                       " {incidence_trend}."
+            message += "Die 7-Tage-Inzidenz liegt bei {incidence} {incidence_trend}."
             if current_data.incidence_interval_since:
                 interval_length = current_data.date - current_data.incidence_interval_since
-                message += " Die Inzidenz ist damit seit {interval_length} unter {interval}."\
+                message += " Die Inzidenz ist damit seit {interval_length} unter {interval}." \
                     .format(interval_length=format_noun(interval_length.days, FormattableNoun.DAYS),
                             interval=current_data.incidence_interval_upper_value)
 
@@ -215,6 +219,18 @@ class Bot(object):
                                  new_deaths_trend=format_data_trend(current_data.deaths_trend),
                                  total_deaths=format_int(current_data.total_deaths))
 
+        if current_data.icu_data:
+            message += f"<b>🏥 Intensivbetten</b>\n" \
+                       f"{format_float(current_data.icu_data.percent_occupied())}% " \
+                       f"({format_noun(current_data.icu_data.occupied_beds, FormattableNoun.BEDS)}) der " \
+                       f"Intensivbetten sind aktuell belegt. " \
+                       f"In {format_noun(current_data.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
+                       f"({format_float(current_data.icu_data.percent_covid())}%) liegen Patienten" \
+                       f" mit COVID-19, davon müssen {current_data.icu_data.covid_ventilated} beatmet werden. " \
+                       f"Insgesamt gibt es {format_noun(current_data.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
+            sources.append(f'Intensivbettenauslastung vom {current_data.icu_data.date.strftime("%d.%m.%Y")}. '
+                           f'Daten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.')
+
         related_vaccinations = None
         if current_data.vaccinations:
             related_vaccinations = current_data.vaccinations
@@ -235,12 +251,14 @@ class Bot(object):
                         vacc_partial=format_int(related_vaccinations.vaccinated_partial),
                         vacc_full=format_int(related_vaccinations.vaccinated_full),
                         vacc_date=related_vaccinations.date.strftime("%d.%m.%Y"))
+            sources.append(f'Impfdaten vom {related_vaccinations.date.strftime("%d.%m.%Y")}. '
+                           f'Daten vom Bundesministerium für Gesundheit, mehr Informationen im '
+                           f'<a href="https://impfdashboard.de/">Impfdashboard</a>.')
 
-        message += '<i>Infektionsdaten vom {date}</i>\n' \
-                   '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
-                   ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
-                   '<a href="https://impfdashboard.de/">Impfdashboard</a>. Sende {info_command} um eine Erläuterung ' \
-                   'der Daten zu erhalten.</i>' \
+        message += "<b>Quellen & Datenstand</b>\n"
+        message += "\n\n".join(sources)
+        message += '\nSende {info_command} um eine Erläuterung ' \
+                   'der Daten zu erhalten.' \
             .format(info_command=self.format_command("Info"), date=current_data.date.strftime("%d.%m.%Y"))
 
         return message
@@ -351,6 +369,7 @@ class Bot(object):
                     incidence_trend=format_data_trend(district.incidence_trend),
                     new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
+
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
         districts.sort(key=lambda d: d.name)
@@ -396,7 +415,7 @@ class Bot(object):
             counties = None
         else:
             counties = list(map(lambda s: (s, self._data.get_district(s).name), user.subscriptions))
-            message = "Du hast aktuell {abo_count} abonniert."\
+            message = "Du hast aktuell {abo_count} abonniert." \
                 .format(abo_count=format_noun(len(user.subscriptions), FormattableNoun.DISTRICT))
 
         return message, counties

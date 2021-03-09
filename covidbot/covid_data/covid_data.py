@@ -4,7 +4,7 @@ from typing import Tuple, List, Optional
 
 from mysql.connector import MySQLConnection
 
-from covidbot.covid_data.models import TrendValue, District, VaccinationData, RValueData, DistrictData
+from covidbot.covid_data.models import TrendValue, District, VaccinationData, RValueData, DistrictData, ICUData
 
 
 class CovidData(object):
@@ -85,6 +85,15 @@ class CovidData(object):
                                   total_cases=record['total_cases'], total_deaths=record['total_deaths'],
                                   new_cases=record['new_cases'], new_deaths=record['new_deaths'],
                                   date=record['date'], vaccinations=vaccination_data)
+
+            # Check if ICU data is available
+            cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds '
+                           'WHERE district_id=%s ORDER BY date DESC LIMIT 1', [district_id])
+            row = cursor.fetchone()
+            if row:
+                icu_data = ICUData(date=row['date'], clear_beds=row['clear'], occupied_beds=row['occupied'],
+                                   occupied_covid=row['occupied_covid'], covid_ventilated=row['covid_ventilated'])
+                result.icu_data = icu_data
 
             # Check if R-Value is available
             if district_id == 0:
