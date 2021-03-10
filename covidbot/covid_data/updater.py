@@ -1,6 +1,6 @@
 import codecs
 import csv
-import json
+import ujson as json
 import logging
 import random
 from abc import ABC, abstractmethod

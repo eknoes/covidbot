@@ -1,17 +1,16 @@
 import html
-import json
 import logging
 import os
 import signal
 import time
 import traceback
 from enum import Enum
-from io import BytesIO
 from typing import Tuple, List, Dict, Union, Optional
 
 import telegram
+import ujson as json
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, ChatAction, \
-    MessageEntity, InputFile, Message, InputMediaPhoto
+    MessageEntity, InputMediaPhoto
 from telegram.error import BadRequest, TelegramError, Unauthorized
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP

@@ -37,6 +37,7 @@ threema.gateway==4.0.0
 tornado==6.1
 typing-extensions==3.7.4.3
 tzlocal==2.1
+ujson==4.0.2
 urllib3==1.26.3
 wrapt==1.12.1
 yarl==1.6.3
