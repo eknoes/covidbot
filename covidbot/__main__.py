@@ -120,7 +120,7 @@ class MessengerBotSetup:
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
 
         if self.name == "interactive":
-            return InteractiveInterface(bot)
+            return InteractiveInterface(bot, visualization)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         for db_conn in self.connections:

@@ -11,7 +11,6 @@ import requests
 from mysql.connector import MySQLConnection
 
 from covidbot.covid_data.covid_data import CovidDatabaseCreator
-from covidbot.utils import adapt_text
 
 
 class Updater(ABC):
@@ -434,6 +433,7 @@ class RulesGermanyUpdater(Updater):
     URL = "https://tourismus-wegweiser.de/json/"
 
     def get_last_update(self) -> Optional[datetime]:
+        return None
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT MAX(updated) FROM district_rules")
             row = cursor.fetchone()
@@ -452,6 +452,7 @@ class RulesGermanyUpdater(Updater):
             data = json.loads(response)
             updated = datetime.now()
             with self.connection.cursor() as cursor:
+                from covidbot.utils import adapt_text
                 for bl in data:
                     district_id = self.get_district_id(bl['Bundesland'])
                     if not district_id:

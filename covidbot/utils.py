@@ -1,7 +1,7 @@
 import re
 import string
 from enum import Enum
-from typing import List, Union, Optional
+from typing import List, Optional
 
 from covidbot.covid_data import TrendValue
 
@@ -16,11 +16,17 @@ def adapt_text(text: str, threema_format=False, just_strip=False) -> str:
 
     # TODO: Reuse re.compile results
     # Make <a href=X>text</a> to text (X)
-    a_pattern = re.compile("<a href=[\"']([:/\w\-.]*)[\"']>([ \w\-.]*)</a>")
+    a_pattern = re.compile("<a href=[\"\']([:/\w\-.=?&]*)[\"\']>([ \w\-.]*)</a>")
     matches = a_pattern.finditer(text)
     if matches:
         for match in matches:
             text = text.replace(match.group(0), f"{match.group(2)} ({match.group(1)})")
+
+    old_text = text.replace("</p>", "\n").replace("<p>", "\n")
+    text = ""
+    for line in old_text.splitlines():
+        text += line.strip() + "\n"
+    text = text.strip("\n")
 
     if not just_strip:
         bold_pattern = re.compile("<b>(.*?)</b>")
