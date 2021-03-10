@@ -5,6 +5,12 @@ from typing import List, Optional
 
 from covidbot.covid_data import TrendValue
 
+a_pattern = re.compile("<a href=[\"\']([:/\w\-.=?&]*)[\"\']>([ \w\-.]*)</a>")
+bold_pattern = re.compile("<b>(.*?)</b>")
+italic_pattern = re.compile("<i>(.*?)</i>")
+general_tag_pattern = re.compile("<[^<]+?>")
+link_pattern = re.compile("\s?(\(http[s]?://[\w.\-]*([/\w\-.])*\))\s?")
+
 
 def adapt_text(text: str, threema_format=False, just_strip=False) -> str:
     if threema_format:
@@ -14,9 +20,7 @@ def adapt_text(text: str, threema_format=False, just_strip=False) -> str:
         replace_bold = replace_bold_unicode
         replace_italic = replace_italic_unicode
 
-    # TODO: Reuse re.compile results
     # Make <a href=X>text</a> to text (X)
-    a_pattern = re.compile("<a href=[\"\']([:/\w\-.=?&]*)[\"\']>([ \w\-.]*)</a>")
     matches = a_pattern.finditer(text)
     if matches:
         for match in matches:
@@ -29,28 +33,24 @@ def adapt_text(text: str, threema_format=False, just_strip=False) -> str:
     text = text.strip("\n")
 
     if not just_strip:
-        bold_pattern = re.compile("<b>(.*?)</b>")
         matches = bold_pattern.finditer(text)
         if matches:
             for match in matches:
                 text = text.replace(match.group(0), replace_bold(match.group(1)))
 
-        bold_pattern = re.compile("<i>(.*?)</i>")
-        matches = bold_pattern.finditer(text)
+        matches = italic_pattern.finditer(text)
         if matches:
             for match in matches:
                 text = text.replace(match.group(0), replace_italic(match.group(1)))
 
     # Strip non bold or italic
-    pattern = re.compile("<[^<]+?>")
-    return pattern.sub("", text)
+    return general_tag_pattern.sub("", text)
 
 
 def replace_bold_markdown(text: str) -> str:
     # Not real markdown but Threema formatting
     text = f"*{text}*"
     # Embed links
-    link_pattern = re.compile("\s?(\(http[s]?://[\w.\-]*([/\w\-.])*\))\s?")
     text = link_pattern.sub("* \g<1> *", text)
 
     return text.replace("**", "").strip()
@@ -63,7 +63,6 @@ def replace_italic_markdown(text: str) -> str:
     # Not real markdown but Threema formatting
     text = f"_{text}_"
     # Embed links
-    link_pattern = re.compile("\s?(\(http[s]?://[\w.\-]*([/\w\-.])*\))\s?")
     text = link_pattern.sub("_ \g<1> _", text)
 
     return text.replace("__", "").strip()
@@ -91,8 +90,6 @@ def replace_italic_unicode(text: str) -> str:
 
 
 def replace_by_list(text: str, search: List[str], replace: List[str]) -> str:
-    # Avoid links
-    link_pattern = re.compile("((http[s]?://)[\w.\-]*([/\w\-.])*)")
     matches = link_pattern.finditer(text)
     tokens = []
     if matches:

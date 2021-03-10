@@ -28,6 +28,7 @@ class Bot(object):
     DEFAULT_LANG = "de"
     command_format: str
     location_feature: bool = False
+    query_regex = re.compile("^[\w,()\- ]*$")
 
     def __init__(self, covid_data: CovidData, subscription_manager: UserManager, command_format="/{command}",
                  location_feature=False):
@@ -74,9 +75,8 @@ class Bot(object):
         possible_district = self._data.search_district_by_name(district_query)
         online_match = False
 
-        query_regex = re.compile("^[\w,()\- ]*$")
         # If e.g. emojis or ?!. are part of query, we do not have to query online
-        if not possible_district and query_regex.match(district_query):
+        if not possible_district and self.query_regex.match(district_query):
             online_match = True
             osm_results = self._location_service.find_location(district_query)
             possible_district = []
