@@ -5,7 +5,7 @@ from typing import List, Optional
 import requests
 from shapely.geometry import shape, Point
 
-from covidbot.metrics import OSM_REQUEST_COUNT
+from covidbot.metrics import OSM_REQUEST_COUNT, OSM_REQUEST_TIME, GEOLOCATION_LOOKUP_COUNT, GEOLOCATION_LOOKUP_TIME
 
 
 class LocationService:
@@ -14,7 +14,9 @@ class LocationService:
         with open(file) as f:
             self._data = json.load(f)
 
+    @GEOLOCATION_LOOKUP_TIME.time()
     def find_rs(self, lon: float, lat: float) -> Optional[int]:
+        GEOLOCATION_LOOKUP_COUNT.inc()
         point = Point(lon, lat)
 
         # check each polygon to see if it contains the point
@@ -23,6 +25,7 @@ class LocationService:
             if polygon.contains(point):
                 return int(feature['properties']['RS'])
 
+    @OSM_REQUEST_TIME.time()
     def find_location(self, name: str) -> List[int]:
         logging.info("Nomatim Request")
         OSM_REQUEST_COUNT.inc()
