@@ -5,7 +5,7 @@ from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
     VaccinationGermanyImpfdashboardUpdater
-from covidbot.covid_data.updater import clean_district_name, ICUGermanyUpdater
+from covidbot.covid_data.updater import clean_district_name, ICUGermanyUpdater, RulesGermanyUpdater
 
 
 class TestVaccinationGermanyUpdater(TestCase):
@@ -30,6 +30,8 @@ class TestVaccinationGermanyUpdater(TestCase):
         updater = VaccinationGermanyImpfdashboardUpdater(self.conn)
         updater.update()
         updater = ICUGermanyUpdater(self.conn)
+        updater.update()
+        updater = RulesGermanyUpdater(self.conn)
         updater.update()
 
     def test_clean_district_name(self):
