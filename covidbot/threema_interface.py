@@ -5,6 +5,7 @@ import traceback
 from io import BytesIO
 from typing import Dict, List, Union
 
+import prometheus_async
 import threema.gateway as threema
 from aiohttp import web
 from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage
@@ -44,7 +45,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         add_callback_route(self.connection, application, self.handle_threema_msg, path='/gateway_callback')
         web.run_app(application, port=9000, access_log=logging.getLogger('threema_api'))
 
-    @BOT_RESPONSE_TIME.time()
+    @prometheus_async.aio.time(BOT_RESPONSE_TIME)
     async def handle_threema_msg(self, message: Message):
         if type(message) == TextMessage:
             RECV_MESSAGE_COUNT.inc()

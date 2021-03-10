@@ -5,7 +5,7 @@ import re
 import signal
 import time
 import traceback
-from io import BytesIO
+import prometheus_async.aio
 from math import ceil
 from typing import Dict, List, Optional
 
@@ -53,7 +53,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         # Just exit on exception
         os.kill(os.getpid(), signal.SIGINT)
 
-    @BOT_RESPONSE_TIME.time()
+    @prometheus_async.aio.time(BOT_RESPONSE_TIME)
     async def message_handler(self, ctx: ChatContext):
         """
         Handles a text message received by the bot
