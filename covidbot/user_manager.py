@@ -188,6 +188,14 @@ class UserManager(object):
                 return row['user_num']
             return 0
 
+    def get_user_number(self, platform: str) -> int:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user WHERE platform=%s", [platform])
+            row = cursor.fetchone()
+            if row and 'user_num' in row and row['user_num']:
+                return row['user_num']
+            return 0
+
     def get_ranked_subscriptions(self) -> List[Tuple[int, str]]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(subscriptions.user_id) as subscribers, c.county_name FROM subscriptions "

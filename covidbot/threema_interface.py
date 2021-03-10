@@ -2,8 +2,7 @@ import logging
 import os
 import signal
 import traceback
-from io import BytesIO
-from typing import Dict, List, Union
+from typing import List, Union
 
 import prometheus_async
 import threema.gateway as threema

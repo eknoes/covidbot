@@ -8,7 +8,7 @@ BOT_COMMAND_COUNT = Counter('bot_command_total', 'Received Bot Commands', ['comm
 BOT_RESPONSE_TIME = Summary('bot_response_time', 'Latency of requests')
 
 # User statistics
-TOTAL_USER_COUNT = Gauge('bot_total_user', 'Number of Bot users')
+USER_COUNT = Gauge('bot_total_user', 'Number of Bot users', ['platform'])
 AVERAGE_SUBSCRIPTION_COUNT = Gauge('bot_avg_subscriptions', 'Average No. of subscriptions')
 
 # Visualization related

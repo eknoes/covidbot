@@ -18,7 +18,7 @@ from covidbot.covid_data.updater import ICUGermanyUpdater
 from covidbot.covid_data.visualization import Visualization
 from covidbot.feedback_forwarder import FeedbackForwarder
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import TOTAL_USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
+from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
 from covidbot.signal_interface import SignalInterface
 from covidbot.telegram_interface import TelegramInterface
 from covidbot.text_interface import InteractiveInterface
@@ -96,7 +96,9 @@ class MessengerBotSetup:
         bot = Bot(data, user_manager, command_format=command_format, location_feature=location_feature)
 
         # Setup database monitoring
-        TOTAL_USER_COUNT.set_function(lambda: user_manager.get_total_user_number())
+        USER_COUNT.labels(platform="threema").set_function(lambda: user_manager.get_user_number("threema"))
+        USER_COUNT.labels(platform="telegram").set_function(lambda: user_manager.get_user_number("telegram"))
+        USER_COUNT.labels(platform="signal").set_function(lambda: user_manager.get_user_number("signal"))
         AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_manager.get_mean_subscriptions())
 
         # Return specific interface
