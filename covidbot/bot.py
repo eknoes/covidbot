@@ -262,7 +262,11 @@ class Bot(object):
             sources.append(f'Regeln vom {current_data.rules.date.strftime("%d.%m.%Y")}. Daten vom '
                            f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweisers</a>, sind lizenziert unter'
                            f' CC BY 4.0.')
-
+        else:
+            parent_district = self._data.get_district_data(current_data.parent)
+            if parent_district.rules:
+                message += f"<b>👆 Regeln</b>\nDie wichtigsten Regeln für {parent_district.name} erhältst du mit dem " \
+                           f"Befehl {self.format_command('Daten ' + parent_district.name)}.\n\n"
         message += "<b>Quellen & Datenstand</b>\n"
         message += "\n\n".join(sources)
         message += '\nSende {info_command} um eine Erläuterung ' \
