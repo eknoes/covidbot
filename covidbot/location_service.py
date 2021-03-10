@@ -9,21 +9,24 @@ from covidbot.metrics import OSM_REQUEST_COUNT, OSM_REQUEST_TIME, GEOLOCATION_LO
 
 
 class LocationService:
+    file: str
 
     def __init__(self, file: str):
-        with open(file) as f:
-            self._data = json.load(f)
+        self.file = file
 
     @GEOLOCATION_LOOKUP_TIME.time()
     def find_rs(self, lon: float, lat: float) -> Optional[int]:
         GEOLOCATION_LOOKUP_COUNT.inc()
         point = Point(lon, lat)
 
-        # check each polygon to see if it contains the point
-        for feature in self._data['features']:
-            polygon = shape(feature['geometry'])
-            if polygon.contains(point):
-                return int(feature['properties']['RS'])
+        with open(self.file) as f:
+            data = json.load(f)
+
+            # check each polygon to see if it contains the point
+            for feature in data['features']:
+                polygon = shape(feature['geometry'])
+                if polygon.contains(point):
+                    return int(feature['properties']['RS'])
 
     @OSM_REQUEST_TIME.time()
     def find_location(self, name: str) -> List[int]:
