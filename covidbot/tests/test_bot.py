@@ -21,6 +21,7 @@ class TestBot(TestCase):
             cursor.execute("DROP TABLE IF EXISTS covid_data;")
             cursor.execute("DROP TABLE IF EXISTS covid_vaccinations;")
             cursor.execute("DROP TABLE IF EXISTS covid_r_value;")
+            cursor.execute("DROP TABLE IF EXISTS icu_beds;")
             cursor.execute("DROP TABLE IF EXISTS counties;")
 
         # Update Data
