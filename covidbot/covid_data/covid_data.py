@@ -5,6 +5,7 @@ from typing import Tuple, List, Optional
 from mysql.connector import MySQLConnection
 
 from covidbot.covid_data.models import TrendValue, District, VaccinationData, RValueData, DistrictData, ICUData
+from covidbot.metrics import LOCATION_DB_LOOKUP
 
 
 class CovidData(object):
@@ -15,6 +16,7 @@ class CovidData(object):
         self.connection = connection
         CovidDatabaseCreator(self.connection)
 
+    @LOCATION_DB_LOOKUP.time()
     def search_district_by_name(self, search_str: str) -> List[Tuple[int, str]]:
         search_str = search_str.lower()
         search_str = search_str.replace(" ", "%")

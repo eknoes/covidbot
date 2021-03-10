@@ -5,7 +5,7 @@ from typing import List, Optional
 import requests
 from shapely.geometry import shape, Point
 
-from covidbot.metrics import OSM_REQUEST_TIME, GEOLOCATION_LOOKUP_TIME
+from covidbot.metrics import LOCATION_OSM_LOOKUP, LOCATION_GEO_LOOKUP
 
 
 class LocationService:
@@ -14,7 +14,7 @@ class LocationService:
     def __init__(self, file: str):
         self.file = file
 
-    @GEOLOCATION_LOOKUP_TIME.time()
+    @LOCATION_GEO_LOOKUP.time()
     def find_rs(self, lon: float, lat: float) -> Optional[int]:
         point = Point(lon, lat)
 
@@ -27,7 +27,7 @@ class LocationService:
                 if polygon.contains(point):
                     return int(feature['properties']['RS'])
 
-    @OSM_REQUEST_TIME.time()
+    @LOCATION_OSM_LOOKUP.time()
     def find_location(self, name: str) -> List[int]:
         logging.info("Nomatim Request")
         # They provide for fair use, so we need an indication if we make too much requests
