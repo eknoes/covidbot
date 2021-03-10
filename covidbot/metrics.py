@@ -16,7 +16,5 @@ CREATED_GRAPHS = Counter('bot_viz_created_graph_count', 'Number of created graph
 CACHED_GRAPHS = Counter('bot_viz_cached_graph_count', 'Number of created graphs', ['type'])
 
 # Location Service
-OSM_REQUEST_COUNT = Counter('bot_osm_requests_total', 'Total OSM Queries')
 OSM_REQUEST_TIME = Summary('bot_osm_request_time', 'Duration of OSM Requests')
-GEOLOCATION_LOOKUP_COUNT = Counter('bot_location_geo_count', 'Total queries by geolocation')
 GEOLOCATION_LOOKUP_TIME = Summary('bot_location_geo_time', 'Time used for geolocation lookup')

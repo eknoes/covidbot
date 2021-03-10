@@ -5,7 +5,7 @@ from typing import List, Optional
 import requests
 from shapely.geometry import shape, Point
 
-from covidbot.metrics import OSM_REQUEST_COUNT, OSM_REQUEST_TIME, GEOLOCATION_LOOKUP_COUNT, GEOLOCATION_LOOKUP_TIME
+from covidbot.metrics import OSM_REQUEST_TIME, GEOLOCATION_LOOKUP_TIME
 
 
 class LocationService:
@@ -16,7 +16,6 @@ class LocationService:
 
     @GEOLOCATION_LOOKUP_TIME.time()
     def find_rs(self, lon: float, lat: float) -> Optional[int]:
-        GEOLOCATION_LOOKUP_COUNT.inc()
         point = Point(lon, lat)
 
         with open(self.file) as f:
@@ -31,7 +30,6 @@ class LocationService:
     @OSM_REQUEST_TIME.time()
     def find_location(self, name: str) -> List[int]:
         logging.info("Nomatim Request")
-        OSM_REQUEST_COUNT.inc()
         # They provide for fair use, so we need an indication if we make too much requests
         request = requests.get("https://nominatim.openstreetmap.org/search.php",
                                params={'q': name, 'countrycodes': 'de', 'format': 'jsonv2'},
