@@ -49,10 +49,9 @@ class TelegramCallbacks(Enum):
 class TelegramInterface(MessengerInterface):
     _bot: Bot
     _viz: Visualization
-    cache: Dict[str, Union[InputMediaPhoto]] = {}
+    cache: Dict[str, str] = {}
     log = logging.getLogger(__name__)
     dev_chat_id: int
-    graph_cache: Dict[int, PhotoSize] = {}
     feedback_cache: Dict[int, str] = {}
     deleted_callbacks: List[int] = []
 
@@ -64,14 +63,13 @@ class TelegramInterface(MessengerInterface):
 
     def get_input_media_photo(self, filename: str) -> Union[InputMediaPhoto]:
         if filename in self.cache.keys():
-            return self.cache[filename]
+            return InputMediaPhoto(self.cache[filename])
 
         with open(filename, "rb") as f:
-            self.cache[filename] = InputMediaPhoto(f, filename=filename)
-        return self.cache[filename]
+            return InputMediaPhoto(f, filename=filename)
 
-    def set_photoid(self, filename: str, photo_size: PhotoSize):
-        self.cache[filename] = InputMediaPhoto(photo_size)
+    def set_file_id(self, filename: str, file_id: str):
+        self.cache[filename] = file_id
 
     def run(self):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update, callback=self.countRecvMessagesHandler), group=DEFAULT_GROUP + 1)
@@ -122,7 +120,7 @@ class TelegramInterface(MessengerInterface):
                 SENT_IMAGES_COUNT.inc(len(photos))
 
                 if message_obj.photo[0]:
-                    self.set_photoid(photo, message_obj.photo[0])
+                    self.set_file_id(photo, message_obj.photo[0].file_id)
 
                 if caption:
                     if message_obj:
@@ -133,7 +131,11 @@ class TelegramInterface(MessengerInterface):
                 for photo in photos:
                     files.append(self.get_input_media_photo(photo))
 
-                self.updater.bot.send_media_group(chat_id, files)
+                sent_messages = self.updater.bot.send_media_group(chat_id, files)
+                if sent_messages:
+                    for i in range(0, len(sent_messages)):
+                        if sent_messages[i].photo:
+                            self.set_file_id(photos[i], sent_messages[i].photo[0].file_id)
                 SENT_IMAGES_COUNT.inc(len(photos))
 
         if self.updater.bot.send_message(chat_id, message, parse_mode=ParseMode.HTML,

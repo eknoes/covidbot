@@ -199,7 +199,6 @@ class CovidData(object):
 
 
 class CovidDatabaseCreator:
-
     def __init__(self, connection: MySQLConnection):
         log = logging.getLogger(str(self.__class__))
         log.debug("Creating Tables")
