@@ -58,7 +58,8 @@ class Updater(ABC):
 
     def get_district_id(self, district_name: str) -> Optional[int]:
         with self.connection.cursor() as cursor:
-            cursor.execute('SELECT rs, county_name FROM counties WHERE county_name LIKE %s', ["%" + district_name + "%"])
+            cursor.execute('SELECT rs, county_name FROM counties WHERE county_name LIKE %s',
+                           ["%" + district_name + "%"])
             rows = cursor.fetchall()
             if rows:
                 if len(rows) == 1:
@@ -202,7 +203,10 @@ class VaccinationGermanyUpdater(Updater):
                 return row[0]
 
     def update(self) -> bool:
-        self.get_last_update()
+        last_update = self.get_last_update()
+        if last_update - datetime.now() < timedelta(hours=12):
+            return False
+
         new_data = False
 
         response = self.get_resource(self.URL)
@@ -263,14 +267,9 @@ class RValueGermanyUpdater(Updater):
                 return row[0]
 
     def update(self) -> bool:
-        last_update = None
-        with self.connection.cursor() as cursor:
-            cursor.execute("SELECT updated FROM covid_r_value ORDER BY updated DESC LIMIT 1")
-            updated = cursor.fetchone()
-            if updated:
-                last_update = updated[0]
-                if last_update.date() == date.today():
-                    return False
+        last_update = self.get_last_update()
+        if last_update and last_update.date() == date.today():
+            return False
 
         new_data = False
         response = self.get_resource(self.URL, 1)
@@ -419,12 +418,13 @@ class ICUGermanyUpdater(Updater):
 
                 # Calculate aggregated values for states
                 for i in range(2):
-                    cursor.execute("INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid, covid_ventilated, updated) "
-                                   "SELECT c.parent, date, SUM(clear), SUM(occupied), SUM(occupied_covid), "
-                                   "SUM(covid_ventilated), updated FROM icu_beds "
-                                   "INNER JOIN counties c on c.rs = icu_beds.district_id "
-                                   "GROUP BY c.parent "
-                                   "HAVING (COUNT(c.parent) = (SELECT COUNT(*) FROM counties WHERE parent=c.parent) OR c.parent > 0) AND parent IS NOT NULL")
+                    cursor.execute(
+                        "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid, covid_ventilated, updated) "
+                        "SELECT c.parent, date, SUM(clear), SUM(occupied), SUM(occupied_covid), "
+                        "SUM(covid_ventilated), updated FROM icu_beds "
+                        "INNER JOIN counties c on c.rs = icu_beds.district_id "
+                        "GROUP BY c.parent "
+                        "HAVING (COUNT(c.parent) = (SELECT COUNT(*) FROM counties WHERE parent=c.parent) OR c.parent > 0) AND parent IS NOT NULL")
             self.connection.commit()
         return new_data
 
@@ -441,9 +441,11 @@ class RulesGermanyUpdater(Updater):
                 return row[0]
 
     def update(self) -> bool:
-        self.get_last_update()
-        new_data = False
+        last_update = self.get_last_update()
+        if last_update and  datetime.now() - last_update < timedelta(hours=12):
+                return False
 
+        new_data = False
         response = self.get_resource(self.URL)
         if response:
             self.log.debug("Got RulesGermany Data")
