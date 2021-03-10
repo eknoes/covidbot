@@ -4,7 +4,8 @@ from typing import Tuple, List, Optional
 
 from mysql.connector import MySQLConnection
 
-from covidbot.covid_data.models import TrendValue, District, VaccinationData, RValueData, DistrictData, ICUData
+from covidbot.covid_data.models import TrendValue, District, VaccinationData, RValueData, DistrictData, ICUData, \
+    RuleData
 from covidbot.metrics import LOCATION_DB_LOOKUP
 
 
@@ -105,6 +106,12 @@ class CovidData(object):
                 if data:
                     r_data = RValueData(data['r_date'], data['7day_r_value'])
                     result.r_value = r_data
+
+            # Check if Rules are available
+            cursor.execute('SELECT text, link, updated FROM district_rules WHERE district_id=%s', [district_id])
+            data = cursor.fetchone()
+            if data:
+                result.rules = RuleData(data['updated'], data['text'], data['link'])
 
             # Add Trend in comparison to yesterday and last week
             cursor.execute(

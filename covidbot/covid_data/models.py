@@ -52,6 +52,13 @@ class ICUData:
 
 
 @dataclass
+class RuleData:
+    date: datetime
+    text: str
+    link: str
+
+
+@dataclass
 class DistrictData(District):
     date: Optional[datetime.date] = None
     incidence: Optional[float] = None
@@ -67,3 +74,4 @@ class DistrictData(District):
     vaccinations: Optional[VaccinationData] = None
     r_value: Optional[RValueData] = None
     icu_data: Optional[ICUData] = None
+    rules: Optional[RuleData] = None
