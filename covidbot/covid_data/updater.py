@@ -11,6 +11,7 @@ import requests
 from mysql.connector import MySQLConnection
 
 from covidbot.covid_data.covid_data import CovidDatabaseCreator
+from covidbot.utils import adapt_text
 
 
 class Updater(ABC):
@@ -57,10 +58,15 @@ class Updater(ABC):
 
     def get_district_id(self, district_name: str) -> Optional[int]:
         with self.connection.cursor() as cursor:
-            cursor.execute('SELECT rs FROM counties WHERE county_name LIKE %s LIMIT 1', ["%" + district_name + "%"])
-            row = cursor.fetchone()
-            if row:
-                return row[0]
+            cursor.execute('SELECT rs, county_name FROM counties WHERE county_name LIKE %s', ["%" + district_name + "%"])
+            rows = cursor.fetchall()
+            if rows:
+                if len(rows) == 1:
+                    return rows[0][0]
+
+                for row in rows:
+                    if row[1] == district_name:
+                        return row[0]
 
 
 class RKIUpdater(Updater):
@@ -419,6 +425,51 @@ class ICUGermanyUpdater(Updater):
                                    "INNER JOIN counties c on c.rs = icu_beds.district_id "
                                    "GROUP BY c.parent "
                                    "HAVING (COUNT(c.parent) = (SELECT COUNT(*) FROM counties WHERE parent=c.parent) OR c.parent > 0) AND parent IS NOT NULL")
+            self.connection.commit()
+        return new_data
+
+
+class RulesGermanyUpdater(Updater):
+    log = logging.getLogger(__name__)
+    URL = "https://tourismus-wegweiser.de/json/"
+
+    def get_last_update(self) -> Optional[datetime]:
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT MAX(updated) FROM district_rules")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
+    def update(self) -> bool:
+        self.get_last_update()
+        new_data = False
+
+        response = self.get_resource(self.URL)
+        if response:
+            self.log.debug("Got RulesGermany Data")
+            data = json.loads(response)
+            updated = datetime.now()
+            with self.connection.cursor() as cursor:
+                for bl in data:
+                    district_id = self.get_district_id(bl['Bundesland'])
+                    if not district_id:
+                        self.log.warning(f"Could not get ID of {bl['Bundesland']}")
+                        continue
+
+                    text = adapt_text(bl['allgemein']['Kontaktbeschränkungen']['text'], just_strip=True)
+                    link = f'https://tourismus-wegweiser.de/widget/detail/?bl={bl["Kürzel"]}&sel=no'
+
+                    cursor.execute("SELECT text, link FROM district_rules WHERE district_id=%s", [district_id])
+                    row = cursor.fetchone()
+                    if row:
+                        if row[0] == text and row[1] == link:
+                            continue
+                        cursor.execute("UPDATE district_rules SET text=%s, link=%s, updated=%s WHERE district_id=%s",
+                                       [text, link, updated, district_id])
+                    else:
+                        cursor.execute("INSERT INTO district_rules (district_id, text, link, updated) "
+                                       "VALUES (%s, %s, %s, %s)", [district_id, text, link, updated])
+                    new_data = True
             self.connection.commit()
         return new_data
 

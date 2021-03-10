@@ -231,6 +231,11 @@ class CovidDatabaseCreator:
                            'occupied_covid INTEGER, covid_ventilated INTEGER, updated DATETIME,'
                            'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, date))')
 
+            # Rule Data
+            cursor.execute('CREATE TABLE IF NOT EXISTS district_rules (id INTEGER PRIMARY KEY AUTO_INCREMENT,'
+                           'district_id INTEGER, text TEXT, link VARCHAR(255), updated DATETIME,'
+                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id))')
+
             # Check if view exists
             cursor.execute("SHOW FULL TABLES WHERE TABLE_TYPE LIKE '%VIEW%';")
             exists = False

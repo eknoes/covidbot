@@ -6,7 +6,7 @@ from typing import List, Union, Optional
 from covidbot.covid_data import TrendValue
 
 
-def adapt_text(text: str, threema_format=False) -> str:
+def adapt_text(text: str, threema_format=False, just_strip=False) -> str:
     if threema_format:
         replace_bold = replace_bold_markdown
         replace_italic = replace_italic_markdown
@@ -14,6 +14,7 @@ def adapt_text(text: str, threema_format=False) -> str:
         replace_bold = replace_bold_unicode
         replace_italic = replace_italic_unicode
 
+    # TODO: Reuse re.compile results
     # Make <a href=X>text</a> to text (X)
     a_pattern = re.compile("<a href=[\"']([:/\w\-.]*)[\"']>([ \w\-.]*)</a>")
     matches = a_pattern.finditer(text)
@@ -21,17 +22,18 @@ def adapt_text(text: str, threema_format=False) -> str:
         for match in matches:
             text = text.replace(match.group(0), f"{match.group(2)} ({match.group(1)})")
 
-    bold_pattern = re.compile("<b>(.*?)</b>")
-    matches = bold_pattern.finditer(text)
-    if matches:
-        for match in matches:
-            text = text.replace(match.group(0), replace_bold(match.group(1)))
+    if not just_strip:
+        bold_pattern = re.compile("<b>(.*?)</b>")
+        matches = bold_pattern.finditer(text)
+        if matches:
+            for match in matches:
+                text = text.replace(match.group(0), replace_bold(match.group(1)))
 
-    bold_pattern = re.compile("<i>(.*?)</i>")
-    matches = bold_pattern.finditer(text)
-    if matches:
-        for match in matches:
-            text = text.replace(match.group(0), replace_italic(match.group(1)))
+        bold_pattern = re.compile("<i>(.*?)</i>")
+        matches = bold_pattern.finditer(text)
+        if matches:
+            for match in matches:
+                text = text.replace(match.group(0), replace_italic(match.group(1)))
 
     # Strip non bold or italic
     pattern = re.compile("<[^<]+?>")

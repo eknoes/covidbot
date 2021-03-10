@@ -14,7 +14,7 @@ from mysql.connector import connect, MySQLConnection
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, VaccinationGermanyImpfdashboardUpdater, \
     RValueGermanyUpdater, RKIUpdater
-from covidbot.covid_data.updater import ICUGermanyUpdater
+from covidbot.covid_data.updater import ICUGermanyUpdater, RulesGermanyUpdater
 from covidbot.covid_data.visualization import Visualization
 from covidbot.feedback_forwarder import FeedbackForwarder
 from covidbot.messenger_interface import MessengerInterface
@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
-            for updater in [VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn),
+            for updater in [VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn), RulesGermanyUpdater(conn),
                             VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:
                     if updater.update():

@@ -27,6 +27,7 @@ class CovidDataTest(TestCase):
             cursor.execute("TRUNCATE TABLE covid_vaccinations;")
             cursor.execute("TRUNCATE TABLE covid_r_value;")
             cursor.execute("TRUNCATE TABLE icu_beds;")
+            cursor.execute("TRUNCATE TABLE district_rules;")
             # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM counties ORDER BY parent DESC;")
             with open("resources/2021-01-16-testdata-counties.sql", "r") as f:
