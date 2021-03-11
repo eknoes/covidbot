@@ -230,6 +230,7 @@ class UserManager(object):
     def get_users_per_platform(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(user_id) as c, platform FROM bot_user WHERE platform NOT LIKE 'interactive' "
+                           "OR platform NOT LIKE 'twitter' "
                            "GROUP BY platform ORDER BY c DESC")
             results = []
             for row in cursor.fetchall():
