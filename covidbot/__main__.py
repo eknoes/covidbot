@@ -12,8 +12,7 @@ from prometheus_client import Info
 from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
-from covid_data import CovidData
-from covidbot.covid_data.visualization import Visualization
+from covidbot.covid_data import CovidData, Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
 from covidbot.user_manager import UserManager
