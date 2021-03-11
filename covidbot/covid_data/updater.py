@@ -393,7 +393,7 @@ class ICUGermanyUpdater(Updater):
     def update(self) -> bool:
         last_update = self.get_last_update()
 
-        if last_update and last_update - datetime.now() < timedelta(hours=12):
+        if last_update and datetime.now() - last_update < timedelta(hours=12):
             return False
 
         new_data = False
