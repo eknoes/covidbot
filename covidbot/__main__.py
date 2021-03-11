@@ -80,9 +80,11 @@ class MessengerBotSetup:
         # Setup CovidData, Bot and UserManager
         data_conn = get_connection(self.config, autocommit=True)
         user_conn = get_connection(self.config, autocommit=True)
+        user_monitor_conn = get_connection(self.config, autocommit=True)
 
         self.connections.append(data_conn)
         self.connections.append(user_conn)
+        self.connections.append(user_monitor_conn)
 
         data = CovidData(data_conn)
         visualization = Visualization(data_conn, self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
@@ -90,10 +92,11 @@ class MessengerBotSetup:
         bot = Bot(data, user_manager, command_format=command_format, location_feature=location_feature)
 
         # Setup database monitoring
-        USER_COUNT.labels(platform="threema").set_function(lambda: user_manager.get_user_number("threema"))
-        USER_COUNT.labels(platform="telegram").set_function(lambda: user_manager.get_user_number("telegram"))
-        USER_COUNT.labels(platform="signal").set_function(lambda: user_manager.get_user_number("signal"))
-        AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_manager.get_mean_subscriptions())
+        user_monitor = UserManager("monitor", user_monitor_conn)
+        USER_COUNT.labels(platform="threema").set_function(lambda: user_monitor.get_user_number("threema"))
+        USER_COUNT.labels(platform="telegram").set_function(lambda: user_monitor.get_user_number("telegram"))
+        USER_COUNT.labels(platform="signal").set_function(lambda: user_monitor.get_user_number("signal"))
+        AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_monitor.get_mean_subscriptions())
 
         # Return specific interface
         if self.name == "threema":
