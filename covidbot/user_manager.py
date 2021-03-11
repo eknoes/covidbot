@@ -182,7 +182,8 @@ class UserManager(object):
 
     def get_total_user_number(self) -> int:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user")
+            cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user WHERE platform NOT LIKE 'twitter' "
+                           "AND platform NOT LIKE 'interactive'")
             row = cursor.fetchone()
             if row and 'user_num' in row and row['user_num']:
                 return row['user_num']
@@ -230,7 +231,7 @@ class UserManager(object):
     def get_users_per_platform(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(user_id) as c, platform FROM bot_user WHERE platform NOT LIKE 'interactive' "
-                           "OR platform NOT LIKE 'twitter' "
+                           "AND platform NOT LIKE 'twitter' "
                            "GROUP BY platform ORDER BY c DESC")
             results = []
             for row in cursor.fetchall():
