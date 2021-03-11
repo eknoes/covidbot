@@ -33,6 +33,7 @@ requests==2.25.1
 Shapely==1.7.1
 six==1.15.0
 sniffio==1.2.0
+TwitterAPI==2.6.9
 threema.gateway==4.0.0
 tornado==6.1
 typing-extensions==3.7.4.3

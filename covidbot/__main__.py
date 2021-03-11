@@ -49,7 +49,7 @@ class MessengerBotSetup:
             stream_log_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
             logging.getLogger().addHandler(stream_log_handler)
 
-        if name != "signal" and name != "threema" and name != "telegram" and name != "interactive" and name != "feedback":
+        if name != "signal" and name != "threema" and name != "telegram" and name != "interactive" and name != "feedback" and name != "twitter":
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
@@ -124,6 +124,12 @@ class MessengerBotSetup:
         if self.name == "interactive":
             from covidbot.text_interface import InteractiveInterface
             return InteractiveInterface(bot, visualization)
+
+        if self.name == "twitter":
+            from covidbot.twitter_interface import TwitterInterface
+            return TwitterInterface(self.config['TWITTER'].get('API_KEY'), self.config['TWITTER'].get('API_SECRET'),
+                                    self.config['TWITTER'].get('ACCESS_TOKEN'), self.config['TWITTER'].get('ACCESS_SECRET'),
+                                    user_manager, data, visualization)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         for db_conn in self.connections:
@@ -282,6 +288,11 @@ def main():
 
         # Forward Feedback
         with MessengerBotSetup("feedback", config, setup_logs=False, monitoring=False) as iface:
+            asyncio.run(iface.send_daily_reports())
+
+
+        # Check Tweets
+        with MessengerBotSetup("twitter", config, setup_logs=False, monitoring=False) as iface:
             asyncio.run(iface.send_daily_reports())
 
     elif args.daily_report:

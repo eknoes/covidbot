@@ -143,7 +143,7 @@ class FormattableNoun(Enum):
     BEDS = 5
 
 
-def format_noun(number: int, noun: FormattableNoun) -> str:
+def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
     singular: Optional[str] = None
     plural: Optional[str] = None
     if noun == FormattableNoun.INFECTIONS:
@@ -163,7 +163,7 @@ def format_noun(number: int, noun: FormattableNoun) -> str:
         plural = "Betten"
 
     if number == 1:
-        return f"{format_int(number)} {singular}"
+        return f"{format_int(number)} {hashtag}{singular}"
     if number == 0 and noun == FormattableNoun.DAYS:
         return "heute"
-    return f"{format_int(number)} {plural}"
+    return f"{format_int(number)} {hashtag}{plural}"
