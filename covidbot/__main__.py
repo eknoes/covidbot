@@ -3,8 +3,8 @@ import asyncio
 import configparser
 import locale
 import logging
-import os
-import sys
+from os.path import abspath
+from sys import exit
 from typing import List
 
 import prometheus_client
@@ -12,18 +12,13 @@ from prometheus_client import Info
 from mysql.connector import connect, MySQLConnection
 
 from covidbot.bot import Bot
-from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, VaccinationGermanyImpfdashboardUpdater, \
-    RValueGermanyUpdater, RKIUpdater
-from covidbot.covid_data.updater import ICUGermanyUpdater, RulesGermanyUpdater
+from covid_data import CovidData
 from covidbot.covid_data.visualization import Visualization
-from covidbot.feedback_forwarder import FeedbackForwarder
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
-from covidbot.signal_interface import SignalInterface
-from covidbot.telegram_interface import TelegramInterface
-from covidbot.text_interface import InteractiveInterface
-from covidbot.threema_interface import ThreemaInterface
 from covidbot.user_manager import UserManager
+
+LOGGING_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 
 def parse_config(config_file: str):
@@ -48,11 +43,11 @@ class MessengerBotSetup:
     def __init__(self, name: str, config_dict, loglvl=logging.INFO, setup_logs=True, monitoring=True):
         if setup_logs:
             # Setup Logging
-            logging.basicConfig(format=logging_format, level=loglvl, filename=f"{name}-bot.log")
+            logging.basicConfig(format=LOGGING_FORMAT, level=loglvl, filename=f"{name}-bot.log")
 
             # Log also to stdout
             stream_log_handler = logging.StreamHandler()
-            stream_log_handler.setFormatter(logging.Formatter(logging_format))
+            stream_log_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
             logging.getLogger().addHandler(stream_log_handler)
 
         if name != "signal" and name != "threema" and name != "telegram" and name != "interactive" and name != "feedback":
@@ -84,14 +79,14 @@ class MessengerBotSetup:
             command_format = '"{command}"'
 
         # Setup CovidData, Bot and UserManager
-        data_conn = get_connection(config, autocommit=True)
-        user_conn = get_connection(config, autocommit=True)
+        data_conn = get_connection(self.config, autocommit=True)
+        user_conn = get_connection(self.config, autocommit=True)
 
         self.connections.append(data_conn)
         self.connections.append(user_conn)
 
         data = CovidData(data_conn)
-        visualization = Visualization(data_conn, config['GENERAL'].get('CACHE_DIR', 'graphics'))
+        visualization = Visualization(data_conn, self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
         user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
         bot = Bot(data, user_manager, command_format=command_format, location_feature=location_feature)
 
@@ -103,23 +98,29 @@ class MessengerBotSetup:
 
         # Return specific interface
         if self.name == "threema":
+            from covidbot.threema_interface import ThreemaInterface
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
                                     self.config['THREEMA'].get('PRIVATE_KEY'), bot,
                                     dev_chat=self.config['THREEMA'].get('DEV_CHAT'), data_visualization=visualization)
 
         if self.name == "signal":
+            from covidbot.signal_interface import SignalInterface
             return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
                                    self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot,
                                    dev_chat=self.config['SIGNAL'].get('DEV_CHAT'), data_visualization=visualization)
 
         if self.name == "telegram":
+            from covidbot.telegram_interface import TelegramInterface
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
-                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), data_visualization=visualization)
+                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"),
+                                     data_visualization=visualization)
         if self.name == "feedback":
+            from covidbot.feedback_forwarder import FeedbackForwarder
             return FeedbackForwarder(api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
 
         if self.name == "interactive":
+            from covidbot.text_interface import InteractiveInterface
             return InteractiveInterface(bot, visualization)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -127,7 +128,7 @@ class MessengerBotSetup:
             db_conn.close()
 
 
-async def sendUpdates(messenger_iface: str):
+async def sendUpdates(messenger_iface: str, config: configparser):
     try:
         with MessengerBotSetup(messenger_iface, config, setup_logs=False, monitoring=False) as iface:
             await iface.send_daily_reports()
@@ -186,10 +187,7 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
                 logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
 
 
-if __name__ == "__main__":
-    logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging_level = logging.INFO
-
+def main():
     # Set locale
     try:
         locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
@@ -227,40 +225,43 @@ if __name__ == "__main__":
 
     if not args.platform and not (args.check_updates or args.message_user or args.graphic_test):
         print("Exactly one platform has to be set, e.g. --platform telegram")
-        sys.exit(1)
+        exit(1)
 
     if args.check_updates and (args.platform or args.message_user):
         print("--check-updates can't be combined with other flags")
-        sys.exit(1)
+        exit(1)
 
     if args.message_user and not (args.specific or args.all):
         print("--message-user has to be combined with either --specific USER1 USER2 ... or --all")
-        sys.exit(1)
+        exit(1)
 
     if args.all and args.specific:
         print("You can't send a message to --all and --specific")
-        sys.exit(1)
+        exit(1)
 
     if args.specific and not args.platform:
         print("--Platform required for --specific USER1 USER2 ...")
-        sys.exit(1)
+        exit(1)
 
     # Read Config
     config = parse_config(args.config)
 
     if args.check_updates:
         # Setup Logging
-        logging.basicConfig(format=logging_format, level=logging_level, filename="updater.log")
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename="updater.log")
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(logging.Formatter(logging_format))
+        stream_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
         if not args.verbose:
             stream_handler.setLevel(logging.ERROR)
         logging.getLogger().addHandler(stream_handler)
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
+            from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, \
+                VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, RKIUpdater, ICUGermanyUpdater, \
+                RulesGermanyUpdater
             for updater in [VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn), RulesGermanyUpdater(conn),
                             VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:
@@ -283,24 +284,24 @@ if __name__ == "__main__":
 
     elif args.daily_report:
         # Setup Logging
-        logging.basicConfig(format=logging_format, level=logging_level, filename=f"reports-{args.platform}.log")
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=f"reports-{args.platform}.log")
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(logging.Formatter(logging_format))
+        stream_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
         if not args.verbose:
             stream_handler.setLevel(logging.ERROR)
         logging.getLogger().addHandler(stream_handler)
 
-        asyncio.run(sendUpdates(args.platform))
+        asyncio.run(sendUpdates(args.platform, config))
 
     elif args.message_user:
         # Setup Logging
-        logging.basicConfig(format=logging_format, level=logging_level, filename="message-users.log")
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename="message-users.log")
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(logging.Formatter(logging_format))
+        stream_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
         logging.getLogger().addHandler(stream_handler)
 
         message_input = None
@@ -331,5 +332,9 @@ if __name__ == "__main__":
             logging.info("### Start Telegram Bot ###")
             interface.run()
     elif args.graphic_test:
-        vis = Visualization(get_connection(config), os.path.abspath("graphics/"))
+        vis = Visualization(get_connection(config), abspath("graphics/"))
         vis.vaccination_graph(0)
+
+
+if __name__ == "__main__":
+    main()
