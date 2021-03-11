@@ -90,7 +90,7 @@ class TwitterInterface(MessengerInterface):
                          f"Intensivbetten sind aktuell belegt. " \
                          f"In {format_noun(icu.occupied_covid, FormattableNoun.BEDS)} " \
                          f"({format_float(icu.percent_covid())}%) liegen Patient:innen" \
-                         f" mit #COVID19, davon werden {icu.covid_ventilated} beatmet. " \
+                         f" mit #COVID19, davon werden {format_int(icu.covid_ventilated)} beatmet. " \
                          f"Insgesamt gibt es {format_noun(icu.total_beds(), FormattableNoun.BEDS)}."
 
             if self.tweet(tweet_text):
@@ -123,7 +123,7 @@ class TwitterInterface(MessengerInterface):
 
         response = self.twitter.request('statuses/update', data)
         if 200 <= response.status_code < 300:
-            self.log.info(f"Tweet sent successfully, response: {response.status_code}")
+            self.log.info(f"Tweet sent successfully {len(message)} chars), response: {response.status_code}")
             return True
         else:
             raise ValueError(f"Could not send tweet: API Code {response.status_code}: {response.text}")
