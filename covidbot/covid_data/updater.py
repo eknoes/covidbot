@@ -337,7 +337,7 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
         if district_id is None:
             raise ValueError("No district_id for Deutschland")
 
-        if last_update - datetime.now() < timedelta(hours=12):
+        if datetime.now() - last_update < timedelta(hours=12):
             return False
 
         new_data = False
