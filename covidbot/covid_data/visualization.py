@@ -1,5 +1,6 @@
 import datetime
 import logging
+import math
 import os
 from typing import Optional, Tuple, List
 
@@ -91,7 +92,7 @@ class Visualization:
 
     @staticmethod
     def teardown_plt(figure: Figure):
-        figure.clear()
+        figure.clf()
         plt.close(figure)
 
     def infections_graph(self, district_id: int, duration: int = 49) -> str:
@@ -131,7 +132,8 @@ class Visualization:
 
     def bot_user_graph(self) -> str:
         now = datetime.datetime.now()
-        filepath = os.path.abspath(os.path.join(self.graphics_dir, f"botuser-{now.strftime('%Y-%m-%d-%H-00')}.jpg"))
+        quarter = math.floor(now.hour / 4)
+        filepath = os.path.abspath(os.path.join(self.graphics_dir, f"botuser-{now.strftime(f'%Y-%m-%d-{quarter}')}.jpg"))
         if os.path.isfile(filepath):
             CACHED_GRAPHS.labels(type='botuser').inc()
             return filepath
