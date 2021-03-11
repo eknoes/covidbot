@@ -1,39 +1,57 @@
-import ujson as json
 import logging
 from typing import List, Optional
 
 import requests
+import ujson as json
 from shapely.geometry import shape, Point
 
 from covidbot.metrics import LOCATION_OSM_LOOKUP, LOCATION_GEO_LOOKUP
 
 
-class LocationService:
-    file: str
+class GeoLookup:
+    json_data: Optional[dict]
+    filename: str
 
-    def __init__(self, file: str):
-        self.file = file
+    def __init__(self, filename: str):
+        self.filename = filename
+
+    def __enter__(self):
+        with open(self.filename, "r") as file:
+            self.json_data = json.load(file)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        del self.json_data
+
+    def find_rs(self, lon: float, lat: float) -> Optional[int]:
+        if not self.json_data:
+            raise BaseException("GeoLookup has to be used in with context")
+
+        point = Point(lon, lat)
+
+        # check each polygon to see if it contains the point
+        for feature in self.json_data['features']:
+            polygon = shape(feature['geometry'])
+            if polygon.contains(point):
+                return int(feature['properties']['RS'])
+
+
+class LocationService:
+    geolookup: Optional[GeoLookup]
+
+    def __init__(self, filename: str):
+        self.geolookup = GeoLookup(filename)
 
     @LOCATION_GEO_LOOKUP.time()
     def find_rs(self, lon: float, lat: float) -> Optional[int]:
-        point = Point(lon, lat)
-
-        with open(self.file) as f:
-            data = json.load(f)
-
-            # check each polygon to see if it contains the point
-            for feature in data['features']:
-                polygon = shape(feature['geometry'])
-                if polygon.contains(point):
-                    return int(feature['properties']['RS'])
+        with self.geolookup as lookup:
+            return lookup.find_rs(lon, lat)
 
     @LOCATION_OSM_LOOKUP.time()
     def find_location(self, name: str) -> List[int]:
-        logging.info("Nomatim Request")
-        # They provide for fair use, so we need an indication if we make too much requests
         request = requests.get("https://nominatim.openstreetmap.org/search.php",
                                params={'q': name, 'countrycodes': 'de', 'format': 'jsonv2'},
-                               headers={'User-Agent': 'CovidUpdateBot (https://github.com/eknoes/covid-bot)'}
+                               headers={'User-Agent': 'CovidBot (https://github.com/eknoes/covid-bot)'}
                                )
         if request.status_code < 200 or request.status_code > 299:
             logging.warning(f"Did not get a 2XX response from Nominatim for query {name} "
@@ -41,9 +59,9 @@ class LocationService:
             return []
         response = request.json()
         result = []
-        for item in response:
-            rs = self.find_rs(float(item['lon']), float(item['lat']))
-            if rs and rs not in result:
-                result.append(rs)
-
+        with self.geolookup as geolookup:
+            for item in response:
+                rs = geolookup.find_rs(float(item['lon']), float(item['lat']))
+                if rs and rs not in result:
+                    result.append(rs)
         return result
