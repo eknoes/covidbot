@@ -1,16 +1,11 @@
 import logging
-import time
-from datetime import datetime
-from typing import List, Union, Dict, Optional
+from typing import List, Union, Optional
 
-from telegram import ParseMode
-from telegram.ext import Updater
+from TwitterAPI import TwitterAPI
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.user_manager import UserManager
-from TwitterAPI import TwitterAPI
-
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
 
 
@@ -64,7 +59,7 @@ class TwitterInterface(MessengerInterface):
         vaccinations_uid = self.user_manager.get_user_id(self.VACCINATIONS_UID)
         if self.user_manager.get_user(vaccinations_uid).last_update.date() < germany.vaccinations.date:
             vacc = germany.vaccinations
-            tweet_text = f"💉 Das BMG hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht." \
+            tweet_text = f"💉 Das @BMG_BUND hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht." \
                          f"\n\n{format_float(vacc.partial_rate * 100)}% der Bevölkerung haben mindestens eine #Impfung " \
                          f"erhalten, {format_float(vacc.full_rate * 100)}% sind vollständig geimpft. Insgesamt wurden " \
                          f"{format_int(vacc.vaccinated_partial)} Erstimpfungen und {format_int(vacc.vaccinated_full)} " \
