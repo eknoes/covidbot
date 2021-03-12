@@ -3,10 +3,11 @@ import time
 from pprint import pprint
 from typing import List, Union, Optional
 
-from TwitterAPI import TwitterAPI
+from TwitterAPI import TwitterAPI, TwitterResponse
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.messenger_interface import MessengerInterface
+from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, TWITTER_RATE_LIMIT, TWITTER_API_RESPONSE_TIME
 from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
@@ -123,23 +124,36 @@ class TwitterInterface(MessengerInterface):
             data['in_reply_to_status_id'] = reply_id
             data['auto_populate_reply_metadata'] = True
 
-        response = self.twitter.request('statuses/update', data)
+        with TWITTER_API_RESPONSE_TIME.time():
+            response = self.twitter.request('statuses/update', data)
+
         if 200 <= response.status_code < 300:
             self.log.info(f"Tweet sent successfully {len(message)} chars), response: {response.status_code}")
+            SENT_MESSAGE_COUNT.inc()
+            self.update_twitter_metrics(response)
             return True
         else:
             raise ValueError(f"Could not send tweet: API Code {response.status_code}: {response.text}")
+
+    @staticmethod
+    def update_twitter_metrics(response: TwitterResponse):
+        quota = response.get_quota()
+        TWITTER_RATE_LIMIT.labels(type='limit').set(quota['limit'])
+        TWITTER_RATE_LIMIT.labels(type='remaining').set(quota['remaining'])
+        TWITTER_API_RESPONSE_TIME.labels(code=response.status_code).inc()
 
     def run(self) -> None:
         running = True
 
         while running:
-            response = self.twitter.request(f"statuses/mentions_timeline")
+            with TWITTER_API_RESPONSE_TIME.time():
+                response = self.twitter.request(f"statuses/mentions_timeline")
+            self.update_twitter_metrics(response)
             if 200 <= response.status_code < 300:
                 for tweet in response:
                     if self.user_manager.is_message_answered(tweet['id']):
                         continue
-
+                    RECV_MESSAGE_COUNT.inc()
                     mention_position = 0
                     for mention in tweet['entities']['user_mentions']:
                         if mention['id'] == 1367862514579542017:
@@ -166,7 +180,9 @@ class TwitterInterface(MessengerInterface):
                         self.tweet(message, media_files=response.images, reply_id=tweet['id'])
 
                     self.user_manager.set_message_answered(tweet['id'])
-                        
+            elif response.status_code == 429:
+                time.sleep(60)
+                self.log.warning("We hit Twitters Rate Limit, sleep for 60s")
             else:
                 raise ValueError(f"Could not get mentions: API Code {response.status_code}: {response.text}")
-            time.sleep(10)
+            time.sleep(20)

@@ -19,3 +19,8 @@ CACHED_GRAPHS = Counter('bot_viz_cached_graph_count', 'Number of created graphs'
 LOCATION_OSM_LOOKUP = Summary('bot_location_osm_lookup', 'Duration of OSM Requests')
 LOCATION_GEO_LOOKUP = Summary('bot_location_geo_lookup', 'Time used for geolocation lookup')
 LOCATION_DB_LOOKUP = Summary('bot_location_db_lookup', 'Time used for database lookup')
+
+# Twitter Metrics
+TWITTER_RATE_LIMIT = Gauge('bot_twitter_rate_limit', 'Current Rate Limit', ['type'])
+TWITTER_API_RESPONSE_CODE = Counter('bot_twitter_api_response_code', 'Twitter API response codes', ['code'])
+TWITTER_API_RESPONSE_TIME = Summary('bot_twitter_api_response_time', 'Twitter API response time')
