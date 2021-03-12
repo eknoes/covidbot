@@ -108,7 +108,6 @@ class TwitterInterface(MessengerInterface):
         self.tweet(message)
 
     def tweet(self, message: str, media_files: Optional[List[str]] = None, reply_id: Optional[str] = None) -> bool:
-        return True
         data = {'status': message}
         if media_files:
             # Upload filenames
