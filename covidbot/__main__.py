@@ -100,23 +100,31 @@ class MessengerBotSetup:
 
         # Return specific interface
         if self.name == "threema":
+            if not self.config.has_section("THREEMA"):
+                raise ValueError("THREEMA is not configured")
             from covidbot.threema_interface import ThreemaInterface
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
                                     self.config['THREEMA'].get('PRIVATE_KEY'), bot,
                                     dev_chat=self.config['THREEMA'].get('DEV_CHAT'), data_visualization=visualization)
 
         if self.name == "signal":
+            if not self.config.has_section("SIGNAL"):
+                raise ValueError("SIGNAL is not configured")
             from covidbot.signal_interface import SignalInterface
             return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
                                    self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot,
                                    dev_chat=self.config['SIGNAL'].get('DEV_CHAT'), data_visualization=visualization)
 
         if self.name == "telegram":
+            if not self.config.has_section("TELEGRAM"):
+                raise ValueError("TELEGRAM is not configured")
             from covidbot.telegram_interface import TelegramInterface
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"),
                                      data_visualization=visualization)
         if self.name == "feedback":
+            if not self.config.has_section("TELEGRAM"):
+                raise ValueError("TELEGRAM is not configured")
             from covidbot.feedback_forwarder import FeedbackForwarder
             return FeedbackForwarder(api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
@@ -126,6 +134,8 @@ class MessengerBotSetup:
             return InteractiveInterface(bot, visualization)
 
         if self.name == "twitter":
+            if not self.config.has_section("TWITTER"):
+                raise ValueError("TWITTER is not configured")
             from covidbot.twitter_interface import TwitterInterface
             return TwitterInterface(self.config['TWITTER'].get('API_KEY'), self.config['TWITTER'].get('API_SECRET'),
                                     self.config['TWITTER'].get('ACCESS_TOKEN'), self.config['TWITTER'].get('ACCESS_SECRET'),
@@ -292,8 +302,9 @@ def main():
 
 
         # Check Tweets
-        with MessengerBotSetup("twitter", config, setup_logs=False, monitoring=False) as iface:
-            asyncio.run(iface.send_daily_reports())
+        if config.has_section("TWITTER"):
+            with MessengerBotSetup("twitter", config, setup_logs=False, monitoring=False) as iface:
+                asyncio.run(iface.send_daily_reports())
 
     elif args.daily_report:
         # Setup Logging
