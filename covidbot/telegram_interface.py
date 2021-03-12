@@ -72,7 +72,8 @@ class TelegramInterface(MessengerInterface):
         self.cache[filename] = file_id
 
     def run(self):
-        self.updater.dispatcher.add_handler(MessageHandler(Filters.update, callback=self.countRecvMessagesHandler), group=DEFAULT_GROUP + 1)
+        self.updater.dispatcher.add_handler(MessageHandler(Filters.update, callback=self.countRecvMessagesHandler),
+                                            group=DEFAULT_GROUP + 1)
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.edited_message, self.editedMessageHandler))
         self.updater.dispatcher.add_handler(MessageHandler(Filters.update.channel_posts, self.channelPostHandler))
         self.updater.dispatcher.add_handler(CommandHandler('hilfe', self.helpHandler))
@@ -226,7 +227,12 @@ class TelegramInterface(MessengerInterface):
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.SUBSCRIBE)
             self.answer_update(update, msg, reply_markup=markup)
         else:
-            self.answer_update(update, self._bot.subscribe(update.effective_chat.id, districts[0][0]))
+            district_id = districts[0][0]
+            self.answer_update(update, self._bot.subscribe(update.effective_chat.id, district_id))
+            self.answer_update(update, self._bot.get_district_report(district_id),
+                               [self._viz.infections_graph(district_id),
+                                self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
+
 
     @BOT_RESPONSE_TIME.time()
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
@@ -289,6 +295,10 @@ class TelegramInterface(MessengerInterface):
             district_id = int(query.data[len(TelegramCallbacks.SUBSCRIBE.name):])
             query.edit_message_text(self._bot.subscribe(update.effective_chat.id, district_id),
                                     parse_mode=telegram.ParseMode.HTML)
+            self.answer_update(update, self._bot.get_district_report(district_id),
+                               [self._viz.infections_graph(district_id),
+                                self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
+
 
         # Unsubscribe Callback
         elif query.data.startswith(TelegramCallbacks.UNSUBSCRIBE.name):
