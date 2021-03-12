@@ -166,13 +166,13 @@ class TwitterInterface(MessengerInterface):
 
                     arguments = tweet['text'][mention_position:].split(" ")
                     district_id = None
-                    for i in range(0, min(len(arguments), 3)):
-                        query = " ".join(arguments[:i + 1])
+                    for i in range(min(len(arguments), 3), 0, -1):
+                        query = " ".join(arguments[:i])
                         test_district = self.data.search_district_by_name(query)
-                        if test_district and len(test_district) < 3:
-                            print(f"Got district {test_district[0]} for:")
-                            district_id = test_district[0][0]
-                            break
+                        if test_district:
+                            if len(test_district) <= 2:
+                                district_id = test_district[0][0]
+                                break
                     
                     # Answer Tweet
                     if district_id:
