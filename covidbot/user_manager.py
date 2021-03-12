@@ -295,3 +295,4 @@ class UserManager(object):
         with self.connection.cursor() as cursor:
             cursor.execute('INSERT INTO answered_messages (platform, message_id) VALUES (%s, %s)',
                            [self.platform, message_id])
+        self.connection.commit()
