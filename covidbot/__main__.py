@@ -355,23 +355,43 @@ def main():
     elif args.platform == "shell":
         with MessengerBotSetup("interactive", config, logging_level) as interface:
             logging.info("### Start Interactive Bot ###")
-            interface.run()
+            try:
+                interface.run()
+            except Exception as e:
+                logging.exception("Exception while running Interactive client", exc_info=e)
+                raise e
     elif args.platform == "signal":
         with MessengerBotSetup("signal", config, logging_level) as interface:
             logging.info("### Start Signal Bot ###")
-            interface.run()
+            try:
+                interface.run()
+            except Exception as e:
+                logging.exception("Exception while running Signal client", exc_info=e)
+                raise e
     elif args.platform == "threema":
         with MessengerBotSetup("threema", config, logging_level) as interface:
             logging.info("### Start Threema Bot ###")
-            interface.run()
+            try:
+                interface.run()
+            except Exception as e:
+                logging.exception("Exception while running Threema client", exc_info=e)
+                raise e
     elif args.platform == "telegram":
         with MessengerBotSetup("telegram", config, logging_level) as interface:
             logging.info("### Start Telegram Bot ###")
-            interface.run()
+            try:
+                interface.run()
+            except Exception as e:
+                logging.exception("Exception while running Telegram client", exc_info=e)
+                raise e
     elif args.platform == "twitter":
         with MessengerBotSetup("twitter", config, logging_level) as interface:
             logging.info("### Start Twitter Bot ###")
-            interface.run()
+            try:
+                interface.run()
+            except Exception as e:
+                logging.exception("Exception while running Twitter client", exc_info=e)
+                raise e
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"))
         vis.vaccination_graph(0)
