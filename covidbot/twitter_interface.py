@@ -8,7 +8,7 @@ from TwitterAPI import TwitterAPI, TwitterResponse
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, TWITTER_RATE_LIMIT, TWITTER_API_RESPONSE_TIME, \
-    TWITTER_API_RESPONSE_CODE
+    TWITTER_API_RESPONSE_CODE, BOT_RESPONSE_TIME
 from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
@@ -177,12 +177,10 @@ class TwitterInterface(MessengerInterface):
                     
                     # Answer Tweet
                     if district_id:
-                        pprint(tweet)
-                        response = self.get_infection_tweet(district_id)
-                        message = f"{response.message}"
-                        print(message)
-                        print(tweet['id'])
-                        self.tweet(message, media_files=response.images, reply_id=tweet['id'])
+                        with BOT_RESPONSE_TIME.time():
+                            response = self.get_infection_tweet(district_id)
+                            message = f"{response.message}"
+                            self.tweet(message, media_files=response.images, reply_id=tweet['id'])
 
                     self.user_manager.set_message_answered(tweet['id'])
             elif response.status_code == 429:
