@@ -48,9 +48,15 @@ class LocationService:
             return lookup.find_rs(lon, lat)
 
     @LOCATION_OSM_LOOKUP.time()
-    def find_location(self, name: str) -> List[int]:
+    def find_location(self, name: str, restrict_type=False) -> List[int]:
+        p = {'countrycodes': 'de', 'format': 'jsonv2'}
+        if restrict_type:
+            p['city'] = name
+        else:
+            p['q'] = name
+
         request = requests.get("https://nominatim.openstreetmap.org/search.php",
-                               params={'q': name, 'countrycodes': 'de', 'format': 'jsonv2'},
+                               params=p,
                                headers={'User-Agent': 'CovidBot (https://github.com/eknoes/covid-bot)'}
                                )
         if request.status_code < 200 or request.status_code > 299:

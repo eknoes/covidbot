@@ -169,7 +169,7 @@ class TwitterInterface(MessengerInterface):
                             mention_position = mention['indices'][1]
                             break
 
-                    arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).split(" ")
+                    arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).strip().split(" ")
                     district_id = None
                     for i in range(min(len(arguments), 3), 0, -1):
                         # TODO: Handle nice
@@ -182,9 +182,13 @@ class TwitterInterface(MessengerInterface):
 
                     # Check OSM
                     if not district_id:
-                        results = self.location_service.find_location(arguments[0])
+                        results = self.location_service.find_location(" ".join(arguments))
                         if len(results) == 1:
                             district_id = results[0]
+                        elif len(results) > 1:
+                            results = self.location_service.find_location(" ".join(arguments), restrict_type=True)
+                            if len(results) == 1:
+                                district_id = results[0]
 
                     # Answer Tweet
                     if district_id:
