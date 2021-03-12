@@ -49,7 +49,7 @@ class MessengerBotSetup:
             stream_log_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
             logging.getLogger().addHandler(stream_log_handler)
 
-        if name != "signal" and name != "threema" and name != "telegram" and name != "interactive" and name != "feedback" and name != "twitter":
+        if name not in ["signal", "threema", "telegram", "interactive", "feedback", "twitter", "mastodon"]:
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
@@ -138,8 +138,17 @@ class MessengerBotSetup:
                 raise ValueError("TWITTER is not configured")
             from covidbot.twitter_interface import TwitterInterface
             return TwitterInterface(self.config['TWITTER'].get('API_KEY'), self.config['TWITTER'].get('API_SECRET'),
-                                    self.config['TWITTER'].get('ACCESS_TOKEN'), self.config['TWITTER'].get('ACCESS_SECRET'),
+                                    self.config['TWITTER'].get('ACCESS_TOKEN'),
+                                    self.config['TWITTER'].get('ACCESS_SECRET'),
                                     user_manager, data, visualization)
+
+        if self.name == "mastodon":
+            if not self.config.has_section("MASTODON"):
+                raise ValueError("MASTODON is not configured")
+            from covidbot.mastodon_interface import MastodonInterface
+            return MastodonInterface(self.config['MASTODON'].get('ACCESS_TOKEN'),
+                                     self.config['MASTODON'].get('INSTANCE_URL'),
+                                     user_manager, data, visualization)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         for db_conn in self.connections:
@@ -300,11 +309,16 @@ def main():
         with MessengerBotSetup("feedback", config, setup_logs=False, monitoring=False) as iface:
             asyncio.run(iface.send_daily_reports())
 
-
         # Check Tweets
         if config.has_section("TWITTER"):
             with MessengerBotSetup("twitter", config, setup_logs=False, monitoring=False) as iface:
                 asyncio.run(iface.send_daily_reports())
+
+        # Check Toots
+        if config.has_section("MASTODON"):
+            with MessengerBotSetup("mastodon", config, setup_logs=False, monitoring=False) as iface:
+                asyncio.run(iface.send_daily_reports())
+
 
     elif args.daily_report:
         # Setup Logging
