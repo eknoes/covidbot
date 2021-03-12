@@ -138,8 +138,11 @@ class TwitterInterface(MessengerInterface):
     @staticmethod
     def update_twitter_metrics(response: TwitterResponse):
         quota = response.get_quota()
-        TWITTER_RATE_LIMIT.labels(type='limit').set(quota['limit'])
-        TWITTER_RATE_LIMIT.labels(type='remaining').set(quota['remaining'])
+        if "limit" in quota:
+            TWITTER_RATE_LIMIT.labels(type='limit').set(quota['limit'])
+
+        if "remaining" in quota:
+            TWITTER_RATE_LIMIT.labels(type='remaining').set(quota['remaining'])
         TWITTER_API_RESPONSE_TIME.labels(code=response.status_code).inc()
 
     def run(self) -> None:
