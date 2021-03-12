@@ -7,6 +7,7 @@ from typing import List, Union, Optional
 from TwitterAPI import TwitterAPI, TwitterResponse
 
 from covidbot.covid_data import CovidData, Visualization
+from covidbot.location_service import LocationService
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, TWITTER_RATE_LIMIT, TWITTER_API_RESPONSE_TIME, \
     TWITTER_API_RESPONSE_CODE, BOT_RESPONSE_TIME
@@ -22,6 +23,7 @@ class TwitterInterface(MessengerInterface):
     viz: Visualization
     twitter: TwitterAPI
     handle_regex = re.compile('@(\w){1,15}')
+    location_service: LocationService
 
     INFECTIONS_UID = "infections"
     VACCINATIONS_UID = "vaccinations"
@@ -34,6 +36,7 @@ class TwitterInterface(MessengerInterface):
         self.viz = visualization
         self.user_manager = user_manager
         self.twitter = TwitterAPI(consumer_key, consumer_secret, access_token_key, access_token_secret, api_version='1.1')
+        self.location_service = LocationService('resources/germany_rs.geojson')
 
     async def send_daily_reports(self) -> None:
         germany = self.data.get_country_data()
@@ -176,7 +179,13 @@ class TwitterInterface(MessengerInterface):
                             if len(test_district) <= 2:
                                 district_id = test_district[0][0]
                                 break
-                    
+
+                    # Check OSM
+                    if not district_id:
+                        results = self.location_service.find_location(arguments[0])
+                        if len(results) == 1:
+                            district_id = results[0]
+
                     # Answer Tweet
                     if district_id:
                         with BOT_RESPONSE_TIME.time():
