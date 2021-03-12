@@ -169,7 +169,7 @@ class TwitterInterface(MessengerInterface):
                     for i in range(0, min(len(arguments), 3)):
                         query = " ".join(arguments[:i + 1])
                         test_district = self.data.search_district_by_name(query)
-                        if test_district and len(test_district) == 1:
+                        if test_district and len(test_district) < 3:
                             print(f"Got district {test_district[0]} for:")
                             district_id = test_district[0][0]
                             break
