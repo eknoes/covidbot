@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from pprint import pprint
 from typing import List, Union, Optional
@@ -20,6 +21,7 @@ class TwitterInterface(MessengerInterface):
     data: CovidData
     viz: Visualization
     twitter: TwitterAPI
+    handle_regex = re.compile('@(\w){1,15}')
 
     INFECTIONS_UID = "infections"
     VACCINATIONS_UID = "vaccinations"
@@ -106,6 +108,7 @@ class TwitterInterface(MessengerInterface):
         self.tweet(message)
 
     def tweet(self, message: str, media_files: Optional[List[str]] = None, reply_id: Optional[str] = None) -> bool:
+        return True
         data = {'status': message}
         if media_files:
             # Upload filenames
@@ -164,11 +167,10 @@ class TwitterInterface(MessengerInterface):
                             mention_position = mention['indices'][1]
                             break
 
-                    arguments = tweet['text'][mention_position:].split(" ")
-
+                    arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).split(" ")
                     district_id = None
                     for i in range(min(len(arguments), 3), 0, -1):
-                        query = " ".join(arguments[:i]).replace(",", "").replace(".", "")
+                        query = " ".join(arguments[:i]).replace(",", "").replace(".", "").strip()
                         test_district = self.data.search_district_by_name(query)
                         if test_district:
                             if len(test_district) <= 2:
