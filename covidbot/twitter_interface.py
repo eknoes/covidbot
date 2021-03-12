@@ -169,7 +169,8 @@ class TwitterInterface(MessengerInterface):
                     arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).split(" ")
                     district_id = None
                     for i in range(min(len(arguments), 3), 0, -1):
-                        query = " ".join(arguments[:i]).replace(",", "").replace(".", "").strip()
+                        # TODO: Handle nice
+                        query = " ".join(arguments[:i]).replace(",", "").replace(".", "").replace("!", "").replace("?", "").strip()
                         test_district = self.data.search_district_by_name(query)
                         if test_district:
                             if len(test_district) <= 2:
