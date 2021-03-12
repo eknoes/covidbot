@@ -1,10 +1,13 @@
 import logging
+import time
+from pprint import pprint
 from typing import List, Union, Optional
 
 from TwitterAPI import TwitterAPI
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.messenger_interface import MessengerInterface
+from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
 
@@ -26,10 +29,9 @@ class TwitterInterface(MessengerInterface):
         self.data = covid_data
         self.viz = visualization
         self.user_manager = user_manager
-        self.twitter = TwitterAPI(consumer_key, consumer_secret, access_token_key, access_token_secret)
+        self.twitter = TwitterAPI(consumer_key, consumer_secret, access_token_key, access_token_secret, api_version='1.1')
 
     async def send_daily_reports(self) -> None:
-
         germany = self.data.get_country_data()
         if not germany:
             raise ValueError("Could not find data for Germany")
@@ -45,13 +47,7 @@ class TwitterInterface(MessengerInterface):
                          f"bei {format_float(germany.incidence)} {format_data_trend(germany.incidence_trend)}, der " \
                          f"aktuelle R-Wert beträgt {format_float(germany.r_value.r_value_7day)}. #COVID19"
 
-            media_ids = []
-            for filename in [self.viz.infections_graph(0), self.viz.incidence_graph(0)]:
-                with open(filename, "rb") as f:
-                    graph = f.read()
-                media_ids.append(await self.upload_media(graph))
-
-            if self.tweet(tweet_text, media_ids):
+            if self.tweet(tweet_text, [self.viz.infections_graph(0), self.viz.incidence_graph(0)]):
                 self.user_manager.set_last_update(infections_uid, germany.date)
                 self.log.info("Tweet was successfully sent")
 
@@ -65,13 +61,7 @@ class TwitterInterface(MessengerInterface):
                          f"{format_int(vacc.vaccinated_partial)} Erstimpfungen und {format_int(vacc.vaccinated_full)} " \
                          f"Zweitimpfungen durchgeführt. #COVID19"
 
-            media_ids = []
-            for filename in [self.viz.vaccination_graph(0)]:
-                with open(filename, "rb") as f:
-                    graph = f.read()
-                media_ids.append(await self.upload_media(graph))
-
-            if self.tweet(tweet_text, media_ids):
+            if self.tweet(tweet_text, [self.viz.vaccination_graph(0)]):
                 self.user_manager.set_last_update(vaccinations_uid, vacc.date)
                 self.log.info("Tweet was successfully sent")
 
@@ -92,13 +82,15 @@ class TwitterInterface(MessengerInterface):
                 self.user_manager.set_last_update(icu_uid, icu.date)
                 self.log.info("Tweet was successfully sent")
 
-    async def upload_media(self, data: bytes) -> str:
-        upload_resp = self.twitter.request('media/upload', None, {'media': data})
-        if upload_resp.status_code != 200:
-            raise ValueError(f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
-                             f"{upload_resp.text}")
-
-        return upload_resp.json()['media_id']
+    def get_infection_tweet(self, district_id: int) -> BotResponse:
+        district = self.data.get_district_data(district_id)
+        tweet_text = f"🦠 Am {district.date.strftime('%d. %B %Y')} wurden " \
+                     f"{format_noun(district.new_cases, FormattableNoun.INFECTIONS, hashtag='#')} " \
+                     f"{format_data_trend(district.cases_trend)} und " \
+                     f"{format_noun(district.new_deaths, FormattableNoun.DEATHS)} " \
+                     f"{format_data_trend(district.deaths_trend)} in {district.name} gemeldet. Die #Inzidenz liegt " \
+                     f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
+        return BotResponse(tweet_text, [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)])
 
     async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
         if users:
@@ -111,10 +103,25 @@ class TwitterInterface(MessengerInterface):
 
         self.tweet(message)
 
-    def tweet(self, message: str, media_ids: Optional[List[str]] = None) -> bool:
+    def tweet(self, message: str, media_files: Optional[List[str]] = None, reply_id: Optional[str] = None) -> bool:
         data = {'status': message}
-        if media_ids:
+        if media_files:
+            # Upload filenames
+            media_ids = []
+            for file in media_files:
+                with open(file, "rb") as f:
+                    upload_resp = self.twitter.request('media/upload', None, {'media': f.read()})
+                    if upload_resp.status_code != 200:
+                        raise ValueError(f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
+                                         f"{upload_resp.text}")
+
+                    media_ids.append(upload_resp.json()['media_id'])
+
             data['media_ids'] = ",".join(map(str, media_ids))
+
+        if reply_id:
+            data['in_reply_to_status_id'] = reply_id
+            data['auto_populate_reply_metadata'] = True
 
         response = self.twitter.request('statuses/update', data)
         if 200 <= response.status_code < 300:
@@ -124,4 +131,42 @@ class TwitterInterface(MessengerInterface):
             raise ValueError(f"Could not send tweet: API Code {response.status_code}: {response.text}")
 
     def run(self) -> None:
-        raise NotImplementedError("This is just an interface to make regular tweets if new data appears")
+        running = True
+
+        while running:
+            response = self.twitter.request(f"statuses/mentions_timeline")
+            if 200 <= response.status_code < 300:
+                for tweet in response:
+                    if self.user_manager.is_message_answered(tweet['id']):
+                        continue
+
+                    mention_position = 0
+                    for mention in tweet['entities']['user_mentions']:
+                        if mention['id'] == 1367862514579542017:
+                            mention_position = mention['indices'][1]
+                            break
+
+                    arguments = tweet['text'][mention_position:].split(" ")
+                    district_id = None
+                    for i in range(0, min(len(arguments), 3)):
+                        query = " ".join(arguments[:i + 1])
+                        test_district = self.data.search_district_by_name(query)
+                        if test_district and len(test_district) == 1:
+                            print(f"Got district {test_district[0]} for:")
+                            district_id = test_district[0][0]
+                            break
+                    
+                    # Answer Tweet
+                    if district_id:
+                        pprint(tweet)
+                        response = self.get_infection_tweet(district_id)
+                        message = f"{response.message}"
+                        print(message)
+                        print(tweet['id'])
+                        self.tweet(message, media_files=response.images, reply_id=tweet['id'])
+
+                    self.user_manager.set_message_answered(tweet['id'])
+                        
+            else:
+                raise ValueError(f"Could not get mentions: API Code {response.status_code}: {response.text}")
+            time.sleep(10)

@@ -226,7 +226,7 @@ def main():
     parser.add_argument('--verbose', '-v', action='count', default=0)
     parser.add_argument('--config', '-c', action='store', default='config.ini', metavar='CONFIG_FILE')
 
-    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'shell'], nargs=1,
+    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'shell', 'twitter'], nargs=1,
                         help='Platform that should be used', type=str, action='store')
     parser.add_argument('--check-updates', help='Run platform independent jobs, such as checking for new data',
                         action='store_true')
@@ -319,7 +319,6 @@ def main():
             with MessengerBotSetup("mastodon", config, setup_logs=False, monitoring=False) as iface:
                 asyncio.run(iface.send_daily_reports())
 
-
     elif args.daily_report:
         # Setup Logging
         logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=f"reports-{args.platform}.log")
@@ -368,6 +367,10 @@ def main():
     elif args.platform == "telegram":
         with MessengerBotSetup("telegram", config, logging_level) as interface:
             logging.info("### Start Telegram Bot ###")
+            interface.run()
+    elif args.platform == "twitter":
+        with MessengerBotSetup("twitter", config, logging_level) as interface:
+            logging.info("### Start Twitter Bot ###")
             interface.run()
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"))

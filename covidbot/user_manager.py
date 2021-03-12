@@ -47,6 +47,9 @@ class UserManager(object):
                            'added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL, '
                            'replied TINYINT(1) NOT NULL DEFAULT 0, forwarded TINYINT(1) NOT NULL DEFAULT 0, '
                            'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
+            cursor.execute('CREATE TABLE IF NOT EXISTS answered_messages '
+                           '(id INT AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(20), message_id BIGINT, '
+                           'UNIQUE(platform, message_id))')
             self.connection.commit()
 
     def set_user_activated(self, user_id: int, activated=True) -> None:
@@ -280,3 +283,15 @@ class UserManager(object):
                 self.connection.commit()
                 return True
             return False
+
+    def is_message_answered(self, message_id: int) -> bool:
+        with self.connection.cursor() as cursor:
+            cursor.execute('SELECT id FROM answered_messages WHERE message_id=%s', [message_id])
+            if cursor.fetchone():
+                return True
+            return False
+
+    def set_message_answered(self, message_id: int):
+        with self.connection.cursor() as cursor:
+            cursor.execute('INSERT INTO answered_messages (platform, message_id) VALUES (%s, %s)',
+                           [self.platform, message_id])
