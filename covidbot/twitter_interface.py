@@ -7,7 +7,8 @@ from TwitterAPI import TwitterAPI, TwitterResponse
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, TWITTER_RATE_LIMIT, TWITTER_API_RESPONSE_TIME
+from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, TWITTER_RATE_LIMIT, TWITTER_API_RESPONSE_TIME, \
+    TWITTER_API_RESPONSE_CODE
 from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
@@ -143,7 +144,7 @@ class TwitterInterface(MessengerInterface):
 
         if 'remaining' in quota and quota['remaining']:
             TWITTER_RATE_LIMIT.labels(type='remaining').set(quota['remaining'])
-        TWITTER_API_RESPONSE_TIME.labels(code=response.status_code).inc()
+        TWITTER_API_RESPONSE_CODE.labels(code=response.status_code).inc()
 
     def run(self) -> None:
         running = True
