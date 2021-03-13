@@ -89,22 +89,24 @@ def replace_italic_unicode(text: str) -> str:
     return replace_by_list(text, normal_str, italic_str)
 
 
-def replace_by_list(text: str, search: List[str], replace: List[str]) -> str:
-    matches = link_pattern.finditer(text)
-    tokens = []
-    if matches:
-        for match in matches:
-            token = f"???!!!?!?!{match.start()}"
-            tokens.append((token, match.group(0)))
-            text = text.replace(match.group(0), token)
+def replace_by_list(text: str, search: List[str], replace: List[str], ignore_links=False) -> str:
+    if not ignore_links:
+        matches = link_pattern.finditer(text)
+        tokens = []
+        if matches:
+            for match in matches:
+                token = f"???!!!?!?!{match.start()}"
+                tokens.append((token, match.group(0)))
+                text = text.replace(match.group(0), token)
 
     replace_list = list(zip(search, replace))
 
     for i in range(len(replace_list)):
         text = text.replace(replace_list[i][0], replace_list[i][1])
 
-    for t in tokens:
-        text = text.replace(t[0], t[1])
+    if ignore_links and tokens:
+        for t in tokens:
+            text = text.replace(t[0], t[1])
     return text
 
 

@@ -11,6 +11,7 @@ from covidbot.metrics import SENT_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TI
     API_RESPONSE_CODE, USER_COUNT
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
+from covidbot.utils import replace_by_list
 
 
 class TwitterInterface(SingleCommandInterface):
@@ -106,6 +107,18 @@ class TwitterInterface(SingleCommandInterface):
 
                 arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).strip()
                 if arguments:
-                    created = datetime.strptime(tweet['created_at'], "%a %b %d %H:%M:%S %z %Y")
+                    # As our locale is different, we have to adapt Twitter Time & Date String
+                    day_en = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+                    day_de = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+                    month_en = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                    month_de = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
+
+                    localized_str = replace_by_list(tweet['created_at'], day_en + month_en, day_de + month_de)
+                    created = None
+                    try:
+                        created = datetime.strptime(localized_str, "%a %b %d %H:%M:%S %z %Y")
+                    except ValueError as e:
+                        self.log.warning(f"Cant parse twitters date string {localized_str}:", exc_info=e)
+
                     mentions.append(SingleArgumentRequest(tweet['id'], arguments, tweet['id'], created))
         return mentions
