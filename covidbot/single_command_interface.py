@@ -61,6 +61,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                          f"aktuelle R-Wert beträgt {format_float(germany.r_value.r_value_7day)}. #COVID19"
             if self.no_write:
                 print(f"Sent message: {tweet_text}")
+                self.user_manager.set_last_update(infections_uid, germany.date)
             elif self.write_message(tweet_text, [self.viz.infections_graph(0), self.viz.incidence_graph(0)]):
                 self.user_manager.set_last_update(infections_uid, germany.date)
                 self.log.info("Tweet was successfully sent")
@@ -77,6 +78,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
             if self.no_write:
                 print(f"Sent message: {tweet_text}")
+                self.user_manager.set_last_update(vaccinations_uid, vacc.date)
             elif self.write_message(tweet_text, [self.viz.vaccination_graph(0)]):
                 self.user_manager.set_last_update(vaccinations_uid, vacc.date)
                 self.log.info("Tweet was successfully sent")
@@ -96,9 +98,10 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
             if self.no_write:
                 print(f"Sent message: {tweet_text}")
-            elif self.write_message(tweet_text):
                 self.user_manager.set_last_update(icu_uid, icu.date)
+            elif self.write_message(tweet_text):
                 self.log.info("Tweet was successfully sent")
+                self.user_manager.set_last_update(icu_uid, icu.date)
 
     def get_infection_tweet(self, district_id: int) -> BotResponse:
         district = self.data.get_district_data(district_id)
