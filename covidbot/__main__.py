@@ -140,7 +140,9 @@ class MessengerBotSetup:
             return TwitterInterface(self.config['TWITTER'].get('API_KEY'), self.config['TWITTER'].get('API_SECRET'),
                                     self.config['TWITTER'].get('ACCESS_TOKEN'),
                                     self.config['TWITTER'].get('ACCESS_SECRET'),
-                                    user_manager, data, visualization)
+                                    user_manager, data, visualization,
+                                    no_write=self.config['TWITTER'].getboolean('DEBUG',
+                                                                               fallback=False))
 
         if self.name == "mastodon":
             if not self.config.has_section("MASTODON"):
@@ -148,7 +150,9 @@ class MessengerBotSetup:
             from covidbot.mastodon_interface import MastodonInterface
             return MastodonInterface(self.config['MASTODON'].get('ACCESS_TOKEN'),
                                      self.config['MASTODON'].get('INSTANCE_URL'),
-                                     user_manager, data, visualization)
+                                     user_manager, data, visualization,
+                                     no_write=self.config['MASTODON'].getboolean('DEBUG',
+                                                                                 fallback=False))
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         for db_conn in self.connections:
@@ -226,7 +230,7 @@ def main():
     parser.add_argument('--verbose', '-v', action='count', default=0)
     parser.add_argument('--config', '-c', action='store', default='config.ini', metavar='CONFIG_FILE')
 
-    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'shell', 'twitter'], nargs=1,
+    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'shell', 'twitter', 'mastodon'], nargs=1,
                         help='Platform that should be used', type=str, action='store')
     parser.add_argument('--check-updates', help='Run platform independent jobs, such as checking for new data',
                         action='store_true')
@@ -391,6 +395,14 @@ def main():
                 interface.run()
             except Exception as e:
                 logging.exception("Exception while running Twitter client", exc_info=e)
+                raise e
+    elif args.platform == "mastodon":
+        with MessengerBotSetup("mastodon", config, logging_level) as interface:
+            logging.info("### Start Mastodon Bot ###")
+            try:
+                interface.run()
+            except Exception as e:
+                logging.exception("Exception while running Mastodon client", exc_info=e)
                 raise e
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"))
