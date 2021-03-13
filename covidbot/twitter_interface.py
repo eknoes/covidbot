@@ -1,6 +1,7 @@
 import logging
 import re
 from datetime import datetime
+from pprint import pprint
 from typing import List, Optional, Iterable
 
 from TwitterAPI import TwitterAPI, TwitterResponse
@@ -8,7 +9,7 @@ from TwitterAPI import TwitterAPI, TwitterResponse
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.metrics import SENT_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
-    API_RESPONSE_CODE
+    API_RESPONSE_CODE, USER_COUNT
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 
@@ -34,6 +35,15 @@ class TwitterInterface(SingleCommandInterface):
                                   api_version='1.1')
         self.rki_name = "@rki_de"
         self.bmg_name = "@BMG_Bund"
+        USER_COUNT.labels(platform="mastodon").set_function(self.get_follower_number)
+
+    def get_follower_number(self) -> Optional[int]:
+        response = self.twitter.request('users/show', {'user_id': 1367862514579542017})
+        if response.status_code == 200:
+            self.update_twitter_metrics(response)
+            return response.json()['followers_count']
+        else:
+            return None
 
     def write_message(self, message: str, media_files: Optional[List[str]] = None,
                       reply_obj: Optional[int] = None) -> bool:

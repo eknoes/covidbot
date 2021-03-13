@@ -5,7 +5,7 @@ from typing import List, Optional, Iterable, Tuple, Dict
 from mastodon import Mastodon, MastodonAPIError
 
 from covidbot.covid_data import CovidData, Visualization
-from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_CODE, API_RESPONSE_TIME, SENT_MESSAGE_COUNT
+from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_CODE, API_RESPONSE_TIME, SENT_MESSAGE_COUNT, USER_COUNT
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 from covidbot.utils import general_tag_pattern
@@ -26,6 +26,13 @@ class MastodonInterface(SingleCommandInterface):
                  visualization: Visualization, no_write: bool = False):
         super().__init__(user_manager, covid_data, visualization, 5, no_write)
         self.mastodon = Mastodon(access_token=access_token, api_base_url=mastodon_url, ratelimit_method="pace")
+        USER_COUNT.labels(platform="mastodon").set_function(self.get_follower_number)
+
+    def get_follower_number(self) -> int:
+
+        info = self.mastodon.account(323011)
+        self.update_metrics()
+        return info['followers_count']
 
     def upload_media(self, filename: str) -> str:
         upload_resp = self.mastodon.media_post(filename, mime_type="image/jpeg")
