@@ -34,7 +34,7 @@ class TwitterInterface(SingleCommandInterface):
                                   api_version='1.1')
         self.rki_name = "@rki_de"
         self.bmg_name = "@BMG_Bund"
-        USER_COUNT.labels(platform="mastodon").set_function(self.get_follower_number)
+        USER_COUNT.labels(platform="twitter").set_function(self.get_follower_number)
 
     def get_follower_number(self) -> Optional[int]:
         response = self.twitter.request('users/show', {'user_id': 1367862514579542017})
