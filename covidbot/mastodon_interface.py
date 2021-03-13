@@ -43,6 +43,7 @@ class MastodonInterface(SingleCommandInterface):
         try:
             with API_RESPONSE_TIME.labels(platform='mastodon').time():
                 response = self.mastodon.status_post(message, media_ids=media_ids, language="deu", in_reply_to_id=reply_id)
+            self.update_metrics()
             if response:
                 self.log.info(f"Toot sent successfully {len(message)} chars)")
                 SENT_MESSAGE_COUNT.inc()
@@ -53,7 +54,7 @@ class MastodonInterface(SingleCommandInterface):
             self.log.error(f"Got error on API access: {api_error}", exc_info=api_error)
             raise api_error
 
-    def update_metrics(self, response):
+    def update_metrics(self):
         if self.mastodon.ratelimit_limit:
             API_RATE_LIMIT.labels(platform='mastodon', type='limit').set(self.mastodon.ratelimit_limit)
 
