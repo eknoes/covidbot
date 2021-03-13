@@ -169,6 +169,8 @@ class SingleCommandInterface(MessengerInterface, ABC):
                 if district_id:
                     if username:
                         username += " "
+                    else:
+                        username = ""
                     response = self.get_infection_tweet(district_id)
                     message = f"{username}{response.message}"
                     if self.no_write:

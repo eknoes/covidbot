@@ -93,5 +93,6 @@ class TwitterInterface(SingleCommandInterface):
                         break
 
                 arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).strip()
-                mentions.append((tweet['id'], arguments, None))
+                if arguments:
+                    mentions.append((tweet['id'], arguments, None))
         return mentions
