@@ -62,7 +62,7 @@ class TwitterInterface(MessengerInterface):
         vaccinations_uid = self.user_manager.get_user_id(self.VACCINATIONS_UID)
         if self.user_manager.get_user(vaccinations_uid).last_update.date() < germany.vaccinations.date:
             vacc = germany.vaccinations
-            tweet_text = f"💉 Das @BMG_BUND hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht." \
+            tweet_text = f"💉 Das @BMG_Bund hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht." \
                          f"\n\n{format_float(vacc.partial_rate * 100)}% der Bevölkerung haben mindestens eine #Impfung " \
                          f"erhalten, {format_float(vacc.full_rate * 100)}% sind vollständig geimpft. Insgesamt wurden " \
                          f"{format_int(vacc.vaccinated_partial)} Erstimpfungen und {format_int(vacc.vaccinated_full)} " \
