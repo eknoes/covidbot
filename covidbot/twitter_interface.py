@@ -36,7 +36,10 @@ class TwitterInterface(SingleCommandInterface):
         self.bmg_name = "@BMG_Bund"
 
     def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_id: Optional[int] = None) -> bool:
+                      reply_obj: Optional[int] = None) -> bool:
+        if reply_obj and type(reply_obj) != int:
+            raise ValueError("Twitter client needs reply_obj to be int")
+
         data = {'status': message}
         if media_files:
             # Upload filenames
@@ -52,8 +55,8 @@ class TwitterInterface(SingleCommandInterface):
 
             data['media_ids'] = ",".join(map(str, media_ids))
 
-        if reply_id:
-            data['in_reply_to_status_id'] = reply_id
+        if reply_obj:
+            data['in_reply_to_status_id'] = reply_obj
             data['auto_populate_reply_metadata'] = True
 
         with API_RESPONSE_TIME.labels(platform='twitter').time():
@@ -96,5 +99,5 @@ class TwitterInterface(SingleCommandInterface):
                 arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).strip()
                 if arguments:
                     created = datetime.strptime(tweet['created_at'], "%a %b %d %H:%M:%S %z %Y")
-                    mentions.append(SingleArgumentRequest(tweet['id'], arguments, None, created))
+                    mentions.append(SingleArgumentRequest(tweet['id'], arguments, tweet['id'], created))
         return mentions

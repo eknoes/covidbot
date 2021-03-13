@@ -1,6 +1,6 @@
 import logging
 from datetime import timezone
-from typing import List, Optional, Iterable, Tuple
+from typing import List, Optional, Iterable, Tuple, Dict
 
 from mastodon import Mastodon, MastodonAPIError
 
@@ -36,14 +36,17 @@ class MastodonInterface(SingleCommandInterface):
         return upload_resp['id']
 
     def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_id: Optional[int] = None) -> bool:
+                      reply_obj: Optional[Dict] = None) -> bool:
         media_ids = []
         for file in media_files:
             media_ids.append(self.upload_media(file))
 
         try:
             with API_RESPONSE_TIME.labels(platform='mastodon').time():
-                response = self.mastodon.status_post(message, media_ids=media_ids, language="deu", in_reply_to_id=reply_id)
+                if not reply_obj:
+                    response = self.mastodon.status_post(message, media_ids=media_ids, language="deu")
+                else:
+                    response = self.mastodon.status_reply(reply_obj, message, media_ids=media_ids, language="deu",)
             self.update_metrics()
             if response:
                 self.log.info(f"Toot sent successfully {len(message)} chars)")
@@ -75,5 +78,5 @@ class MastodonInterface(SingleCommandInterface):
             text = text[mention_pos + len(bot_name):]
             if text:
                 created = n['status']['created_at']
-                mentions.append(SingleArgumentRequest(n['status']['id'], text, '@' + n['status']['account']['acct'], created))
+                mentions.append(SingleArgumentRequest(n['status']['id'], text, n['status'], created))
         return mentions

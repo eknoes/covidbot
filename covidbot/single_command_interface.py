@@ -21,8 +21,8 @@ from covidbot.utils import format_noun, FormattableNoun, format_data_trend, form
 class SingleArgumentRequest:
     chat_id: int
     message: str
-    username: Optional[str] = None
-    sent: Optional[datetime] = None
+    reply_obj: object = None
+    sent: datetime = None
 
 
 class SingleCommandInterface(MessengerInterface, ABC):
@@ -136,7 +136,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
     @abstractmethod
     def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_id: Optional[int] = None) -> bool:
+                      reply_obj: Optional[object] = None) -> bool:
         pass
 
     @abstractmethod
@@ -150,7 +150,6 @@ class SingleCommandInterface(MessengerInterface, ABC):
             for mention in self.get_mentions():
                 chat_id = mention.chat_id
                 message = mention.message
-                username = mention.username
 
                 if self.user_manager.is_message_answered(chat_id):
                     continue
@@ -186,20 +185,15 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
                 # Answer Tweet
                 if district_id:
-                    if username:
-                        username += " "
-                    else:
-                        username = ""
                     response = self.get_infection_tweet(district_id)
-                    message = f"{username}{response.message}"
+                    message = f"{response.message}"
                     if self.no_write:
                         print(arguments)
                         print(f"Reply to {chat_id}: {message}")
                     else:
-                        self.write_message(message, media_files=response.images, reply_id=chat_id)
+                        self.write_message(message, media_files=response.images, reply_obj=mention.reply_obj)
                     if mention.sent:
                         if type(mention.sent) == datetime:
-
                             try:
                                 duration = self.timezone.localize(datetime.now()) - mention.sent
                                 SINGLE_COMMAND_RESPONSE_TIME.observe(duration.seconds)
