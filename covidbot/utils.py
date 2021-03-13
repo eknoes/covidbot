@@ -3,7 +3,7 @@ import string
 from enum import Enum
 from typing import List, Optional
 
-from covidbot.covid_data import TrendValue
+from covidbot.covid_data.models import TrendValue
 
 a_pattern = re.compile("<a href=[\"\']([:/\w\-.=?&]*)[\"\']>([ \w\-.]*)</a>")
 bold_pattern = re.compile("<b>(.*?)</b>")
@@ -104,7 +104,7 @@ def replace_by_list(text: str, search: List[str], replace: List[str], ignore_lin
     for i in range(len(replace_list)):
         text = text.replace(replace_list[i][0], replace_list[i][1])
 
-    if ignore_links and tokens:
+    if not ignore_links and tokens:
         for t in tokens:
             text = text.replace(t[0], t[1])
     return text
