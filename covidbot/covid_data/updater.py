@@ -460,7 +460,7 @@ class RulesGermanyUpdater(Updater):
                         continue
 
                     text = adapt_text(bl['allgemein']['Kontaktbeschränkungen']['text'], just_strip=True)
-                    link = f'https://tourismus-wegweiser.de/widget/detail/?bl={bl["Kürzel"]}&sel=no'
+                    link = f'https://tourismus-wegweiser.de/detail/?bl={bl["Kürzel"]}'
 
                     cursor.execute("SELECT text, link FROM district_rules WHERE district_id=%s", [district_id])
                     row = cursor.fetchone()
