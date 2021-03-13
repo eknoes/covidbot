@@ -1,7 +1,6 @@
 import logging
 import re
 from datetime import datetime
-from pprint import pprint
 from typing import List, Optional, Iterable
 
 from TwitterAPI import TwitterAPI, TwitterResponse
