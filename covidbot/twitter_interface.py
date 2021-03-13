@@ -40,7 +40,6 @@ class TwitterInterface(SingleCommandInterface):
     def get_follower_number(self) -> Optional[int]:
         response = self.twitter.request('users/show', {'user_id': 1367862514579542017})
         if response.status_code == 200:
-            self.update_twitter_metrics(response)
             return response.json()['followers_count']
         else:
             return None
