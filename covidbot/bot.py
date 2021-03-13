@@ -252,7 +252,7 @@ class Bot(object):
 
         if current_data.rules:
             message += "<b>👆 Regeln</b>\n" \
-                       f"{current_data.rules.text}\nDetails zu den aktuellen Regeln und Öffnungen findest du " \
+                       f"{current_data.rules.text}\n\nDetails zu den aktuellen Regeln und Öffnungen findest du " \
                        f"<a href='{current_data.rules.link}'>hier</a>.\n\n"
             sources.append(f'Regeln vom {current_data.rules.date.strftime("%d.%m.%Y")}. Daten vom '
                            f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweisers</a>, sind lizenziert unter'
