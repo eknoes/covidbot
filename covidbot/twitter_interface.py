@@ -6,8 +6,8 @@ from TwitterAPI import TwitterAPI, TwitterResponse
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
-from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, TWITTER_RATE_LIMIT, TWITTER_API_RESPONSE_TIME, \
-    TWITTER_API_RESPONSE_CODE
+from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
+    API_RESPONSE_CODE
 from covidbot.single_command_interface import SingleCommandInterface
 from covidbot.user_manager import UserManager
 
@@ -35,7 +35,7 @@ class TwitterInterface(SingleCommandInterface):
         self.bmg_name = "@BMG_Bund"
 
     def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_id: Optional[str] = None) -> bool:
+                      reply_id: Optional[int] = None) -> bool:
         data = {'status': message}
         if media_files:
             # Upload filenames
@@ -55,7 +55,7 @@ class TwitterInterface(SingleCommandInterface):
             data['in_reply_to_status_id'] = reply_id
             data['auto_populate_reply_metadata'] = True
 
-        with TWITTER_API_RESPONSE_TIME.time():
+        with API_RESPONSE_TIME.labels(platform='twitter').time():
             response = self.twitter.request('statuses/update', data)
 
         if 200 <= response.status_code < 300:
@@ -70,14 +70,14 @@ class TwitterInterface(SingleCommandInterface):
     def update_twitter_metrics(response: TwitterResponse):
         quota = response.get_quota()
         if 'limit' in quota and quota['limit']:
-            TWITTER_RATE_LIMIT.labels(type='limit').set(quota['limit'])
+            API_RATE_LIMIT.labels(platform='twitter', type='limit').set(quota['limit'])
 
         if 'remaining' in quota and quota['remaining']:
-            TWITTER_RATE_LIMIT.labels(type='remaining').set(quota['remaining'])
-        TWITTER_API_RESPONSE_CODE.labels(code=response.status_code).inc()
+            API_RATE_LIMIT.labels(platform='twitter', type='remaining').set(quota['remaining'])
+        API_RESPONSE_CODE.labels(platform='twitter', code=response.status_code).inc()
 
-    def get_mentions(self) -> Iterable[Tuple[str, str]]:
-        with TWITTER_API_RESPONSE_TIME.time():
+    def get_mentions(self) -> Iterable[Tuple[int, str, Optional[str]]]:
+        with API_RESPONSE_TIME.labels(platform='twitter').time():
             response = self.twitter.request(f"statuses/mentions_timeline")
         self.update_twitter_metrics(response)
         mentions = []
@@ -93,5 +93,5 @@ class TwitterInterface(SingleCommandInterface):
                         break
 
                 arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).strip()
-                mentions.append((tweet['id'], arguments))
+                mentions.append((tweet['id'], arguments, None))
         return mentions

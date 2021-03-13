@@ -11,8 +11,8 @@ from TwitterAPI import TwitterAPI, TwitterResponse
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, TWITTER_RATE_LIMIT, TWITTER_API_RESPONSE_TIME, \
-    TWITTER_API_RESPONSE_CODE, BOT_RESPONSE_TIME
+from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
+    API_RESPONSE_CODE, BOT_RESPONSE_TIME
 from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
@@ -126,20 +126,30 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
     @abstractmethod
     def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_id: Optional[str] = None) -> bool:
+                      reply_id: Optional[int] = None) -> bool:
         pass
 
     @abstractmethod
-    def get_mentions(self) -> Iterable[Tuple[str, str]]:
+    def get_mentions(self) -> Iterable[Tuple[int, str, Optional[str]]]:
         pass
 
     def run(self) -> None:
         running = True
 
         while running:
-            for chat_id, message in self.get_mentions():
+            for chat_id, message, username in self.get_mentions():
+                if self.user_manager.is_message_answered(chat_id):
+                    continue
+
                 district_id = None
                 arguments = message.replace(",", "").replace(".", "").replace("!", "").replace("?", "").strip().split()
+
+                # Manually discard some arguments
+                if len(arguments[0]) < 4 and len(arguments) > 3:
+                    self.log.warning(f"Do not lookup {arguments}, as it might not be a query but a message")
+                    self.user_manager.set_message_answered(chat_id)
+                    continue
+
                 for i in range(min(len(arguments), 3), 0, -1):
                     argument = " ".join(arguments[:i]).strip()
                     districts_query = self.data.search_district_by_name(argument)
@@ -160,9 +170,12 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
                 # Answer Tweet
                 if district_id:
+                    if username:
+                        username += " "
                     response = self.get_infection_tweet(district_id)
-                    message = f"{response.message}"
+                    message = f"{username}{response.message}"
                     if self.no_write:
+                        print(arguments)
                         print(f"Reply to {chat_id}: {message}")
                     else:
                         self.write_message(message, media_files=response.images, reply_id=chat_id)
