@@ -5,7 +5,7 @@ from mastodon import Mastodon, MastodonAPIError
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_CODE, API_RESPONSE_TIME, SENT_MESSAGE_COUNT
-from covidbot.single_command_interface import SingleCommandInterface
+from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 from covidbot.utils import general_tag_pattern
 
@@ -61,7 +61,7 @@ class MastodonInterface(SingleCommandInterface):
         if self.mastodon.ratelimit_remaining:
             API_RATE_LIMIT.labels(platform='mastodon', type='remaining').set(self.mastodon.ratelimit_remaining)
 
-    def get_mentions(self) -> Iterable[Tuple[int, str, Optional[str]]]:
+    def get_mentions(self) -> Iterable[SingleArgumentRequest]:
         with API_RESPONSE_TIME.labels(platform='mastodon').time():
             notifications = self.mastodon.notifications(exclude_types=['follow', 'favourite', 'reblog' 'poll', 'follow_request'])
         mentions = []
@@ -73,5 +73,5 @@ class MastodonInterface(SingleCommandInterface):
             mention_pos = text.lower().find(bot_name.lower())
             text = text[mention_pos + len(bot_name):]
             if text:
-                mentions.append((n['status']['id'], text, '@' + n['status']['account']['acct']))
+                mentions.append(SingleArgumentRequest(n['status']['id'], text, '@' + n['status']['account']['acct']))
         return mentions

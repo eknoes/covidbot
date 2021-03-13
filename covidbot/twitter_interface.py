@@ -8,7 +8,7 @@ from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
     API_RESPONSE_CODE
-from covidbot.single_command_interface import SingleCommandInterface
+from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 
 
@@ -76,7 +76,7 @@ class TwitterInterface(SingleCommandInterface):
             API_RATE_LIMIT.labels(platform='twitter', type='remaining').set(quota['remaining'])
         API_RESPONSE_CODE.labels(platform='twitter', code=response.status_code).inc()
 
-    def get_mentions(self) -> Iterable[Tuple[int, str, Optional[str]]]:
+    def get_mentions(self) -> Iterable[SingleArgumentRequest]:
         with API_RESPONSE_TIME.labels(platform='twitter').time():
             response = self.twitter.request(f"statuses/mentions_timeline")
         self.update_twitter_metrics(response)
@@ -94,5 +94,5 @@ class TwitterInterface(SingleCommandInterface):
 
                 arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).strip()
                 if arguments:
-                    mentions.append((tweet['id'], arguments, None))
+                    mentions.append(SingleArgumentRequest(tweet['id'], arguments))
         return mentions

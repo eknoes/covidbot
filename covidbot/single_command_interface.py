@@ -2,6 +2,8 @@ import logging
 import re
 import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime
 from typing import List, Union, Optional, Tuple, Iterable
 
 from covidbot.covid_data import CovidData, Visualization
@@ -11,6 +13,14 @@ from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT
 from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
+
+
+@dataclass
+class SingleArgumentRequest:
+    chat_id: int
+    message: str
+    username: Optional[str] = None
+    send: Optional[datetime] = None
 
 
 class SingleCommandInterface(MessengerInterface, ABC):
@@ -31,7 +41,8 @@ class SingleCommandInterface(MessengerInterface, ABC):
     VACCINATIONS_UID = "vaccinations"
     ICU_UID = "icu"
 
-    def __init__(self, user_manager: UserManager, covid_data: CovidData, visualization: Visualization, sleep_sec: int, no_write: bool = False):
+    def __init__(self, user_manager: UserManager, covid_data: CovidData, visualization: Visualization, sleep_sec: int,
+                 no_write: bool = False):
         self.data = covid_data
         self.viz = visualization
         self.user_manager = user_manager
@@ -125,14 +136,18 @@ class SingleCommandInterface(MessengerInterface, ABC):
         pass
 
     @abstractmethod
-    def get_mentions(self) -> Iterable[Tuple[int, str, Optional[str]]]:
+    def get_mentions(self) -> Iterable[SingleArgumentRequest]:
         pass
 
     def run(self) -> None:
         running = True
 
         while running:
-            for chat_id, message, username in self.get_mentions():
+            for mention in self.get_mentions():
+                chat_id = mention.chat_id
+                message = mention.message
+                username = mention.username
+
                 if self.user_manager.is_message_answered(chat_id):
                     continue
 
