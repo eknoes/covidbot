@@ -7,6 +7,9 @@ BOT_COMMAND_COUNT = Counter('bot_command_total', 'Received Bot Commands', ['comm
 
 BOT_RESPONSE_TIME = Summary('bot_response_time', 'Latency of requests')
 
+# SingleCommand
+DISCARDED_MESSAGE_COUNT = Counter('bot_discard_message_count', 'Received but discarded messages')
+
 # User statistics
 USER_COUNT = Gauge('bot_total_user', 'Number of Bot users', ['platform'])
 AVERAGE_SUBSCRIPTION_COUNT = Gauge('bot_avg_subscriptions', 'Average No. of subscriptions')

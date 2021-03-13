@@ -2,17 +2,12 @@ import logging
 import re
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from pprint import pprint
-from typing import List, Union, Optional, Dict, Tuple, Iterable
-
-from TwitterAPI import TwitterAPI, TwitterResponse
+from typing import List, Union, Optional, Tuple, Iterable
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
-    API_RESPONSE_CODE, BOT_RESPONSE_TIME
+from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT
 from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
@@ -141,6 +136,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                 if self.user_manager.is_message_answered(chat_id):
                     continue
 
+                RECV_MESSAGE_COUNT.inc()
                 district_id = None
                 arguments = message.replace(",", "").replace(".", "").replace("!", "").replace("?", "").strip().split()
 
@@ -148,6 +144,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                 if len(arguments[0]) < 4 and len(arguments) > 3:
                     self.log.warning(f"Do not lookup {arguments}, as it might not be a query but a message")
                     self.user_manager.set_message_answered(chat_id)
+                    DISCARDED_MESSAGE_COUNT.inc()
                     continue
 
                 for i in range(min(len(arguments), 3), 0, -1):

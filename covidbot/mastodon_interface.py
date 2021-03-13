@@ -1,9 +1,10 @@
 import logging
 from typing import List, Optional, Iterable, Tuple
 
-from mastodon import Mastodon
+from mastodon import Mastodon, MastodonAPIError
 
 from covidbot.covid_data import CovidData, Visualization
+from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_CODE, API_RESPONSE_TIME, SENT_MESSAGE_COUNT
 from covidbot.single_command_interface import SingleCommandInterface
 from covidbot.user_manager import UserManager
 from covidbot.utils import general_tag_pattern
@@ -39,16 +40,29 @@ class MastodonInterface(SingleCommandInterface):
         for file in media_files:
             media_ids.append(self.upload_media(file))
 
-        response = self.mastodon.status_post(message, media_ids=media_ids, language="deu", in_reply_to_id=reply_id)
-        if response:
-            self.log.info(f"Toot sent successfully {len(message)} chars)")
-            return True
-        else:
-            raise ValueError(f"Could not send toot!")
+        try:
+            with API_RESPONSE_TIME.labels(platform='mastodon').time():
+                response = self.mastodon.status_post(message, media_ids=media_ids, language="deu", in_reply_to_id=reply_id)
+            if response:
+                self.log.info(f"Toot sent successfully {len(message)} chars)")
+                SENT_MESSAGE_COUNT.inc()
+                return True
+            else:
+                raise ValueError(f"Could not send toot!")
+        except MastodonAPIError as api_error:
+            self.log.error(f"Got error on API access: {api_error}", exc_info=api_error)
+            raise api_error
+
+    def update_metrics(self, response):
+        if self.mastodon.ratelimit_limit:
+            API_RATE_LIMIT.labels(platform='mastodon', type='limit').set(self.mastodon.ratelimit_limit)
+
+        if self.mastodon.ratelimit_remaining:
+            API_RATE_LIMIT.labels(platform='mastodon', type='remaining').set(self.mastodon.ratelimit_remaining)
 
     def get_mentions(self) -> Iterable[Tuple[int, str, Optional[str]]]:
-        notifications = self.mastodon.notifications(
-            exclude_types=['follow', 'favourite', 'reblog' 'poll', 'follow_request'])
+        with API_RESPONSE_TIME.labels(platform='mastodon').time():
+            notifications = self.mastodon.notifications(exclude_types=['follow', 'favourite', 'reblog' 'poll', 'follow_request'])
         mentions = []
         bot_name = "@D64_Covidbot"
         for n in notifications:

@@ -85,7 +85,7 @@ class TwitterInterface(SingleCommandInterface):
             for tweet in response:
                 if self.user_manager.is_message_answered(tweet['id']):
                     continue
-                RECV_MESSAGE_COUNT.inc()
+
                 mention_position = 0
                 for mention in tweet['entities']['user_mentions']:
                     if mention['id'] == 1367862514579542017:
