@@ -68,6 +68,7 @@ class MastodonInterface(SingleCommandInterface):
     def get_mentions(self) -> Iterable[SingleArgumentRequest]:
         with API_RESPONSE_TIME.labels(platform='mastodon').time():
             notifications = self.mastodon.notifications(exclude_types=['follow', 'favourite', 'reblog' 'poll', 'follow_request'])
+        self.update_metrics()
         mentions = []
         bot_name = "@D64_Covidbot"
         for n in notifications:
