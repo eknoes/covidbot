@@ -9,6 +9,7 @@ BOT_RESPONSE_TIME = Summary('bot_response_time', 'Latency of requests')
 
 # SingleCommand
 DISCARDED_MESSAGE_COUNT = Counter('bot_discard_message_count', 'Received but discarded messages')
+SINGLE_COMMAND_RESPONSE_TIME = Summary('bot_response_time_single', 'Response time to single command input')
 
 # User statistics
 USER_COUNT = Gauge('bot_total_user', 'Number of Bot users', ['platform'])

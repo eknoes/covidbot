@@ -1,4 +1,5 @@
 import logging
+from datetime import timezone
 from typing import List, Optional, Iterable, Tuple
 
 from mastodon import Mastodon, MastodonAPIError
@@ -73,5 +74,6 @@ class MastodonInterface(SingleCommandInterface):
             mention_pos = text.lower().find(bot_name.lower())
             text = text[mention_pos + len(bot_name):]
             if text:
-                mentions.append(SingleArgumentRequest(n['status']['id'], text, '@' + n['status']['account']['acct']))
+                created = n['status']['created_at']
+                mentions.append(SingleArgumentRequest(n['status']['id'], text, '@' + n['status']['account']['acct'], created))
         return mentions

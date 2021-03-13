@@ -4,12 +4,14 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Union, Optional, Tuple, Iterable
+from typing import List, Union, Optional, Iterable
+
+import pytz
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT
+from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT, SINGLE_COMMAND_RESPONSE_TIME
 from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
 from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
@@ -20,7 +22,7 @@ class SingleArgumentRequest:
     chat_id: int
     message: str
     username: Optional[str] = None
-    send: Optional[datetime] = None
+    sent: Optional[datetime] = None
 
 
 class SingleCommandInterface(MessengerInterface, ABC):
@@ -32,6 +34,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
     sleep_sec: int
     no_write: bool
     handle_regex = re.compile('@(\w\.@)+')
+    timezone: datetime.tzinfo
 
     rki_name: str = "RKI"
     divi_name: str = "DIVI"
@@ -49,6 +52,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         self.location_service = LocationService('resources/germany_rs.geojson')
         self.sleep_sec = sleep_sec
         self.no_write = no_write
+        self.timezone = pytz.timezone("Europe/Berlin")
 
     async def send_daily_reports(self) -> None:
         germany = self.data.get_country_data()
@@ -193,6 +197,15 @@ class SingleCommandInterface(MessengerInterface, ABC):
                         print(f"Reply to {chat_id}: {message}")
                     else:
                         self.write_message(message, media_files=response.images, reply_id=chat_id)
+                    if mention.sent:
+                        if type(mention.sent) == datetime:
 
+                            try:
+                                duration = self.timezone.localize(datetime.now()) - mention.sent
+                                SINGLE_COMMAND_RESPONSE_TIME.observe(duration.seconds)
+                            except TypeError as e:
+                                self.log.warning("Cant measure duration: ", exc_info=e)
+                        else:
+                            self.log.warning(f"mention.sent has the wrong type {type(mention.sent)}: {mention.sent}")
                 self.user_manager.set_message_answered(chat_id)
             time.sleep(self.sleep_sec)

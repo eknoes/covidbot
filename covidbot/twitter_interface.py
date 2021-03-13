@@ -1,12 +1,13 @@
 import logging
 import re
-from typing import List, Optional, Tuple, Iterable
+from datetime import datetime
+from typing import List, Optional, Iterable
 
 from TwitterAPI import TwitterAPI, TwitterResponse
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
-from covidbot.metrics import SENT_MESSAGE_COUNT, RECV_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
+from covidbot.metrics import SENT_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
     API_RESPONSE_CODE
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
@@ -94,5 +95,6 @@ class TwitterInterface(SingleCommandInterface):
 
                 arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).strip()
                 if arguments:
-                    mentions.append(SingleArgumentRequest(tweet['id'], arguments))
+                    created = datetime.strptime(tweet['created_at'], "%a %b %d %H:%M:%S %z %Y")
+                    mentions.append(SingleArgumentRequest(tweet['id'], arguments, None, created))
         return mentions

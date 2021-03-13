@@ -219,12 +219,6 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
 
 
 def main():
-    # Set locale
-    try:
-        locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
-    except Exception:
-        logging.error("Can't set locale!")
-
     # Parse Arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--verbose', '-v', action='count', default=0)
@@ -253,6 +247,13 @@ def main():
         logging_level = logging.DEBUG
     else:
         logging_level = logging.INFO
+
+    if not args.platform or args.platform not in ["twitter"]:
+        # Set locale
+        try:
+            locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
+        except Exception:
+            logging.error("Can't set locale!")
 
     if not args.platform and not (args.check_updates or args.message_user or args.graphic_test):
         print("Exactly one platform has to be set, e.g. --platform telegram")
