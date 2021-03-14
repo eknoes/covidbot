@@ -44,8 +44,9 @@ class MastodonInterface(SingleCommandInterface):
     def write_message(self, message: str, media_files: Optional[List[str]] = None,
                       reply_obj: Optional[Dict] = None) -> bool:
         media_ids = []
-        for file in media_files:
-            media_ids.append(self.upload_media(file))
+        if media_files:
+            for file in media_files:
+                media_ids.append(self.upload_media(file))
 
         try:
             with API_RESPONSE_TIME.labels(platform='mastodon').time():
