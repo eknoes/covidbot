@@ -1,11 +1,10 @@
 import logging
-from datetime import timezone
-from typing import List, Optional, Iterable, Tuple, Dict
+from typing import List, Optional, Iterable, Dict
 
 from mastodon import Mastodon, MastodonAPIError
 
 from covidbot.covid_data import CovidData, Visualization
-from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_CODE, API_RESPONSE_TIME, SENT_MESSAGE_COUNT, USER_COUNT
+from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_TIME, SENT_MESSAGE_COUNT, USER_COUNT
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 from covidbot.utils import general_tag_pattern
@@ -25,7 +24,7 @@ class MastodonInterface(SingleCommandInterface):
     def __init__(self, access_token: str, mastodon_url: str, user_manager: UserManager, covid_data: CovidData,
                  visualization: Visualization, no_write: bool = False):
         super().__init__(user_manager, covid_data, visualization, 5, no_write)
-        self.mastodon = Mastodon(access_token=access_token, api_base_url=mastodon_url, ratelimit_method="pace")
+        self.mastodon = Mastodon(access_token=access_token, api_base_url=mastodon_url)
         USER_COUNT.labels(platform="mastodon").set_function(self.get_follower_number)
 
     def get_follower_number(self) -> int:
