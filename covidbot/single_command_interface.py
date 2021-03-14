@@ -159,7 +159,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                 arguments = message.replace(",", "").replace(".", "").replace("!", "").replace("?", "").strip().split()
 
                 # Manually discard some arguments
-                if len(arguments[0]) < 4 and len(arguments) > 3:
+                if arguments and len(arguments[0]) < 4 and len(arguments) > 3:
                     self.log.warning(f"Do not lookup {arguments}, as it might not be a query but a message")
                     self.user_manager.set_message_answered(chat_id)
                     DISCARDED_MESSAGE_COUNT.inc()
