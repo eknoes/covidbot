@@ -78,8 +78,6 @@ class Bot(object):
             for district_id in osm_results:
                 district = self._data.get_district(district_id)
                 possible_district.append((district_id, district.name))
-                if district.parent and district.parent not in [d[0] for d in possible_district]:
-                    possible_district.append((district.parent, self._data.get_district(district.parent).name))
 
         if not possible_district:
             message = 'Leider konnte kein Ort gefunden werden. Bitte beachte, ' \
