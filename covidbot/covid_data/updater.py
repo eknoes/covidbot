@@ -433,7 +433,6 @@ class RulesGermanyUpdater(Updater):
     URL = "https://tourismus-wegweiser.de/json/"
 
     def get_last_update(self) -> Optional[datetime]:
-        return None
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT MAX(updated) FROM district_rules")
             row = cursor.fetchone()
@@ -459,7 +458,8 @@ class RulesGermanyUpdater(Updater):
                         self.log.warning(f"Could not get ID of {bl['Bundesland']}")
                         continue
 
-                    text = adapt_text(bl['allgemein']['Kontaktbeschränkungen']['text'], just_strip=True)
+                    text = bl['allgemein']['Kontaktbeschränkungen']['text']
+                    text = adapt_text(text, just_strip=True)
                     link = f'https://tourismus-wegweiser.de/detail/?bl={bl["Kürzel"]}'
 
                     cursor.execute("SELECT text, link FROM district_rules WHERE district_id=%s", [district_id])

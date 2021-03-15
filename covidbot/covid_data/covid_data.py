@@ -240,7 +240,7 @@ class CovidDatabaseCreator:
 
             # Rule Data
             cursor.execute('CREATE TABLE IF NOT EXISTS district_rules (id INTEGER PRIMARY KEY AUTO_INCREMENT,'
-                           'district_id INTEGER, text TEXT, link VARCHAR(255), updated DATETIME,'
+                           'district_id INTEGER, text TEXT CHARACTER SET utf8 COLLATE utf8_general_ci, link VARCHAR(255), updated DATETIME,'
                            'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id))')
 
             # Check if view exists
