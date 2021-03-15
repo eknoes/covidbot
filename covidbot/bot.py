@@ -368,7 +368,7 @@ class Bot(object):
                    '<a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
                    'Intensivbettendaten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.' \
                    '\n\nSende {info_command} um eine Erläuterung ' \
-                   'der Daten zu erhalten. Ein Service von <a href="d-64.org/">D64 - Zentrum für Digitalen ' \
+                   'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
 
         return message
