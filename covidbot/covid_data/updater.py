@@ -22,7 +22,7 @@ class Updater(ABC):
         self.log = logging.getLogger(str(self.__class__.__name__))
         CovidDatabaseCreator(self.connection)
 
-    def get_resource(self, url: str, chance: Optional[float] = 1.0) -> Optional[bytes]:
+    def get_resource(self, url: str, chance: Optional[float] = 1.0) -> Optional[str]:
         # Just fetch for a certain chance, 100% by default
         if random.uniform(0.0, 1.0) > chance:
             return None
@@ -41,7 +41,7 @@ class Updater(ABC):
         response = requests.get(url, headers=header)
 
         if response.status_code == 200:
-            return response.content
+            return response.text
         elif response.status_code == 304:
             self.log.info("No new data available")
         else:
@@ -90,7 +90,7 @@ class RKIUpdater(Updater):
         response = self.get_resource(self.RKI_LK_CSV)
         if response:
             self.log.debug("Got RKI Data, checking if new")
-            rki_data = codecs.decode(response, "utf-8").splitlines()
+            rki_data = response.splitlines()
             reader = csv.DictReader(rki_data)
             self.add_data(reader)
             if last_update is None or last_update < self.get_last_update():
@@ -257,6 +257,7 @@ class RValueGermanyUpdater(Updater):
     URL = "https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv?__blob" \
           "=publicationFile"
     R_VALUE_7DAY_CSV_KEY = "Schätzer_7_Tage_R_Wert"
+    R_VALUE_7DAY_CSV_KEY_ALT = "Sch�tzer_7_Tage_R_Wert"
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
@@ -276,7 +277,7 @@ class RValueGermanyUpdater(Updater):
         if response:
             self.log.debug("Got R-Value Data")
 
-            rki_data = codecs.decode(response, "utf-8").splitlines()
+            rki_data = response.splitlines()
             reader = csv.DictReader(rki_data, delimiter=';', )
             district_id = self.get_district_id("Deutschland")
             if district_id is None:
@@ -292,19 +293,22 @@ class RValueGermanyUpdater(Updater):
                         continue
 
                     if self.R_VALUE_7DAY_CSV_KEY not in row:
-                        raise ValueError(f"{self.R_VALUE_7DAY_CSV_KEY} is not in CSV!")
+                        if self.R_VALUE_7DAY_CSV_KEY_ALT not in row:
+                            raise ValueError(f"{self.R_VALUE_7DAY_CSV_KEY} is not in CSV!")
+                        r_value = row[self.R_VALUE_7DAY_CSV_KEY_ALT]
+                    else:
+                        r_value = row[self.R_VALUE_7DAY_CSV_KEY]
+
+                    if r_value == '.':
+                        continue
+                    else:
+                        r_value = float(r_value.replace(",", "."))
 
                     try:
                         r_date = datetime.strptime(row['Datum'], "%d.%m.%Y").date()
                     except ValueError as e:
                         self.log.error(f"Could not get date of string {row['Datum']}", exc_info=e)
                         continue
-
-                    r_value = row[self.R_VALUE_7DAY_CSV_KEY]
-                    if r_value == '.':
-                        continue
-                    else:
-                        r_value = float(r_value.replace(",", "."))
 
                     cursor.execute("SELECT id FROM covid_r_value WHERE district_id=%s AND r_date=%s",
                                    [district_id, r_date])
@@ -344,7 +348,7 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
         response = self.get_resource(self.URL)
         if response:
             self.log.debug("Got Vaccination Data from Impfdashboard")
-            dashboard_data = codecs.decode(response, "utf-8").splitlines()
+            dashboard_data = response.splitlines()
             reader = csv.DictReader(dashboard_data, delimiter='\t', quoting=csv.QUOTE_NONE)
 
             with self.connection.cursor() as cursor:
@@ -400,7 +404,7 @@ class ICUGermanyUpdater(Updater):
         response = self.get_resource(self.URL)
         if response:
             self.log.debug("Got ICU Data from DIVI")
-            divi_data = codecs.decode(response, "utf-8").splitlines()
+            divi_data = response.splitlines()
             reader = csv.DictReader(divi_data)
             results = []
             for row in reader:

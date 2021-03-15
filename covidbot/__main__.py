@@ -303,7 +303,7 @@ def main():
                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
                 except ValueError as error:
                     # Data did not make it through plausibility check
-                    print(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}")
+                    logging.exception(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}", exc_info=error)
                     with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
                         asyncio.run(telegram.send_message(f"Exception happened on Data Update with "
                                                           f"{updater.__class__.__name__}: {error}",
