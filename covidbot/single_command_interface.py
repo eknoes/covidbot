@@ -59,6 +59,10 @@ class SingleCommandInterface(MessengerInterface, ABC):
         if not germany:
             raise ValueError("Could not find data for Germany")
 
+        # Do not tweet at night, so we show up more recently in the morning
+        if datetime.now().hour < 6:
+            return
+
         # Infections
         infections_uid = self.user_manager.get_user_id(self.INFECTIONS_UID)
         if self.user_manager.get_user(infections_uid).last_update.date() < germany.date:
