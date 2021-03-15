@@ -211,7 +211,7 @@ class CovidDatabaseCreator:
         log.debug("Creating Tables")
         with connection.cursor(dictionary=False) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS counties '
-                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30),'
+                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci, type VARCHAR(30),'
                            'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
                            'UNIQUE(rs, county_name))')
