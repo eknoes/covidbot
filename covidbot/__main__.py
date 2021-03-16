@@ -49,7 +49,7 @@ class MessengerBotSetup:
             stream_log_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
             logging.getLogger().addHandler(stream_log_handler)
 
-        if name not in ["signal", "threema", "telegram", "interactive", "feedback", "twitter", "mastodon"]:
+        if name not in ["signal", "threema", "telegram", "interactive", "feedback", "twitter", "mastodon", "instagram"]:
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
@@ -154,6 +154,18 @@ class MessengerBotSetup:
                                      no_write=self.config['MASTODON'].getboolean('DEBUG',
                                                                                  fallback=False))
 
+        if self.name == "instagram":
+            if not self.config.has_section("INSTAGRAM"):
+                raise ValueError("INSTAGRAM is not configured")
+            from covidbot.instagram_interface import InstagramInterface
+            return InstagramInterface(self.config['INSTAGRAM'].get('ACCOUNT_ID'),
+                                      self.config['INSTAGRAM'].get('ACCESS_TOKEN'),
+                                      self.config['INSTAGRAM'].get('WEB_DIR'),
+                                      self.config['INSTAGRAM'].get('PUBLIC_URL'),
+                                      user_manager, data, visualization,
+                                      no_write=self.config['INSTAGRAM'].getboolean('DEBUG',
+                                                                                   fallback=False))
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         for db_conn in self.connections:
             db_conn.close()
@@ -230,7 +242,8 @@ def main():
     parser.add_argument('--verbose', '-v', action='count', default=0)
     parser.add_argument('--config', '-c', action='store', default='config.ini', metavar='CONFIG_FILE')
 
-    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'shell', 'twitter', 'mastodon'], nargs=1,
+    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'shell', 'twitter', 'mastodon'],
+                        nargs=1,
                         help='Platform that should be used', type=str, action='store')
     parser.add_argument('--check-updates', help='Run platform independent jobs, such as checking for new data',
                         action='store_true')
@@ -303,7 +316,8 @@ def main():
                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
                 except ValueError as error:
                     # Data did not make it through plausibility check
-                    logging.exception(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}", exc_info=error)
+                    logging.exception(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}",
+                                      exc_info=error)
                     with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
                         asyncio.run(telegram.send_message(f"Exception happened on Data Update with "
                                                           f"{updater.__class__.__name__}: {error}",
@@ -313,14 +327,17 @@ def main():
         with MessengerBotSetup("feedback", config, setup_logs=False, monitoring=False) as iface:
             asyncio.run(iface.send_daily_reports())
 
-        # Check Tweets
+        # Check Tweets & Co
+        platforms = []
         if config.has_section("TWITTER"):
-            with MessengerBotSetup("twitter", config, setup_logs=False, monitoring=False) as iface:
-                asyncio.run(iface.send_daily_reports())
-
-        # Check Toots
+            platforms.append("twitter")
         if config.has_section("MASTODON"):
-            with MessengerBotSetup("mastodon", config, setup_logs=False, monitoring=False) as iface:
+            platforms.append("mastodon")
+        if config.has_section("INSTAGRAM"):
+            platforms.append("instagram")
+
+        for platform in platforms:
+            with MessengerBotSetup(platform, config, setup_logs=False, monitoring=False) as iface:
                 asyncio.run(iface.send_daily_reports())
 
     elif args.daily_report:
@@ -369,8 +386,8 @@ def main():
                                                       [config["TELEGRAM"].get("DEV_CHAT")]))
                 raise e
     elif args.graphic_test:
-        vis = Visualization(get_connection(config), abspath("graphics/"))
-        vis.vaccination_graph(0)
+        vis = Visualization(get_connection(config), abspath("graphics/"), disable_cache=True)
+        vis.infections_graph(0, quadratic=True)
 
 
 if __name__ == "__main__":

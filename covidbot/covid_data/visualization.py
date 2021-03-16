@@ -22,18 +22,24 @@ class Visualization:
     connection: MySQLConnection
     graphics_dir: str
     log = logging.getLogger(__name__)
+    disable_cache: bool
 
-    def __init__(self, connection: MySQLConnection, directory: str) -> None:
+    def __init__(self, connection: MySQLConnection, directory: str, disable_cache: bool = False) -> None:
         self.connection = connection
         if not os.path.isdir(directory):
             raise NotADirectoryError(f"Path {directory} is not a directory")
 
         self.graphics_dir = directory
+        self.disable_cache = disable_cache
 
     @staticmethod
     def setup_plot(current_date: Optional[datetime.date], title: str, y_label: str,
-                   source: str = "Robert-Koch-Institut") -> Tuple[Figure, Axes]:
-        fig = plt.figure(figsize=(8, 5), dpi=200)
+                   source: str = "Robert-Koch-Institut", quadratic: bool = False) -> Tuple[Figure, Axes]:
+        figsize = (8, 5)
+        if quadratic:
+            figsize = (8, 8)
+
+        fig = plt.figure(figsize=figsize, dpi=200)
         gs = gridspec.GridSpec(15, 3)
 
         if current_date:
@@ -95,19 +101,19 @@ class Visualization:
         figure.clf()
         plt.close(figure)
 
-    def infections_graph(self, district_id: int, duration: int = 49) -> str:
+    def infections_graph(self, district_id: int, duration: int = 49, quadratic = False) -> str:
         district_name, current_date, x_data, y_data = self._get_covid_data("new_cases", district_id, duration)
 
         filepath = os.path.abspath(
             os.path.join(self.graphics_dir, f"infections-{current_date.isoformat()}-{district_id}.jpg"))
 
         # Do not draw new graphic if its cached
-        if os.path.isfile(filepath):
+        if not self.disable_cache and os.path.isfile(filepath):
             CACHED_GRAPHS.labels(type='infections').inc()
             return filepath
         CREATED_GRAPHS.labels(type='infections').inc()
 
-        fig, ax1 = self.setup_plot(current_date, f"Neuinfektionen {district_name}", "Neuinfektionen")
+        fig, ax1 = self.setup_plot(current_date, f"Neuinfektionen {district_name}", "Neuinfektionen", quadratic=quadratic)
         # Plot data
         plt.xticks(x_data, rotation='30', ha='right')
 
@@ -134,7 +140,7 @@ class Visualization:
         now = datetime.datetime.now()
         quarter = math.floor(now.hour / 4)
         filepath = os.path.abspath(os.path.join(self.graphics_dir, f"botuser-{now.strftime(f'%Y-%m-%d-{quarter}')}.jpg"))
-        if os.path.isfile(filepath):
+        if not self.disable_cache and os.path.isfile(filepath):
             CACHED_GRAPHS.labels(type='botuser').inc()
             return filepath
         CREATED_GRAPHS.labels(type='botuser').inc()
@@ -208,7 +214,7 @@ class Visualization:
                 os.path.join(self.graphics_dir, f"vaccinations-{x_data[-1].isoformat()}-{district_id}.jpg"))
 
             # Do not draw new graphic if its cached
-            if os.path.isfile(filepath):
+            if not self.disable_cache and os.path.isfile(filepath):
                 CACHED_GRAPHS.labels(type='vaccinations').inc()
                 return filepath
             CREATED_GRAPHS.labels(type='vaccinations').inc()
@@ -249,7 +255,7 @@ class Visualization:
             os.path.join(self.graphics_dir, f"incidence-{current_date.isoformat()}-{district_id}.jpg"))
 
         # Do not draw new graphic if its cached
-        if os.path.isfile(filepath):
+        if not self.disable_cache and os.path.isfile(filepath):
             CACHED_GRAPHS.labels(type='incidence').inc()
             return filepath
         CREATED_GRAPHS.labels(type='incidence').inc()
