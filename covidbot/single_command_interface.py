@@ -153,46 +153,19 @@ class SingleCommandInterface(MessengerInterface, ABC):
         while running:
             for mention in self.get_mentions():
                 chat_id = mention.chat_id
-                message = mention.message
 
                 if self.user_manager.is_message_answered(chat_id):
                     continue
 
                 RECV_MESSAGE_COUNT.inc()
-                district_id = None
-                arguments = message.replace(",", "").replace(".", "").replace("!", "").replace("?", "").strip().split()
-
-                # Manually discard some arguments
-                if arguments and len(arguments[0]) < 4 and len(arguments) > 3:
-                    self.log.warning(f"Do not lookup {arguments}, as it might not be a query but a message")
-                    self.user_manager.set_message_answered(chat_id)
-                    DISCARDED_MESSAGE_COUNT.inc()
-                    continue
-
-                for i in range(min(len(arguments), 3), 0, -1):
-                    argument = " ".join(arguments[:i]).strip()
-                    districts_query = self.data.search_district_by_name(argument)
-                    if districts_query:
-                        if len(districts_query) <= 2:
-                            district_id = districts_query[0][0]
-                            break
-
-                # Check OSM if nothing was found
-                if not district_id:
-                    results = self.location_service.find_location(" ".join(arguments))
-                    if len(results) == 1:
-                        district_id = results[0]
-                    elif len(results) > 1:
-                        results = self.location_service.find_location(" ".join(arguments), restrict_type=True)
-                        if len(results) == 1:
-                            district_id = results[0]
+                district_id = self.find_district(mention.message)
 
                 # Answer Tweet
                 if district_id:
                     response = self.get_infection_tweet(district_id)
                     message = f"{response.message}"
                     if self.no_write:
-                        print(arguments)
+                        print(mention.message)
                         print(f"Reply to {chat_id}: {message}")
                     else:
                         self.write_message(message, media_files=response.images, reply_obj=mention.reply_obj)
@@ -205,5 +178,40 @@ class SingleCommandInterface(MessengerInterface, ABC):
                                 self.log.warning("Cant measure duration: ", exc_info=e)
                         else:
                             self.log.warning(f"mention.sent has the wrong type {type(mention.sent)}: {mention.sent}")
+                else:
+                    DISCARDED_MESSAGE_COUNT.inc()
                 self.user_manager.set_message_answered(chat_id)
             time.sleep(self.sleep_sec)
+
+    def find_district(self, query: str) -> Optional[int]:
+        arguments = query.replace(",", "").replace(".", "").replace("!", "").replace("?", "").strip().split()
+        district_id = None
+
+        # Manually discard some arguments
+        if arguments and len(arguments[0]) < 4 and len(arguments) > 3:
+            self.log.warning(f"Do not lookup {arguments}, as it might not be a query but a message")
+            return district_id
+
+        for i in range(min(len(arguments), 3), 0, -1):
+            argument = " ".join(arguments[:i]).strip()
+            districts_query = self.data.search_district_by_name(argument)
+            if districts_query:
+                district_id = districts_query[0][0]
+
+                if len(districts_query) > 1:
+                    for district in districts_query:
+                        if district[1].find(argument) == 0:
+                            district_id = district[0]
+                            break
+
+        # Check OSM if nothing was found
+        if not district_id:
+            results = self.location_service.find_location(" ".join(arguments))
+            if len(results) == 1:
+                district_id = results[0]
+            elif len(results) > 1:
+                results = self.location_service.find_location(" ".join(arguments), restrict_type=True)
+                if len(results) == 1:
+                    district_id = results[0]
+
+        return district_id
