@@ -203,7 +203,7 @@ class VaccinationGermanyUpdater(Updater):
 
     def update(self) -> bool:
         last_update = self.get_last_update()
-        if last_update and last_update - datetime.now() < timedelta(hours=12):
+        if last_update and datetime.now() - last_update < timedelta(hours=12):
             return False
 
         new_data = False
@@ -400,7 +400,6 @@ class ICUGermanyUpdater(Updater):
         if last_update and datetime.now() - last_update < timedelta(hours=12):
             return False
 
-        new_data = False
         response = self.get_resource(self.URL)
         if response:
             self.log.debug("Got ICU Data from DIVI")
@@ -429,7 +428,9 @@ class ICUGermanyUpdater(Updater):
                         "GROUP BY c.parent, date "
                         "HAVING (COUNT(c.parent) = (SELECT COUNT(*) FROM counties WHERE parent=c.parent) OR c.parent > 0) AND parent IS NOT NULL")
             self.connection.commit()
-        return new_data
+            if last_update != self.get_last_update():
+                return True
+        return False
 
 
 class RulesGermanyUpdater(Updater):

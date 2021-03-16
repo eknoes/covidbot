@@ -8,7 +8,7 @@ from covidbot.covid_data import RKIUpdater, VaccinationGermanyUpdater, RValueGer
 from covidbot.covid_data.updater import clean_district_name, ICUGermanyUpdater, RulesGermanyUpdater
 
 
-class TestVaccinationGermanyUpdater(TestCase):
+class TestUpdater(TestCase):
     conn: MySQLConnection
 
     @classmethod
@@ -24,15 +24,15 @@ class TestVaccinationGermanyUpdater(TestCase):
         rki = RKIUpdater(self.conn)
         rki.update()
         updater = VaccinationGermanyUpdater(self.conn)
-        updater.update()
+        self.assertTrue(updater.update())
         updater = RValueGermanyUpdater(self.conn)
-        updater.update()
+        self.assertTrue(updater.update())
         updater = VaccinationGermanyImpfdashboardUpdater(self.conn)
-        updater.update()
+        self.assertTrue(updater.update())
         updater = ICUGermanyUpdater(self.conn)
-        updater.update()
+        self.assertTrue(updater.update())
         updater = RulesGermanyUpdater(self.conn)
-        updater.update()
+        self.assertTrue(updater.update())
 
     def test_clean_district_name(self):
         expected = [("Region Hannover", "Hannover"), ("LK Kassel", "Kassel"),
