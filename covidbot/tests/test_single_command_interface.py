@@ -25,7 +25,7 @@ class TestSingleCommandInterface(TestCase):
         cls.conn = get_connection(cfg)
 
         cls.interface = NonAbstractSingleCommandInterface(UserManager("test", cls.conn), CovidData(cls.conn),
-                                                          Visualization(cls.conn, "graphics"), 0, True)
+                                                          Visualization(cls.conn, "."), 0, True)
 
     def test_find_district(self):
         self.assertEqual(5113, self.interface.find_district("Essen"), "Result for Essen should be Essen")
