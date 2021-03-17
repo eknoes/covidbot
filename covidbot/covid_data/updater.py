@@ -196,7 +196,7 @@ class VaccinationGermanyUpdater(Updater):
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
-            cursor.execute("SELECT MAX(updated) FROM covid_vaccinations WHERE district_id != 0")
+            cursor.execute("SELECT MAX(last_update) FROM covid_vaccinations WHERE district_id != 0")
             row = cursor.fetchone()
             if row:
                 return row[0]
@@ -330,7 +330,7 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
             germany_id = self.get_district_id("Deutschland")
-            cursor.execute("SELECT MAX(updated) FROM covid_vaccinations WHERE district_id=%s", [germany_id])
+            cursor.execute("SELECT MAX(last_update) FROM covid_vaccinations WHERE district_id=%s", [germany_id])
             row = cursor.fetchone()
             if row:
                 return row[0]
@@ -341,7 +341,7 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
         if district_id is None:
             raise ValueError("No district_id for Deutschland")
 
-        if datetime.now() - last_update < timedelta(hours=12):
+        if last_update and datetime.now() - last_update < timedelta(hours=12):
             return False
 
         new_data = False
