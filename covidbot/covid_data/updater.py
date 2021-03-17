@@ -224,10 +224,12 @@ class VaccinationGermanyUpdater(Updater):
                         self.log.warning(f"Can't find district_id for {row['Bundesland']}!")
                         continue
 
-                    updated = datetime.fromtimestamp(row['Datenstand'] // 1000)
+                    updated = datetime.fromtimestamp(row['Datenstand'] // 1000).date()
                     cursor.execute("SELECT id FROM covid_vaccinations WHERE date = %s AND district_id=%s",
                                    [updated, district_id])
-                    if cursor.fetchone():
+                    record = cursor.fetchone()
+
+                    if record is not None:
                         continue
 
                     new_data = True
@@ -354,7 +356,7 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
             with self.connection.cursor() as cursor:
                 for row in reader:
                     # The other vaccination source uses another timeformat, so we have to add a day
-                    updated = datetime.fromisoformat(row['date']) + timedelta(days=1)
+                    updated = (datetime.fromisoformat(row['date']) + timedelta(days=1))
                     cursor.execute("SELECT id FROM covid_vaccinations WHERE date = %s AND district_id=%s",
                                    [updated, district_id])
                     if cursor.fetchone():

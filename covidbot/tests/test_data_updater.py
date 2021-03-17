@@ -21,18 +21,26 @@ class TestUpdater(TestCase):
         cls.conn.close()
 
     def test_update(self):
+        with self.conn.cursor() as c:
+            c.execute("DROP TABLE covid_data")
+            c.execute("DROP TABLE covid_vaccinations")
+            c.execute("DROP TABLE covid_r_value")
+            c.execute("DROP TABLE district_rules")
+            c.execute("DROP TABLE icu_beds")
+
         rki = RKIUpdater(self.conn)
         rki.update()
-        updater = VaccinationGermanyUpdater(self.conn)
-        self.assertTrue(updater.update())
-        updater = RValueGermanyUpdater(self.conn)
-        self.assertTrue(updater.update())
         updater = VaccinationGermanyImpfdashboardUpdater(self.conn)
-        self.assertTrue(updater.update())
+        self.assertTrue(updater.update(), "VaccinationGermanyImpfdashboardUpdater should update")
+        updater = VaccinationGermanyUpdater(self.conn)
+        self.assertTrue(updater.update(), "VaccinationGermanyUpdater should update")
+        updater = RValueGermanyUpdater(self.conn)
+        self.assertTrue(updater.update(), "RValueGermanyUpdater should update")
         updater = ICUGermanyUpdater(self.conn)
-        self.assertTrue(updater.update())
+        self.assertTrue(updater.update(), "ICUGermanyUpdater should update")
         updater = RulesGermanyUpdater(self.conn)
-        self.assertTrue(updater.update())
+        self.assertTrue(updater.update(), "RulesGermanyUpdater should update")
+
 
     def test_clean_district_name(self):
         expected = [("Region Hannover", "Hannover"), ("LK Kassel", "Kassel"),
