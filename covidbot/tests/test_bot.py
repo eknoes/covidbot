@@ -145,15 +145,15 @@ class TestBot(TestCase):
 
     def test_get_possible_actions(self):
         uid1 = "uid1"
-        expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT]
+        expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT, UserDistrictActions.RULES]
         actual = map(lambda x: x[1], self.bot.get_possible_actions(uid1, 1)[1])
-        self.assertCountEqual(expected, actual, "A user without a subscription should get SUBSCRIBE and REPORT action")
+        self.assertCountEqual(expected, actual, "A user without a subscription should get SUBSCRIBE, REPORT and RULES action")
 
         self.bot.subscribe(uid1, 1)
-        expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT]
+        expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT, UserDistrictActions.RULES]
         actual = map(lambda x: x[1], self.bot.get_possible_actions(uid1, 2)[1])
-        self.assertCountEqual(expected, actual, "A user without subscription should get SUBSCRIBE and REPORT action")
+        self.assertCountEqual(expected, actual, "A user without subscription should get SUBSCRIBE, REPORT and RULES action")
 
-        expected = [UserDistrictActions.UNSUBSCRIBE, UserDistrictActions.REPORT]
+        expected = [UserDistrictActions.UNSUBSCRIBE, UserDistrictActions.REPORT, UserDistrictActions.RULES]
         actual = map(lambda x: x[1], self.bot.get_possible_actions(uid1, 1)[1])
-        self.assertCountEqual(expected, actual, "A user with subscription should get UNSUBSCRIBE and REPORT action")
+        self.assertCountEqual(expected, actual, "A user with subscription should get UNSUBSCRIBE, REPORT and RULES action")
