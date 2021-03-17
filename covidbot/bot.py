@@ -329,26 +329,6 @@ class Bot(object):
     def _get_report(self, subscriptions: List[int]) -> str:
         country = self._data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n"
-        if country.vaccinations:
-            message += "<b>💉  Impfdaten</b>\n" \
-                       "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits - Stand {date} - vollständig geimpft.\n\n" \
-                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
-                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
-                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
-                        vacc_full=format_int(country.vaccinations.vaccinated_full),
-                        date=country.vaccinations.date.strftime("%d.%m.%Y"))
-
-        if country.icu_data:
-            message += f"<b>🏥 Intensivbetten</b>\n" \
-                       f"{format_float(country.icu_data.percent_occupied())}% " \
-                       f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)}) der " \
-                       f"Intensivbetten sind aktuell belegt. " \
-                       f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
-                       f"({format_float(country.icu_data.percent_covid())}%) liegen Patienten" \
-                       f" mit COVID-19, davon müssen {country.icu_data.covid_ventilated} beatmet werden. " \
-                       f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
-
         message += "<b>🦠 Infektionszahlen</b>\n" \
                    "Insgesamt wurden bundesweit {new_cases} {new_cases_trend} und " \
                    "{new_deaths} {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
@@ -385,6 +365,26 @@ class Bot(object):
                 data = map(lambda district: "• " + self.format_district_data(district),
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
+
+        if country.vaccinations:
+            message += "<b>💉  Impfdaten</b>\n" \
+                       "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits - Stand {date} - vollständig geimpft.\n\n" \
+                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
+                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
+                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
+                        vacc_full=format_int(country.vaccinations.vaccinated_full),
+                        date=country.vaccinations.date.strftime("%d.%m.%Y"))
+
+        if country.icu_data:
+            message += f"<b>🏥 Intensivbetten</b>\n" \
+                       f"{format_float(country.icu_data.percent_occupied())}% " \
+                       f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)}) der " \
+                       f"Intensivbetten sind aktuell belegt. " \
+                       f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
+                       f"({format_float(country.icu_data.percent_covid())}%) liegen Patienten" \
+                       f" mit COVID-19, davon müssen {country.icu_data.covid_ventilated} beatmet werden. " \
+                       f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
 
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
