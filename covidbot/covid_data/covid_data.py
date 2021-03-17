@@ -84,6 +84,7 @@ class CovidData(object):
                                                    vaccination_record['date'])
 
 
+
             result = DistrictData(name=record['county_name'], incidence=record['incidence'],
                                   parent=record['parent'], type=record['type'],
                                   total_cases=record['total_cases'], total_deaths=record['total_deaths'],
@@ -226,7 +227,7 @@ class CovidDatabaseCreator:
             cursor.execute('CREATE TABLE IF NOT EXISTS covid_vaccinations (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
                            'district_id INTEGER, date DATE, vaccinated_partial INTEGER, '
                            'vaccinated_full INTEGER, rate_full FLOAT, rate_partial FLOAT, last_update DATETIME DEFAULT NOW(),'
-                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, updated))')
+                           'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, date))')
 
             # R Value Data
             cursor.execute('CREATE TABLE IF NOT EXISTS covid_r_value (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
