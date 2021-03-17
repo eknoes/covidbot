@@ -225,7 +225,7 @@ class VaccinationGermanyUpdater(Updater):
                         continue
 
                     updated = datetime.fromtimestamp(row['Datenstand'] // 1000)
-                    cursor.execute("SELECT id FROM covid_vaccinations WHERE updated = %s AND district_id=%s",
+                    cursor.execute("SELECT id FROM covid_vaccinations WHERE date = %s AND district_id=%s",
                                    [updated, district_id])
                     if cursor.fetchone():
                         continue
@@ -244,7 +244,7 @@ class VaccinationGermanyUpdater(Updater):
                     if row['Zweitimpfungen_kumulativ']:
                         rate_full = row['Zweitimpfungen_kumulativ'] / population
 
-                    cursor.execute('INSERT INTO covid_vaccinations (district_id, updated, vaccinated_partial, '
+                    cursor.execute('INSERT INTO covid_vaccinations (district_id, date, vaccinated_partial, '
                                    'vaccinated_full, rate_partial, rate_full) VALUE (%s, %s, %s, %s, %s, %s)',
                                    [district_id, updated, row['Impfungen_kumulativ'],
                                     row['Zweitimpfungen_kumulativ'], rate_partial, rate_full])
@@ -355,7 +355,7 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
                 for row in reader:
                     # The other vaccination source uses another timeformat, so we have to add a day
                     updated = datetime.fromisoformat(row['date']) + timedelta(days=1)
-                    cursor.execute("SELECT id FROM covid_vaccinations WHERE updated = %s AND district_id=%s",
+                    cursor.execute("SELECT id FROM covid_vaccinations WHERE date = %s AND district_id=%s",
                                    [updated, district_id])
                     if cursor.fetchone():
                         continue
@@ -374,7 +374,7 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
                     if row['personen_voll_kumulativ']:
                         rate_full = int(row['personen_voll_kumulativ']) / population
 
-                    cursor.execute('INSERT INTO covid_vaccinations (district_id, updated, vaccinated_partial, '
+                    cursor.execute('INSERT INTO covid_vaccinations (district_id, date, vaccinated_partial, '
                                    'vaccinated_full, rate_partial, rate_full) VALUE (%s, %s, %s, %s, %s, %s)',
                                    [district_id, updated, row['personen_erst_kumulativ'],
                                     row['personen_voll_kumulativ'], rate_partial, rate_full])
