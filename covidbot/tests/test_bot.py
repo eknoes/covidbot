@@ -4,7 +4,7 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.bot import Bot, UserDistrictActions
+from covidbot.bot import Bot, UserDistrictActions, UserHintService
 from covidbot.covid_data import CovidData, DistrictData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater
 from covidbot.user_manager import UserManager
 
@@ -147,13 +147,29 @@ class TestBot(TestCase):
         uid1 = "uid1"
         expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT, UserDistrictActions.RULES]
         actual = map(lambda x: x[1], self.bot.get_possible_actions(uid1, 1)[1])
-        self.assertCountEqual(expected, actual, "A user without a subscription should get SUBSCRIBE, REPORT and RULES action")
+        self.assertCountEqual(expected, actual,
+                              "A user without a subscription should get SUBSCRIBE, REPORT and RULES action")
 
         self.bot.subscribe(uid1, 1)
         expected = [UserDistrictActions.SUBSCRIBE, UserDistrictActions.REPORT, UserDistrictActions.RULES]
         actual = map(lambda x: x[1], self.bot.get_possible_actions(uid1, 2)[1])
-        self.assertCountEqual(expected, actual, "A user without subscription should get SUBSCRIBE, REPORT and RULES action")
+        self.assertCountEqual(expected, actual,
+                              "A user without subscription should get SUBSCRIBE, REPORT and RULES action")
 
         expected = [UserDistrictActions.UNSUBSCRIBE, UserDistrictActions.REPORT, UserDistrictActions.RULES]
         actual = map(lambda x: x[1], self.bot.get_possible_actions(uid1, 1)[1])
-        self.assertCountEqual(expected, actual, "A user with subscription should get UNSUBSCRIBE, REPORT and RULES action")
+        self.assertCountEqual(expected, actual,
+                              "A user with subscription should get UNSUBSCRIBE, REPORT and RULES action")
+
+    def test_user_hints(self):
+        hints = UserHintService(lambda x: f"/{x}")
+
+        expected = "Lorem /ipsum sim /dolor"
+        actual = hints.format_commands("Lorem {ipsum} sim {dolor}")
+        self.assertEqual(expected, actual, "Commands should be formatted correctly in User Hints")
+
+        hints = UserHintService(lambda x: f"'{x}'")
+
+        expected = "Lorem 'ipsum' sim 'dolor'"
+        actual = hints.format_commands("Lorem {ipsum} sim {dolor}")
+        self.assertEqual(expected, actual, "Commands should be formatted correctly in User Hints")

@@ -1,8 +1,11 @@
+import csv
+import datetime
 import logging
 import re
+import os.path
 from enum import Enum
 from functools import reduce
-from typing import Optional, Tuple, List, Dict, Union
+from typing import Optional, Tuple, List, Dict, Union, Callable
 
 from covidbot.covid_data import CovidData, DistrictData
 from covidbot.location_service import LocationService
@@ -16,6 +19,35 @@ class UserDistrictActions(Enum):
     REPORT = 2
     RULES = 3
 
+
+class UserHintService:
+    FILE = "resources/user-tips.csv"
+    current_hint: Optional[str] = None
+    current_date: datetime.date = datetime.date.today()
+    command_fmt: Callable[[str], str]
+    command_regex = re.compile("{(\w*)}")
+
+    def __init__(self, command_formatter: Callable[[str], str]):
+        self.command_fmt = command_formatter
+
+    def get_hint_of_today(self) -> str:
+        if self.current_hint and self.current_date == datetime.date.today():
+            return self.current_hint
+
+        if os.path.isfile(self.FILE):
+            with open(self.FILE, "r") as f:
+                reader = csv.DictReader(f, delimiter=";")
+                today = datetime.date.today()
+                for row in reader:
+                    if row['date'] == today.isoformat():
+                        self.current_hint = self.format_commands(row['message'])
+                        self.current_date = today
+                        return self.current_hint
+
+    def format_commands(self, message: str) -> str:
+        return self.command_regex.sub(lambda x: self.command_fmt(x.group(1)), message)
+
+
 class Bot(object):
     _data: CovidData
     _manager: UserManager
@@ -24,6 +56,7 @@ class Bot(object):
     command_format: str
     location_feature: bool = False
     query_regex = re.compile("^[\w,()\-. ]*$")
+    user_hints: UserHintService
 
     def __init__(self, covid_data: CovidData, subscription_manager: UserManager, command_format="/{command}",
                  location_feature=False):
@@ -33,6 +66,7 @@ class Bot(object):
         self._location_service = LocationService('resources/germany_rs.geojson')
         self.command_format = command_format
         self.location_feature = location_feature
+        self.user_hints = UserHintService(self.format_command)
 
     def is_user_activated(self, user_identification: Union[int, str]) -> bool:
         user_id = self._manager.get_user_id(user_identification)
@@ -385,6 +419,10 @@ class Bot(object):
                        f"({format_float(country.icu_data.percent_covid())}%) liegen Patienten" \
                        f" mit COVID-19, davon müssen {country.icu_data.covid_ventilated} beatmet werden. " \
                        f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
+
+        user_hint = self.user_hints.get_hint_of_today()
+        if user_hint:
+            message += f"{user_hint}\n\n"
 
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
