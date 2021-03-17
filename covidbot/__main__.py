@@ -242,7 +242,7 @@ def main():
     parser.add_argument('--verbose', '-v', action='count', default=0)
     parser.add_argument('--config', '-c', action='store', default='config.ini', metavar='CONFIG_FILE')
 
-    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'shell', 'twitter', 'mastodon'],
+    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'interactive', 'twitter', 'mastodon'],
                         nargs=1,
                         help='Platform that should be used', type=str, action='store')
     parser.add_argument('--check-updates', help='Run platform independent jobs, such as checking for new data',

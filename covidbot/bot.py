@@ -14,7 +14,7 @@ class UserDistrictActions(Enum):
     SUBSCRIBE = 0
     UNSUBSCRIBE = 1
     REPORT = 2
-
+    RULES = 3
 
 class Bot(object):
     _data: CovidData
@@ -129,12 +129,37 @@ class Bot(object):
             else:
                 actions.append(("Starte Abo", UserDistrictActions.SUBSCRIBE))
                 verb = "starten"
-
-            message = "Möchtest du dein Abo von {name} {verb} oder die aktuellen Daten erhalten?" \
+            actions.append(("Regeln anzeigen", UserDistrictActions.RULES))
+            message = "Möchtest du dein Abo von {name} {verb}, die aktuellen Daten oder geltende Regeln erhalten?" \
                 .format(name=district.name, verb=verb)
         else:
             message = "Möchtest du die aktuellen Daten von {name} erhalten?".format(name=district.name)
         return message, actions
+
+    def get_rules(self, district_id: int) -> str:
+        current_data = self._data.get_district_data(district_id)
+        rules, district_name = None, None
+        if current_data.rules:
+            rules = current_data.rules
+            district_name = current_data.name
+
+        if not rules and current_data.parent:
+            parent = self._data.get_district_data(current_data.parent)
+            if parent.rules:
+                rules = parent.rules
+                district_name = parent.name
+
+        if rules:
+            message = f"<b>👆 Regeln für {district_name}</b>\n" \
+                      f"{rules.text}\n\nDetails zu den aktuellen Regeln und Öffnungen findest du " \
+                      f"<a href='{rules.link}'>hier</a>.\n\n"
+            message += (f'Regeln vom {rules.date.strftime("%d.%m.%Y")}. Daten vom '
+                        f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweisers</a>, sind lizenziert unter'
+                        f' CC BY 4.0.')
+        else:
+            message = f"Regeln sind für {current_data.name} leider nicht verfügbar. Momentan können Regeln nur für " \
+                      f"Bundesländer abgerufen werden."
+        return message
 
     def get_vaccination_overview(self, district_id: int) -> str:
         parent_data = self._data.get_district_data(district_id)

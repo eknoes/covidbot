@@ -47,6 +47,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("info", self.infoHandler, False))
         self.handler_list.append(Handler("impfungen", self.vaccHandler, False))
         self.handler_list.append(Handler("abo", self.subscribeHandler, True))
+        self.handler_list.append(Handler("regeln", self.rulesHandler, True))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler, True))
         self.handler_list.append(Handler("lösche", self.unsubscribeHandler, True))
         self.handler_list.append(Handler("datenschutz", self.privacyHandler, False))
@@ -67,7 +68,7 @@ class SimpleTextInterface(object):
         if user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
-                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche"]:
+                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln"]:
                     user_input += " " + str(state[1])
                 del self.chat_states[user_id]
             elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
@@ -165,6 +166,15 @@ class SimpleTextInterface(object):
             return [BotResponse(self.bot.subscribe(user_id, location)), self.currentDataHandler(user_input, user_id)]
         return BotResponse(location)
 
+    def rulesHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
+        BOT_COMMAND_COUNT.labels('rules').inc()
+        if not user_input:
+            return BotResponse("Du musst einen Ort angeben.")
+        location = self.parseLocationInput(user_input)
+        if type(location) == int:
+            return [BotResponse(self.bot.get_rules(location))]
+        return BotResponse(location)
+
     def unsubscribeHandler(self, user_input: str, user_id: str) -> BotResponse:
         BOT_COMMAND_COUNT.labels('unsubscribe').inc()
         location = self.parseLocationInput(user_input)
@@ -200,6 +210,8 @@ class SimpleTextInterface(object):
                     message += '• Schreibe "Abo", um den Ort zu abonnieren\n'
                 elif action[1] == UserDistrictActions.UNSUBSCRIBE:
                     message += '• Schreibe "Beende", dein Abo zu beenden\n'
+                elif action[1] == UserDistrictActions.RULES:
+                    message += '• Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten\n'
             return BotResponse(message)
         return BotResponse(location)
 

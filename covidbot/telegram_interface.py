@@ -29,6 +29,7 @@ daten - Aktuelle Zahlen für den Ort
 abo - Abonniere Ort
 beende - Widerrufe Abonnement
 bericht - Aktueller Bericht
+regeln - Regeln für Ort
 impfungen - Zeige Impfbericht
 statistik - Nutzungsstatistik
 datenschutz - Datenschutzerklärung
@@ -42,6 +43,7 @@ class TelegramCallbacks(Enum):
     DELETE_ME = "delete_me"
     CHOOSE_ACTION = "choose_action"
     REPORT = "report"
+    RULES = "rules"
     CONFIRM_FEEDBACK = "feedback"
     DISCARD = "discard"
 
@@ -84,7 +86,7 @@ class TelegramInterface(MessengerInterface):
         self.updater.dispatcher.add_handler(CommandHandler('start', self.startHandler))
         self.updater.dispatcher.add_handler(CommandHandler('bericht', self.reportHandler))
         self.updater.dispatcher.add_handler(CommandHandler('daten', self.currentHandler))
-        self.updater.dispatcher.add_handler(CommandHandler('ort', self.currentHandler))
+        self.updater.dispatcher.add_handler(CommandHandler('regeln', self.rulesHandler))
         self.updater.dispatcher.add_handler(CommandHandler('impfungen', self.vaccHandler))
         self.updater.dispatcher.add_handler(CommandHandler('abo', self.subscribeHandler))
         self.updater.dispatcher.add_handler(CommandHandler('beende', self.unsubscribeHandler))
@@ -202,6 +204,21 @@ class TelegramInterface(MessengerInterface):
                                                  self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
 
     @BOT_RESPONSE_TIME.time()
+    def rulesHandler(self, update: Update, context: CallbackContext) -> None:
+        BOT_COMMAND_COUNT.labels('rules').inc()
+        query = " ".join(context.args)
+        msg, districts = self._bot.find_district_id(query)
+        if not districts:
+            self.answer_update(update, msg)
+        elif len(districts) > 1:
+            markup = self.gen_multi_district_answer(districts, TelegramCallbacks.RULES)
+            self.answer_update(update, msg, reply_markup=markup)
+        else:
+            district_id = districts[0][0]
+            message = self._bot.get_rules(district_id)
+            self.answer_update(update, message, disable_web_page_preview=True)
+
+    @BOT_RESPONSE_TIME.time()
     def deleteHandler(self, update: Update, context: CallbackContext) -> None:
         BOT_COMMAND_COUNT.labels('delete_me').inc()
         markup = InlineKeyboardMarkup([[InlineKeyboardButton("Ja, alle meine Daten löschen",
@@ -299,13 +316,18 @@ class TelegramInterface(MessengerInterface):
                                [self._viz.infections_graph(district_id),
                                 self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
 
-
         # Unsubscribe Callback
         elif query.data.startswith(TelegramCallbacks.UNSUBSCRIBE.name):
             BOT_COMMAND_COUNT.labels('unsubscribe').inc()
             district_id = int(query.data[len(TelegramCallbacks.UNSUBSCRIBE.name):])
             query.edit_message_text(self._bot.unsubscribe(update.effective_chat.id, district_id),
                                     parse_mode=telegram.ParseMode.HTML)
+
+        # Rules Callback
+        elif query.data.startswith(TelegramCallbacks.RULES.name):
+            BOT_COMMAND_COUNT.labels('rules').inc()
+            district_id = int(query.data[len(TelegramCallbacks.RULES.name):])
+            query.edit_message_text(self._bot.get_rules(district_id), parse_mode=telegram.ParseMode.HTML)
 
         # Choose Action Callback
         elif query.data.startswith(TelegramCallbacks.CHOOSE_ACTION.name):
@@ -369,7 +391,8 @@ class TelegramInterface(MessengerInterface):
             # See #82: https://github.com/eknoes/covid-bot/issues/82
             cmd_with_args = update.message.text.split()
             if cmd_with_args[0].lower() in ["hilfe", "info", "loeschmich", "datenschutz", "start", "bericht", "ort",
-                                            "abo", "beende", "statistik", "sprache", "debug", "impfungen", "daten"]:
+                                            "abo", "beende", "statistik", "sprache", "debug", "impfungen", "daten",
+                                            "regeln"]:
                 update.message.text = f"/{update.message.text}"
                 update.message.entities = [
                     MessageEntity(MessageEntity.BOT_COMMAND, offset=0, length=len(cmd_with_args[0]) + 1)]
@@ -418,7 +441,11 @@ class TelegramInterface(MessengerInterface):
                 callback = TelegramCallbacks.SUBSCRIBE.name + str(district_id)
             elif action == UserDistrictActions.UNSUBSCRIBE:
                 callback = TelegramCallbacks.UNSUBSCRIBE.name + str(district_id)
-            buttons.append([InlineKeyboardButton(action_name, callback_data=callback)])
+            elif action == UserDistrictActions.RULES:
+                callback = TelegramCallbacks.RULES.name + str(district_id)
+
+            if callback:
+                buttons.append([InlineKeyboardButton(action_name, callback_data=callback)])
 
         markup = InlineKeyboardMarkup(buttons)
         return message, markup
