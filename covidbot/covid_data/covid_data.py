@@ -72,16 +72,16 @@ class CovidData(object):
             # Check if vaccination data is available
             vaccination_data = None
             cursor.execute('SELECT vaccinated_full, vaccinated_partial, rate_full, rate_partial, '
-                           'DATE(updated) as updated '
-                           'FROM covid_vaccinations WHERE district_id=%s and DATE(updated)<=%s '
-                           'ORDER BY updated DESC LIMIT 1',
+                           'date '
+                           'FROM covid_vaccinations WHERE district_id=%s and date<=%s '
+                           'ORDER BY date DESC LIMIT 1',
                            [district_id, record['date']])
             vaccination_record = cursor.fetchone()
             if vaccination_record:
                 vaccination_data = VaccinationData(vaccination_record['vaccinated_full'],
                                                    vaccination_record['vaccinated_partial'],
                                                    vaccination_record['rate_full'], vaccination_record['rate_partial'],
-                                                   vaccination_record['updated'])
+                                                   vaccination_record['date'])
 
 
             result = DistrictData(name=record['county_name'], incidence=record['incidence'],
@@ -224,7 +224,7 @@ class CovidDatabaseCreator:
 
             # Vaccination Data
             cursor.execute('CREATE TABLE IF NOT EXISTS covid_vaccinations (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
-                           'district_id INTEGER, updated DATE, vaccinated_partial INTEGER, '
+                           'district_id INTEGER, date DATE, vaccinated_partial INTEGER, '
                            'vaccinated_full INTEGER, rate_full FLOAT, rate_partial FLOAT, last_update DATETIME DEFAULT NOW(),'
                            'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, updated))')
 

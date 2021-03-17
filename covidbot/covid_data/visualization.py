@@ -186,7 +186,7 @@ class Visualization:
     def vaccination_graph(self, district_id: int) -> str:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute(
-                "SELECT vaccinated_partial, vaccinated_full, date(updated) as updated FROM covid_vaccinations WHERE district_id=%s ORDER BY updated",
+                "SELECT vaccinated_partial, vaccinated_full, date FROM covid_vaccinations WHERE district_id=%s ORDER BY date",
                 [district_id])
 
             y_data_full = []
@@ -208,7 +208,7 @@ class Visualization:
                 y_data_partial.append(row['vaccinated_partial'])
                 y_data_full.append(row['vaccinated_full'])
 
-                x_data.append(row['updated'])
+                x_data.append(row['date'])
 
             filepath = os.path.abspath(
                 os.path.join(self.graphics_dir, f"vaccinations-{x_data[-1].isoformat()}-{district_id}.jpg"))
