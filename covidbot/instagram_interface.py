@@ -22,7 +22,7 @@ class InstagramInterface(SingleCommandInterface):
     def __init__(self, account_id: str, access_token: str, web_dir: str, url: str, user_manager: UserManager,
                  covid_data: CovidData,
                  visualization: Visualization, no_write: bool = False):
-        super().__init__(user_manager, covid_data, visualization, no_write)
+        super().__init__(user_manager, covid_data, visualization, 0, no_write)
         self.account_id = account_id
         self.access_token = access_token
         self.web_dir = web_dir
