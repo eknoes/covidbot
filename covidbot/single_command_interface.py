@@ -196,13 +196,16 @@ class SingleCommandInterface(MessengerInterface, ABC):
             argument = " ".join(arguments[:i]).strip()
             districts_query = self.data.search_district_by_name(argument)
             if districts_query:
-                district_id = districts_query[0][0]
-
                 if len(districts_query) > 1:
                     for district in districts_query:
                         if district[1].find(argument) == 0:
                             district_id = district[0]
                             break
+                else:
+                    district_id = districts_query[0][0]
+
+                if district_id:
+                    break
 
         # Check OSM if nothing was found
         if not district_id:

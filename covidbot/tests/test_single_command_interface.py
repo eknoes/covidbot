@@ -34,6 +34,7 @@ class TestSingleCommandInterface(TestCase):
         self.assertEqual(5515, self.interface.find_district("Münster Westfalen"),
                          "Result for Münster Westfalen should be Münster")
         self.assertEqual(6435, self.interface.find_district("Hanau"), "Result for Hanau should be MKK")
+        self.assertEqual(9772, self.interface.find_district("Landkreis Augsburg"), "Result for LK Augsburg should be correct")
         self.assertEqual(8221, self.interface.find_district("Betreutes Trinken"),
                          "Result for Betreutes Trinken should be Heidelberg")
 
