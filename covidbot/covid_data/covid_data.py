@@ -69,28 +69,31 @@ class CovidData(object):
             if not record:
                 return None
 
-            # Check if vaccination data is available
-            vaccination_data = None
-            cursor.execute('SELECT vaccinated_full, vaccinated_partial, rate_full, rate_partial, '
-                           'date '
-                           'FROM covid_vaccinations WHERE district_id=%s and date<=%s '
-                           'ORDER BY date DESC LIMIT 1',
-                           [district_id, record['date']])
-            vaccination_record = cursor.fetchone()
-            if vaccination_record:
-                vaccination_data = VaccinationData(vaccination_record['vaccinated_full'],
-                                                   vaccination_record['vaccinated_partial'],
-                                                   vaccination_record['rate_full'], vaccination_record['rate_partial'],
-                                                   vaccination_record['date'])
-
-
-
             result = DistrictData(name=record['county_name'], incidence=record['incidence'],
                                   parent=record['parent'], type=record['type'],
                                   total_cases=record['total_cases'], total_deaths=record['total_deaths'],
                                   new_cases=record['new_cases'], new_deaths=record['new_deaths'],
-                                  date=record['date'], vaccinations=vaccination_data)
+                                  date=record['date'])
 
+            # Check if vaccination data is available
+            vaccination_data = None
+            cursor.execute('SELECT MAX(date) as last_update FROM covid_vaccinations WHERE district_id=%s', [district_id])
+            vacc_date = cursor.fetchone()
+            if vacc_date:
+                last_update = vacc_date['last_update']
+                cursor.execute('SELECT vaccinated_full, vaccinated_partial, rate_full, rate_partial, '
+                               'date '
+                               'FROM covid_vaccinations WHERE district_id=%s and date<=%s '
+                               'ORDER BY date DESC LIMIT 1',
+                               [district_id, last_update])
+                vaccination_record = cursor.fetchone()
+                if vaccination_record:
+                    vaccination_data = VaccinationData(vaccination_record['vaccinated_full'],
+                                                       vaccination_record['vaccinated_partial'],
+                                                       vaccination_record['rate_full'], vaccination_record['rate_partial'],
+                                                       vaccination_record['date'])
+
+                    result.vaccinations = vaccination_data
             # Check if ICU data is available
             cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds '
                            'WHERE district_id=%s ORDER BY date DESC LIMIT 1', [district_id])
