@@ -51,7 +51,7 @@ class MastodonInterface(SingleCommandInterface):
         try:
             with API_RESPONSE_TIME.labels(platform='mastodon').time():
                 if not reply_obj:
-                    response = self.mastodon.status_post(message, media_ids=media_ids, language="deu")
+                    response = self.mastodon.status_post(message, media_ids=media_ids, language="deu", visibility="unlisted")
                 else:
                     response = self.mastodon.status_reply(reply_obj, message, media_ids=media_ids, language="deu",)
             self.update_metrics()
