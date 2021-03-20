@@ -186,10 +186,10 @@ class Bot(object):
 
         if rules:
             message = f"<b>👆 Regeln für {district_name}</b>\n" \
-                      f"{rules.text}\n\nDetails zu den aktuellen Regeln und Öffnungen findest du " \
+                      f"{rules.text}\n\nDetails zu den aktuellen Regeln sowie Links zu den FAQs und den Verordnungen deines Bundeslandes findest du " \
                       f"<a href='{rules.link}'>hier</a>.\n\n"
             message += (f'Regeln vom {rules.date.strftime("%d.%m.%Y")}. Daten vom '
-                        f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweisers</a>, sind lizenziert unter'
+                        f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweisers</a> des Kompetenzzentrum Tourismus des Bundes, sind lizenziert unter'
                         f' CC BY 4.0.')
         else:
             message = f"Regeln sind für {current_data.name} leider nicht verfügbar. Momentan können Regeln nur für " \
