@@ -123,7 +123,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             else:
                 current_part.strip('\n')
                 split_message.append(current_part)
-                current_part = ""
+                current_part = part
         if current_part:
             split_message.append(current_part.strip('\n'))
         return split_message

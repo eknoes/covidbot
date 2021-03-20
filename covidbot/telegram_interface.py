@@ -20,6 +20,7 @@ from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_COMMAND_COUNT, RECV_MESSAGE_COUNT, \
     BOT_RESPONSE_TIME
+from covidbot.utils import str_bytelen
 
 '''
 Telegram Aktionen:
@@ -487,12 +488,32 @@ class TelegramInterface(MessengerInterface):
         if not message:
             message = self._bot.get_report(userid)
 
-        graph = self._viz.infections_graph(0)
-        sent_msg = self.send_telegram_message(userid, message, [graph], disable_web_page_preview=True)
+        graph = [self._viz.infections_graph(0)]
+
+        sent_msg = True
+        for m in self.split_messages(message):
+            sent_msg = self.send_telegram_message(userid, m, graph, disable_web_page_preview=True)
+            graph = None
 
         if sent_msg:
             return True
         return False
+
+    @staticmethod
+    def split_messages(message: str) -> List[str]:
+        # Max len of 4096 bytes
+        current_part = ""
+        split_message = []
+        for part in message.split('\n'):
+            if str_bytelen(part) + str_bytelen(current_part) + str_bytelen('\n') < 4096:
+                current_part += part + '\n'
+            else:
+                current_part.strip('\n')
+                split_message.append(current_part)
+                current_part = part
+        if current_part:
+            split_message.append(current_part.strip('\n'))
+        return split_message
 
     @BOT_RESPONSE_TIME.time()
     def statHandler(self, update: Update, context: CallbackContext) -> None:
