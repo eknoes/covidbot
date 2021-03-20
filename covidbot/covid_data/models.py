@@ -24,7 +24,7 @@ class VaccinationData:
     full_rate: float
     partial_rate: float
     date: date
-    avg_speed: Optional[float] = None
+    avg_speed: Optional[int] = None
     avg_days_to_finish: Optional[int] = None
 
 

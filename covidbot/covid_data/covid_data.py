@@ -1,4 +1,5 @@
 import logging
+import math
 from datetime import date, timedelta
 from typing import Tuple, List, Optional
 
@@ -92,6 +93,13 @@ class CovidData(object):
                                                        vaccination_record['vaccinated_partial'],
                                                        vaccination_record['rate_full'], vaccination_record['rate_partial'],
                                                        vaccination_record['date'])
+
+                    cursor.execute('SELECT (MAX(vaccinated_full) - MIN(vaccinated_full) + MAX(vaccinated_partial) - MIN(vaccinated_partial)) / 7 as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) GROUP BY district_id', [district_id, last_update])
+                    record = cursor.fetchone()
+                    if record:
+                        vaccination_data.avg_speed = int(record['avg_7day'])
+                        population_to_be_vaccinated = 2*record['population'] - (vaccination_data.vaccinated_full + vaccination_data.vaccinated_partial)
+                        vaccination_data.avg_days_to_finish = math.ceil(population_to_be_vaccinated / vaccination_data.avg_speed)
 
                     result.vaccinations = vaccination_data
             # Check if ICU data is available

@@ -204,14 +204,18 @@ class Bot(object):
         children_data = self._data.get_children_data(district_id)
         message = f"<b>💉 Impfdaten ({parent_data.name})</b>\n"
         message += "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
-                   " - Stand {vacc_date} - vollständig geimpft.\n\n" \
+                   " - Stand {vacc_date} - vollständig geimpft. " \
+                   "Bei dem Impftempo der letzten 7 Tage werden {vacc_speed} Dosen pro Tag verabreicht und in " \
+                   "{vacc_days_to_finish} Tagen wäre die gesamte Bevölkerung vollständig geschützt.\n\n" \
                    "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
                    "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
             .format(rate_partial=format_float(parent_data.vaccinations.partial_rate * 100),
                     rate_full=format_float(parent_data.vaccinations.full_rate * 100),
                     vacc_partial=format_int(parent_data.vaccinations.vaccinated_partial),
                     vacc_full=format_int(parent_data.vaccinations.vaccinated_full),
-                    vacc_date=parent_data.vaccinations.date.strftime("%d.%m.%Y"))
+                    vacc_date=parent_data.vaccinations.date.strftime("%d.%m.%Y"),
+                    vacc_speed=format_int(parent_data.vaccinations.avg_speed),
+                    vacc_days_to_finish=format_int(parent_data.vaccinations.avg_days_to_finish))
 
         earliest_data = reduce(
             lambda x, y: x if x.vaccinations.date < y.vaccinations.date else y,
