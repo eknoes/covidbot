@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 import semaphore
 from semaphore import ChatContext
 
-from covidbot.bot import Bot
+from covidbot.bot import Bot, UserHintService
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
@@ -141,6 +141,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         """
         if not users:
             users = map(lambda x: x.platform_id, self.bot.get_all_user())
+
+        message = UserHintService.format_commands(message, self.bot.format_command)
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:

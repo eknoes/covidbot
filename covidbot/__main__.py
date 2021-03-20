@@ -73,7 +73,7 @@ class MessengerBotSetup:
             # users_activated = False
 
         if self.name == "telegram":
-            command_format = "/{command}"
+            command_format = "<code>/{command}</code>"
         else:
             command_format = '"{command}"'
 

@@ -25,7 +25,7 @@ class UserHintService:
     current_hint: Optional[str] = None
     current_date: datetime.date = datetime.date.today()
     command_fmt: Callable[[str], str]
-    command_regex = re.compile("{(\w*)}")
+    command_regex = re.compile("{([\w\s]*)}")
 
     def __init__(self, command_formatter: Callable[[str], str]):
         self.command_fmt = command_formatter
@@ -40,12 +40,13 @@ class UserHintService:
                 today = datetime.date.today()
                 for row in reader:
                     if row['date'] == today.isoformat():
-                        self.current_hint = self.format_commands(row['message'])
+                        self.current_hint = self.format_commands(row['message'], self.command_fmt)
                         self.current_date = today
                         return self.current_hint
 
-    def format_commands(self, message: str) -> str:
-        return self.command_regex.sub(lambda x: self.command_fmt(x.group(1)), message)
+    @staticmethod
+    def format_commands(message: str, formatter: Callable[[str], str]) -> str:
+        return UserHintService.command_regex.sub(lambda x: formatter(x.group(1)), message)
 
 
 class Bot(object):
@@ -58,7 +59,7 @@ class Bot(object):
     query_regex = re.compile("^[\w,()\-. ]*$")
     user_hints: UserHintService
 
-    def __init__(self, covid_data: CovidData, subscription_manager: UserManager, command_format="/{command}",
+    def __init__(self, covid_data: CovidData, subscription_manager: UserManager, command_format="<code>/{command}</code>",
                  location_feature=False):
         self.log = logging.getLogger(__name__)
         self._data = covid_data

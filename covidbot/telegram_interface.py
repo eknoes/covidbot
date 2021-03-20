@@ -15,7 +15,7 @@ from telegram.error import BadRequest, TelegramError, Unauthorized
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP
 
-from covidbot.bot import Bot, UserDistrictActions
+from covidbot.bot import Bot, UserDistrictActions, UserHintService
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_COMMAND_COUNT, RECV_MESSAGE_COUNT, \
@@ -250,7 +250,6 @@ class TelegramInterface(MessengerInterface):
             self.answer_update(update, self._bot.get_district_report(district_id),
                                [self._viz.infections_graph(district_id),
                                 self._viz.incidence_graph(district_id)], disable_web_page_preview=True)
-
 
     @BOT_RESPONSE_TIME.time()
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
@@ -529,6 +528,8 @@ class TelegramInterface(MessengerInterface):
     async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
             users = map(lambda x: x.platform_id, self._bot.get_all_user())
+
+        message = UserHintService.format_commands(message, self._bot.format_command)
         sliding_flood_window = []
         for uid in users:
             try:

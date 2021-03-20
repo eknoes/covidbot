@@ -9,7 +9,7 @@ import threema.gateway as threema
 from aiohttp import web
 from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage
 
-from covidbot.bot import Bot
+from covidbot.bot import Bot, UserHintService
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT, BOT_RESPONSE_TIME
@@ -131,6 +131,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
     async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
             users = map(lambda x: x.platform_id, self.bot.get_all_user())
+
+        message = UserHintService.format_commands(message, self.bot.format_command)
 
         for user in users:
             await TextMessage(self.connection, text=adapt_text(message, True), to_id=user).send()
