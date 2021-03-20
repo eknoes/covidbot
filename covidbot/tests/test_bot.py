@@ -162,14 +162,13 @@ class TestBot(TestCase):
                               "A user with subscription should get UNSUBSCRIBE, REPORT and RULES action")
 
     def test_user_hints(self):
-        hints = UserHintService(lambda x: f"/{x}")
+        formatter = lambda x: f"/{x}"
 
         expected = "Lorem /ipsum sim /dolor"
-        actual = hints.format_commands("Lorem {ipsum} sim {dolor}")
+        actual = UserHintService.format_commands("Lorem {ipsum} sim {dolor}", formatter)
         self.assertEqual(expected, actual, "Commands should be formatted correctly in User Hints")
 
-        hints = UserHintService(lambda x: f"'{x}'")
-
+        formatter = lambda x: f"'{x}'"
         expected = "Lorem 'ipsum' sim 'dolor'"
-        actual = hints.format_commands("Lorem {ipsum} sim {dolor}")
+        actual = UserHintService.format_commands("Lorem {ipsum} sim {dolor}", formatter)
         self.assertEqual(expected, actual, "Commands should be formatted correctly in User Hints")
