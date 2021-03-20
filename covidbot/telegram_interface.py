@@ -41,6 +41,7 @@ loeschmich - Lösche alle Daten
 class TelegramCallbacks(Enum):
     SUBSCRIBE = "subscribe"
     UNSUBSCRIBE = "unsubscribe"
+    VACCINATIONS = "vaccinations"
     DELETE_ME = "delete_me"
     CHOOSE_ACTION = "choose_action"
     REPORT = "report"
@@ -329,6 +330,15 @@ class TelegramInterface(MessengerInterface):
             district_id = int(query.data[len(TelegramCallbacks.RULES.name):])
             query.edit_message_text(self._bot.get_rules(district_id), parse_mode=telegram.ParseMode.HTML)
 
+        # Vaccination Callback
+        elif query.data.startswith(TelegramCallbacks.VACCINATIONS.name):
+            BOT_COMMAND_COUNT.labels('vaccinations').inc()
+            district_id = int(query.data[len(TelegramCallbacks.VACCINATIONS.name):])
+            query.delete_message()
+            self.deleted_callbacks.append(query.message.message_id)
+            self.answer_update(update, self._bot.get_vaccination_overview(district_id),
+                               [self._viz.vaccination_graph(district_id)], disable_web_page_preview=True)
+
         # Choose Action Callback
         elif query.data.startswith(TelegramCallbacks.CHOOSE_ACTION.name):
             BOT_COMMAND_COUNT.labels('choose_action').inc()
@@ -522,8 +532,20 @@ class TelegramInterface(MessengerInterface):
     @BOT_RESPONSE_TIME.time()
     def vaccHandler(self, update: Update, context: CallbackContext) -> None:
         BOT_COMMAND_COUNT.labels('vaccinations').inc()
-        self.answer_update(update, self._bot.get_vaccination_overview(0), [self._viz.vaccination_graph(0)],
-                           disable_web_page_preview=True)
+
+        query = " ".join(context.args)
+        district_id = 0
+        if query:
+            msg, districts = self._bot.find_district_id(query)
+            if districts and len(districts) > 1:
+                markup = self.gen_multi_district_answer(districts, TelegramCallbacks.VACCINATIONS)
+                self.answer_update(update, msg, reply_markup=markup)
+                return
+            elif districts and len(districts) == 1:
+                district_id = districts[0][0]
+
+        self.answer_update(update, self._bot.get_vaccination_overview(district_id),
+                           [self._viz.vaccination_graph(district_id)], disable_web_page_preview=True)
 
     async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
