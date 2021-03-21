@@ -185,9 +185,9 @@ class Bot(object):
                 district_name = parent.name
 
         if rules:
-            message = f"<b>👆 Regeln für {district_name}</b>\n" \
+            message = f"<b>👆 Regeln für {district_name}</b>\n\n" \
                       f"<i>Wir beziehen den folgenden Überblick vom Kompetenzzentrum Tourismus des Bundes. Für die Richtigkeit der Angaben können wir " \
-                      f"keine Gewähr übernehmen. Für weitere Informationen siehe unten.</i>\n" \
+                      f"keine Gewähr übernehmen. Für weitere Informationen siehe unten.</i>\n\n" \
                       f"{rules.text}\n\nDetails zu den aktuellen Regeln sowie Links zu den FAQs und den Verordnungen deines Bundeslandes findest du " \
                       f"<a href='{rules.link}'>hier</a>.\n\n"
             message += (f'Regeln vom {rules.date.strftime("%d.%m.%Y")}. Daten vom '
