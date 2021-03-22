@@ -30,6 +30,7 @@ class TestSingleCommandInterface(TestCase):
     def test_find_district(self):
         self.assertEqual(5113, self.interface.find_district("Essen"), "Result for Essen should be Essen")
         self.assertEqual(6, self.interface.find_district("Hessen"), "Result for Hessen should be Hessen")
+        self.assertEqual(8317, self.interface.find_district("Kehl Baden Württemberg"), "Result for Kehl should be Ortenaukreis")
         self.assertEqual(5515, self.interface.find_district("Münster"), "Result for Münster should be Münster")
         self.assertEqual(5515, self.interface.find_district("Münster Westfalen"),
                          "Result for Münster Westfalen should be Münster")
@@ -56,3 +57,4 @@ class TestSingleCommandInterface(TestCase):
         self.assertIsNone(self.interface.find_district("Super! Funktioniert klasse"))
         self.assertIsNone(self.interface.find_district("Das ist echt großartig, was ihr geleistet habt."))
         self.assertIsNone(self.interface.find_district("Klar..."))
+        self.assertIsNone(self.interface.find_district("Bitte korrigiert bei den Regeln für Berlin die Angabe zu den Kindern."))
