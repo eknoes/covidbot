@@ -417,7 +417,7 @@ class ICUGermanyUpdater(Updater):
 
             with self.connection.cursor() as cursor:
                 for row in results:
-                    cursor.execute("INSERT INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
+                    cursor.execute("INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
                                    " covid_ventilated, updated) VALUES (%s, %s, %s, %s, %s, %s, %s)", row)
 
                 # Calculate aggregated values for states
