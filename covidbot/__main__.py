@@ -9,7 +9,7 @@ from typing import List
 
 import prometheus_client
 from prometheus_client import Info
-from mysql.connector import connect, MySQLConnection
+from mysql.connector import connect, MySQLConnection, IntegrityError
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, Visualization
@@ -314,7 +314,7 @@ def main():
                         with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
                             asyncio.run(telegram.send_message(f"Got new data from {updater.__class__.__name__}",
                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
-                except ValueError as error:
+                except Exception as error:
                     # Data did not make it through plausibility check
                     logging.exception(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}",
                                       exc_info=error)
