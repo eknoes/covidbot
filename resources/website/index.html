@@ -33,8 +33,7 @@
                 <a href="https://t.me/CovidInzidenzBot">Telegram</a></button>
             <button onclick="window.location.href='https://threema.id/*COVINFO?text=Start'">
                 <a href="https://threema.id/*COVINFO?text=Start">Threema</a></button>
-            <button onclick="window.location.href='tel:+4915792453845'" ><a href="tel:+4915792453845">Signal (Beta)*</a></button>
-            <!--<button class="disabled">Signal (Beta)*</button>-->
+            <button onclick="window.location.href='tel:+4915792453845'" ><a href="tel:+4915792453845">Signal</a></button>
         </p>
         <p>
             <strong>iOS Nutzer:innen</strong> können den Signal-Button gedrückt halten, damit ein Menü erscheint, um den Bot zu den eigenen Kontakten hinzuzufügen.
@@ -42,19 +41,18 @@
        <!-- <h3>Signal Status</h3>
         <p><strong>&#9888;&#65039; Derzeit haben wir auf Signal mit technischen Problemen zu kämpfen (<a href="#signal-probleme">Status Verlauf</a>) &#9888;&#65039;</strong><br/>
         Wir sind aber zuversichtlich, dass wir dich morgen wieder mit einem aktuellen Bericht versorgen können!</p>-->
-        <p><strong>*Signal (Beta):</strong> Für Signal befindet sich der Covidbot noch in einer Testphase, insbesondere was den Versand der täglichen Abonnements angeht. Weitere Informationen hierzu findest du
+        <!--<p><strong>*Signal (Beta):</strong> Für Signal befindet sich der Covidbot noch in einer Testphase, insbesondere was den Versand der täglichen Abonnements angeht. Weitere Informationen hierzu findest du
             <a href="#faq_signal">in unserem FAQ</a>. Mit dem Befehl "Bericht" kannst du jederzeit deinen personalisierten Bericht abrufen - unabh&auml;ngig davon, ob er am Vormittag automatisiert zugestellt wurde.</p>
-        <br>
+        <br>-->
         <h3>Ohne personalisierter Abofunktion</h3>
-        <p>Unser Covidbot ist auch auf Twitter, Mastodon und Instagram vertreten, dort gibt es die neuesten bundesweiten Zahlen direkt in die Timeline.</p>
+        <p>Unser Covidbot ist auch auf Twitter, Mastodon und Instagram vertreten, dort gibt es die neuesten bundesweiten Zahlen direkt in deine Timeline. Informationen zu den eigenen Orten gibt es auf Twitter und Mastodon allerdings nur als Antwort auf ein Mention mit der Stadt, die dich interessiert (bspw. "@D64_Covidbot Hannover). Auf Instagram bieten wir aufgrund der eingeschränkten Programmierschnittstelle leider keine personalisierten Funktionen an.</p>
         <p class="buttons">
-                        <button onclick="window.location.href='https://chaos.social/@D64_Covidbot'">
+            <button onclick="window.location.href='https://chaos.social/@D64_Covidbot'">
                 <a href="https://chaos.social/@D64_Covidbot">Mastodon</a></button>
             <button onclick="window.location.href='https://twitter.com/D64_Covidbot'">
                 <a href="https://twitter.com/D64_Covidbot">Twitter</a></button>
             <button onclick="window.location.href='https://www.instagram.com/d64_covidbot/'">
                 <a href="https://www.instagram.com/d64_covidbot/">Instagram</a></button>
-
         </p>
         <h2 id="faq">Fragen und Antworten (FAQ)</h2>
         <h3 id="faq_allgemein">Allgemein</h3>
@@ -85,6 +83,9 @@
             <li>Daten über die Intensivbettenbelegung,
                 <a href="https://www.intensivregister.de/#/aktuelle-lage/reports" target="_blank">DIVI-Intensivregister</a><br>
             </li>
+            <li>Überblick über die aktuell geltenden Regeln,
+                <a href="https://tourismus-wegweiser.de/" target="_blank">Tourismus-Wegweiser des Kompetenzzentrum Tourismus des Bundes </a><br>
+            </li>
         </ul>
         <p>Projekte wie dieser Bot sind nur möglich, wenn öffentliche
             Stellen Ihre Daten frei - als Open Data - zur Verfügung stellen. Wir sind der Meinung, dass alle Daten, die öffentlichen Institutionen zur Verfügung stehen, grundsätzlich frei für alle abrufbar und verwendbar sein sollten.</p>
@@ -102,21 +103,22 @@
             </em>Unseren Daten sollten aber stets mit denen
             <a href="https://www.tagesschau.de/inland/coronavirus-karte-deutschland-101.html" target="_blank">der Tagesschau</a> und des
             <a href="https://corona.rki.de/" target="_blank">Covid 19-Dashboards des RKI</a> übereinstimmen.</p>
-        <h4 id="faq-massnahmen">Könnte der Bericht zu einem Ort nicht auch eine Übersicht der aktuellen Corona-Maßnahmen der Landesregierung bzw. der regionalen Behörde beinhalten?</h4>
-        <p>Das würden grundsätzlich sehr gerne anbieten! Leider werden diese Informationen von den Behörden nicht in maschinenlesbarer Form zur Verfügung gestellt. Wir sind derzeit am Überlegen, wie wir sie mit vertretbaren Aufwand einbauen können. Wenn du eine Idee hast,
-            <a href="#kontakt">schreib uns gerne</a>!</p>
+        <h4 id="faq-massnahmen">Ich habe einen Fehler in den aktuell geltenden Regeln für meinen Ort gefunden!</h4>
+        <p>Wir beziehen einen die aktuell geltenden Kontaktbeschränkungen automatisch vom <a href="https://tourismus-wegweiser.de/" target="_blank">Tourismus-Wegweiser des Kompetenzzentrum Tourismus des Bundes </a>. Wir werten dort das Feld "Kontaktbeschränkungen" des jeweiligen Bundeslandes aus. Bitte mache selbst das Team des Tourismus-Wegweisers <a href="mailto:kontakt@kompetenzzentrum-tourismus.de?cc=erik.tuchtfeld@d-64.org&subject=Fehler%20in%20der%20aktuellen%20Regelungen&body=Liebes%20Team%20des%20Kompetenzzentrum%20Tourismus%2C%0A%0Azun%C3%A4chst%20einmal%20vielen%20Dank%20f%C3%BCr%20den%20Service%20des%20Tourismus-Wegweisers!%0A%0AMir%20ist%20folgender%20Fehler%20aufgefallen%3A%0A%0AXXX%0ABITTE%20BESCHREIBE%20HIER%20DEN%20FEHLER%20M%C3%96GLICHST%20KONKRET.%20VERGISS%20NICHT%2C%20DAS%20BETREFFENDE%20BUNDESLAND%20ANZUGEBEN.%0AXXX%0A%0AMit%20freundlichen%20Gr%C3%BC%C3%9Fen%0A%0A">über diesen Link auf den Fehler aufmerksam</a>, dann erhalten wir die Mail in Kopie und behalten einen Überblick über die Qualität unserer Datenquellen.</p>
         <h4 id="faq-vorschlag">Ich fände es gut, wenn der Bot noch xyz könnte!</h4>
         <p>Wir finden das wahrscheinlich auch gut, hatten diese Idee aber noch nicht.
             <a href="#kontakt">Schick sie uns gerne!</a><br></p>
         <h3 id="faq_signal">Signal</h3>
-        <h4>Was heißt "Beta"-Status?</h4>
+        <h4>Der Chat verbraucht mit den vielen Grafiken so viel Speicherplatz, kann ich dies begrenzen?</h4>
+        <p>Ja, Signal bietet eine Funktion an, mit der Nachrichten in einem Chat nach einem fest definierten Zeitraum (bis zu einer Woche) gelöscht werden. <a href="https://support.signal.org/hc/de/articles/360007320771">Hier ist beschrieben</a>, wie du diese Funktion aktivieren kannst.</p>
+        <!--<h4>Was heißt "Beta"-Status?</h4>
         <p>Leider bietet Signal, anders als Threema oder Telegram, keine offizielle Schnittstelle für Bots an. Deshalb mussten wir ein bisschen basteln. Das funktioniert recht gut, aber noch nicht immer, deshalb befindet sich unser Bot für Signal noch in einer Testphase. Hier kann es ab und zu mal etwas ruckeln.</p>
         <h4>Ich habe heute Morgen keinen Bericht erhalten, funktioniert alles?</h4>
         <p>Wenn du bis 09 Uhr morgens keinen Bericht erhalten hast, gibt es wahrscheinlich ein technisches Problem. Leider ist es gut möglich, dass der Bot den Bericht an einige verschickt hat, an andere aber nicht. Ohne deine Hilfe wissen wir aber leider nicht, ob ein:e Nutzer:in diesen erhalten hat.
             <a href="#kontakt">Bitte schreib uns deshalb!</a> Sollte es größere Probleme geben, werden wir hier auf der Seite Informationen dazu veröffentlichen.
         </p>
         <h4 id="signal-probleme">Bekannte Störungen beim Covidbot auf Signal</h4>
-        <p>Der Covidbot auf Signal läuft stabil.</p>
+        <p>Der Covidbot auf Signal läuft stabil.</p>-->
         <!--<h5>Störung am 13.02.2021</h5>
         <ul>
             <li>18:30 Uhr: &#x1F7E1; Bot läuft langsam wieder an</li>
@@ -140,6 +142,7 @@
         <ul>
             <li><code>Hilfe</code> bzw. <code>Start</code>: Überblick über die Befehle</li>
             <li><code>Daten Hannover</code>: Aktuelle Daten für den Ort, hier Hannover als Beispiel, mit generierter Neuinfektionsgrafik</li>
+            <li><code>Regeln Hannover</code>: Aktuelle Regeln für das Bundesland, in dem sich der Ort befindet, hier Hannover als Beispiel für Niedersachsen.</li>
             <li><code>Abo Hannover</code>: Abonniert tägliche Daten für den Ort, hier Hannover als Beispiel</li>
             <li><code>Abo</code>: Zeigt eine Liste deiner Abos an</li>
             <li><code>Beende Hannover</code>: Beendet das Abonnement für den Ort, hier Hannover als Beispiel</li>
