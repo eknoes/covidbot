@@ -8,6 +8,11 @@ h1, h2, h3 {
 	color: #00abe5;
 }
 
+code {
+    background-color: #d3d3d3;
+    padding: 2px 5px;
+}
+
 #logoBackgroundImage {
     display: block;
     position: relative;
