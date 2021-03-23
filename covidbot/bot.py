@@ -325,7 +325,7 @@ class Bot(object):
             parent_district = self._data.get_district_data(current_data.parent)
             if parent_district and parent_district.rules:
                 message += f"<b>👆 Regeln</b>\nDie wichtigsten Regeln für {parent_district.name} erhältst du mit dem " \
-                           f"Befehl {self.format_command('Daten ' + parent_district.name)}.\n\n"
+                           f"Befehl {self.format_command('Regeln ' + parent_district.name)}.\n\n"
         message += "<b>Quellen & Datenstand</b>\n"
         message += "\n\n".join(sources)
         message += '\nSende {info_command} um eine Erläuterung ' \
