@@ -482,6 +482,9 @@ class TelegramInterface(MessengerInterface):
             except Unauthorized:
                 self._bot.delete_user(userid)
                 logging.warning(f"Deleted user {userid} as he blocked us")
+            except BadRequest as e:
+                self.log.error(f"Bad Request while sending report to {userid}: {e.message}", exc_info=e)
+
 
     def sendReport(self, userid: int, message=None):
         if not message:
