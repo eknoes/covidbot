@@ -434,8 +434,9 @@ class Bot(object):
         message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
                    '<a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
-                   'Intensivbettendaten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.' \
-                   '\n\nSende {info_command} um eine Erläuterung ' \
+                   'Intensivbettendaten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.</i>' \
+                   '\n\n' \
+                   '<i>Sende {info_command} um eine Erläuterung ' \
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
 
