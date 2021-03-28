@@ -230,7 +230,7 @@ class SimpleTextInterface(object):
     def deleteMeHandler(self, user_input: str, user_id: str) -> BotResponse:
         BOT_COMMAND_COUNT.labels('delete_me').inc()
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_DELETE_ME, None)
-        return BotResponse("Wenn alle deine bei uns gespeicherten Daten gelöscht werden sollen, antworte bitte mit Ja!")
+        return BotResponse("Möchtest du das tägliche Abonnement beenden und alle von dir bei uns gespeicherten Daten löschen? Dann antworte bitte mit Ja.")
 
     def getUpdates(self) -> List[Tuple[str, BotResponse]]:
         updates = self.bot.get_unconfirmed_daily_reports()
