@@ -143,6 +143,7 @@ class FormattableNoun(Enum):
     DISTRICT = 3
     DAYS = 4
     BEDS = 5
+    PERSONS = 6
 
 
 def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
@@ -163,6 +164,9 @@ def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
     elif noun == FormattableNoun.BEDS:
         singular = "Bett"
         plural = "Betten"
+    elif noun == FormattableNoun.PERSONS:
+        singular = "Person"
+        plural = "Personen"
 
     if number == 1:
         return f"{format_int(number)} {hashtag}{singular}"
