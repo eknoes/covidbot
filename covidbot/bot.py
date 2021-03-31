@@ -285,7 +285,7 @@ class Bot(object):
                        f"Intensivbetten sind aktuell belegt. " \
                        f"In {format_noun(current_data.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
                        f"({format_float(current_data.icu_data.percent_covid())}%) liegen Patient:innen" \
-                       f" mit COVID-19, davon müssen {format_noun(current_data.icu_data.covid_ventilated, FormattableNoun.PERSONS)} beatmet werden. " \
+                       f" mit COVID-19, davon müssen {format_noun(current_data.icu_data.covid_ventilated, FormattableNoun.PERSONS)} invasiv beatmet werden. " \
                        f"Insgesamt gibt es {format_noun(current_data.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
             sources.append(f'Intensivbettenauslastung vom {current_data.icu_data.date.strftime("%d.%m.%Y")}. '
                            f'Daten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.')
@@ -424,7 +424,7 @@ class Bot(object):
                        f"Intensivbetten sind aktuell belegt. " \
                        f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
                        f"({format_float(country.icu_data.percent_covid())}%) liegen Patient:innen" \
-                       f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)} beatmet werden. " \
+                       f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)} invasiv beatmet werden. " \
                        f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
 
         user_hint = self.user_hints.get_hint_of_today()

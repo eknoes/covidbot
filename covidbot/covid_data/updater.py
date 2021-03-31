@@ -413,7 +413,7 @@ class ICUGermanyUpdater(Updater):
                 if row['gemeindeschluessel'] == '11000':
                     row['gemeindeschluessel'] = 11
                 results.append((row['gemeindeschluessel'], row['daten_stand'], row['betten_frei'], row['betten_belegt'],
-                                row['faelle_covid_aktuell'], row['faelle_covid_aktuell_beatmet'], row['daten_stand']))
+                                row['faelle_covid_aktuell'], row['faelle_covid_aktuell_invasiv_beatmet'], row['daten_stand']))
 
             with self.connection.cursor() as cursor:
                 for row in results:
