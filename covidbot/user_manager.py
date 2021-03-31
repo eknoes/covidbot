@@ -73,6 +73,13 @@ class UserManager(object):
                 return new_id
             return None
 
+    def change_platform_id(self, old_id: str, new_id: str) -> bool:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("UPDATE bot_user SET platform_id=%s WHERE platform_id=%s", [new_id, old_id])
+            if cursor.rowcount:
+                return True
+            return False
+
     def add_subscription(self, user_id: int, rs: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             try:

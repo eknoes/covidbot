@@ -449,6 +449,9 @@ class Bot(object):
                 return "Deine Daten wurden erfolgreich gelöscht."
         return "Zu deinem Account sind keine Daten vorhanden."
 
+    def change_platform_id(self, old_id: str, new_id: str) -> bool:
+        return self._manager.change_platform_id(old_id, new_id)
+
     @staticmethod
     def format_district_data(district: DistrictData) -> str:
         return "{name}: {incidence} {incidence_trend} ({new_cases}, {new_deaths})" \

@@ -11,7 +11,7 @@ import telegram
 import ujson as json
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, ChatAction, \
     MessageEntity, InputMediaPhoto
-from telegram.error import BadRequest, TelegramError, Unauthorized
+from telegram.error import BadRequest, TelegramError, Unauthorized, ChatMigrated
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP
 
@@ -484,6 +484,11 @@ class TelegramInterface(MessengerInterface):
                 logging.warning(f"Deleted user {userid} as he blocked us")
             except BadRequest as e:
                 self.log.error(f"Bad Request while sending report to {userid}: {e.message}", exc_info=e)
+            except ChatMigrated as e:
+                if self._bot.change_platform_id(userid, str(e.new_chat_id)):
+                    self.log.info(f"Migrated Chat {userid} to {e.new_chat_id}")
+                else:
+                    self.log.warning(f"Could not migrate {userid} to {e.new_chat_id}")
 
 
     def sendReport(self, userid: int, message=None):
