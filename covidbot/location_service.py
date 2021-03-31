@@ -48,9 +48,9 @@ class LocationService:
             return lookup.find_rs(lon, lat)
 
     @LOCATION_OSM_LOOKUP.time()
-    def find_location(self, name: str, restrict_type=False) -> List[int]:
+    def find_location(self, name: str, strict=False) -> List[int]:
         p = {'countrycodes': 'de', 'format': 'jsonv2'}
-        if restrict_type:
+        if strict:
             p['city'] = name
         else:
             p['q'] = name
@@ -65,9 +65,23 @@ class LocationService:
             return []
         response = request.json()
         result = []
+        stricter_results = []
         with self.geolookup as geolookup:
             for item in response:
+                if strict and item['importance'] < 0.5:
+                    continue
+
                 rs = geolookup.find_rs(float(item['lon']), float(item['lat']))
                 if rs and rs not in result:
                     result.append(rs)
+
+                if strict and item['display_name'].find(name) == 0:
+                    first_part = item['display_name'].split(",")[0]
+                    if first_part == name:
+                        return [rs]
+                    stricter_results.append(rs)
+
+
+        if strict and stricter_results:
+            return stricter_results
         return result

@@ -91,7 +91,7 @@ class TwitterInterface(SingleCommandInterface):
 
     def get_mentions(self) -> Iterable[SingleArgumentRequest]:
         with API_RESPONSE_TIME.labels(platform='twitter').time():
-            response = self.twitter.request(f"statuses/mentions_timeline")
+            response = self.twitter.request(f"statuses/mentions_timeline", params={'tweet_mode': 'extended'})
         self.update_twitter_metrics(response)
         mentions = []
         if 200 <= response.status_code < 300:
@@ -105,7 +105,7 @@ class TwitterInterface(SingleCommandInterface):
                         mention_position = mention['indices'][1]
                         break
 
-                arguments = self.handle_regex.sub("", tweet['text'][mention_position:]).strip()
+                arguments = self.handle_regex.sub("", tweet['full_text'][mention_position:]).strip()
                 if arguments:
                     # As our locale is different, we have to adapt Twitter Time & Date String
                     day_en = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]

@@ -188,7 +188,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         district_id = None
 
         # Manually discard some arguments
-        if arguments and (len(arguments[0]) < 4 and len(arguments) > 3) or len(arguments) > 5:
+        if arguments and (len(arguments[0]) <= 5 and len(arguments) > 3):
             self.log.warning(f"Do not lookup {arguments}, as it might not be a query but a message")
             return district_id
 
@@ -213,8 +213,8 @@ class SingleCommandInterface(MessengerInterface, ABC):
             if len(results) == 1:
                 district_id = results[0]
             elif len(results) > 1:
-                results = self.location_service.find_location(" ".join(arguments), restrict_type=True)
-                if len(results) == 1:
+                results = self.location_service.find_location(" ".join(arguments), strict=True)
+                if 0 < len(results) <= 3:
                     district_id = results[0]
 
         if not district_id:
