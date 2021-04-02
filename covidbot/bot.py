@@ -285,7 +285,7 @@ class Bot(object):
                        f"Intensivbetten sind aktuell belegt. " \
                        f"In {format_noun(current_data.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
                        f"({format_float(current_data.icu_data.percent_covid())}%) liegen Patient:innen" \
-                       f" mit COVID-19, davon müssen {format_noun(current_data.icu_data.covid_ventilated, FormattableNoun.PERSONS)} \
+                       f" mit COVID-19, davon müssen {format_noun(current_data.icu_data.covid_ventilated, FormattableNoun.PERSONS)} "\
                        f"({format_float(current_data.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
                        f"Insgesamt gibt es {format_noun(current_data.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
             sources.append(f'Intensivbettenauslastung vom {current_data.icu_data.date.strftime("%d.%m.%Y")}. '
