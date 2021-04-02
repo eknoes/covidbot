@@ -424,7 +424,7 @@ class Bot(object):
                        f"Intensivbetten sind aktuell belegt. " \
                        f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
                        f"({format_float(country.icu_data.percent_covid())}%) liegen Patient:innen" \
-                       f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)} invasiv beatmet werden. " \
+                       f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)} ({format_float(country.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
                        f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
 
         user_hint = self.user_hints.get_hint_of_today()
