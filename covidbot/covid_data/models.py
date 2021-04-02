@@ -53,6 +53,8 @@ class ICUData:
         return self.occupied_covid / self.total_beds() * 100
 
     def percent_ventilated(self) -> float:
+        if self.covid_ventilated == 0 or self.occupied_covid == 0:
+            return 0
         return self.covid_ventilated / self.occupied_covid * 100
 
 
