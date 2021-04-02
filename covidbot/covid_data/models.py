@@ -52,6 +52,9 @@ class ICUData:
     def percent_covid(self) -> float:
         return self.occupied_covid / self.total_beds() * 100
 
+    def percent_ventilated(self) -> float:
+        return self.covid_ventilated / self.occupied_covid() * 100
+
 
 @dataclass
 class RuleData:
