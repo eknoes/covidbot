@@ -4,7 +4,7 @@ set -euo pipefail
 # SET SIGNAL_ADMIN_PHONE as environment variable
 
 signald() {
-            echo "$1" | nc -q0 -U signald.sock | jq 'select(.type != "version")'
+            echo "$1" | nc -q0 -U ~/covid-bot/resources/signald.sock | jq 'select(.type != "version")'
 }
 
 signald '{"type": "list_accounts"}' | jq -r 'select(.type == "account_list") | .data.accounts[].username' | while read username; do
