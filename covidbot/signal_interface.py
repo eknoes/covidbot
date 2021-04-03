@@ -66,7 +66,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 # This is a location
                 text = re.sub('\nhttps://maps.google.com/maps\?q=.*', '', text)
                 # Strip URL so it is searched for the contained address
-            platform_id = ctx.message.source
+            platform_id = ctx.message.source.uuid
             # Currently, we disable user that produce errors on sending the daily report
             # If they would query our bot, we'd like to have them activated before we process their query
             # This is a hacky workaround for https://github.com/eknoes/covidbot/issues/103
