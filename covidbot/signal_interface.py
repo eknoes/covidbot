@@ -15,7 +15,8 @@ from semaphore import ChatContext
 from covidbot.bot import Bot, UserHintService
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
+from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
+    FAILED_MESSAGE_COUNT
 from covidbot.text_interface import SimpleTextInterface, BotResponse
 from covidbot.utils import adapt_text
 
@@ -89,8 +90,11 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 attachment.append(self.get_attachment(image))
                 SENT_IMAGES_COUNT.inc()
 
-        await ctx.message.reply(body=reply.message, attachments=attachment)
-        SENT_MESSAGE_COUNT.inc()
+        if await ctx.message.reply(body=reply.message, attachments=attachment):
+            SENT_MESSAGE_COUNT.inc()
+        else:
+            self.log.error(f"Could not send message to {ctx.message.username}:\n{reply.message}")
+            FAILED_MESSAGE_COUNT.inc()
 
     @staticmethod
     def get_attachment(filename: str) -> Dict:

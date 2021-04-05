@@ -2,6 +2,7 @@ from prometheus_client.metrics import Counter, Gauge, Summary
 
 RECV_MESSAGE_COUNT = Counter('bot_recv_message_count', 'Received messages')
 SENT_MESSAGE_COUNT = Counter('bot_sent_message_count', 'Sent text messages')
+FAILED_MESSAGE_COUNT = Counter('bot_failed_message_count', 'Number of messages failed to send')
 SENT_IMAGES_COUNT = Counter('bot_sent_images_count', 'Sent images')
 BOT_COMMAND_COUNT = Counter('bot_command_total', 'Received Bot Commands', ['command'])
 
