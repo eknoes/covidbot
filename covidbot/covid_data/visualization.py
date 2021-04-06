@@ -2,6 +2,7 @@ import datetime
 import logging
 import math
 import os
+from functools import reduce
 from typing import Optional, Tuple, List
 
 import matplotlib.dates as mdates
@@ -248,6 +249,61 @@ class Visualization:
             plt.savefig(filepath, format='JPEG')
             self.teardown_plt(fig)
             return filepath
+
+    def multi_incidence_graph(self, district_ids: List[int], duration: int = 14) -> Optional[str]:
+        if not district_ids:
+            return None
+
+        data = []
+        district_ids.sort()
+
+        # Source: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
+        linestyles = [
+            'solid', 'dotted', 'dashed', 'dashdot', (0, (1, 1)), (0, (5, 1)), (0, (3, 1, 1, 1)), (0, (3, 1, 1, 1, 1, 1))]
+
+        linecolors = ['#1fa2de', '#16739E', '#0D455E', '#21ABEB', '#1B8FC4']
+
+        i = 0
+        for district in district_ids:
+            district_name, current_date, x_data, y_data = self._get_covid_data("incidence", district, duration)
+            data.append({'name': district_name, 'x': x_data, 'y': y_data, 'date': current_date,
+                         'linestyle': linestyles[i % len(linestyles)], 'linecolor': linecolors[i % len(linecolors)]})
+            i += 1
+
+        current_date = data[0].get('date')
+        identifier = reduce(lambda x, y: x + y, map(str, district_ids))
+
+        filepath = os.path.abspath(
+            os.path.join(self.graphics_dir, f"incidence-{current_date.isoformat()}-{identifier}.jpg"))
+
+        # Do not draw new graphic if its cached
+        if not self.disable_cache and os.path.isfile(filepath):
+            CACHED_GRAPHS.labels(type='incidence').inc()
+            return filepath
+        CREATED_GRAPHS.labels(type='incidence').inc()
+
+        fig, ax1 = self.setup_plot(current_date, f"7-Tage-Inzidenzen", "7-Tage-Inzidenz")
+
+        x_data = data[0].get('x')
+        # Plot data
+        plt.xticks(x_data, rotation='30', ha='right')
+
+        for d in data:
+            plt.plot(d.get('x'), d.get('y'), linestyle=d.get('linestyle'), color=d.get('linecolor'), zorder=3, linewidth=1, label=d.get('name'))
+
+        # Add legend
+        plt.legend()
+
+        ax1.set_ylim(bottom=0)
+
+        # Add a label every 7 days
+        self.set_weekday_formatter(ax1, current_date.weekday())
+
+        # Save to file
+        plt.show()
+        plt.savefig(filepath, format='JPEG')
+        self.teardown_plt(fig)
+        return filepath
 
     def incidence_graph(self, district_id: int, duration: int = 49) -> str:
         district_name, current_date, x_data, y_data = self._get_covid_data("incidence", district_id, duration)
