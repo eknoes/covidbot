@@ -250,7 +250,7 @@ class Visualization:
             self.teardown_plt(fig)
             return filepath
 
-    def multi_incidence_graph(self, district_ids: List[int], duration: int = 14) -> Optional[str]:
+    def multi_incidence_graph(self, district_ids: List[int], duration: int = 49) -> Optional[str]:
         if not district_ids:
             return None
 
@@ -258,16 +258,16 @@ class Visualization:
         district_ids.sort()
 
         # Source: https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
-        linestyles = [
-            'solid', 'dotted', 'dashed', 'dashdot', (0, (1, 1)), (0, (5, 1)), (0, (3, 1, 1, 1)), (0, (3, 1, 1, 1, 1, 1))]
+        line_styles = [
+            'solid', 'dotted', 'dashed', 'dashdot', (0, (5, 1)), (0, (3, 1, 1, 1)), (0, (3, 1, 1, 1, 1, 1))]
 
-        linecolors = ['#1fa2de', '#16739E', '#0D455E', '#21ABEB', '#1B8FC4']
+        line_colors = ['#393991', '#E000BA', '#6D6DDF', '#18948D', '#539140', '#947B01']
 
         i = 0
         for district in district_ids:
             district_name, current_date, x_data, y_data = self._get_covid_data("incidence", district, duration)
             data.append({'name': district_name, 'x': x_data, 'y': y_data, 'date': current_date,
-                         'linestyle': linestyles[i % len(linestyles)], 'linecolor': linecolors[i % len(linecolors)]})
+                         'linestyle': line_styles[i % len(line_styles)], 'linecolor': line_colors[i % len(line_colors)]})
             i += 1
 
         current_date = data[0].get('date')
@@ -288,6 +288,8 @@ class Visualization:
         # Plot data
         plt.xticks(x_data, rotation='30', ha='right')
 
+        # Sort for legend, highest at first
+        data.sort(key=lambda element: element.get('y')[-1], reverse=True)
         for d in data:
             plt.plot(d.get('x'), d.get('y'), linestyle=d.get('linestyle'), color=d.get('linecolor'), zorder=3, linewidth=1, label=d.get('name'))
 
@@ -300,7 +302,7 @@ class Visualization:
         self.set_weekday_formatter(ax1, current_date.weekday())
 
         # Save to file
-        plt.show()
+        # plt.show()
         plt.savefig(filepath, format='JPEG')
         self.teardown_plt(fig)
         return filepath
