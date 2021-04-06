@@ -261,7 +261,7 @@ class Visualization:
         line_styles = [
             'solid', 'dotted', 'dashed', 'dashdot', (0, (5, 1)), (0, (3, 1, 1, 1)), (0, (3, 1, 1, 1, 1, 1))]
 
-        line_colors = ['#393991', '#E000BA', '#6D6DDF', '#18948D', '#539140', '#947B01']
+        line_colors = ['#393991', '#916047', '#6D6DDF', '#45291B', '#539140']
 
         i = 0
         for district in district_ids:
