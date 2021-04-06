@@ -3,6 +3,7 @@ import asyncio
 import configparser
 import locale
 import logging
+import os
 from os.path import abspath
 from sys import exit
 from typing import List
@@ -42,7 +43,9 @@ class MessengerBotSetup:
     def __init__(self, name: str, config_dict, loglvl=logging.INFO, setup_logs=True, monitoring=True):
         if setup_logs:
             # Setup Logging
-            logging.basicConfig(format=LOGGING_FORMAT, level=loglvl, filename=f"{name}-bot.log")
+            logs_dir = config_dict["GENERAL"].get("LOGS_DIR", fallback="")
+
+            logging.basicConfig(format=LOGGING_FORMAT, level=loglvl, filename=os.path.join(logs_dir, f"{name}-bot.log"))
 
             # Log also to stdout
             stream_log_handler = logging.StreamHandler()
@@ -290,9 +293,11 @@ def main():
     # Read Config
     config = parse_config(args.config)
 
+    logs_dir = config["GENERAL"].get("LOGS_DIR", fallback="")
+
     if args.check_updates:
         # Setup Logging
-        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename="updater.log")
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, "updater.log"))
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
@@ -342,7 +347,7 @@ def main():
 
     elif args.daily_report:
         # Setup Logging
-        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=f"reports-{args.platform}.log")
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, f"reports-{args.platform}.log"))
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
@@ -355,7 +360,7 @@ def main():
 
     elif args.message_user:
         # Setup Logging
-        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename="message-users.log")
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, "message-users.log"))
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
