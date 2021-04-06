@@ -92,7 +92,7 @@ class MessengerBotSetup:
         data = CovidData(data_conn)
         visualization = Visualization(data_conn, self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
         user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
-        bot = Bot(data, user_manager, command_format=command_format, location_feature=location_feature)
+        bot = Bot(data, user_manager, visualization, command_format=command_format, location_feature=location_feature)
 
         # Setup database monitoring
         user_monitor = UserManager("monitor", user_monitor_conn)
@@ -108,7 +108,7 @@ class MessengerBotSetup:
             from covidbot.threema_interface import ThreemaInterface
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
                                     self.config['THREEMA'].get('PRIVATE_KEY'), bot,
-                                    dev_chat=self.config['THREEMA'].get('DEV_CHAT'), data_visualization=visualization)
+                                    dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
 
         if self.name == "signal":
             if not self.config.has_section("SIGNAL"):
@@ -116,15 +116,14 @@ class MessengerBotSetup:
             from covidbot.signal_interface import SignalInterface
             return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
                                    self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot,
-                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'), data_visualization=visualization)
+                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'))
 
         if self.name == "telegram":
             if not self.config.has_section("TELEGRAM"):
                 raise ValueError("TELEGRAM is not configured")
             from covidbot.telegram_interface import TelegramInterface
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
-                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"),
-                                     data_visualization=visualization)
+                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
         if self.name == "feedback":
             if not self.config.has_section("TELEGRAM"):
                 raise ValueError("TELEGRAM is not configured")
@@ -134,7 +133,7 @@ class MessengerBotSetup:
 
         if self.name == "interactive":
             from covidbot.text_interface import InteractiveInterface
-            return InteractiveInterface(bot, visualization)
+            return InteractiveInterface(bot)
 
         if self.name == "twitter":
             if not self.config.has_section("TWITTER"):

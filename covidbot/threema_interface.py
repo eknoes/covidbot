@@ -13,8 +13,8 @@ from covidbot.bot import Bot, UserHintService
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT, BOT_RESPONSE_TIME
-from covidbot.text_interface import SimpleTextInterface, BotResponse
-from covidbot.utils import adapt_text, str_bytelen
+from covidbot.text_interface import SimpleTextInterface
+from covidbot.utils import adapt_text, str_bytelen, BotResponse
 
 
 class ThreemaInterface(SimpleTextInterface, MessengerInterface):
@@ -25,8 +25,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
     connection: threema.Connection
     dev_chat: str
 
-    def __init__(self, threema_id: str, threema_secret: str, threema_key: str, bot: Bot, dev_chat: str, data_visualization: Visualization):
-        super().__init__(bot, data_visualization)
+    def __init__(self, threema_id: str, threema_secret: str, threema_key: str, bot: Bot, dev_chat: str):
+        super().__init__(bot)
         self.threema_id = threema_id
         self.threema_secret = threema_secret
         self.threema_key = threema_key
@@ -97,17 +97,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
         if not unconfirmed_reports:
             return
-        daily_graph = self.viz.infections_graph(0)
         for userid, message in unconfirmed_reports:
-            if daily_graph:
-                response_img = ImageMessage(self.connection, image_path=daily_graph,
-                                            to_id=userid)
-                await response_img.send()
-
-            message_parts = self.split_messages(message)
-            for m in message_parts:
-                report = TextMessage(self.connection, text=m, to_id=userid)
-                await report.send()
+            await self.send_bot_response(userid, message)
             self.bot.confirm_daily_report_send(userid)
             self.log.warning(f"Sent report to {userid}")
 

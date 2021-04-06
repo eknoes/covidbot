@@ -12,9 +12,8 @@ from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT, SINGLE_COMMAND_RESPONSE_TIME
-from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
-from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
+from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int, BotResponse
 
 
 @dataclass

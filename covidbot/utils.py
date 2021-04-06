@@ -1,7 +1,8 @@
 import re
 import string
+from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from covidbot.covid_data.models import TrendValue
 
@@ -12,7 +13,21 @@ general_tag_pattern = re.compile("<[^<]+?>")
 link_pattern = re.compile("\s?(\(http[s]?://[\w.\-]*([/\w\-.])*\))\s?")
 
 
-def adapt_text(text: str, threema_format=False, just_strip=False) -> str:
+@dataclass
+class BotResponse:
+    message: str
+    images: Optional[List[str]] = None
+
+    def __str__(self):
+        return self.message
+
+
+def adapt_text(text: Union[BotResponse, str], threema_format=False, just_strip=False) -> Union[BotResponse, str]:
+    response = None
+    if type(text) == BotResponse:
+        response = text
+        text = response.message
+
     if threema_format:
         replace_bold = replace_bold_markdown
         replace_italic = replace_italic_markdown
@@ -44,7 +59,12 @@ def adapt_text(text: str, threema_format=False, just_strip=False) -> str:
                 text = text.replace(match.group(0), replace_italic(match.group(1)))
 
     # Strip non bold or italic
-    return general_tag_pattern.sub("", text)
+    text = general_tag_pattern.sub("", text)
+
+    if response:
+        response.message = text
+        text = response
+    return text
 
 
 def replace_bold_markdown(text: str) -> str:
