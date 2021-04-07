@@ -5,7 +5,8 @@ from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot, UserDistrictActions, UserHintService
-from covidbot.covid_data import CovidData, DistrictData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater
+from covidbot.covid_data import CovidData, DistrictData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
+    Visualization
 from covidbot.user_manager import UserManager
 
 
@@ -41,7 +42,8 @@ class TestBot(TestCase):
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
 
         self.man = UserManager("unittest", self.conn, activated_default=True)
-        self.bot = Bot(CovidData(self.conn), self.man)
+        self.viz = Visualization(self.conn, "graphics/test")
+        self.bot = Bot(CovidData(self.conn), self.man, self.viz)
 
     def tearDown(self) -> None:
         del self.bot

@@ -27,6 +27,8 @@ class Visualization:
 
     def __init__(self, connection: MySQLConnection, directory: str, disable_cache: bool = False) -> None:
         self.connection = connection
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         if not os.path.isdir(directory):
             raise NotADirectoryError(f"Path {directory} is not a directory")
 
