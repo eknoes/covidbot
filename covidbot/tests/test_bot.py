@@ -5,7 +5,8 @@ from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.bot import Bot, UserDistrictActions, UserHintService
-from covidbot.covid_data import CovidData, DistrictData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater
+from covidbot.covid_data import CovidData, DistrictData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
+    Visualization
 from covidbot.user_manager import UserManager
 
 
@@ -41,15 +42,16 @@ class TestBot(TestCase):
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
 
         self.man = UserManager("unittest", self.conn, activated_default=True)
-        self.bot = Bot(CovidData(self.conn), self.man)
+        self.viz = Visualization(self.conn, "graphics/test")
+        self.bot = Bot(CovidData(self.conn), self.man, self.viz)
 
     def tearDown(self) -> None:
         del self.bot
         del self.man
 
     def test_update_with_subscribers(self):
-        hessen_id = self.bot.find_district_id("Hessen")[1][0][0]
-        bayern_id = self.bot.find_district_id("Bayern")[1][0][0]
+        hessen_id = self.bot.find_district_id("Hessen")[1][0].id
+        bayern_id = self.bot.find_district_id("Bayern")[1][0].id
 
         user1 = "uid1"
         user2 = "uid2"
@@ -106,9 +108,9 @@ class TestBot(TestCase):
                              "possible actions")
 
     def test_group_districts(self):
-        districts = [DistrictData(incidence=0, name="0Incidence"), DistrictData(incidence=35, name="35Incidence"),
-                     DistrictData(incidence=36, name="36Incidence"), DistrictData(incidence=51, name="51Incidence"),
-                     DistrictData(incidence=101, name="101Incidence"), DistrictData(incidence=201, name="201Incidence")]
+        districts = [DistrictData(incidence=0, name="0Incidence", id=0), DistrictData(incidence=35, name="35Incidence", id=35),
+                     DistrictData(incidence=36, name="36Incidence", id=36), DistrictData(incidence=51, name="51Incidence", id=51),
+                     DistrictData(incidence=101, name="101Incidence", id=101), DistrictData(incidence=201, name="201Incidence", id=201)]
         actual = self.bot.group_districts(districts)
 
         self.assertCountEqual(actual[0], [districts[0], districts[1]], "District should be grouped in <= 35")
@@ -124,8 +126,8 @@ class TestBot(TestCase):
 
         # Bug
         districts = [
-            DistrictData(name='Göttingen (Landkreis)', type='Landkreis', date=date(2021, 1, 21), incidence=81.5848),
-            DistrictData(name='Lüneburg (Landkreis)', type='Landkreis', date=date(2021, 1, 21), incidence=30.9549)]
+            DistrictData(name='Göttingen (Landkreis)', type='Landkreis', date=date(2021, 1, 21), incidence=81.5848, id=1),
+            DistrictData(name='Lüneburg (Landkreis)', type='Landkreis', date=date(2021, 1, 21), incidence=30.9549, id=2)]
         actual = self.bot.group_districts(districts)
 
         self.assertCountEqual([districts[0]], actual[50])
@@ -135,8 +137,8 @@ class TestBot(TestCase):
         self.assertIsInstance(self.bot.group_districts([]), dict)
 
     def test_sort_districts(self):
-        districts = [DistrictData(incidence=0, name="A"), DistrictData(incidence=0, name="C"),
-                     DistrictData(incidence=0, name="B")]
+        districts = [DistrictData(incidence=0, name="A", id=1), DistrictData(incidence=0, name="C", id=3),
+                     DistrictData(incidence=0, name="B", id=2)]
         actual_names = list(map(lambda d: d.name, self.bot.sort_districts(districts)))
 
         self.assertEqual("A", actual_names[0], "Districts should be sorted alphabetically")

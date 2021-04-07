@@ -41,7 +41,6 @@ class TestUpdater(TestCase):
         updater = RulesGermanyUpdater(self.conn)
         self.assertTrue(updater.update(), "RulesGermanyUpdater should update")
 
-
     def test_clean_district_name(self):
         expected = [("Region Hannover", "Hannover"), ("LK Kassel", "Kassel"),
                     ("LK Dillingen a.d.Donau", "Dillingen a.d.Donau"),

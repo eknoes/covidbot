@@ -12,9 +12,8 @@ from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT, SINGLE_COMMAND_RESPONSE_TIME
-from covidbot.text_interface import BotResponse
 from covidbot.user_manager import UserManager
-from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
+from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int, BotResponse
 
 
 @dataclass
@@ -54,7 +53,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         self.no_write = no_write
         self.timezone = pytz.timezone("Europe/Berlin")
 
-    async def send_daily_reports(self) -> None:
+    async def send_unconfirmed_reports(self) -> None:
         germany = self.data.get_country_data()
         if not germany:
             raise ValueError("Could not find data for Germany")
@@ -127,7 +126,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
         return BotResponse(tweet_text, [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)])
 
-    async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if users:
             self.log.error("Can't tweet to specific users!")
             return
@@ -198,11 +197,11 @@ class SingleCommandInterface(MessengerInterface, ABC):
             if districts_query:
                 if len(districts_query) > 1:
                     for district in districts_query:
-                        if district[1].find(argument) == 0:
-                            district_id = district[0]
+                        if district.name.find(argument) == 0:
+                            district_id = district.id
                             break
                 else:
-                    district_id = districts_query[0][0]
+                    district_id = districts_query[0].id
 
                 if district_id:
                     break

@@ -5,20 +5,19 @@ import re
 import signal
 import time
 import traceback
-import prometheus_async.aio
 from math import ceil
 from typing import Dict, List, Optional
 
+import prometheus_async.aio
 import semaphore
 from semaphore import ChatContext
 
 from covidbot.bot import Bot, UserHintService
-from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
     FAILED_MESSAGE_COUNT
-from covidbot.text_interface import SimpleTextInterface, BotResponse
-from covidbot.utils import adapt_text
+from covidbot.text_interface import SimpleTextInterface
+from covidbot.utils import adapt_text, BotResponse
 
 
 class SignalInterface(SimpleTextInterface, MessengerInterface):
@@ -28,8 +27,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
     profile_picture: Optional[str] = None  # = os.path.abspath("resources/logo.png")
     dev_chat: str = None
 
-    def __init__(self, phone_number: str, socket: str, bot: Bot, dev_chat: str,  data_visualization: Visualization):
-        super().__init__(bot, data_visualization)
+    def __init__(self, phone_number: str, socket: str, bot: Bot, dev_chat: str):
+        super().__init__(bot)
         self.phone_number = phone_number
         self.socket = socket
         self.dev_chat = dev_chat
@@ -103,7 +102,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         """
         return {"filename": filename, "width": "1600", "height": "1000"}
 
-    async def send_daily_reports(self) -> None:
+    async def send_unconfirmed_reports(self) -> None:
         """
         Send unconfirmed daily reports to the specific users
         """
@@ -114,7 +113,6 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
         # Get the current graph as attachement dict
         self.log.warning(f"{len(unconfirmed_reports)} to send!")
-        country_graph = self.get_attachment(self.viz.infections_graph(0))
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
@@ -122,7 +120,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             message_counter = 0
             for userid, message in unconfirmed_reports:
                 self.log.info(f"Try to send report {message_counter}")
-                success = await bot.send_message(userid, adapt_text(message), attachments=[country_graph])
+                for elem in message:
+                    success = await bot.send_message(userid, adapt_text(elem.message), attachments=elem.images)
                 if success:
                     self.bot.confirm_daily_report_send(userid)
                     self.log.warning(f"({message_counter}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
@@ -133,7 +132,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 backoff_time = self.backoff_timer(backoff_time, not success, userid)
                 message_counter += 1
 
-    async def send_message(self, message: str, users: List[str], append_report=False) -> None:
+    async def send_message_to_users(self, message: str, users: List[str], append_report=False) -> None:
         """
         Send a message to specific or all users
         Args:
@@ -156,11 +155,12 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 if append_report:
                     response = self.reportHandler("", user)
                     attachments = []
-                    if response.images:
-                        for image in response.images:
-                            attachments.append(self.get_attachment(image))
-                    success = await bot.send_message(user, adapt_text(response.message), attachments)
-                    backoff_time = self.backoff_timer(backoff_time, not success, user)
+                    for elem in response:
+                        if elem.images:
+                            for image in elem.images:
+                                attachments.append(self.get_attachment(image))
+                        success = await bot.send_message(user, adapt_text(elem.message), attachments)
+                        backoff_time = self.backoff_timer(backoff_time, not success, user)
 
     def backoff_timer(self, current_backoff: float, failed: bool, user_id: str) -> float:
         """

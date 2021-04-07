@@ -71,9 +71,9 @@ class CovidDataTest(TestCase):
         self.assertIsNone(non_existent, "get_district_data should return None for non-existing data")
 
     def test_fill_trend(self):
-        today = DistrictData("Test1", new_cases=5, new_deaths=5, incidence=5)
-        last_week = DistrictData("Test1", new_cases=5, new_deaths=6, incidence=4)
-        yesterday = DistrictData("Test1", new_cases=5, new_deaths=6, incidence=6)
+        today = DistrictData("Test1", 1, new_cases=5, new_deaths=5, incidence=5)
+        last_week = DistrictData("Test1", 1, new_cases=5, new_deaths=6, incidence=4)
+        yesterday = DistrictData("Test1", 1, new_cases=5, new_deaths=6, incidence=6)
 
         trend_d1 = self.data.fill_trend(today, last_week, yesterday)
         self.assertEqual(TrendValue.DOWN, trend_d1.incidence_trend)

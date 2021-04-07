@@ -9,8 +9,8 @@ from sys import exit
 from typing import List
 
 import prometheus_client
+from mysql.connector import connect, MySQLConnection
 from prometheus_client import Info
-from mysql.connector import connect, MySQLConnection, IntegrityError
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, Visualization
@@ -92,7 +92,7 @@ class MessengerBotSetup:
         data = CovidData(data_conn)
         visualization = Visualization(data_conn, self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
         user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
-        bot = Bot(data, user_manager, command_format=command_format, location_feature=location_feature)
+        bot = Bot(data, user_manager, visualization, command_format=command_format, location_feature=location_feature)
 
         # Setup database monitoring
         user_monitor = UserManager("monitor", user_monitor_conn)
@@ -108,7 +108,7 @@ class MessengerBotSetup:
             from covidbot.threema_interface import ThreemaInterface
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
                                     self.config['THREEMA'].get('PRIVATE_KEY'), bot,
-                                    dev_chat=self.config['THREEMA'].get('DEV_CHAT'), data_visualization=visualization)
+                                    dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
 
         if self.name == "signal":
             if not self.config.has_section("SIGNAL"):
@@ -116,15 +116,14 @@ class MessengerBotSetup:
             from covidbot.signal_interface import SignalInterface
             return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
                                    self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot,
-                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'), data_visualization=visualization)
+                                   dev_chat=self.config['SIGNAL'].get('DEV_CHAT'))
 
         if self.name == "telegram":
             if not self.config.has_section("TELEGRAM"):
                 raise ValueError("TELEGRAM is not configured")
             from covidbot.telegram_interface import TelegramInterface
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
-                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"),
-                                     data_visualization=visualization)
+                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
         if self.name == "feedback":
             if not self.config.has_section("TELEGRAM"):
                 raise ValueError("TELEGRAM is not configured")
@@ -134,7 +133,7 @@ class MessengerBotSetup:
 
         if self.name == "interactive":
             from covidbot.text_interface import InteractiveInterface
-            return InteractiveInterface(bot, visualization)
+            return InteractiveInterface(bot)
 
         if self.name == "twitter":
             if not self.config.has_section("TWITTER"):
@@ -177,7 +176,7 @@ class MessengerBotSetup:
 async def sendUpdates(messenger_iface: str, config: configparser):
     try:
         with MessengerBotSetup(messenger_iface, config, setup_logs=False, monitoring=False) as iface:
-            await iface.send_daily_reports()
+            await iface.send_unconfirmed_reports()
             logging.info(f"Checked for daily reports on {messenger_iface}")
     except Exception as e:
         logging.error(f"Got exception while sending daily reports for {messenger_iface}: {e}", exc_info=e)
@@ -222,13 +221,13 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
 
     if messenger_interface:
         with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
-            await iface.send_message(message, recipients, with_report)
+            await iface.send_message_to_users(message, recipients, with_report)
 
     else:
         for messenger_interface in ["telegram", "threema", "signal"]:
             try:
                 with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
-                    await iface.send_message(message, recipients, with_report)
+                    await iface.send_message_to_users(message, recipients, with_report)
             except Exception as e:
                 logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
 
@@ -317,20 +316,20 @@ def main():
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
                         with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                            asyncio.run(telegram.send_message(f"Got new data from {updater.__class__.__name__}",
-                                                              [config["TELEGRAM"].get("DEV_CHAT")]))
+                            asyncio.run(telegram.send_message_to_users(f"Got new data from {updater.__class__.__name__}",
+                                                                       [config["TELEGRAM"].get("DEV_CHAT")]))
                 except Exception as error:
                     # Data did not make it through plausibility check
                     logging.exception(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}",
                                       exc_info=error)
                     with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                        asyncio.run(telegram.send_message(f"Exception happened on Data Update with "
+                        asyncio.run(telegram.send_message_to_users(f"Exception happened on Data Update with "
                                                           f"{updater.__class__.__name__}: {error}",
-                                                          [config["TELEGRAM"].get("DEV_CHAT")]))
+                                                                   [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Forward Feedback
         with MessengerBotSetup("feedback", config, setup_logs=False, monitoring=False) as iface:
-            asyncio.run(iface.send_daily_reports())
+            asyncio.run(iface.send_unconfirmed_reports())
 
         # Check Tweets & Co
         platforms = []
@@ -343,7 +342,7 @@ def main():
 
         for platform in platforms:
             with MessengerBotSetup(platform, config, setup_logs=False, monitoring=False) as iface:
-                asyncio.run(iface.send_daily_reports())
+                asyncio.run(iface.send_unconfirmed_reports())
 
     elif args.daily_report:
         # Setup Logging
@@ -386,9 +385,9 @@ def main():
             except Exception as e:
                 logging.exception(f"Exception while running {args.platform} client", exc_info=e)
                 with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                    asyncio.run(telegram.send_message(f"Exception happened while running {args.platform} bot:"
+                    asyncio.run(telegram.send_message_to_users(f"Exception happened while running {args.platform} bot:"
                                                       f"{e}",
-                                                      [config["TELEGRAM"].get("DEV_CHAT")]))
+                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
                 raise e
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"), disable_cache=True)

@@ -13,6 +13,7 @@ class TrendValue(Enum):
 @dataclass
 class District:
     name: str
+    id: int
     type: Optional[str] = None
     parent: Optional[int] = None
 

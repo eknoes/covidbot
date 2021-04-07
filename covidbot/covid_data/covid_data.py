@@ -19,7 +19,7 @@ class CovidData(object):
         CovidDatabaseCreator(self.connection)
 
     @LOCATION_DB_LOOKUP.time()
-    def search_district_by_name(self, search_str: str) -> List[Tuple[int, str]]:
+    def search_district_by_name(self, search_str: str) -> List[District]:
         search_str = search_str.lower()
         search_str = search_str.replace(" ", "%")
         results = []
@@ -33,15 +33,15 @@ class CovidData(object):
                                ['%' + search_str + '%', '%' + search_str + '%'])
             for row in cursor.fetchall():
                 if row['county_name'].lower() == search_str.replace("%", " "):
-                    return [(row['rs'], row['county_name'])]
-                results.append((row['rs'], row['county_name']))
+                    return [District(row['county_name'], row['rs'])]
+                results.append(District(row['county_name'], row['rs']))
         return results
 
     def get_district(self, district_id: int) -> District:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT county_name, type, parent FROM counties WHERE rs=%s', [int(district_id)])
             data = cursor.fetchone()
-            return District(data['county_name'], type=data['type'], parent=data['parent'])
+            return District(data['county_name'], id=district_id, type=data['type'], parent=data['parent'])
 
     def get_children_data(self, district_id: int) -> Optional[List[DistrictData]]:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -70,14 +70,13 @@ class CovidData(object):
             if not record:
                 return None
 
-            result = DistrictData(name=record['county_name'], incidence=record['incidence'],
+            result = DistrictData(name=record['county_name'], id=district_id, incidence=record['incidence'],
                                   parent=record['parent'], type=record['type'],
                                   total_cases=record['total_cases'], total_deaths=record['total_deaths'],
                                   new_cases=record['new_cases'], new_deaths=record['new_deaths'],
                                   date=record['date'])
 
             # Check if vaccination data is available
-            vaccination_data = None
             cursor.execute('SELECT MAX(date) as last_update FROM covid_vaccinations WHERE district_id=%s', [district_id])
             vacc_date = cursor.fetchone()
             if vacc_date:
@@ -132,7 +131,7 @@ class CovidData(object):
                 [district_id, result.date, result.date])
             last_week, yesterday = None, None
             for record in cursor.fetchall():
-                comparison_data = DistrictData(name=record['county_name'], incidence=record['incidence'],
+                comparison_data = DistrictData(name=record['county_name'], id=district_id, incidence=record['incidence'],
                                                type=record['type'], total_cases=record['total_cases'],
                                                total_deaths=record['total_deaths'], new_cases=record['new_cases'],
                                                new_deaths=record['new_deaths'], date=record['date'])

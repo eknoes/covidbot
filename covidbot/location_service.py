@@ -81,7 +81,6 @@ class LocationService:
                         return [rs]
                     stricter_results.append(rs)
 
-
         if strict and stricter_results:
             return stricter_results
         return result
