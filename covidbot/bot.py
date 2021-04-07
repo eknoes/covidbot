@@ -516,7 +516,7 @@ class Bot(object):
                 .format(subscribe_command=self.format_command("abo"))
             districts = None
         else:
-            districts = list(map(lambda s: (s, self._data.get_district(s)), user.subscriptions))
+            districts = list(map(self._data.get_district, user.subscriptions))
             message = "Du hast aktuell {abo_count} abonniert." \
                 .format(abo_count=format_noun(len(user.subscriptions), FormattableNoun.DISTRICT))
 
