@@ -5,15 +5,14 @@ import re
 import signal
 import time
 import traceback
-import prometheus_async.aio
 from math import ceil
 from typing import Dict, List, Optional
 
+import prometheus_async.aio
 import semaphore
 from semaphore import ChatContext
 
 from covidbot.bot import Bot, UserHintService
-from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
     FAILED_MESSAGE_COUNT

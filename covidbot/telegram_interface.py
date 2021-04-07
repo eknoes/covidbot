@@ -103,64 +103,66 @@ class TelegramInterface(MessengerInterface):
         self.updater.start_polling()
         self.updater.idle()
 
-    def answer_callback_query(self, update: Update, response: BotResponse, disable_web_page_preview=False):
+    def answer_callback_query(self, update: Update, response: List[BotResponse], disable_web_page_preview=False):
         query = update.callback_query
-        if not response.images:
-            return query.edit_message_text(response.message, disable_web_page_preview=disable_web_page_preview)
+        if len(response) == 1 and response[0].images:
+            if not response[0].images:
+                return query.edit_message_text(response[0].message, disable_web_page_preview=disable_web_page_preview)
 
         query.delete_message()
         self.deleted_callbacks.append(query.message.message_id)
-        self.send_telegram_message(update.effective_chat.id, response, disable_web_page_preview=disable_web_page_preview)
+        self.send_telegram_message(update.effective_chat.id, response,
+                                   disable_web_page_preview=disable_web_page_preview)
 
-    def answer_update(self, update: Update, response: BotResponse,
+    def answer_update(self, update: Update, response: List[BotResponse],
                       disable_web_page_preview=False, reply_markup=None) -> bool:
         return self.send_telegram_message(update.effective_chat.id, response,
                                           disable_web_page_preview,
                                           reply_markup)
 
-    def send_telegram_message(self, chat_id: int, response: BotResponse,
+    def send_telegram_message(self, chat_id: int, responses: List[BotResponse],
                               disable_web_page_preview=False, reply_markup=None) -> bool:
-        if response.images:
-            self.updater.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
-            if len(response.images) == 1:
-                photo = response.images[0]
-                caption = None
-                if len(response.message) <= 1024:
-                    caption = response.message
+        success = True
+        for response in responses:
+            if response.images:
+                self.updater.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
+                if len(response.images) == 1:
+                    photo = response.images[0]
+                    caption = None
+                    if len(response.message) <= 1024:
+                        caption = response.message
 
-                message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo).media,
-                                                          caption=caption, parse_mode=ParseMode.HTML)
-                SENT_IMAGES_COUNT.inc(len(response.images))
+                    message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo).media,
+                                                              caption=caption, parse_mode=ParseMode.HTML)
+                    SENT_IMAGES_COUNT.inc(len(response.images))
 
-                if message_obj.photo[0]:
-                    self.set_file_id(photo, message_obj.photo[0].file_id)
+                    if message_obj.photo[0]:
+                        self.set_file_id(photo, message_obj.photo[0].file_id)
 
-                if caption:
-                    if message_obj:
-                        return True
-                    return False
-            else:
-                files = []
-                for photo in response.images:
-                    files.append(self.get_input_media_photo(photo))
+                    if caption:
+                        if not message_obj:
+                            success = False
+                        continue
+                else:
+                    files = []
+                    for photo in response.images:
+                        files.append(self.get_input_media_photo(photo))
 
-                sent_messages = self.updater.bot.send_media_group(chat_id, files)
-                if sent_messages:
-                    for i in range(0, len(sent_messages)):
-                        if sent_messages[i].photo:
-                            self.set_file_id(response.images[i], sent_messages[i].photo[0].file_id)
-                SENT_IMAGES_COUNT.inc(len(response.images))
+                    sent_messages = self.updater.bot.send_media_group(chat_id, files)
+                    if sent_messages:
+                        for i in range(0, len(sent_messages)):
+                            if sent_messages[i].photo:
+                                self.set_file_id(response.images[i], sent_messages[i].photo[0].file_id)
+                    SENT_IMAGES_COUNT.inc(len(response.images))
 
-        split_messages = self.split_messages(response.message)
-        success = False
-        for m in split_messages:
-            if self.updater.bot.send_message(chat_id, m, parse_mode=ParseMode.HTML,
-                                             disable_web_page_preview=disable_web_page_preview,
-                                             reply_markup=reply_markup):
-                SENT_MESSAGE_COUNT.inc()
-                success = True
-            else:
-                success = False
+            split_messages = self.split_messages(response.message)
+            for m in split_messages:
+                if self.updater.bot.send_message(chat_id, m, parse_mode=ParseMode.HTML,
+                                                 disable_web_page_preview=disable_web_page_preview,
+                                                 reply_markup=reply_markup):
+                    SENT_MESSAGE_COUNT.inc()
+                else:
+                    success = False
 
         return success
 
@@ -209,10 +211,10 @@ class TelegramInterface(MessengerInterface):
         query = " ".join(context.args)
         msg, districts = self._bot.find_district_id(query)
         if not districts:
-            self.answer_update(update, BotResponse(msg))
+            self.answer_update(update, [BotResponse(msg)])
         elif len(districts) > 1:
             markup = self.gen_multi_district_answer(districts, TelegramCallbacks.REPORT)
-            self.answer_update(update, BotResponse(msg), reply_markup=markup)
+            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
         else:
             district_id = districts[0][0]
             message = self._bot.get_district_report(district_id)
@@ -224,10 +226,10 @@ class TelegramInterface(MessengerInterface):
         query = " ".join(context.args)
         msg, districts = self._bot.find_district_id(query)
         if not districts:
-            self.answer_update(update, BotResponse(msg))
+            self.answer_update(update, [BotResponse(msg)])
         elif len(districts) > 1:
             markup = self.gen_multi_district_answer(districts, TelegramCallbacks.RULES)
-            self.answer_update(update, BotResponse(msg), reply_markup=markup)
+            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
         else:
             district_id = districts[0][0]
             message = self._bot.get_rules(district_id)
@@ -239,7 +241,7 @@ class TelegramInterface(MessengerInterface):
         markup = InlineKeyboardMarkup([[InlineKeyboardButton("Ja, alle meine Daten löschen",
                                                              callback_data=TelegramCallbacks.DELETE_ME.name)],
                                        [InlineKeyboardButton("Nein", callback_data=TelegramCallbacks.DISCARD.name)]])
-        self.answer_update(update, BotResponse("Sollen alle deine Abonnements und Daten gelöscht werden?"),
+        self.answer_update(update, [BotResponse("Sollen alle deine Abonnements und Daten gelöscht werden?")],
                            reply_markup=markup)
 
     @BOT_RESPONSE_TIME.time()
@@ -252,16 +254,16 @@ class TelegramInterface(MessengerInterface):
             msg, districts = self._bot.find_district_id(query)
 
         if not districts:
-            self.answer_update(update, BotResponse(msg))
+            self.answer_update(update, [BotResponse(msg)])
         elif len(districts) > 1 or not context.args:
             if not context.args:
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.CHOOSE_ACTION)
             else:
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.SUBSCRIBE)
-            self.answer_update(update, BotResponse(msg), reply_markup=markup)
+            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
         else:
             district_id = districts[0][0]
-            self.answer_update(update, self._bot.subscribe(update.effective_chat.id, district_id))
+            self.answer_update(update, self._bot.subscribe(update.effective_chat.id, district_id), disable_web_page_preview=True)
 
     @BOT_RESPONSE_TIME.time()
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
@@ -269,10 +271,10 @@ class TelegramInterface(MessengerInterface):
         query = " ".join(context.args)
         msg, districts = self._bot.find_district_id(query)
         if not districts:
-            self.answer_update(update, BotResponse(msg))
+            self.answer_update(update, [BotResponse(msg)])
         elif len(districts) > 1:
             markup = self.gen_multi_district_answer(districts, TelegramCallbacks.UNSUBSCRIBE)
-            self.answer_update(update, BotResponse(msg), reply_markup=markup)
+            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
         else:
             self.answer_update(update, self._bot.unsubscribe(update.effective_chat.id, districts[0][0]))
 
@@ -322,7 +324,7 @@ class TelegramInterface(MessengerInterface):
         if query.data.startswith(TelegramCallbacks.SUBSCRIBE.name):
             BOT_COMMAND_COUNT.labels('subscribe').inc()
             district_id = int(query.data[len(TelegramCallbacks.SUBSCRIBE.name):])
-            self.answer_callback_query(update, self._bot.subscribe(update.effective_chat.id, district_id))
+            self.answer_callback_query(update, self._bot.subscribe(update.effective_chat.id, district_id), disable_web_page_preview=True)
 
         # Unsubscribe Callback
         elif query.data.startswith(TelegramCallbacks.UNSUBSCRIBE.name):
@@ -344,13 +346,14 @@ class TelegramInterface(MessengerInterface):
             if markup is not None:
                 query.edit_message_text(text, reply_markup=markup, parse_mode=telegram.ParseMode.HTML)
             else:
-                self.answer_callback_query(update, BotResponse(text))
+                self.answer_callback_query(update, [BotResponse(text)])
 
         # Send Report Callback
         elif query.data.startswith(TelegramCallbacks.REPORT.name):
             BOT_COMMAND_COUNT.labels('report').inc()
             district_id = int(query.data[len(TelegramCallbacks.REPORT.name):])
-            self.answer_callback_query(update, self._bot.get_district_report(district_id), disable_web_page_preview=True)
+            self.answer_callback_query(update, self._bot.get_district_report(district_id),
+                                       disable_web_page_preview=True)
 
         # DeleteMe Callback
         elif query.data.startswith(TelegramCallbacks.DELETE_ME.name):
@@ -402,7 +405,7 @@ class TelegramInterface(MessengerInterface):
             msg, districts = self._bot.find_district_id(update.message.text)
 
         if not districts:
-            self.answer_update(update, BotResponse(msg))
+            self.answer_update(update, [BotResponse(msg)])
 
             self.feedback_cache[update.effective_chat.id] = update.message.text
             if update.effective_user:
@@ -413,14 +416,14 @@ class TelegramInterface(MessengerInterface):
                  [InlineKeyboardButton("Abbrechen",
                                        callback_data=TelegramCallbacks.DISCARD.name)]])
 
-            self.answer_update(update, BotResponse("Hast du gar keinen Ort gesucht, sondern möchtest uns deine "
-                                                   "Nachricht als Feedback zusenden?"), reply_markup=feedback_markup)
+            self.answer_update(update, [BotResponse("Hast du gar keinen Ort gesucht, sondern möchtest uns deine "
+                                                   "Nachricht als Feedback zusenden?")], reply_markup=feedback_markup)
         else:
             if len(districts) > 1:
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.CHOOSE_ACTION)
             else:
                 msg, markup = self.chooseActionBtnGenerator(districts[0][0], update.effective_chat.id)
-            self.answer_update(update, BotResponse(msg), reply_markup=markup)
+            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
 
     @staticmethod
     def gen_multi_district_answer(districts: List[Tuple[int, str]],
@@ -471,10 +474,7 @@ class TelegramInterface(MessengerInterface):
                 sent_msg = self.sendReport(userid, message)
                 if sent_msg:
                     self._bot.confirm_daily_report_send(userid)
-                    # Add to flood window, on message > 1024 characters, 2 messages are sent
                     sliding_flood_window.append(time.perf_counter())
-                    if len(message.message) > 1024:
-                        sliding_flood_window.append(time.perf_counter())
 
                 self.log.warning(f"Sent report to {userid}!")
             except Unauthorized:
@@ -488,7 +488,7 @@ class TelegramInterface(MessengerInterface):
                 else:
                     self.log.warning(f"Could not migrate {userid} to {e.new_chat_id}")
 
-    def sendReport(self, userid: int, message: Optional[BotResponse] = None):
+    def sendReport(self, userid: int, message: Optional[List[BotResponse]] = None):
         if not message:
             message = self._bot.get_report(userid)
 
@@ -603,6 +603,6 @@ class TelegramInterface(MessengerInterface):
             os.kill(os.getpid(), signal.SIGINT)
 
     def send_message_to_dev(self, message: str):
-        if self.send_telegram_message(self.dev_chat_id, BotResponse(message)):
+        if self.send_telegram_message(self.dev_chat_id, [BotResponse(message)]):
             return True
         return False

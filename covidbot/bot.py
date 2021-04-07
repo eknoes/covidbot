@@ -72,6 +72,7 @@ class Bot(object):
         self.user_hints = UserHintService(self.format_command)
         self.data_visualization = visualization
 
+    # User management functions
     def is_user_activated(self, user_identification: Union[int, str]) -> bool:
         user_id = self._manager.get_user_id(user_identification)
         if user_id:
@@ -88,7 +89,7 @@ class Bot(object):
         if user_id:
             self._manager.set_user_activated(user_id, activated=False)
 
-    def set_language(self, user_identification: Union[int, str], language: Optional[str]) -> BotResponse:
+    def set_language(self, user_identification: Union[int, str], language: Optional[str]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)
         if not language:
             user = self._manager.get_user(user_id)
@@ -96,10 +97,11 @@ class Bot(object):
                 language = user.language
             else:
                 language = self.DEFAULT_LANG
-            return BotResponse("Deine aktuelle Spracheinstellung ist {language}".format(language=language))
+            return [BotResponse("Deine aktuelle Spracheinstellung ist {language}".format(language=language))]
         if self._manager.set_language(user_id, language):
-            return BotResponse("Deine bevorzugte Sprache wurde auf {language} gesetzt.".format(language=language))
-        return BotResponse("Leider konnte deine Sprache nicht auf {language} gesetzt werde.".format(language=language))
+            return [BotResponse("Deine bevorzugte Sprache wurde auf {language} gesetzt.".format(language=language))]
+        return [
+            BotResponse("Leider konnte deine Sprache nicht auf {language} gesetzt werde.".format(language=language))]
 
     def find_district_id(self, district_query: str) -> Tuple[Optional[str], Optional[List[Tuple[int, str]]]]:
         if not district_query:
@@ -174,7 +176,7 @@ class Bot(object):
             message = "Möchtest du die aktuellen Daten von {name} erhalten?".format(name=district.name)
         return message, actions
 
-    def get_rules(self, district_id: int) -> BotResponse:
+    def get_rules(self, district_id: int) -> List[BotResponse]:
         current_data = self._data.get_district_data(district_id)
         rules, district_name = None, None
         if current_data.rules:
@@ -199,13 +201,13 @@ class Bot(object):
         else:
             message = f"Regeln sind für {current_data.name} leider nicht verfügbar. Momentan können Regeln nur für " \
                       f"Bundesländer abgerufen werden."
-        return BotResponse(message)
+        return [BotResponse(message)]
 
-    def get_vaccination_overview(self, district_id: int) -> BotResponse:
+    def get_vaccination_overview(self, district_id: int) -> List[BotResponse]:
         parent_data = self._data.get_district_data(district_id)
         if not parent_data.vaccinations:
-            return BotResponse(
-                f"Leider kann für {parent_data.name} keine Impfübersicht generiert werden, da keine Daten vorliegen.")
+            return [BotResponse(
+                f"Leider kann für {parent_data.name} keine Impfübersicht generiert werden, da keine Daten vorliegen.")]
 
         children_data = self._data.get_children_data(district_id)
         message = f"<b>💉 Impfdaten ({parent_data.name})</b>\n"
@@ -242,9 +244,9 @@ class Bot(object):
                    'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
             .format(info_command=self.format_command("Info"),
                     earliest_vacc_date=earliest_data.vaccinations.date.strftime("%d.%m.%Y"))
-        return BotResponse(message, [self.data_visualization.vaccination_graph(district_id)])
+        return [BotResponse(message, [self.data_visualization.vaccination_graph(district_id)])]
 
-    def get_district_report(self, district_id: int) -> BotResponse:
+    def get_district_report(self, district_id: int) -> List[BotResponse]:
         current_data = self._data.get_district_data(district_id)
         sources = [f'Infektionsdaten vom {current_data.date.strftime("%d.%m.%Y")}. '
                    f'Infektionsdaten und R-Wert vom Robert Koch-Institut (RKI), '
@@ -337,9 +339,10 @@ class Bot(object):
                    'der Daten zu erhalten.' \
             .format(info_command=self.format_command("Info"), date=current_data.date.strftime("%d.%m.%Y"))
 
-        return BotResponse(message, [self.data_visualization.infections_graph(district_id), self.data_visualization.incidence_graph(district_id)])
+        return [BotResponse(message, [self.data_visualization.infections_graph(district_id),
+                                      self.data_visualization.incidence_graph(district_id)])]
 
-    def subscribe(self, user_identification: Union[int, str], district_id: int) -> BotResponse:
+    def subscribe(self, user_identification: Union[int, str], district_id: Optional[int]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)
         if self._manager.add_subscription(user_id, district_id):
             message = "Dein Abonnement für {name} wurde erstellt."
@@ -355,25 +358,24 @@ class Bot(object):
                     f"Danke, dass du unseren Bot benutzt!")
         else:
             message = "Du hast {name} bereits abonniert."
-            # TODO: Also return data
-        return BotResponse(message.format(name=self._data.get_district(district_id).name))
+        return [BotResponse(message.format(name=self._data.get_district(district_id).name))] + self.get_district_report(district_id)
 
-    def unsubscribe(self, user_identification: Union[int, str], district_id: int) -> BotResponse:
+    def unsubscribe(self, user_identification: Union[int, str], district_id: int) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)
         if self._manager.rm_subscription(user_id, district_id):
             message = "Dein Abonnement für {name} wurde beendet."
         else:
             message = "Du hast {name} nicht abonniert."
-        return BotResponse(message.format(name=self._data.get_district(district_id).name))
+        return [BotResponse(message.format(name=self._data.get_district(district_id).name))]
 
-    def get_report(self, user_identification: Union[int, str]) -> BotResponse:
+    def get_report(self, user_identification: Union[int, str]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)
         user = self._manager.get_user(user_id, with_subscriptions=True)
         if not user:
             return self._get_report([])
         return self._get_report(user.subscriptions)
 
-    def _get_report(self, subscriptions: List[int]) -> BotResponse:
+    def _get_report(self, subscriptions: List[int]) -> List[BotResponse]:
         country = self._data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n"
         message += "<b>🦠 Infektionszahlen</b>\n" \
@@ -447,14 +449,14 @@ class Bot(object):
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
 
-        return BotResponse(message, [self.data_visualization.infections_graph(0)])
+        return [BotResponse(message, [self.data_visualization.infections_graph(0)])]
 
-    def delete_user(self, user_identification: Union[int, str]) -> BotResponse:
+    def delete_user(self, user_identification: Union[int, str]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification, create_if_not_exists=False)
         if user_id:
             if self._manager.delete_user(user_id):
-                return BotResponse("Deine Daten wurden erfolgreich gelöscht.")
-        return BotResponse("Zu deinem Account sind keine Daten vorhanden.")
+                return [BotResponse("Deine Daten wurden erfolgreich gelöscht.")]
+        return [BotResponse("Zu deinem Account sind keine Daten vorhanden.")]
 
     def change_platform_id(self, old_id: str, new_id: str) -> bool:
         return self._manager.change_platform_id(old_id, new_id)
@@ -522,11 +524,12 @@ class Bot(object):
     def handle_no_input() -> str:
         return 'Diese Aktion benötigt eine Ortsangabe.'
 
-    def unknown_action(self) -> BotResponse:
-        return BotResponse(("Dieser Befehl wurde nicht verstanden. Sende <code>{help_command}</code> um einen Überblick über die "
-                "Funktionen zu bekommen!").format(help_command=self.format_command("hilfe")))
+    def unknown_action(self) -> List[BotResponse]:
+        return [BotResponse(
+            ("Dieser Befehl wurde nicht verstanden. Sende <code>{help_command}</code> um einen Überblick über die "
+             "Funktionen zu bekommen!").format(help_command=self.format_command("hilfe")))]
 
-    def get_unconfirmed_daily_reports(self) -> Optional[List[Tuple[Union[int, str], BotResponse]]]:
+    def get_unconfirmed_daily_reports(self) -> Optional[List[Tuple[Union[int, str], List[BotResponse]]]]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
@@ -548,7 +551,7 @@ class Bot(object):
         user_id = self._manager.get_user_id(user_identification)
         self._manager.set_last_update(user_id, updated)
 
-    def get_statistic(self) -> BotResponse:
+    def get_statistic(self) -> List[BotResponse]:
         message = "Aktuell nutzen {total_user} Personen diesen Bot, davon "
         messenger_strings = [f"{c} über {m}" for m, c in self._manager.get_users_per_platform()]
         message += ", ".join(messenger_strings[:-1])
@@ -571,21 +574,21 @@ class Bot(object):
 
         message += "\n\nInformationen zur Nutzung des Bots auf anderen Plattformen findest du unter " \
                    "https://covidbot.d-64.org!"
-        return BotResponse(message, [self.data_visualization.bot_user_graph()])
+        return [BotResponse(message, [self.data_visualization.bot_user_graph()])]
 
-    def get_debug_report(self, user_identification: Union[int, str]) -> BotResponse:
+    def get_debug_report(self, user_identification: Union[int, str]) -> List[BotResponse]:
         uid = self._manager.get_user_id(user_identification, False)
         if not uid:
-            return BotResponse("Für dich sind aktuell keine Debug informationen verfügbar.")
+            return [BotResponse("Für dich sind aktuell keine Debug informationen verfügbar.")]
 
         user = self._manager.get_user(uid, with_subscriptions=True)
 
-        return BotResponse(f"<b>Debug Informationen</b>\n"
-                           f"platform_id: {user.platform_id}\n"
-                           f"user_id: {user.id}\n"
-                           f"lang: {user.language}\n"
-                           f"last_update: {user.last_update}\n"
-                           f"subscriptions: {user.subscriptions}")
+        return [BotResponse(f"<b>Debug Informationen</b>\n"
+                            f"platform_id: {user.platform_id}\n"
+                            f"user_id: {user.id}\n"
+                            f"lang: {user.language}\n"
+                            f"last_update: {user.last_update}\n"
+                            f"subscriptions: {user.subscriptions}")]
 
     def get_all_user(self) -> List[BotUser]:
         return self._manager.get_all_user()
@@ -594,21 +597,21 @@ class Bot(object):
         user_id = self._manager.get_user_id(user_identification)
         return self._manager.add_feedback(user_id, feedback)
 
-    def get_privacy_msg(self) -> BotResponse:
-        return BotResponse("Unsere Datenschutzerklärung findest du hier: "
-                           "https://github.com/eknoes/covid-bot/wiki/Datenschutz\n\n"
-                           f"Außerdem kannst du mit dem Befehl {self.format_command('loeschmich')} alle deine bei uns gespeicherten "
-                           "Daten löschen.")
+    def get_privacy_msg(self) -> List[BotResponse]:
+        return [BotResponse("Unsere Datenschutzerklärung findest du hier: "
+                            "https://github.com/eknoes/covid-bot/wiki/Datenschutz\n\n"
+                            f"Außerdem kannst du mit dem Befehl {self.format_command('loeschmich')} alle deine bei uns gespeicherten "
+                            "Daten löschen.")]
 
     @staticmethod
-    def get_error_message() -> BotResponse:
-        return BotResponse("Leider ist ein unvorhergesehener Fehler aufgetreten. Bitte versuche es erneut.")
+    def get_error_message() -> List[BotResponse]:
+        return [BotResponse("Leider ist ein unvorhergesehener Fehler aufgetreten. Bitte versuche es erneut.")]
 
     @staticmethod
-    def no_delete_user() -> BotResponse:
-        return BotResponse("Deine Daten werden nicht gelöscht.")
+    def no_delete_user() -> List[BotResponse]:
+        return [BotResponse("Deine Daten werden nicht gelöscht.")]
 
-    def start_message(self, user_identification: Union[str, int], username=""):
+    def start_message(self, user_identification: Union[str, int], username="") -> List[BotResponse]:
         if username:
             username = " " + username
         message = (f'Hallo{username},\n'
@@ -624,9 +627,9 @@ class Bot(object):
             f'Wenn die Daten des Ortes nur gesammelt für eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
             f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
             f' auch die aktuellen Zahlen für andere Orte ansehen.')
-        return BotResponse(message)
+        return [BotResponse(message)]
 
-    def help_message(self, user_identification: Union[str, int], username="") -> BotResponse:
+    def help_message(self, user_identification: Union[str, int], username="") -> List[BotResponse]:
         if username:
             username = " " + username
 
@@ -674,11 +677,11 @@ class Bot(object):
                     abo_command=self.format_command('Abo'), privacy_command=self.format_command('Datenschutz'),
                     help_command=self.format_command('Hilfe'), info_command=self.format_command('Info'),
                     vacc_command=self.format_command('Impfungen'), deleteme_command=self.format_command('Loeschmich'))
-        return BotResponse(message)
+        return [BotResponse(message)]
 
     @staticmethod
-    def explain_message() -> BotResponse:
-        return BotResponse("<b>Was bedeuten die Infektionszahlen?</b>\n"
+    def explain_message() -> List[BotResponse]:
+        return [BotResponse("<b>Was bedeuten die Infektionszahlen?</b>\n"
                            "Die 7-Tage Inzidenz ist die Anzahl der Covid19-Infektionen in den vergangenen 7 Tagen je 100.000 Einwohner:innen. "
                            "Im Gegensatz zu den Neuinfektionszahlen und Todesfällen lässt sich dieser Wert gut täglich vergleichen. "
                            "Das liegt daran, dass es ein Wert ist, der sich auf die letzten 7 Tage bezieht und so nicht den tagesabhängigen Schwankungen unterliegt. "
@@ -700,7 +703,7 @@ class Bot(object):
                            "• <a href='https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv'>Neuinfektionen</a>\n"
                            "• <a href='https://services.arcgis.com/OLiydejKCZTGhvWg/ArcGIS/rest/services/Impftabelle_mit_Zweitimpfungen/FeatureServer/0'>Impfdaten für Deutschland und die Bundesländer</a>\n"
                            "• <a href='https://impfdashboard.de'>Impfdaten für Deutschland</a>\n"
-                           "• <a href='https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv'>R-Wert</a>")
+                           "• <a href='https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv'>R-Wert</a>")]
 
     def format_command(self, command: str):
         if command:
