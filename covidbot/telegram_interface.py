@@ -16,6 +16,7 @@ from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandle
 from telegram.ext.dispatcher import DEFAULT_GROUP
 
 from covidbot.bot import Bot, UserDistrictActions, UserHintService
+from covidbot.covid_data.models import District
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_COMMAND_COUNT, RECV_MESSAGE_COUNT, \
@@ -209,14 +210,14 @@ class TelegramInterface(MessengerInterface):
     def currentHandler(self, update: Update, context: CallbackContext) -> None:
         BOT_COMMAND_COUNT.labels('district_data').inc()
         query = " ".join(context.args)
-        msg, districts = self._bot.find_district_id(query)
+        response, districts = self._bot.find_district_id(query)
         if not districts:
-            self.answer_update(update, [BotResponse(msg)])
+            self.answer_update(update, [response])
         elif len(districts) > 1:
             markup = self.gen_multi_district_answer(districts, TelegramCallbacks.REPORT)
-            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
+            self.answer_update(update, [response], reply_markup=markup)
         else:
-            district_id = districts[0][0]
+            district_id = districts[0].id
             message = self._bot.get_district_report(district_id)
             self.answer_update(update, message, disable_web_page_preview=True)
 
@@ -224,14 +225,14 @@ class TelegramInterface(MessengerInterface):
     def rulesHandler(self, update: Update, context: CallbackContext) -> None:
         BOT_COMMAND_COUNT.labels('rules').inc()
         query = " ".join(context.args)
-        msg, districts = self._bot.find_district_id(query)
+        response, districts = self._bot.find_district_id(query)
         if not districts:
-            self.answer_update(update, [BotResponse(msg)])
+            self.answer_update(update, [response])
         elif len(districts) > 1:
             markup = self.gen_multi_district_answer(districts, TelegramCallbacks.RULES)
-            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
+            self.answer_update(update, [response], reply_markup=markup)
         else:
-            district_id = districts[0][0]
+            district_id = districts[0].id
             message = self._bot.get_rules(district_id)
             self.answer_update(update, message, disable_web_page_preview=True)
 
@@ -248,36 +249,35 @@ class TelegramInterface(MessengerInterface):
     def subscribeHandler(self, update: Update, context: CallbackContext) -> None:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
         if not context.args:
-            msg, districts = self._bot.get_overview(update.effective_chat.id)
+            response, districts = self._bot.get_overview(update.effective_chat.id)
         else:
             query = " ".join(context.args)
-            msg, districts = self._bot.find_district_id(query)
+            response, districts = self._bot.find_district_id(query)
 
         if not districts:
-            self.answer_update(update, [BotResponse(msg)])
+            self.answer_update(update, [response])
         elif len(districts) > 1 or not context.args:
             if not context.args:
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.CHOOSE_ACTION)
             else:
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.SUBSCRIBE)
-            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
+            self.answer_update(update, [response], reply_markup=markup)
         else:
-            district_id = districts[0][0]
-            self.answer_update(update, self._bot.subscribe(update.effective_chat.id, district_id),
+            self.answer_update(update, self._bot.subscribe(update.effective_chat.id, districts[0].id),
                                disable_web_page_preview=True)
 
     @BOT_RESPONSE_TIME.time()
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
         BOT_COMMAND_COUNT.labels('unsubscribe').inc()
         query = " ".join(context.args)
-        msg, districts = self._bot.find_district_id(query)
+        response, districts = self._bot.find_district_id(query)
         if not districts:
-            self.answer_update(update, [BotResponse(msg)])
+            self.answer_update(update, [response])
         elif len(districts) > 1:
             markup = self.gen_multi_district_answer(districts, TelegramCallbacks.UNSUBSCRIBE)
-            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
+            self.answer_update(update, [response], reply_markup=markup)
         else:
-            self.answer_update(update, self._bot.unsubscribe(update.effective_chat.id, districts[0][0]))
+            self.answer_update(update, self._bot.unsubscribe(update.effective_chat.id, districts[0].id))
 
     @BOT_RESPONSE_TIME.time()
     def reportHandler(self, update: Update, context: CallbackContext) -> None:
@@ -390,7 +390,7 @@ class TelegramInterface(MessengerInterface):
     @BOT_RESPONSE_TIME.time()
     def directMessageHandler(self, update: Update, context: CallbackContext) -> None:
         if update.message.location:
-            msg, districts = self._bot.find_district_id_from_geolocation(update.message.location.longitude,
+            response, districts = self._bot.find_district_id_from_geolocation(update.message.location.longitude,
                                                                          update.message.location.latitude)
         else:
             # Make Commands without / available
@@ -404,10 +404,10 @@ class TelegramInterface(MessengerInterface):
                     MessageEntity(MessageEntity.BOT_COMMAND, offset=0, length=len(cmd_with_args[0]) + 1)]
                 return self.updater.dispatcher.process_update(update)
 
-            msg, districts = self._bot.find_district_id(update.message.text)
+            response, districts = self._bot.find_district_id(update.message.text)
 
         if not districts:
-            self.answer_update(update, [BotResponse(msg)])
+            self.answer_update(update, [response])
 
             self.feedback_cache[update.effective_chat.id] = update.message.text
             if update.effective_user:
@@ -424,15 +424,16 @@ class TelegramInterface(MessengerInterface):
             if len(districts) > 1:
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.CHOOSE_ACTION)
             else:
-                msg, markup = self.chooseActionBtnGenerator(districts[0][0], update.effective_chat.id)
-            self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
+                message, markup = self.chooseActionBtnGenerator(districts[0].id, update.effective_chat.id)
+                response = BotResponse(message)
+            self.answer_update(update, [response], reply_markup=markup)
 
     @staticmethod
-    def gen_multi_district_answer(districts: List[Tuple[int, str]],
+    def gen_multi_district_answer(districts: List[District],
                                   callback: TelegramCallbacks) -> InlineKeyboardMarkup:
         buttons = []
-        for district_id, name in districts:
-            buttons.append([InlineKeyboardButton(name, callback_data=callback.name + str(district_id))])
+        for district in districts:
+            buttons.append([InlineKeyboardButton(district.name, callback_data=callback.name + str(district.id))])
         return InlineKeyboardMarkup(buttons)
 
     def chooseActionBtnGenerator(self, district_id: int, user_id: int) -> Tuple[str, InlineKeyboardMarkup]:

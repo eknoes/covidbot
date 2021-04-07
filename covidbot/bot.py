@@ -8,6 +8,7 @@ from functools import reduce
 from typing import Optional, Tuple, List, Dict, Union, Callable
 
 from covidbot.covid_data import CovidData, DistrictData, Visualization
+from covidbot.covid_data.models import District
 from covidbot.location_service import LocationService
 from covidbot.user_manager import UserManager, BotUser
 from covidbot.utils import format_data_trend, format_int, format_float, format_noun, FormattableNoun, BotResponse
@@ -103,9 +104,9 @@ class Bot(object):
         return [
             BotResponse("Leider konnte deine Sprache nicht auf {language} gesetzt werde.".format(language=language))]
 
-    def find_district_id(self, district_query: str) -> Tuple[Optional[str], Optional[List[Tuple[int, str]]]]:
+    def find_district_id(self, district_query: str) -> Tuple[Optional[BotResponse], Optional[List[District]]]:
         if not district_query:
-            return 'Dieser Befehl benötigt eine Ortsangabe', None
+            return BotResponse('Dieser Befehl benötigt eine Ortsangabe'), None
 
         possible_district = self._data.search_district_by_name(district_query)
         online_match = False
@@ -124,7 +125,7 @@ class Bot(object):
                       'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind. Mit {help_cmd} erhältst du ' \
                       'einen Überblick über die Funktionsweise des Bots.' \
                 .format(location=district_query, help_cmd=self.format_command("hilfe"))
-            return message, None
+            return BotResponse(message), None
         elif len(possible_district) == 1:
             return None, possible_district
         elif 1 < len(possible_district) <= 15:
@@ -134,12 +135,12 @@ class Bot(object):
                     .format(district=district_query)
             else:
                 message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden"
-            return message, possible_district
+            return BotResponse(message), possible_district
         else:
             message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
-            return message, None
+            return [BotResponse(message)], None
 
-    def find_district_id_from_geolocation(self, lon, lat) -> Tuple[Optional[str], Optional[List[Tuple[int, str]]]]:
+    def find_district_id_from_geolocation(self, lon, lat) -> Tuple[Optional[str], Optional[List[District]]]:
         district_id = self._location_service.find_rs(lon, lat)
         if not district_id:
             return ('Leider konnte kein Ort in den RKI Corona Daten zu {location} gefunden werden. Bitte beachte, '
@@ -147,7 +148,7 @@ class Bot(object):
                     None)
         else:
             district = self._data.get_district(district_id)
-            results = [(district_id, district.name)]
+            results = [district]
 
             message = None
             if district.parent:
@@ -506,20 +507,20 @@ class Bot(object):
 
         return result
 
-    def get_overview(self, user_identification: Union[int, str]) -> Tuple[str, Optional[List[Tuple[int, str]]]]:
+    def get_overview(self, user_identification: Union[int, str]) -> Tuple[BotResponse, Optional[List[District]]]:
         user_id = self._manager.get_user_id(user_identification)
         user = self._manager.get_user(user_id, with_subscriptions=True)
         if not user or not user.subscriptions:
             message = "Du hast aktuell <b>keine</b> Orte abonniert. Mit <code>{subscribe_command}</code> kannst du " \
                       "Orte abonnieren, bspw. <code>{subscribe_command} Dresden</code> " \
                 .format(subscribe_command=self.format_command("abo"))
-            counties = None
+            districts = None
         else:
-            counties = list(map(lambda s: (s, self._data.get_district(s).name), user.subscriptions))
+            districts = list(map(lambda s: (s, self._data.get_district(s)), user.subscriptions))
             message = "Du hast aktuell {abo_count} abonniert." \
                 .format(abo_count=format_noun(len(user.subscriptions), FormattableNoun.DISTRICT))
 
-        return message, counties
+        return BotResponse(message), districts
 
     @staticmethod
     def handle_no_input() -> str:

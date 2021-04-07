@@ -197,11 +197,11 @@ class SingleCommandInterface(MessengerInterface, ABC):
             if districts_query:
                 if len(districts_query) > 1:
                     for district in districts_query:
-                        if district[1].find(argument) == 0:
-                            district_id = district[0]
+                        if district.name.find(argument) == 0:
+                            district_id = district.id
                             break
                 else:
-                    district_id = districts_query[0][0]
+                    district_id = districts_query[0].id
 
                 if district_id:
                     break

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Union, Optional, Tuple
 
 from covidbot.bot import Bot, UserDistrictActions
+from covidbot.covid_data.models import District
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import BOT_COMMAND_COUNT
 from covidbot.utils import adapt_text, BotResponse
@@ -119,41 +120,41 @@ class SimpleTextInterface(object):
         BOT_COMMAND_COUNT.labels('vaccinations').inc()
         return self.bot.get_vaccination_overview(0)
 
-    def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[str, int]:
-        message, locations = self.bot.find_district_id(location_query)
+    def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[List[BotResponse], District]:
+        response, locations = self.bot.find_district_id(location_query)
         if not locations:
             if set_feedback != 0:
                 self.chat_states[set_feedback] = (ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
-                message += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
+                response += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
                            "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
-            return message
+            return [response]
 
         elif len(locations) == 1:
-            return locations[0][0]
+            return locations[0]
         else:
-            locations_list = message + "\n\n"
+            locations_list = response.message + "\n\n"
             for location in locations:
-                locations_list += f"• {location[1]}\t{location[0]}\n"
+                locations_list += f"• {location.name}\t{location.id}\n"
 
             locations_list += "\n"
             locations_list += "Leider musst du deine Auswahl genauer angeben. Anstatt des kompletten Namens kannst du " \
-                              f"auch die ID nutzen, also bspw. Abo {locations[0][0]} für {locations[0][1]}"
-            return locations_list
+                              f"auch die ID nutzen, also bspw. Abo {locations[0].id} für {locations[0].name}"
+            return [BotResponse(locations_list)]
 
     def subscribeHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
         if not user_input:
-            message, locations = self.bot.get_overview(user_id)
+            response, locations = self.bot.get_overview(user_id)
             if locations:
-                message += "\n"
+                response.message += "\n"
                 for loc in locations:
-                    message += f"• {loc[1]}\t{loc[0]}\n"
-            return [BotResponse(message)]
+                    response.message += f"• {loc.name}\t{loc.id}\n"
+            return response
 
         location = self.parseLocationInput(user_input)
-        if type(location) == int:
-            return self.bot.subscribe(user_id, location)
-        return [BotResponse(location)]
+        if type(location) == District:
+            return self.bot.subscribe(user_id, location.id)
+        return location
 
     def rulesHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('rules').inc()
@@ -161,9 +162,9 @@ class SimpleTextInterface(object):
             return [BotResponse("Dieser Befehl benötigt eine Ortsangabe.")]
 
         location = self.parseLocationInput(user_input)
-        if type(location) == int:
-            return self.bot.get_rules(location)
-        return [BotResponse(location)]
+        if type(location) == District:
+            return self.bot.get_rules(location.id)
+        return location
 
     def unsubscribeHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('unsubscribe').inc()
@@ -171,9 +172,9 @@ class SimpleTextInterface(object):
             return [BotResponse("Dieser Befehl benötigt eine Ortsangabe.")]
 
         location = self.parseLocationInput(user_input)
-        if type(location) == int:
-            return self.bot.unsubscribe(user_id, location)
-        return [BotResponse(location)]
+        if type(location) == District:
+            return self.bot.unsubscribe(user_id, location.id)
+        return location
 
     def currentDataHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('district_data').inc()
@@ -182,9 +183,9 @@ class SimpleTextInterface(object):
             return [BotResponse("Dieser Befehl benötigt eine Ortsangabe.")]
 
         location = self.parseLocationInput(user_input)
-        if type(location) == int:
-            return self.bot.get_district_report(location)
-        return [BotResponse(location)]
+        if type(location) == District:
+            return self.bot.get_district_report(location.id)
+        return location
 
     def reportHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('report').inc()
@@ -192,9 +193,9 @@ class SimpleTextInterface(object):
 
     def directHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         location = self.parseLocationInput(user_input, set_feedback=user_id)
-        if type(location) == int:
-            self.chat_states[user_id] = (ChatBotState.WAITING_FOR_COMMAND, str(location))
-            message, available_actions = self.bot.get_possible_actions(user_id, location)
+        if type(location) == District:
+            self.chat_states[user_id] = (ChatBotState.WAITING_FOR_COMMAND, str(location.id))
+            message, available_actions = self.bot.get_possible_actions(user_id, location.id)
             message += "\n\n"
             for action in available_actions:
                 if action[1] == UserDistrictActions.REPORT:
@@ -206,7 +207,7 @@ class SimpleTextInterface(object):
                 elif action[1] == UserDistrictActions.RULES:
                     message += '• Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten\n'
             return [BotResponse(message)]
-        return [BotResponse(location)]
+        return location
 
     def statHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('statistic').inc()
