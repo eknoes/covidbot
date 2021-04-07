@@ -35,7 +35,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
         try:
             responses = self.handle_input(message.text, message.sender_id)
             for response in responses:
-                await self.send_bot_response(message.sender_id, response)
+                await self.send_bot_response(message.sender_id, adapt_text(response, threema_format=True))
         except Exception as e:
             self.log.exception("An error happened while handling a FB Messenger message", exc_info=e)
             self.log.exception(f"Message from {message.sender_id}: {message.text}")
