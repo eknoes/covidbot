@@ -30,6 +30,7 @@ python-telegram-bot==13.4.1
 pytz==2021.1
 requests==2.25.1
 -e git+https://github.com/eknoes/semaphore@production#egg=semaphore_bot
+-e git+https://github.com/eknoes/simple-fbmessenger@main#egg=fbmessenger
 -e git+https://github.com/eknoes/Mastodon.py.git@64d43b90a45fa6890b85eb25960d2d08a8aea4ae#egg=mastodon.py
 Shapely==1.7.1
 six==1.15.0

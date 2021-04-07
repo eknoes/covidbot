@@ -52,7 +52,8 @@ class MessengerBotSetup:
             stream_log_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
             logging.getLogger().addHandler(stream_log_handler)
 
-        if name not in ["signal", "threema", "telegram", "interactive", "feedback", "twitter", "mastodon", "instagram"]:
+        if name not in ["signal", "threema", "telegram", "interactive", "feedback", "twitter", "mastodon", "instagram",
+                        "messenger"]:
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
@@ -71,9 +72,8 @@ class MessengerBotSetup:
         # Do not activate user on Threema automatically
         users_activated = True
         location_feature = True
-        if self.name == "threema":
+        if self.name == "threema" or self.name == "messenger":
             location_feature = False
-            # users_activated = False
 
         if self.name == "telegram":
             command_format = "<code>/{command}</code>"
@@ -99,6 +99,7 @@ class MessengerBotSetup:
         USER_COUNT.labels(platform="threema").set_function(lambda: user_monitor.get_user_number("threema"))
         USER_COUNT.labels(platform="telegram").set_function(lambda: user_monitor.get_user_number("telegram"))
         USER_COUNT.labels(platform="signal").set_function(lambda: user_monitor.get_user_number("signal"))
+        USER_COUNT.labels(platform="messenger").set_function(lambda: user_monitor.get_user_number("messenger"))
         AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_monitor.get_mean_subscriptions())
 
         # Return specific interface
@@ -109,6 +110,14 @@ class MessengerBotSetup:
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
                                     self.config['THREEMA'].get('PRIVATE_KEY'), bot,
                                     dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
+
+        if self.name == "messenger":
+            if not self.config.has_section("MESSENGER"):
+                raise ValueError("MESSENGER is not configured")
+            from covidbot.fbmessenger_interface import FBMessengerInterface
+            return FBMessengerInterface(bot, self.config['MESSENGER'].get('PAGE_ACCESS_TOKEN'),
+                                        self.config['MESSENGER'].get('VERIFY'),
+                                        self.config['MESSENGER'].getint('PORT', fallback=8080))
 
         if self.name == "signal":
             if not self.config.has_section("SIGNAL"):
@@ -187,7 +196,7 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
         print("You have to specify a messenger if you want to send a message to certain users!")
         return
 
-    if messenger_interface and messenger_interface not in ["signal", "threema", "telegram"]:
+    if messenger_interface and messenger_interface not in ["signal", "threema", "telegram", "messenger"]:
         print("Your messenger name is invalid.")
         return
 
@@ -224,7 +233,7 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
             await iface.send_message_to_users(message, recipients, with_report)
 
     else:
-        for messenger_interface in ["telegram", "threema", "signal"]:
+        for messenger_interface in ["telegram", "threema", "signal", "messenger"]:
             try:
                 with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
                     await iface.send_message_to_users(message, recipients, with_report)
@@ -244,7 +253,8 @@ def main():
     parser.add_argument('--verbose', '-v', action='count', default=0)
     parser.add_argument('--config', '-c', action='store', default='config.ini', metavar='CONFIG_FILE')
 
-    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'interactive', 'twitter', 'mastodon'],
+    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'interactive', 'twitter', 'mastodon',
+                                               'messenger'],
                         nargs=1,
                         help='Platform that should be used', type=str, action='store')
     parser.add_argument('--check-updates', help='Run platform independent jobs, such as checking for new data',
@@ -262,6 +272,7 @@ def main():
     args = parser.parse_args()
     if args.platform:
         args.platform = args.platform[0]
+
     if not args.verbose:
         logging_level = logging.WARNING
     elif args.verbose > 1:
@@ -316,15 +327,16 @@ def main():
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
                         with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                            asyncio.run(telegram.send_message_to_users(f"Got new data from {updater.__class__.__name__}",
-                                                                       [config["TELEGRAM"].get("DEV_CHAT")]))
+                            asyncio.run(
+                                telegram.send_message_to_users(f"Got new data from {updater.__class__.__name__}",
+                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
                 except Exception as error:
                     # Data did not make it through plausibility check
                     logging.exception(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}",
                                       exc_info=error)
                     with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
                         asyncio.run(telegram.send_message_to_users(f"Exception happened on Data Update with "
-                                                          f"{updater.__class__.__name__}: {error}",
+                                                                   f"{updater.__class__.__name__}: {error}",
                                                                    [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Forward Feedback
@@ -346,7 +358,8 @@ def main():
 
     elif args.daily_report:
         # Setup Logging
-        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, f"reports-{args.platform}.log"))
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level,
+                            filename=os.path.join(logs_dir, f"reports-{args.platform}.log"))
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
@@ -359,7 +372,8 @@ def main():
 
     elif args.message_user:
         # Setup Logging
-        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, "message-users.log"))
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level,
+                            filename=os.path.join(logs_dir, "message-users.log"))
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
@@ -386,8 +400,7 @@ def main():
                 logging.exception(f"Exception while running {args.platform} client", exc_info=e)
                 with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
                     asyncio.run(telegram.send_message_to_users(f"Exception happened while running {args.platform} bot:"
-                                                      f"{e}",
-                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
+                                                               f"{e}", [config["TELEGRAM"].get("DEV_CHAT")]))
                 raise e
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"), disable_cache=True)
