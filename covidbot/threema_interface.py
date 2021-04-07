@@ -10,7 +10,6 @@ from aiohttp import web
 from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage
 
 from covidbot.bot import Bot, UserHintService
-from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT, BOT_RESPONSE_TIME
 from covidbot.text_interface import SimpleTextInterface
@@ -59,7 +58,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 self.log.exception("Exiting!")
 
                 try:
-                    response_msg = TextMessage(self.connection, text=adapt_text(self.bot.get_error_message(), True),
+                    response_msg = TextMessage(self.connection, text=adapt_text(self.bot.get_error_message()[0], True),
                                                to_id=message.from_id)
                     await response_msg.send()
                 except Exception:
@@ -98,7 +97,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         if not unconfirmed_reports:
             return
         for userid, message in unconfirmed_reports:
-            await self.send_bot_response(userid, message)
+            for elem in message:
+                await self.send_bot_response(userid, elem)
             self.bot.confirm_daily_report_send(userid)
             self.log.warning(f"Sent report to {userid}")
 
@@ -130,7 +130,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
 
             if append_report:
                 report = self.reportHandler("", user)
-                await self.send_bot_response(user, report)
+                for elem in report:
+                    await self.send_bot_response(user, elem)
             self.log.warning(f"Sent message to {user}")
 
     async def sendMessageToDev(self, message: str):

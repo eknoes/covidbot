@@ -77,7 +77,6 @@ class CovidData(object):
                                   date=record['date'])
 
             # Check if vaccination data is available
-            vaccination_data = None
             cursor.execute('SELECT MAX(date) as last_update FROM covid_vaccinations WHERE district_id=%s', [district_id])
             vacc_date = cursor.fetchone()
             if vacc_date:

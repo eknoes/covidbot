@@ -1,6 +1,4 @@
-import codecs
 import csv
-import ujson as json
 import logging
 import random
 from abc import ABC, abstractmethod
@@ -8,6 +6,7 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 import requests
+import ujson as json
 from mysql.connector import MySQLConnection
 
 from covidbot.covid_data.covid_data import CovidDatabaseCreator
@@ -411,9 +410,10 @@ class ICUGermanyUpdater(Updater):
             for row in reader:
                 # Berlin is here AGS = 11000
                 if row['gemeindeschluessel'] == '11000':
-                    row['gemeindeschluessel'] = 11
+                    row['gemeindeschluessel'] = '11'
                 results.append((row['gemeindeschluessel'], row['daten_stand'], row['betten_frei'], row['betten_belegt'],
-                                row['faelle_covid_aktuell'], row['faelle_covid_aktuell_invasiv_beatmet'], row['daten_stand']))
+                                row['faelle_covid_aktuell'], row['faelle_covid_aktuell_invasiv_beatmet'],
+                                row['daten_stand']))
 
             with self.connection.cursor() as cursor:
                 for row in results:
@@ -448,8 +448,8 @@ class RulesGermanyUpdater(Updater):
 
     def update(self) -> bool:
         last_update = self.get_last_update()
-        if last_update and  datetime.now() - last_update < timedelta(hours=12):
-                return False
+        if last_update and datetime.now() - last_update < timedelta(hours=12):
+            return False
 
         new_data = False
         response = self.get_resource(self.URL)

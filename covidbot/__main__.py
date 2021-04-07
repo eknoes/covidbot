@@ -9,8 +9,8 @@ from sys import exit
 from typing import List
 
 import prometheus_client
+from mysql.connector import connect, MySQLConnection
 from prometheus_client import Info
-from mysql.connector import connect, MySQLConnection, IntegrityError
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, Visualization

@@ -110,9 +110,9 @@ def replace_italic_unicode(text: str) -> str:
 
 
 def replace_by_list(text: str, search: List[str], replace: List[str], ignore_links=False) -> str:
+    tokens = []
     if not ignore_links:
         matches = link_pattern.finditer(text)
-        tokens = []
         if matches:
             for match in matches:
                 token = f"???!!!?!?!{match.start()}"

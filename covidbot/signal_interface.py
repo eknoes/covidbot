@@ -120,7 +120,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             message_counter = 0
             for userid, message in unconfirmed_reports:
                 self.log.info(f"Try to send report {message_counter}")
-                success = await bot.send_message(userid, adapt_text(message.message), attachments=message.images)
+                for elem in message:
+                    success = await bot.send_message(userid, adapt_text(elem.message), attachments=elem.images)
                 if success:
                     self.bot.confirm_daily_report_send(userid)
                     self.log.warning(f"({message_counter}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
@@ -156,11 +157,12 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 if append_report:
                     response = self.reportHandler("", user)
                     attachments = []
-                    if response.images:
-                        for image in response.images:
-                            attachments.append(self.get_attachment(image))
-                    success = await bot.send_message(user, adapt_text(response.message), attachments)
-                    backoff_time = self.backoff_timer(backoff_time, not success, user)
+                    for elem in response:
+                        if elem.images:
+                            for image in elem.images:
+                                attachments.append(self.get_attachment(image))
+                        success = await bot.send_message(user, adapt_text(elem.message), attachments)
+                        backoff_time = self.backoff_timer(backoff_time, not success, user)
 
         await self.restart_service()
 

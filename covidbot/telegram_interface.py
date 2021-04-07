@@ -9,8 +9,8 @@ from typing import Tuple, List, Dict, Union, Optional
 
 import telegram
 import ujson as json
-from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, ChatAction, \
-    MessageEntity, InputMediaPhoto, CallbackQuery
+from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, ChatAction, \
+    MessageEntity, InputMediaPhoto
 from telegram.error import BadRequest, TelegramError, Unauthorized, ChatMigrated
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP
@@ -263,7 +263,8 @@ class TelegramInterface(MessengerInterface):
             self.answer_update(update, [BotResponse(msg)], reply_markup=markup)
         else:
             district_id = districts[0][0]
-            self.answer_update(update, self._bot.subscribe(update.effective_chat.id, district_id), disable_web_page_preview=True)
+            self.answer_update(update, self._bot.subscribe(update.effective_chat.id, district_id),
+                               disable_web_page_preview=True)
 
     @BOT_RESPONSE_TIME.time()
     def unsubscribeHandler(self, update: Update, context: CallbackContext) -> None:
@@ -324,7 +325,8 @@ class TelegramInterface(MessengerInterface):
         if query.data.startswith(TelegramCallbacks.SUBSCRIBE.name):
             BOT_COMMAND_COUNT.labels('subscribe').inc()
             district_id = int(query.data[len(TelegramCallbacks.SUBSCRIBE.name):])
-            self.answer_callback_query(update, self._bot.subscribe(update.effective_chat.id, district_id), disable_web_page_preview=True)
+            self.answer_callback_query(update, self._bot.subscribe(update.effective_chat.id, district_id),
+                                       disable_web_page_preview=True)
 
         # Unsubscribe Callback
         elif query.data.startswith(TelegramCallbacks.UNSUBSCRIBE.name):
@@ -417,7 +419,7 @@ class TelegramInterface(MessengerInterface):
                                        callback_data=TelegramCallbacks.DISCARD.name)]])
 
             self.answer_update(update, [BotResponse("Hast du gar keinen Ort gesucht, sondern möchtest uns deine "
-                                                   "Nachricht als Feedback zusenden?")], reply_markup=feedback_markup)
+                                                    "Nachricht als Feedback zusenden?")], reply_markup=feedback_markup)
         else:
             if len(districts) > 1:
                 markup = self.gen_multi_district_answer(districts, TelegramCallbacks.CHOOSE_ACTION)
@@ -553,7 +555,7 @@ class TelegramInterface(MessengerInterface):
                 self._bot.delete_user(uid)
                 self.log.warning(f"Could not send message to {str(uid)} as he blocked us")
 
-    def error_callback(self, update: Update, context: CallbackContext):
+    def error_callback(self, update: object, context: CallbackContext):
         # Send all errors to maintainers
         # Try to send non Telegram Exceptions to maintainer
         try:
@@ -561,7 +563,7 @@ class TelegramInterface(MessengerInterface):
             tb_string = ''.join(tb_list)
 
             message = [f'<b>An exception was raised while handling an update!</b>\n']
-            if update:
+            if update and type(update) == Update:
                 message.append(
                     f'<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}'
                     f'</pre>\n\n', )
@@ -580,7 +582,7 @@ class TelegramInterface(MessengerInterface):
                     self.log.warning("Can't send message to developers!")
 
             # Inform user that an error happened
-            if update.effective_chat.id:
+            if update and type(update) == Update and update.effective_chat.id:
                 self.send_telegram_message(update.effective_chat.id, self._bot.get_error_message())
         except Exception as e:
             self.log.error("Can't send error to developers", exc_info=e)
@@ -588,7 +590,7 @@ class TelegramInterface(MessengerInterface):
         # noinspection PyBroadException
         if isinstance(context.error, Unauthorized):
             user_id = 0
-            if update and update.effective_chat:
+            if update and type(update) == Update and update.effective_chat:
                 user_id = update.effective_chat.id
 
             logging.warning(f"TelegramError: Unauthorized chat_id {user_id}", exc_info=context.error)

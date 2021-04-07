@@ -104,7 +104,7 @@ class Visualization:
         figure.clf()
         plt.close(figure)
 
-    def infections_graph(self, district_id: int, duration: int = 49, quadratic = False) -> str:
+    def infections_graph(self, district_id: int, duration: int = 49, quadratic=False) -> str:
         district_name, current_date, x_data, y_data = self._get_covid_data("new_cases", district_id, duration)
 
         filepath = os.path.abspath(
@@ -116,7 +116,8 @@ class Visualization:
             return filepath
         CREATED_GRAPHS.labels(type='infections').inc()
 
-        fig, ax1 = self.setup_plot(current_date, f"Neuinfektionen {district_name}", "Neuinfektionen", quadratic=quadratic)
+        fig, ax1 = self.setup_plot(current_date, f"Neuinfektionen {district_name}", "Neuinfektionen",
+                                   quadratic=quadratic)
         # Plot data
         plt.xticks(x_data, rotation='30', ha='right')
 
@@ -142,7 +143,8 @@ class Visualization:
     def bot_user_graph(self) -> str:
         now = datetime.datetime.now()
         quarter = math.floor(now.hour / 4)
-        filepath = os.path.abspath(os.path.join(self.graphics_dir, f"botuser-{now.strftime(f'%Y-%m-%d-{quarter}')}.jpg"))
+        filepath = os.path.abspath(
+            os.path.join(self.graphics_dir, f"botuser-{now.strftime(f'%Y-%m-%d-{quarter}')}.jpg"))
         if not self.disable_cache and os.path.isfile(filepath):
             CACHED_GRAPHS.labels(type='botuser').inc()
             return filepath
@@ -269,7 +271,8 @@ class Visualization:
         for district in district_ids:
             district_name, current_date, x_data, y_data = self._get_covid_data("incidence", district, duration)
             data.append({'name': district_name, 'x': x_data, 'y': y_data, 'date': current_date,
-                         'linestyle': line_styles[i % len(line_styles)], 'linecolor': line_colors[i % len(line_colors)]})
+                         'linestyle': line_styles[i % len(line_styles)],
+                         'linecolor': line_colors[i % len(line_colors)]})
             i += 1
 
         current_date = data[0].get('date')
@@ -293,7 +296,8 @@ class Visualization:
         # Sort for legend, highest at first
         data.sort(key=lambda element: element.get('y')[-1], reverse=True)
         for d in data:
-            plt.plot(d.get('x'), d.get('y'), linestyle=d.get('linestyle'), color=d.get('linecolor'), zorder=3, linewidth=1, label=d.get('name'))
+            plt.plot(d.get('x'), d.get('y'), linestyle=d.get('linestyle'), color=d.get('linecolor'), zorder=3,
+                     linewidth=1, label=d.get('name'))
 
         # Add legend
         plt.legend()
