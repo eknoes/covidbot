@@ -117,8 +117,7 @@ class Bot(object):
             osm_results = self._location_service.find_location(district_query)
             possible_district = []
             for district_id in osm_results:
-                district = self._data.get_district(district_id)
-                possible_district.append((district_id, district.name))
+                possible_district.append(self._data.get_district(district_id))
 
         if not possible_district:
             message = 'Leider konnte kein Ort gefunden werden. Bitte beachte, ' \

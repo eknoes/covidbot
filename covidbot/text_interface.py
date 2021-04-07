@@ -125,8 +125,8 @@ class SimpleTextInterface(object):
         if not locations:
             if set_feedback != 0:
                 self.chat_states[set_feedback] = (ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
-                response += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
-                           "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
+                response.message += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
+                                    "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
             return [response]
 
         elif len(locations) == 1:
@@ -224,7 +224,8 @@ class SimpleTextInterface(object):
     def deleteMeHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('delete_me').inc()
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_DELETE_ME, None)
-        return [BotResponse("Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten löschen? Dann antworte bitte mit Ja.")]
+        return [BotResponse(
+            "Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten löschen? Dann antworte bitte mit Ja.")]
 
     def getUpdates(self) -> List[Tuple[str, List[BotResponse]]]:
         return self.bot.get_unconfirmed_daily_reports()
