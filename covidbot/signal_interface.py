@@ -133,8 +133,6 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 backoff_time = self.backoff_timer(backoff_time, not success, userid)
                 message_counter += 1
 
-        await self.restart_service()
-
     async def send_message(self, message: str, users: List[str], append_report=False) -> None:
         """
         Send a message to specific or all users
@@ -164,8 +162,6 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                     success = await bot.send_message(user, adapt_text(response.message), attachments)
                     backoff_time = self.backoff_timer(backoff_time, not success, user)
 
-        await self.restart_service()
-
     def backoff_timer(self, current_backoff: float, failed: bool, user_id: str) -> float:
         """
         Sleeps and calculates the new backoff time, depending whether sending the message failed or not
@@ -194,21 +190,3 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
     async def send_to_dev(self, message: str, bot: semaphore.Bot):
         await bot.send_message(self.dev_chat, adapt_text(message))
-
-    async def restart_service(self) -> None:
-        """
-        Restarts the signald and signalbot service
-        """
-        self.log.warning("Try to restart signald and signalbot")
-        cmd = "supervisorctl restart signald signalbot"
-        proc = await asyncio.create_subprocess_shell(
-            cmd,
-            stdout=asyncio.subprocess.DEVNULL,
-            stderr=asyncio.subprocess.DEVNULL)
-
-        await proc.wait()
-        if proc.returncode:
-            print(f'{cmd} exited with {proc.returncode}')
-            self.log.error(f'{cmd!r} exited with {proc.returncode}')
-            return
-        self.log.warning("Restarted signalbot service")
