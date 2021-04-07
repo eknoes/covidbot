@@ -40,7 +40,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
             self.log.exception("An error happened while handling a FB Messenger message", exc_info=e)
             self.log.exception(f"Message from {message.sender_id}: {message.text}")
             self.log.exception("Exiting!")
-            await self.fb_messenger.reply(message, adapt_text(self.bot.get_error_message()[0], threema_format=True))
+            await self.fb_messenger.send_reply(message, adapt_text(self.bot.get_error_message()[0], threema_format=True))
 
             try:
                 tb_list = traceback.format_exception(None, e, e.__traceback__)
@@ -56,13 +56,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
 
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.message:
-            image = None
-            if response.images:
-                for image in response.images[:-1]:
-                    await self.fb_messenger.send_message(user, "", image)
-                image = response.images[-1]
-
-            await self.fb_messenger.send_message(user, response.message, image)
+            await self.fb_messenger.send_message(user, response.message, response.images)
             SENT_MESSAGE_COUNT.inc()
 
     async def send_unconfirmed_reports(self) -> None:
