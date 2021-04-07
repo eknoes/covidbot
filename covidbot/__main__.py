@@ -117,7 +117,9 @@ class MessengerBotSetup:
             from covidbot.fbmessenger_interface import FBMessengerInterface
             return FBMessengerInterface(bot, self.config['MESSENGER'].get('PAGE_ACCESS_TOKEN'),
                                         self.config['MESSENGER'].get('VERIFY'),
-                                        self.config['MESSENGER'].getint('PORT', fallback=8080))
+                                        self.config['MESSENGER'].getint('PORT', fallback=8080),
+                                        self.config['INSTAGRAM'].get('WEB_DIR'),
+                                        self.config['INSTAGRAM'].get('PUBLIC_URL'))
 
         if self.name == "signal":
             if not self.config.has_section("SIGNAL"):

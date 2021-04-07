@@ -20,9 +20,9 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
     fb_messenger: Messenger
     port: int
 
-    def __init__(self, bot: Bot, access_token: str, verify_token: str, port: int):
+    def __init__(self, bot: Bot, access_token: str, verify_token: str, port: int, web_dir: str, public_url: str):
         super().__init__(bot)
-        self.fb_messenger = Messenger(access_token, verify_token, self.handle_messenger_msg)
+        self.fb_messenger = Messenger(access_token, verify_token, self.handle_messenger_msg, web_dir, public_url)
         self.port = port
 
     def run(self):
