@@ -40,7 +40,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
             self.log.exception("An error happened while handling a FB Messenger message", exc_info=e)
             self.log.exception(f"Message from {message.sender_id}: {message.text}")
             self.log.exception("Exiting!")
-            await self.fb_messenger.send_reply(message, adapt_text(self.bot.get_error_message()[0], threema_format=True))
+            await self.fb_messenger.send_reply(message, adapt_text(self.bot.get_error_message()[0].message, threema_format=True))
 
             try:
                 tb_list = traceback.format_exception(None, e, e.__traceback__)
