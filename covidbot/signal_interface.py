@@ -102,7 +102,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         """
         return {"filename": filename, "width": "1600", "height": "1000"}
 
-    async def send_daily_reports(self) -> None:
+    async def send_unconfirmed_reports(self) -> None:
         """
         Send unconfirmed daily reports to the specific users
         """
@@ -134,7 +134,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
 
         await self.restart_service()
 
-    async def send_message(self, message: str, users: List[str], append_report=False) -> None:
+    async def send_message_to_users(self, message: str, users: List[str], append_report=False) -> None:
         """
         Send a message to specific or all users
         Args:

@@ -234,10 +234,10 @@ class SimpleTextInterface(object):
 
 
 class InteractiveInterface(SimpleTextInterface, MessengerInterface):
-    async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         print("Sending messages is not implemented for interactive interface")
 
-    def send_daily_reports(self) -> None:
+    def send_unconfirmed_reports(self) -> None:
         print("Sending Daily reports is not implemented for interactive interface")
 
     def run(self) -> None:

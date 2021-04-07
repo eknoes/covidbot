@@ -53,7 +53,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         self.no_write = no_write
         self.timezone = pytz.timezone("Europe/Berlin")
 
-    async def send_daily_reports(self) -> None:
+    async def send_unconfirmed_reports(self) -> None:
         germany = self.data.get_country_data()
         if not germany:
             raise ValueError("Could not find data for Germany")
@@ -126,7 +126,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
         return BotResponse(tweet_text, [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)])
 
-    async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if users:
             self.log.error("Can't tweet to specific users!")
             return

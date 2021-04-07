@@ -92,7 +92,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 await response_msg.send()
                 SENT_MESSAGE_COUNT.inc()
 
-    async def send_daily_reports(self) -> None:
+    async def send_unconfirmed_reports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
         if not unconfirmed_reports:
             return
@@ -119,7 +119,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             split_message.append(current_part.strip('\n'))
         return split_message
 
-    async def send_message(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
             users = map(lambda x: x.platform_id, self.bot.get_all_user())
 
