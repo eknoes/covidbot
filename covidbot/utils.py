@@ -76,9 +76,6 @@ def replace_bold_markdown(text: str) -> str:
     return text.replace("**", "").strip()
 
 
-'*Mehr Infos hier* (https://test.de/)  *und da* (https://test2.de/) **'
-
-
 def replace_italic_markdown(text: str) -> str:
     # Not real markdown but Threema formatting
     text = f"_{text}_"
