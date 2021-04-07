@@ -60,7 +60,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
             if response.images:
                 for image in response.images[:-1]:
                     await self.fb_messenger.send_message(user, "", image)
-                image = response.images[:-1]
+                image = response.images[-1]
 
             await self.fb_messenger.send_message(user, response.message, image)
             SENT_MESSAGE_COUNT.inc()
