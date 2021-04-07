@@ -139,19 +139,20 @@ class Bot(object):
             message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
             return BotResponse(message), None
 
-    def find_district_id_from_geolocation(self, lon, lat) -> Tuple[Optional[str], Optional[List[District]]]:
+    def find_district_id_from_geolocation(self, lon, lat) -> Tuple[Optional[BotResponse], Optional[List[District]]]:
         district_id = self._location_service.find_rs(lon, lat)
         if not district_id:
-            return ('Leider konnte kein Ort in den RKI Corona Daten zu {location} gefunden werden. Bitte beachte, '
-                    'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location="deinem Standort"),
-                    None)
+            return BotResponse(
+                'Leider konnte kein Ort in den RKI Corona Daten zu {location} gefunden werden. Bitte beachte, dass '
+                'Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location="deinem Standort")), None
         else:
             district = self._data.get_district(district_id)
             results = [district]
 
             message = None
             if district.parent:
-                message = "Die Daten für die folgenden Orte und Regionen sind für deinen Standort verfügbar"
+                message = BotResponse(
+                    "Die Daten für die folgenden Orte und Regionen sind für deinen Standort verfügbar")
                 results.append(self._data.get_district(district.parent))
             return message, results
 
