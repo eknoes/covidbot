@@ -35,12 +35,12 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
         try:
             responses = self.handle_input(message.text, message.sender_id)
             for response in responses:
-                await self.send_bot_response(message.sender_id, adapt_text(response, threema_format=True))
+                await self.send_bot_response(message.sender_id, adapt_text(response, just_strip=True))
         except Exception as e:
             self.log.exception("An error happened while handling a FB Messenger message", exc_info=e)
             self.log.exception(f"Message from {message.sender_id}: {message.text}")
             self.log.exception("Exiting!")
-            await self.fb_messenger.send_reply(message, adapt_text(self.bot.get_error_message()[0].message, threema_format=True))
+            await self.fb_messenger.send_reply(message, adapt_text(self.bot.get_error_message()[0].message, just_strip=True))
 
             try:
                 tb_list = traceback.format_exception(None, e, e.__traceback__)
@@ -76,7 +76,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
         message = UserHintService.format_commands(message, self.bot.format_command)
 
         for user in users:
-            await self.fb_messenger.send_message(user, adapt_text(message, threema_format=True))
+            await self.fb_messenger.send_message(user, adapt_text(message, just_strip=True))
 
             if append_report:
                 report = self.reportHandler("", user)
