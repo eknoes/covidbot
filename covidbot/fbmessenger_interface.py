@@ -12,7 +12,7 @@ from covidbot.bot import Bot, UserHintService
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
 from covidbot.text_interface import SimpleTextInterface
-from covidbot.utils import adapt_text, BotResponse
+from covidbot.utils import adapt_text, BotResponse, split_message
 
 
 class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
@@ -35,7 +35,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
         try:
             responses = self.handle_input(message.text, message.sender_id)
             for response in responses:
-                await self.send_bot_response(message.sender_id, adapt_text(response, just_strip=True))
+                await self.send_bot_response(message.sender_id, response)
         except Exception as e:
             self.log.exception("An error happened while handling a FB Messenger message", exc_info=e)
             self.log.exception(f"Message from {message.sender_id}: {message.text}")
@@ -56,8 +56,11 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
 
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.message:
-            await self.fb_messenger.send_message(user, response.message, images=response.images)
-            SENT_MESSAGE_COUNT.inc()
+            images = response.images
+            for message in split_message(adapt_text(response.message, just_strip=True), max_chars=2000):
+                await self.fb_messenger.send_message(user, message, images=images)
+                images = None
+                SENT_MESSAGE_COUNT.inc()
 
     async def send_unconfirmed_reports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()

@@ -2,7 +2,7 @@ import re
 import string
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Callable
 
 from covidbot.covid_data.models import TrendValue
 
@@ -150,10 +150,6 @@ def format_float(incidence: float) -> str:
     return "Keine Daten"
 
 
-def str_bytelen(s) -> int:
-    return len(s.encode('utf-8'))
-
-
 class FormattableNoun(Enum):
     INFECTIONS = 1
     DEATHS = 2
@@ -190,3 +186,31 @@ def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
     if number == 0 and noun == FormattableNoun.DAYS:
         return "heute"
     return f"{format_int(number)} {hashtag}{plural}"
+
+
+def str_bytelen(s) -> int:
+    return len(s.encode('utf-8'))
+
+
+def split_message(message: str, max_chars: Optional[int] = None, max_bytes: Optional[int] = None) -> List[str]:
+    if not max_bytes and not max_chars:
+        raise ValueError("Either max_bytes or max_chars have to be set")
+
+    len_function: Callable[[str], int] = len
+    max_length = max_chars
+    if max_bytes:
+        len_function = str_bytelen
+        max_length = max_bytes
+
+    current_part = ""
+    messages = []
+    for part in message.split('\n'):
+        if len_function(part) + len_function(current_part) + len_function('\n') < max_length:
+            current_part += part + '\n'
+        else:
+            current_part.strip('\n')
+            messages.append(current_part)
+            current_part = part
+    if current_part:
+        messages.append(current_part.strip('\n'))
+    return messages

@@ -21,7 +21,7 @@ from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_COMMAND_COUNT, RECV_MESSAGE_COUNT, \
     BOT_RESPONSE_TIME
-from covidbot.utils import str_bytelen, BotResponse
+from covidbot.utils import str_bytelen, BotResponse, split_message
 
 '''
 Telegram Aktionen:
@@ -179,8 +179,8 @@ class TelegramInterface(MessengerInterface):
                                 self.set_file_id(response.images[i], sent_messages[i].photo[0].file_id)
                     SENT_IMAGES_COUNT.inc(len(response.images))
 
-            split_messages = self.split_message(response.message)
-            for m in split_messages:
+            messages = split_message(response.message, max_bytes=4096)
+            for m in messages:
                 if self.updater.bot.send_message(chat_id, m, parse_mode=ParseMode.HTML,
                                                  disable_web_page_preview=disable_web_page_preview,
                                                  reply_markup=reply_markup):
@@ -569,22 +569,6 @@ class TelegramInterface(MessengerInterface):
                     self.log.info(f"Migrated Chat {userid} to {e.new_chat_id}")
                 else:
                     self.log.warning(f"Could not migrate {userid} to {e.new_chat_id}")
-
-    @staticmethod
-    def split_message(message: str) -> List[str]:
-        # Max len of 4096 bytes
-        current_part = ""
-        split_message = []
-        for part in message.split('\n'):
-            if str_bytelen(part) + str_bytelen(current_part) + str_bytelen('\n') < 4096:
-                current_part += part + '\n'
-            else:
-                current_part.strip('\n')
-                split_message.append(current_part)
-                current_part = part
-        if current_part:
-            split_message.append(current_part.strip('\n'))
-        return split_message
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:

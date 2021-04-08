@@ -13,7 +13,7 @@ from covidbot.bot import Bot, UserHintService
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT, BOT_RESPONSE_TIME
 from covidbot.text_interface import SimpleTextInterface
-from covidbot.utils import adapt_text, str_bytelen, BotResponse
+from covidbot.utils import adapt_text, BotResponse, split_message
 
 
 class ThreemaInterface(SimpleTextInterface, MessengerInterface):
@@ -86,7 +86,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 SENT_IMAGES_COUNT.inc()
 
         if response.message:
-            message_parts = self.split_messages(response.message)
+            message_parts = split_message(adapt_text(response.message, threema_format=True), max_bytes=3500)
             for m in message_parts:
                 response_msg = TextMessage(self.connection, text=m, to_id=user)
                 await response_msg.send()
@@ -107,23 +107,6 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                                exc_info=error)
                 if error.status == 404:
                     self.bot.delete_user(userid)
-
-    @staticmethod
-    def split_messages(message: str) -> List[str]:
-        # Max len of 3500 bytes
-        current_part = ""
-        message = adapt_text(message, True)
-        split_message = []
-        for part in message.split('\n'):
-            if str_bytelen(part) + str_bytelen(current_part) + str_bytelen('\n') < 3500:
-                current_part += part + '\n'
-            else:
-                current_part.strip('\n')
-                split_message.append(current_part)
-                current_part = part
-        if current_part:
-            split_message.append(current_part.strip('\n'))
-        return split_message
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
