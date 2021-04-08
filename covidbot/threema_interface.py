@@ -103,7 +103,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 self.bot.confirm_daily_report_send(userid)
                 self.log.warning(f"Sent report to {userid}")
             except threema.KeyServerError as error:
-                self.log.error(f"Got KeyServer Error {error.status}: {error.status_description} ", exc_info=error)
+                self.log.error(f"Got KeyServer Error {error.status}: {error.status_description[error.status]} ",
+                               exc_info=error)
                 if error.status == 404:
                     self.bot.delete_user(userid)
 
