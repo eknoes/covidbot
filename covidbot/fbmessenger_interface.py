@@ -56,7 +56,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
 
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.message:
-            await self.fb_messenger.send_message(user, response.message, response.images)
+            await self.fb_messenger.send_message(user, response.message, images=response.images)
             SENT_MESSAGE_COUNT.inc()
 
     async def send_unconfirmed_reports(self) -> None:
