@@ -97,10 +97,15 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
         if not unconfirmed_reports:
             return
         for userid, message in unconfirmed_reports:
-            for elem in message:
-                await self.send_bot_response(userid, elem)
-            self.bot.confirm_daily_report_send(userid)
-            self.log.warning(f"Sent report to {userid}")
+            try:
+                for elem in message:
+                    await self.send_bot_response(userid, elem)
+                self.bot.confirm_daily_report_send(userid)
+                self.log.warning(f"Sent report to {userid}")
+            except threema.KeyServerError as error:
+                self.log.error(f"Got KeyServer Error {error.status}: {error.status_description} ", exc_info=error)
+                if error.status == 404:
+                    self.bot.delete_user(userid)
 
     @staticmethod
     def split_messages(message: str) -> List[str]:
