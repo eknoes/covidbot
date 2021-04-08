@@ -467,17 +467,18 @@ class TelegramInterface(MessengerInterface):
         if not districts:
             self.answer_update(update, [response])
 
-            self.feedback_cache[update.effective_chat.id] = update.message.text
-            if update.effective_user:
-                self.feedback_cache[update.effective_chat.id] += "\n— {name}" \
-                    .format(name=update.effective_user.first_name)
-            feedback_markup = InlineKeyboardMarkup(
-                [[InlineKeyboardButton("Ja", callback_data=TelegramCallbacks.CONFIRM_FEEDBACK.name)],
-                 [InlineKeyboardButton("Abbrechen",
-                                       callback_data=TelegramCallbacks.DISCARD.name)]])
+            if update.message.text:
+                self.feedback_cache[update.effective_chat.id] = update.message.text
+                if update.effective_user:
+                    self.feedback_cache[update.effective_chat.id] += "\n— {name}" \
+                        .format(name=update.effective_user.first_name)
+                feedback_markup = InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("Ja", callback_data=TelegramCallbacks.CONFIRM_FEEDBACK.name)],
+                     [InlineKeyboardButton("Abbrechen",
+                                           callback_data=TelegramCallbacks.DISCARD.name)]])
 
-            self.answer_update(update, [BotResponse("Hast du gar keinen Ort gesucht, sondern möchtest uns deine "
-                                                    "Nachricht als Feedback zusenden?")], reply_markup=feedback_markup)
+                self.answer_update(update, [BotResponse("Hast du gar keinen Ort gesucht, sondern möchtest uns deine "
+                                                        "Nachricht als Feedback zusenden?")], reply_markup=feedback_markup)
         else:
             if len(districts) > 1:
                 markup = self.generate_multiple_districts_markup(districts, TelegramCallbacks.CHOOSE_ACTION)
