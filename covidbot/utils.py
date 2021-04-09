@@ -14,9 +14,16 @@ link_pattern = re.compile("\s?(\(http[s]?://[\w.\-]*([/\w\-.])*\))\s?")
 
 
 @dataclass
+class UserChoice:
+    label: str
+    callback_data: str
+
+
+@dataclass
 class BotResponse:
     message: str
     images: Optional[List[str]] = None
+    choices: List[UserChoice] = None
 
     def __str__(self):
         return self.message

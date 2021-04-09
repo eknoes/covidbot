@@ -6,7 +6,7 @@ from covidbot.bot import Bot, UserDistrictActions
 from covidbot.covid_data.models import District
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import BOT_COMMAND_COUNT
-from covidbot.utils import adapt_text, BotResponse
+from covidbot.utils import adapt_text, BotResponse, UserChoice
 
 
 @dataclass
@@ -132,14 +132,15 @@ class SimpleTextInterface(object):
         elif len(locations) == 1:
             return locations[0]
         else:
+            choices = []
             locations_list = response.message + "\n\n"
             for location in locations:
                 locations_list += f"• {location.name}\t{location.id}\n"
-
+                choices.append(UserChoice(location.name, str(location.id)))
             locations_list += "\n"
             locations_list += "Leider musst du deine Auswahl genauer angeben. Anstatt des kompletten Namens kannst du " \
                               f"auch die ID nutzen, also bspw. Abo {locations[0].id} für {locations[0].name}"
-            return [BotResponse(locations_list)]
+            return [BotResponse(locations_list, choices=choices)]
 
     def subscribeHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
@@ -197,16 +198,21 @@ class SimpleTextInterface(object):
             self.chat_states[user_id] = (ChatBotState.WAITING_FOR_COMMAND, str(location.id))
             message, available_actions = self.bot.get_possible_actions(user_id, location.id)
             message += "\n\n"
-            for action in available_actions:
-                if action[1] == UserDistrictActions.REPORT:
+            choices = []
+            for action_name, action in available_actions:
+                if action == UserDistrictActions.REPORT:
+                    choices.append(UserChoice(action_name, f'/daten {location.id}'))
                     message += '• Schreibe "Daten", um die aktuellen Daten zu erhalten\n'
-                elif action[1] == UserDistrictActions.SUBSCRIBE:
+                elif action == UserDistrictActions.SUBSCRIBE:
+                    choices.append(UserChoice(action_name, f'/abo {location.id}'))
                     message += '• Schreibe "Abo", um den Ort zu abonnieren\n'
-                elif action[1] == UserDistrictActions.UNSUBSCRIBE:
+                elif action == UserDistrictActions.UNSUBSCRIBE:
+                    choices.append(UserChoice(action_name, f'/beende {location.id}'))
                     message += '• Schreibe "Beende", dein Abo zu beenden\n'
-                elif action[1] == UserDistrictActions.RULES:
+                elif action == UserDistrictActions.RULES:
+                    choices.append(UserChoice(action_name, f'/regeln {location.id}'))
                     message += '• Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten\n'
-            return [BotResponse(message)]
+            return [BotResponse(message, choices=choices)]
         return location
 
     def statHandler(self, user_input: str, user_id: str) -> List[BotResponse]:

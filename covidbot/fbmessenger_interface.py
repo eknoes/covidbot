@@ -6,7 +6,7 @@ from typing import List, Union
 
 import prometheus_async
 from fbmessenger import Messenger
-from fbmessenger.models import Message
+from fbmessenger.models import Message, PostbackButton
 
 from covidbot.bot import Bot, UserHintService
 from covidbot.messenger_interface import MessengerInterface
@@ -57,8 +57,14 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.message:
             images = response.images
-            for message in split_message(adapt_text(response.message, just_strip=True), max_chars=2000):
-                await self.fb_messenger.send_message(user, message, images=images)
+            messages = split_message(adapt_text(response.message, just_strip=True), max_chars=2000)
+            for i in range(0, len(messages)):
+                buttons = None
+                if response.choices and i == len(messages) - 1:
+                    buttons = []
+                    for choice in response.choices:
+                        buttons.append(PostbackButton(choice.label, choice.callback_data))
+                await self.fb_messenger.send_message(user, messages[i], images=images, buttons=buttons)
                 images = None
                 SENT_MESSAGE_COUNT.inc()
 
