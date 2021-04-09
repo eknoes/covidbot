@@ -162,19 +162,16 @@ class Bot(object):
         district = self._data.get_district(district_id)
         user_id = self._manager.get_user_id(user_identification)
 
-        if district.type != "Staat":
-            user = self._manager.get_user(user_id, with_subscriptions=True)
-            if user and district_id in user.subscriptions:
-                actions.append(("Beende Abo", UserDistrictActions.UNSUBSCRIBE))
-                verb = "beenden"
-            else:
-                actions.append(("Starte Abo", UserDistrictActions.SUBSCRIBE))
-                verb = "starten"
-            actions.append(("Regeln anzeigen", UserDistrictActions.RULES))
-            message = "Möchtest du dein Abo von {name} {verb}, die aktuellen Daten oder geltende Regeln erhalten?" \
-                .format(name=district.name, verb=verb)
+        user = self._manager.get_user(user_id, with_subscriptions=True)
+        if user and district_id in user.subscriptions:
+            actions.append(("Beende Abo", UserDistrictActions.UNSUBSCRIBE))
+            verb = "beenden"
         else:
-            message = "Möchtest du die aktuellen Daten von {name} erhalten?".format(name=district.name)
+            actions.append(("Starte Abo", UserDistrictActions.SUBSCRIBE))
+            verb = "starten"
+        actions.append(("Regeln anzeigen", UserDistrictActions.RULES))
+        message = "Möchtest du dein Abo von {name} {verb}, die aktuellen Daten oder geltende Regeln erhalten?" \
+            .format(name=district.name, verb=verb)
         return message, actions
 
     def get_rules(self, district_id: int) -> List[BotResponse]:
@@ -403,7 +400,7 @@ class Bot(object):
             # Split Bundeslaender from other
             subscription_data = list(map(lambda rs: self._data.get_district_data(rs), subscriptions))
             subscribed_bls = list(filter(lambda d: d.type == "Bundesland", subscription_data))
-            subscribed_cities = list(filter(lambda d: d.type != "Bundesland", subscription_data))
+            subscribed_cities = list(filter(lambda d: d.type != "Bundesland" and d.type != "Staat", subscription_data))
             if len(subscribed_bls) > 0:
                 message += "<b>Bundesländer</b>\n"
                 data = map(lambda district: "• " + self.format_district_data(district),
@@ -545,7 +542,7 @@ class Bot(object):
         result = []
         data_update = self._data.get_last_update()
         for user in self._manager.get_all_user(with_subscriptions=True):
-            if not user.activated:
+            if not user.activated or not user.subscriptions:
                 continue
 
             if user.last_update is None or user.last_update.date() < data_update:
@@ -633,6 +630,9 @@ class Bot(object):
             f'Wenn die Daten des Ortes nur gesammelt für eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
             f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
             f' auch die aktuellen Zahlen für andere Orte ansehen.')
+
+        # Add subscription for Germany on start
+        self._manager.add_subscription(self._manager.get_user_id(user_identification, create_if_not_exists=True), 0)
         return [BotResponse(message)]
 
     def help_message(self, user_identification: Union[str, int], username="") -> List[BotResponse]:

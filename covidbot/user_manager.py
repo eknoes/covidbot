@@ -137,7 +137,7 @@ class UserManager(object):
                     if not current_user.subscriptions:
                         current_user.subscriptions = []
 
-                    if row['rs']:
+                    if row['rs'] is not None:
                         current_user.subscriptions.append(row['rs'])
 
             if current_user:
