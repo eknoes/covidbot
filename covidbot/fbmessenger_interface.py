@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import signal
@@ -27,6 +28,12 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
 
     def run(self):
         logging.info("Run Facebook Messenger Interface")
+        # Set Get Started and Greeting Text
+        asyncio.ensure_future(
+            self.fb_messenger.set_greeting_text('Ein Bot zu Deinen Diensten: Ich versorge Dich einmal am Tag '
+                                                'mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir '
+                                                'ausgewählten Orte.'))
+        asyncio.ensure_future(self.fb_messenger.set_get_started_payload('/start'))
         self.fb_messenger.start_receiving(port=self.port)
 
     @prometheus_async.aio.time(BOT_RESPONSE_TIME)
