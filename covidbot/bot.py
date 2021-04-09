@@ -448,9 +448,13 @@ class Bot(object):
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
 
+        # Add Visualization
         graphs = [self.data_visualization.infections_graph(0)]
         if subscriptions:
-            graphs.append(self.data_visualization.multi_incidence_graph(subscriptions[-5:]))
+            districts = subscriptions[-5:]
+            if 0 in subscriptions and 0 not in districts:
+                districts[0] = 0
+            graphs.append(self.data_visualization.multi_incidence_graph(districts))
 
         return [BotResponse(message, graphs)]
 
