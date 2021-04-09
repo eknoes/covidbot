@@ -353,7 +353,8 @@ class TelegramInterface(MessengerInterface):
     @BOT_RESPONSE_TIME.time()
     def report_command_handler(self, update: Update, context: CallbackContext) -> None:
         BOT_COMMAND_COUNT.labels('report').inc()
-        self.send_message(update.effective_chat.id, self._bot.get_report(update.effective_chat.id))
+        self.send_message(update.effective_chat.id, self._bot.get_report(update.effective_chat.id),
+                          disable_web_page_preview=True)
 
     @BOT_RESPONSE_TIME.time()
     def unknown_command_handler(self, update: Update, context: CallbackContext) -> None:
