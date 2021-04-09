@@ -61,10 +61,12 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
         if response.message:
             images = response.images
             messages = split_message(adapt_text(response.message), max_chars=2000)
-            for i in range(0, max(len(messages), 3)):
+            for i in range(0, len(messages)):
                 buttons = None
                 if response.choices and i == len(messages) - 1:
                     buttons = []
+                    if len(response.choices) > 3:
+                        response.choices = response.choices[:3]
                     for choice in response.choices:
                         buttons.append(PostbackButton(choice.label, choice.callback_data))
                 await self.fb_messenger.send_message(user, messages[i], images=images, buttons=buttons)
