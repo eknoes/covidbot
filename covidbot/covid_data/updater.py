@@ -3,7 +3,7 @@ import logging
 import random
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
-from typing import Optional
+from typing import Optional, Dict
 
 import requests
 import ujson as json
@@ -69,7 +69,7 @@ class Updater(ABC):
 
 
 class RKIUpdater(Updater):
-    RKI_LK_CSV = "https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv"
+    RKI_LK_CSV = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&returnGeodetic=false&outFields=RS%2C+cases%2C+county%2C+BEZ%2C+EWZ%2C+BL%2C+BL_ID%2C+cases7_per_100k%2C+deaths%2C+cases7_bl_per_100k%2C+last_update&returnGeometry=false&returnCentroid=false&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pjson&token="
     log = logging.getLogger(__name__)
 
     def get_last_update(self) -> Optional[datetime]:
@@ -89,22 +89,22 @@ class RKIUpdater(Updater):
         response = self.get_resource(self.RKI_LK_CSV)
         if response:
             self.log.debug("Got RKI Data, checking if new")
-            rki_data = response.splitlines()
-            reader = csv.DictReader(rki_data)
-            self.add_data(reader)
+            response_data = json.loads(response)
+            self.add_data(response_data['features'])
             if last_update is None or last_update < self.get_last_update():
                 logging.info(f"Received new data, data is now from {self.get_last_update()}")
                 return True
         return False
 
-    def add_data(self, reader: csv.DictReader) -> None:
+    def add_data(self, json_data: Dict) -> None:
         covid_data = []
         rs_data = []
         added_bl = set()
         last_update = self.get_last_update()
         now = datetime.now().date()
         new_updated = None
-        for row in reader:
+        for feature in json_data:
+            row = feature['attributes']
             new_updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr").date()
             if last_update and new_updated <= last_update or now < new_updated:
                 # Do not take data from future, important for testing
