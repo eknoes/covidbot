@@ -451,7 +451,11 @@ class Bot(object):
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
 
-        return [BotResponse(message, [self.data_visualization.infections_graph(0)])]
+        graphs = [self.data_visualization.infections_graph(0)]
+        if subscriptions:
+            graphs.append(self.data_visualization.multi_incidence_graph(subscriptions[-5:]))
+
+        return [BotResponse(message, graphs)]
 
     def delete_user(self, user_identification: Union[int, str]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification, create_if_not_exists=False)
