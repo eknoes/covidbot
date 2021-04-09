@@ -279,7 +279,7 @@ class Visualization:
         identifier = reduce(lambda x, y: x + y, map(str, district_ids))
 
         filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"incidence-{current_date.isoformat()}-{identifier}.jpg"))
+            os.path.join(self.graphics_dir, f"multi-incidence-{current_date.isoformat()}-{identifier}.jpg"))
 
         # Do not draw new graphic if its cached
         if not self.disable_cache and os.path.isfile(filepath):
