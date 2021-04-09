@@ -61,7 +61,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
         if response.message:
             images = response.images
             messages = split_message(adapt_text(response.message), max_chars=2000)
-            for i in range(0, len(messages)):
+            for i in range(0, max(len(messages), 3)):
                 buttons = None
                 if response.choices and i == len(messages) - 1:
                     buttons = []
