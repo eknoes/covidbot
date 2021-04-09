@@ -33,7 +33,10 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
     async def handle_messenger_msg(self, message: Message):
         RECV_MESSAGE_COUNT.inc()
         try:
-            responses = self.handle_input(message.text, message.sender_id)
+            user_input = message.text
+            if message.payload:
+                user_input = message.payload
+            responses = self.handle_input(user_input, message.sender_id)
             for response in responses:
                 await self.send_bot_response(message.sender_id, response)
         except Exception as e:
