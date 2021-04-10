@@ -127,6 +127,7 @@ class SimpleTextInterface(object):
                 self.chat_states[set_feedback] = (ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
                 response.message += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
                                     "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
+                response.choices = [UserChoice("Feedback weiterleiten", "Ja"), UserChoice("Abbrechen", "Nein")]
             return [response]
 
         elif len(locations) == 1:
