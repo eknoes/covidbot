@@ -214,7 +214,9 @@ class UserManager(object):
     def get_ranked_subscriptions(self) -> List[Tuple[int, str]]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(subscriptions.user_id) as subscribers, c.county_name FROM subscriptions "
-                           "JOIN counties c on subscriptions.rs = c.rs GROUP BY c.county_name "
+                           "JOIN counties c on subscriptions.rs = c.rs "
+                           "WHERE subscriptions.rs != 0 "
+                           "GROUP BY c.county_name "
                            "ORDER BY subscribers DESC LIMIT 10")
             result = []
             for row in cursor.fetchall():
