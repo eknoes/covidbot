@@ -246,9 +246,10 @@ class VaccinationGermanyUpdater(Updater):
                         rate_full = row['Zweitimpfungen_kumulativ'] / population
 
                     cursor.execute('INSERT INTO covid_vaccinations (district_id, date, vaccinated_partial, '
-                                   'vaccinated_full, rate_partial, rate_full) VALUE (%s, %s, %s, %s, %s, %s)',
+                                   'vaccinated_full, rate_partial, rate_full, doses_diff) VALUE (%s, %s, %s, %s, %s, %s, %s)',
                                    [district_id, updated, row['Impfungen_kumulativ'],
-                                    row['Zweitimpfungen_kumulativ'], rate_partial, rate_full])
+                                    row['Zweitimpfungen_kumulativ'], rate_partial, rate_full,
+                                    row['Differenz_zum_Vortag']])
             self.connection.commit()
         return new_data
 
@@ -376,9 +377,10 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
                         rate_full = int(row['personen_voll_kumulativ']) / population
 
                     cursor.execute('INSERT INTO covid_vaccinations (district_id, date, vaccinated_partial, '
-                                   'vaccinated_full, rate_partial, rate_full) VALUE (%s, %s, %s, %s, %s, %s)',
+                                   'vaccinated_full, rate_partial, rate_full, doses_diff) VALUE (%s, %s, %s, %s, %s, %s, %s)',
                                    [district_id, updated, row['personen_erst_kumulativ'],
-                                    row['personen_voll_kumulativ'], rate_partial, rate_full])
+                                    row['personen_voll_kumulativ'], rate_partial, rate_full,
+                                    row['dosen_differenz_zum_vortag']])
             self.connection.commit()
         return new_data
 

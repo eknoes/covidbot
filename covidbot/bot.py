@@ -242,7 +242,8 @@ class Bot(object):
                    'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
             .format(info_command=self.format_command("Info"),
                     earliest_vacc_date=earliest_data.vaccinations.date.strftime("%d.%m.%Y"))
-        return [BotResponse(message, [self.data_visualization.vaccination_graph(district_id)])]
+        return [BotResponse(message, [self.data_visualization.vaccination_graph(district_id),
+                                      self.data_visualization.vaccination_speed_graph(district_id)])]
 
     def get_district_report(self, district_id: int) -> List[BotResponse]:
         current_data = self._data.get_district_data(district_id)
@@ -422,13 +423,14 @@ class Bot(object):
 
         if country.vaccinations:
             message += "<b>💉  Impfdaten</b>\n" \
-                       "{vacc_partial} ({rate_partial}%) Personen in Deutschland haben mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits - Stand {date} - vollständig geimpft.\n\n" \
+                       "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
                 .format(rate_full=format_float(country.vaccinations.full_rate * 100),
                         rate_partial=format_float(country.vaccinations.partial_rate * 100),
                         vacc_partial=format_int(country.vaccinations.vaccinated_partial),
                         vacc_full=format_int(country.vaccinations.vaccinated_full),
-                        date=country.vaccinations.date.strftime("%d.%m.%Y"))
+                        date=country.vaccinations.date.strftime("%d.%m.%Y"),
+                        doses=format_int(country.vaccinations.doses_diff))
 
         if country.icu_data:
             message += f"<b>🏥 Intensivbetten</b>\n" \

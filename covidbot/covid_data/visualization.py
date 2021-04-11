@@ -140,6 +140,56 @@ class Visualization:
         self.teardown_plt(fig)
         return filepath
 
+    def vaccination_speed_graph(self, district_id: int, duration: int = 49, quadratic=False) -> str:
+        with self.connection.cursor(dictionary=True) as cursor:
+            oldest_date = datetime.date.today() - datetime.timedelta(days=duration)
+            cursor.execute('SELECT c.county_name as name, date, doses_diff FROM covid_vaccinations '
+                           'LEFT JOIN counties c on c.rs = covid_vaccinations.district_id '
+                           'WHERE district_id=%s AND date > %s ORDER BY date', [district_id, oldest_date])
+            x_data = []
+            y_data = []
+            current_date = None
+            district_name = None
+            for row in cursor.fetchall():
+                y_data.append(row['doses_diff'])
+                x_data.append(row['date'])
+                if not current_date or row['date'] > current_date:
+                    current_date = row['date']
+                    district_name = row['name']
+
+        filepath = os.path.abspath(
+            os.path.join(self.graphics_dir, f"vaccination-speed-{current_date.isoformat()}-{district_id}.jpg"))
+
+        # Do not draw new graphic if its cached
+        if not self.disable_cache and os.path.isfile(filepath):
+            CACHED_GRAPHS.labels(type='vaccination-speed').inc()
+            return filepath
+        CREATED_GRAPHS.labels(type='vaccination-speed').inc()
+
+        fig, ax1 = self.setup_plot(current_date, f"Impfungen {district_name}", "Verimpfte Dosen",
+                                   quadratic=quadratic)
+        # Plot data
+        plt.xticks(x_data, rotation='30', ha='right')
+
+        # Add a label every 7 days
+        bars = plt.bar(x_data, y_data, color="#1fa2de", width=0.8, zorder=3)
+        props = dict(boxstyle='round', facecolor='#ffffff', alpha=0.7, edgecolor='#ffffff')
+        for i in range(len(bars) - 1, 0, -7):
+            rect = bars[i]
+            height = rect.get_height()
+            ax1.annotate(format_int(int(height)),
+                         xy=(rect.get_x() + rect.get_width() / 2., height),
+                         xytext=(0, 30), textcoords='offset points',
+                         arrowprops=dict(arrowstyle="-", facecolor='black'),
+                         horizontalalignment='center', verticalalignment='top', bbox=props)
+
+        self.set_weekday_formatter(ax1, current_date.weekday())
+
+        # Save to file
+        plt.savefig(filepath, format='JPEG')
+        self.teardown_plt(fig)
+        return filepath
+
     def bot_user_graph(self) -> str:
         now = datetime.datetime.now()
         quarter = math.floor(now.hour / 4)

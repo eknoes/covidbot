@@ -82,7 +82,7 @@ class CovidData(object):
             if vacc_date:
                 last_update = vacc_date['last_update']
                 cursor.execute('SELECT vaccinated_full, vaccinated_partial, rate_full, rate_partial, '
-                               'date '
+                               'date, doses_diff '
                                'FROM covid_vaccinations WHERE district_id=%s and date<=%s '
                                'ORDER BY date DESC LIMIT 1',
                                [district_id, last_update])
@@ -91,7 +91,7 @@ class CovidData(object):
                     vaccination_data = VaccinationData(vaccination_record['vaccinated_full'],
                                                        vaccination_record['vaccinated_partial'],
                                                        vaccination_record['rate_full'], vaccination_record['rate_partial'],
-                                                       vaccination_record['date'])
+                                                       vaccination_record['date'], doses_diff=vaccination_record['doses_diff'])
 
                     cursor.execute('SELECT (MAX(vaccinated_full) - MIN(vaccinated_full) + MAX(vaccinated_partial) - MIN(vaccinated_partial)) / 7 as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) GROUP BY district_id', [district_id, last_update])
                     record = cursor.fetchone()
