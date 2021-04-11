@@ -451,7 +451,7 @@ class Bot(object):
         # Add Visualization
         graphs = [self.data_visualization.infections_graph(0)]
         if subscriptions:
-            districts = subscriptions[-5:]
+            districts = subscriptions[-8:]
             if 0 in subscriptions and 0 not in districts:
                 districts[0] = 0
             graphs.append(self.data_visualization.multi_incidence_graph(districts))
