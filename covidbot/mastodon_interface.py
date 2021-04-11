@@ -28,10 +28,11 @@ class MastodonInterface(SingleCommandInterface):
         USER_COUNT.labels(platform="mastodon").set_function(self.get_follower_number)
 
     def get_follower_number(self) -> int:
-
         info = self.mastodon.account(323011)
         self.update_metrics()
-        return info['followers_count']
+        number = info['followers_count']
+        self.user_manager.set_user_number(number)
+        return number
 
     def upload_media(self, filename: str) -> str:
         upload_resp = self.mastodon.media_post(filename, mime_type="image/jpeg")

@@ -140,7 +140,7 @@ class TestSubscriptionManager(TestCase):
                              "If no subscribers exist, list of user should be empty")
 
     def test_statistic(self):
-        self.assertEqual(self.test_manager.get_total_user_number(), 0,
+        self.assertEqual(self.test_manager.get_messenger_user_number(), 0,
                          "get_total_user should return 0 if no users are present")
 
         uid1 = self.test_manager.get_user_id("testuser1")
@@ -165,7 +165,7 @@ class TestSubscriptionManager(TestCase):
             # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM counties ORDER BY parent DESC")
             cursor.executemany("INSERT INTO counties (rs, county_name) VALUES (%s, %s)", [(1, "Test1"), (2, "Test2")])
-        self.assertEqual(self.test_manager.get_total_user_number(), 3,
+        self.assertEqual(self.test_manager.get_messenger_user_number(), 3,
                          "get_total_user should return the number of users")
         self.assertEqual(len(self.test_manager.get_ranked_subscriptions()), 2,
                          "len(get_ranked_subscriptions) should return "

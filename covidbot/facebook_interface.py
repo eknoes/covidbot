@@ -28,6 +28,18 @@ class FacebookInterface(SingleCommandInterface):
         self.access_token = access_token
         self.web_dir = web_dir
         self.url = url
+        self.save_follower_number()
+
+    def save_follower_number(self):
+        response = requests.request("GET", f"https://graph.facebook.com/{self.page_id}?fields=followers_count&access_token={self.access_token}")
+        if response.status_code == 200:
+            number = response.json()['followers_count']
+            self.user_manager.set_user_number(number)
+        else:
+            self.log.error(f"Instagram API returned {response.status_code}: {response.text}")
+            self.log.error(response.content)
+
+
 
     def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
         message_text = ""

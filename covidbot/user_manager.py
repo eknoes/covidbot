@@ -50,6 +50,7 @@ class UserManager(object):
             cursor.execute('CREATE TABLE IF NOT EXISTS answered_messages '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(20), message_id BIGINT, '
                            'UNIQUE(platform, message_id))')
+            cursor.execute('CREATE TABLE IF NOT EXISTS platform_statistics (platform VARCHAR(100), followers INTEGER, UNIQUE(platform, followers))')
             self.connection.commit()
 
     def set_user_activated(self, user_id: int, activated=True) -> None:
@@ -193,15 +194,19 @@ class UserManager(object):
                 return False
             return False
 
-    def get_total_user_number(self) -> int:
+    def get_messenger_user_number(self) -> int:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user WHERE  platform NOT LIKE 'interactive' "
-                           "AND platform NOT LIKE 'twitter' AND platform NOT LIKE 'mastodon' "
-                           "AND platform NOT LIKE 'instagram'")
+            cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user "
+                           "WHERE platform NOT IN ('interactive', 'twitter', 'mastodon', 'instagram', 'facebook')")
             row = cursor.fetchone()
             if row and 'user_num' in row and row['user_num']:
                 return row['user_num']
             return 0
+
+    def get_total_user_number(self) -> int:
+        with self.connection.cursor() as cursor:
+            cursor.execute('SELECT SUM(followers) FROM platform_statistics')
+            return cursor.fetchone()[0] + self.get_messenger_user_number()
 
     def get_user_number(self, platform: str) -> int:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -244,14 +249,22 @@ class UserManager(object):
                 return row['num_subscriptions']
             return 0
 
-    def get_users_per_platform(self) -> List[Tuple[str, int]]:
+    def get_users_per_messenger(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(user_id) as c, platform FROM bot_user WHERE platform NOT LIKE 'interactive' "
-                           "AND platform NOT LIKE 'twitter' AND platform NOT LIKE 'mastodon' AND platform NOT LIKE 'instagram'"
+            cursor.execute("SELECT COUNT(user_id) as c, platform FROM bot_user "
+                           "WHERE platform NOT IN ('interactive', 'twitter', 'mastodon', 'instagram', 'facebook')"
                            "GROUP BY platform ORDER BY c DESC")
             results = []
             for row in cursor.fetchall():
                 results.append((str(row['platform']).capitalize(), row['c']))
+            return results
+
+    def get_users_per_network(self) -> List[Tuple[str, int]]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT * FROM platform_statistics ORDER BY followers DESC")
+            results = []
+            for row in cursor.fetchall():
+                results.append((str(row['platform']).capitalize(), row['followers']))
             return results
 
     def add_feedback(self, user_id: int, feedback: str) -> Optional[int]:
@@ -309,3 +322,8 @@ class UserManager(object):
             cursor.execute('INSERT INTO answered_messages (platform, message_id) VALUES (%s, %s)',
                            [self.platform, message_id])
         self.connection.commit()
+
+    def set_user_number(self, number_of_users: int):
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('INSERT INTO platform_statistics (platform, followers) VALUE (%s, %s) ON DUPLICATE '
+                           'KEY UPDATE followers=%s', [self.platform, number_of_users, number_of_users])

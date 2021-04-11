@@ -226,7 +226,7 @@ class Visualization:
                 y_data.append(y_data[-1])
                 x_data.append(x_data[-1] + datetime.timedelta(days=1))
 
-            fig, ax1 = self.setup_plot(None, f"Nutzer:innen des Covidbots", "Anzahl")
+            fig, ax1 = self.setup_plot(None, f"Nutzer:innen des Covidbots (über Messenger)", "Anzahl")
             # Plot data
             plt.xticks(x_data, rotation='30', ha='right')
             ax1.fill_between(x_data, y_data, color="#1fa2de", zorder=3)
