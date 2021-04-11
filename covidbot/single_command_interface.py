@@ -1,9 +1,9 @@
+import datetime
 import logging
 import re
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
 from typing import List, Union, Optional, Iterable
 
 import pytz
@@ -22,7 +22,7 @@ class SingleArgumentRequest:
     chat_id: int
     message: str
     reply_obj: object = None
-    sent: datetime = None
+    sent: datetime.datetime = None
 
 
 class SingleCommandInterface(MessengerInterface, ABC):
@@ -34,7 +34,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
     sleep_sec: int
     no_write: bool
     handle_regex = re.compile('@(\w\.@)+')
-    timezone: datetime.tzinfo
+    timezone: datetime.datetime.tzinfo
 
     rki_name: str = "RKI"
     divi_name: str = "DIVI"
@@ -60,7 +60,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
             raise ValueError("Could not find data for Germany")
 
         # Do not tweet at night, so we show up more recently in the morning
-        if datetime.now().hour < 6:
+        if datetime.datetime.now().hour < 6:
             return
 
         # Infections
@@ -133,7 +133,10 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
     def get_infection_shortpost(self, district_id: int) -> List[BotResponse]:
         district = self.data.get_district_data(district_id)
-        tweet_text = f"🦠 Am {district.date.strftime('%d. %B %Y')} wurden " \
+        date_str = "Am " + district.date.strftime('%d. %B %Y')
+        if district.date == datetime.date.today() - datetime.timedelta(days=1):
+            date_str = "Gestern"
+        tweet_text = f"🦠 {date_str} wurden " \
                      f"{format_noun(district.new_cases, FormattableNoun.INFECTIONS, hashtag='#')} " \
                      f"{format_data_trend(district.cases_trend)} und " \
                      f"{format_noun(district.new_deaths, FormattableNoun.DEATHS)} " \
@@ -183,9 +186,9 @@ class SingleCommandInterface(MessengerInterface, ABC):
                     else:
                         self.write_message(response, reply_obj=mention.reply_obj)
                     if mention.sent:
-                        if type(mention.sent) == datetime:
+                        if type(mention.sent) == datetime.datetime:
                             try:
-                                duration = self.timezone.localize(datetime.now()) - mention.sent
+                                duration = self.timezone.localize(datetime.datetime.now()) - mention.sent
                                 SINGLE_COMMAND_RESPONSE_TIME.observe(duration.seconds)
                             except TypeError as e:
                                 self.log.warning("Cant measure duration: ", exc_info=e)
