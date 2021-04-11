@@ -328,6 +328,7 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('INSERT INTO platform_statistics (platform, followers) VALUE (%s, %s) ON DUPLICATE '
                            'KEY UPDATE followers=%s', [self.platform, number_of_users, number_of_users])
+            self.connection.commit()
 
     def get_social_network_user_number(self, network: str):
         with self.connection.cursor(dictionary=True) as cursor:
