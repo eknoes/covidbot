@@ -323,7 +323,15 @@ class UserManager(object):
                            [self.platform, message_id])
         self.connection.commit()
 
-    def set_user_number(self, number_of_users: int):
+    def set_social_network_user_number(self, number_of_users: int):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('INSERT INTO platform_statistics (platform, followers) VALUE (%s, %s) ON DUPLICATE '
                            'KEY UPDATE followers=%s', [self.platform, number_of_users, number_of_users])
+
+    def get_social_network_user_number(self, network: str):
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT followers FROM platform_statistics WHERE platform=%s', [network])
+            row = cursor.fetchone()
+            if row:
+                return row['followers']
+            return 0

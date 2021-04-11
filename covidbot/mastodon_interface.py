@@ -31,7 +31,7 @@ class MastodonInterface(SingleCommandInterface):
         info = self.mastodon.account(323011)
         self.update_metrics()
         number = info['followers_count']
-        self.user_manager.set_user_number(number)
+        self.user_manager.set_social_network_user_number(number)
         return number
 
     def upload_media(self, filename: str) -> str:

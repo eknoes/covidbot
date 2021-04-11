@@ -266,7 +266,7 @@ class Bot(object):
                     interval = interval * -1
                     word = "über"
 
-                message += " Die Inzidenz ist damit seit {interval_length} {word} {interval}."\
+                message += " Die Inzidenz ist damit seit {interval_length} {word} {interval}." \
                     .format(interval_length=days, interval=interval, word=word)
 
         if current_data.r_value:
@@ -580,7 +580,6 @@ class Bot(object):
         message += "Außerdem sind "
         message += ", ".join(messenger_strings[:-1])
         message += f" und {messenger_strings[-1:][0]} aktiv.\n\n"
-
 
         message += "Die Top 10 der beliebtesten Orte sind:\n"
 

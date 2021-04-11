@@ -101,6 +101,11 @@ class MessengerBotSetup:
         USER_COUNT.labels(platform="telegram").set_function(lambda: user_monitor.get_user_number("telegram"))
         USER_COUNT.labels(platform="signal").set_function(lambda: user_monitor.get_user_number("signal"))
         USER_COUNT.labels(platform="messenger").set_function(lambda: user_monitor.get_user_number("messenger"))
+        USER_COUNT.labels(platform="facebook").set_function(lambda: user_monitor.get_social_network_user_number("facebook"))
+        USER_COUNT.labels(platform="instagram").set_function(lambda: user_monitor.get_social_network_user_number("instagram"))
+        USER_COUNT.labels(platform="twitter").set_function(lambda: user_monitor.get_social_network_user_number("twitter"))
+        USER_COUNT.labels(platform="mastodon").set_function(lambda: user_monitor.get_social_network_user_number("mastodon"))
+
         AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_monitor.get_mean_subscriptions())
 
         # Return specific interface
