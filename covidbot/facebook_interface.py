@@ -47,13 +47,14 @@ class FacebookInterface(SingleCommandInterface):
         else:
             response = requests.request("POST", f"https://graph.facebook.com/{self.page_id}/feed?"
                                                 f"message={message}&access_token={self.access_token}")
-            if response.status_code != 200:
-                self.log.error(f"Facebook API returned {response.status_code}: {response.text}")
-                return False
+        if response.status_code != 200:
+            self.log.error(f"Facebook API returned {response.status_code}: {response.text}")
+            self.log.error(response.json())
+            return False
 
         self.log.debug(response)
-        image_id = response.json()['id']
-        if not image_id:
+        post_id = response.json()['id']
+        if not post_id:
             self.log.error("Facebook API did not return an id")
             return False
         return True
