@@ -37,6 +37,10 @@ class FacebookInterface(SingleCommandInterface):
             if not media_file and response.images:
                 media_file = response.images[0]
 
+        message_text += "\n\nUnser Covidbot versorgt Dich einmal am Tag mit den aktuellen Infektions-, Todes- und " \
+                        "Impfzahlen der von Dir ausgewählten Orte, schreib uns einfach eine Nachricht im Facebook " \
+                        "Messenger oder auf anderen Plattformen: https://covidbot.d-64.org"
+
         message = urllib.parse.quote_plus(message_text)
 
         if media_file:
