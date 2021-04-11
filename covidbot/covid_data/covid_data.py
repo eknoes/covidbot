@@ -242,7 +242,7 @@ class CovidDatabaseCreator:
 
             # Vaccination Data
             cursor.execute('CREATE TABLE IF NOT EXISTS covid_vaccinations (id INTEGER PRIMARY KEY AUTO_INCREMENT, '
-                           'district_id INTEGER, date DATE, vaccinated_partial INTEGER, '
+                           'district_id INTEGER, date DATE, vaccinated_partial INTEGER, doses_diff INTEGER, '
                            'vaccinated_full INTEGER, rate_full FLOAT, rate_partial FLOAT, last_update DATETIME DEFAULT NOW(),'
                            'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, date))')
 
