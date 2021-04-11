@@ -68,7 +68,7 @@ class LocationService:
         stricter_results = []
         with self.geolookup as geolookup:
             for item in response:
-                if strict and item['importance'] < 0.5:
+                if strict and item['importance'] < 0.4:
                     continue
 
                 rs = geolookup.find_rs(float(item['lon']), float(item['lat']))

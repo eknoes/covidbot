@@ -38,6 +38,7 @@ class TestSingleCommandInterface(TestCase):
         self.assertEqual(8221, self.interface.find_district("Betreutes Trinken"),
                          "Result for Betreutes Trinken should be Heidelberg")
         self.assertEqual(8215, self.interface.find_district("Rheinstetten"), "Result for Rheinstetten is missing")
+        self.assertEqual(3361, self.interface.find_district("Achim"), "Result for Achim is missing")
 
     def test_find_district_no_query(self):
         self.assertIsNone(self.interface.find_district("via Threema, Telegram oder Signal"))
