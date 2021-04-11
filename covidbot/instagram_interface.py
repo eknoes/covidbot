@@ -9,6 +9,7 @@ import requests
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
+from covidbot.utils import BotResponse
 
 
 class InstagramInterface(SingleCommandInterface):
@@ -28,25 +29,27 @@ class InstagramInterface(SingleCommandInterface):
         self.web_dir = web_dir
         self.url = url
 
-    def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_obj: Optional[object] = None) -> bool:
-        if not media_files:
+    def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
+        message_text = ""
+        media_file = None
+        for response in messages:
+            message_text += response.message + '\n\n'
+            if not media_file and response.images:
+                media_file = response.images[0]
+
+        if not media_file:
             raise ValueError("Instagram Interface can just post a single media file with caption")
 
-        media_files = [media_files[0]]
+        url = self.url + os.path.basename(shutil.copy2(media_file, self.web_dir))
+        message_text += "\n\nUnser Covidbot versorgt Dich einmal am Tag mit den aktuellen Infektions-, Todes- und " \
+                        "Impfzahlen der von Dir ausgewählten Orte. Abonniere ihn einfach auf Telegram, Threema oder " \
+                        "Signal. Den Link dazu findest du in unserer Bio!"
 
-        filename = os.path.basename(shutil.copy2(media_files[0], self.web_dir))
-
-        url = self.url + filename
-        message += "\n\nUnser Covidbot versorgt Dich einmal am Tag mit den aktuellen Infektions-, Todes- und " \
-                   "Impfzahlen der von Dir ausgewählten Orte. Abonniere ihn einfach auf Telegram, Threema oder " \
-                   "Signal. Den Link dazu findest du in unserer Bio!"
-
-        if len(message) > 2200:
-            raise ValueError(f"Caption too long: {len(message)} characters")
-        message = urllib.parse.quote_plus(message)
+        if len(message_text) > 2200:
+            raise ValueError(f"Caption too long: {len(message_text)} characters")
+        message_text = urllib.parse.quote_plus(message_text)
         media_response = requests.request("POST", f"https://graph.facebook.com/{self.account_id}/media?"
-                                                  f"caption={message}&image_url={url}&access_token={self.access_token}")
+                                                  f"caption={message_text}&image_url={url}&access_token={self.access_token}")
         self.log.debug(media_response)
         if media_response.status_code != 200:
             self.log.error(f"Instagram API returned {media_response.status_code}: {media_response.text}")

@@ -11,7 +11,7 @@ from covidbot.metrics import SENT_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TI
     API_RESPONSE_CODE, USER_COUNT
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
-from covidbot.utils import replace_by_list
+from covidbot.utils import replace_by_list, BotResponse
 
 
 class TwitterInterface(SingleCommandInterface):
@@ -44,40 +44,41 @@ class TwitterInterface(SingleCommandInterface):
         else:
             return None
 
-    def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_obj: Optional[int] = None) -> bool:
+    def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
         if reply_obj and type(reply_obj) != int:
             raise ValueError("Twitter client needs reply_obj to be int")
 
-        data = {'status': message}
-        if media_files:
-            # Upload filenames
-            media_ids = []
-            for file in media_files:
-                with open(file, "rb") as f:
-                    upload_resp = self.twitter.request('media/upload', None, {'media': f.read()})
-                    if upload_resp.status_code != 200:
-                        raise ValueError(f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
-                                         f"{upload_resp.text}")
+        for message in messages:
+            data = {'status': message.message}
+            if message.images:
+                # Upload filenames
+                media_ids = []
+                for file in message.images:
+                    with open(file, "rb") as f:
+                        upload_resp = self.twitter.request('media/upload', None, {'media': f.read()})
+                        if upload_resp.status_code != 200:
+                            raise ValueError(f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
+                                             f"{upload_resp.text}")
 
-                    media_ids.append(upload_resp.json()['media_id'])
+                        media_ids.append(upload_resp.json()['media_id'])
 
-            data['media_ids'] = ",".join(map(str, media_ids))
+                data['media_ids'] = ",".join(map(str, media_ids))
 
-        if reply_obj:
-            data['in_reply_to_status_id'] = reply_obj
-            data['auto_populate_reply_metadata'] = True
+            if reply_obj:
+                data['in_reply_to_status_id'] = reply_obj
+                data['auto_populate_reply_metadata'] = True
 
-        with API_RESPONSE_TIME.labels(platform='twitter').time():
-            response = self.twitter.request('statuses/update', data)
+            with API_RESPONSE_TIME.labels(platform='twitter').time():
+                response = self.twitter.request('statuses/update', data)
 
-        if 200 <= response.status_code < 300:
-            self.log.info(f"Tweet sent successfully {len(message)} chars), response: {response.status_code}")
-            SENT_MESSAGE_COUNT.inc()
-            self.update_twitter_metrics(response)
-            return True
-        else:
-            raise ValueError(f"Could not send tweet: API Code {response.status_code}: {response.text}")
+            if 200 <= response.status_code < 300:
+                self.log.info(f"Tweet sent successfully {len(data['status'])} chars), response: {response.status_code}")
+                SENT_MESSAGE_COUNT.inc()
+                self.update_twitter_metrics(response)
+                reply_obj = response.json()['id']
+            else:
+                raise ValueError(f"Could not send tweet: API Code {response.status_code}: {response.text}")
+        return True
 
     @staticmethod
     def update_twitter_metrics(response: TwitterResponse):

@@ -9,6 +9,7 @@ import requests
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
+from covidbot.utils import BotResponse
 
 
 class FacebookInterface(SingleCommandInterface):
@@ -28,13 +29,18 @@ class FacebookInterface(SingleCommandInterface):
         self.web_dir = web_dir
         self.url = url
 
-    def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_obj: Optional[object] = None) -> bool:
-        message = urllib.parse.quote_plus(message)
+    def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
+        message_text = ""
+        media_file = None
+        for response in messages:
+            message_text += response.message + '\n\n'
+            if not media_file and response.images:
+                media_file = response.images[0]
 
-        if media_files:
-            file = media_files[0]
-            filename = os.path.basename(shutil.copy2(file, self.web_dir))
+        message = urllib.parse.quote_plus(message_text)
+
+        if media_file:
+            filename = os.path.basename(shutil.copy2(media_file, self.web_dir))
             url = self.url + filename
             response = requests.request("POST", f"https://graph.facebook.com/{self.page_id}/photos?"
                                                 f"caption={message}&url={url}&access_token={self.access_token}")

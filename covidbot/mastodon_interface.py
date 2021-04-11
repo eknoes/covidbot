@@ -7,7 +7,7 @@ from covidbot.covid_data import CovidData, Visualization
 from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_TIME, SENT_MESSAGE_COUNT, USER_COUNT
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
-from covidbot.utils import general_tag_pattern
+from covidbot.utils import general_tag_pattern, BotResponse
 
 
 class MastodonInterface(SingleCommandInterface):
@@ -41,29 +41,29 @@ class MastodonInterface(SingleCommandInterface):
 
         return upload_resp['id']
 
-    def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_obj: Optional[Dict] = None) -> bool:
-        media_ids = []
-        if media_files:
-            for file in media_files:
-                media_ids.append(self.upload_media(file))
-
-        try:
-            with API_RESPONSE_TIME.labels(platform='mastodon').time():
-                if not reply_obj:
-                    response = self.mastodon.status_post(message, media_ids=media_ids, language="deu", visibility="unlisted")
+    def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
+        for message in messages:
+            media_ids = []
+            if message.images:
+                for file in message.images:
+                    media_ids.append(self.upload_media(file))
+            try:
+                with API_RESPONSE_TIME.labels(platform='mastodon').time():
+                    if not reply_obj:
+                        response = self.mastodon.status_post(message.message, media_ids=media_ids, language="deu", visibility="unlisted")
+                    else:
+                        response = self.mastodon.status_reply(reply_obj, message.message, media_ids=media_ids, language="deu",)
+                self.update_metrics()
+                if response:
+                    self.log.info(f"Toot sent successfully {len(message.message)} chars)")
+                    SENT_MESSAGE_COUNT.inc()
+                    reply_obj = response
                 else:
-                    response = self.mastodon.status_reply(reply_obj, message, media_ids=media_ids, language="deu",)
-            self.update_metrics()
-            if response:
-                self.log.info(f"Toot sent successfully {len(message)} chars)")
-                SENT_MESSAGE_COUNT.inc()
-                return True
-            else:
-                raise ValueError(f"Could not send toot!")
-        except MastodonAPIError as api_error:
-            self.log.error(f"Got error on API access: {api_error}", exc_info=api_error)
-            raise api_error
+                    raise ValueError(f"Could not send toot!")
+            except MastodonAPIError as api_error:
+                self.log.error(f"Got error on API access: {api_error}", exc_info=api_error)
+                raise api_error
+        return True
 
     def update_metrics(self):
         if self.mastodon.ratelimit_limit:

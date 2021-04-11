@@ -9,6 +9,7 @@ from typing import List, Union, Optional, Iterable
 import pytz
 
 from covidbot.covid_data import CovidData, Visualization
+from covidbot.covid_data.models import ICUData, VaccinationData
 from covidbot.location_service import LocationService
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT, SINGLE_COMMAND_RESPONSE_TIME
@@ -75,48 +76,54 @@ class SingleCommandInterface(MessengerInterface, ABC):
             if self.no_write:
                 print(f"Sent message: {tweet_text}")
                 self.user_manager.set_last_update(infections_uid, germany.date)
-            elif self.write_message(tweet_text, [self.viz.infections_graph(0), self.viz.incidence_graph(0)]):
+            elif self.write_message([BotResponse(tweet_text, [self.viz.infections_graph(0), self.viz.incidence_graph(0)])]):
                 self.user_manager.set_last_update(infections_uid, germany.date)
                 self.log.info("Tweet was successfully sent")
 
         # Vaccinations
         vaccinations_uid = self.user_manager.get_user_id(self.VACCINATIONS_UID)
         if self.user_manager.get_user(vaccinations_uid).last_update.date() < germany.vaccinations.date:
-            vacc = germany.vaccinations
-            tweet_text = f"💉 Das {self.bmg_name} hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht." \
-                         f"\n\n{format_float(vacc.partial_rate * 100)}% der Bevölkerung haben mindestens eine #Impfung " \
-                         f"erhalten, {format_float(vacc.full_rate * 100)}% sind vollständig geimpft. Insgesamt wurden " \
-                         f"{format_int(vacc.vaccinated_partial)} Erstimpfungen und {format_int(vacc.vaccinated_full)} " \
-                         f"Zweitimpfungen durchgeführt. #COVID19"
+            posts = self.get_vaccination_shortpost(germany.vaccinations)
 
             if self.no_write:
-                print(f"Sent message: {tweet_text}")
-                self.user_manager.set_last_update(vaccinations_uid, vacc.date)
-            elif self.write_message(tweet_text, [self.viz.vaccination_graph(0)]):
-                self.user_manager.set_last_update(vaccinations_uid, vacc.date)
+                print(f"Sent message: {posts[0].message}")
+                self.user_manager.set_last_update(vaccinations_uid, germany.vaccinations.date)
+            elif self.write_message(posts, [self.viz.vaccination_graph(0)]):
+                self.user_manager.set_last_update(vaccinations_uid, germany.vaccinations.date)
                 self.log.info("Tweet was successfully sent")
 
         # Vaccinations
         icu_uid = self.user_manager.get_user_id(self.ICU_UID)
         if self.user_manager.get_user(icu_uid).last_update.date() < germany.icu_data.date:
-            icu = germany.icu_data
-            tweet_text = f"🏥 Die {self.divi_name} hat Daten über die #Intensivbetten in Deutschland für den " \
-                         f"{icu.date.strftime('%d. %B %Y')} gemeldet.\n\n{format_float(icu.percent_occupied())}% " \
-                         f"({format_noun(icu.occupied_beds, FormattableNoun.BEDS)}) der " \
-                         f"Intensivbetten sind aktuell belegt. " \
-                         f"In {format_noun(icu.occupied_covid, FormattableNoun.BEDS)} " \
-                         f"({format_float(icu.percent_covid())}%) liegen Patient:innen" \
-                         f" mit #COVID19, davon werden {format_int(icu.covid_ventilated)} beatmet. " \
-                         f"Insgesamt gibt es {format_noun(icu.total_beds(), FormattableNoun.BEDS)}."
+            posts = self.get_icu_shortpost(germany.icu_data)
 
             if self.no_write:
-                print(f"Sent message: {tweet_text}")
-                self.user_manager.set_last_update(icu_uid, icu.date)
-            elif self.write_message(tweet_text):
+                print(f"Sent message: {posts[0].message}")
+                self.user_manager.set_last_update(icu_uid, germany.icu_data.date)
+            elif self.write_message(posts):
                 self.log.info("Tweet was successfully sent")
-                self.user_manager.set_last_update(icu_uid, icu.date)
+                self.user_manager.set_last_update(icu_uid, germany.icu_data.date)
 
-    def get_infection_tweet(self, district_id: int) -> BotResponse:
+    def get_vaccination_shortpost(self, vacc: VaccinationData):
+        tweet_text = f"💉 Das {self.bmg_name} hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht." \
+                     f"\n\n{format_float(vacc.partial_rate * 100)}% der Bevölkerung haben mindestens eine #Impfung " \
+                     f"erhalten, {format_float(vacc.full_rate * 100)}% sind vollständig geimpft. Insgesamt wurden " \
+                     f"{format_int(vacc.vaccinated_partial)} Erstimpfungen und {format_int(vacc.vaccinated_full)} " \
+                     f"Zweitimpfungen durchgeführt. #COVID19"
+        return [BotResponse(tweet_text, [self.viz.vaccination_graph(0)])]
+
+    def get_icu_shortpost(self, icu: ICUData) -> List[BotResponse]:
+        tweet_text = f"🏥 Die {self.divi_name} hat Daten über die #Intensivbetten in Deutschland für den " \
+                     f"{icu.date.strftime('%d. %B %Y')} gemeldet.\n\n{format_float(icu.percent_occupied())}% " \
+                     f"({format_noun(icu.occupied_beds, FormattableNoun.BEDS)}) der " \
+                     f"Intensivbetten sind aktuell belegt. " \
+                     f"In {format_noun(icu.occupied_covid, FormattableNoun.BEDS)} " \
+                     f"({format_float(icu.percent_covid())}%) liegen Patient:innen" \
+                     f" mit #COVID19, davon werden {format_int(icu.covid_ventilated)} beatmet. " \
+                     f"Insgesamt gibt es {format_noun(icu.total_beds(), FormattableNoun.BEDS)}."
+        return [BotResponse(tweet_text)]
+
+    def get_infection_shortpost(self, district_id: int) -> List[BotResponse]:
         district = self.data.get_district_data(district_id)
         tweet_text = f"🦠 Am {district.date.strftime('%d. %B %Y')} wurden " \
                      f"{format_noun(district.new_cases, FormattableNoun.INFECTIONS, hashtag='#')} " \
@@ -124,7 +131,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"{format_noun(district.new_deaths, FormattableNoun.DEATHS)} " \
                      f"{format_data_trend(district.deaths_trend)} in {district.name} gemeldet. Die #Inzidenz liegt " \
                      f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
-        return BotResponse(tweet_text, [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)])
+        return [BotResponse(tweet_text, [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)])]
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if users:
@@ -135,11 +142,10 @@ class SingleCommandInterface(MessengerInterface, ABC):
             self.log.error("Message can't be longer than 240 characters!")
             return
 
-        self.write_message(message)
+        self.write_message([BotResponse(message)])
 
     @abstractmethod
-    def write_message(self, message: str, media_files: Optional[List[str]] = None,
-                      reply_obj: Optional[object] = None) -> bool:
+    def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
         pass
 
     @abstractmethod
@@ -161,13 +167,12 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
                 # Answer Tweet
                 if district_id:
-                    response = self.get_infection_tweet(district_id)
-                    message = f"{response.message}"
+                    response = self.get_infection_shortpost(district_id)
                     if self.no_write:
                         print(mention.message)
-                        print(f"Reply to {chat_id}: {message}")
+                        print(f"Reply to {chat_id}: {response[0].message}")
                     else:
-                        self.write_message(message, media_files=response.images, reply_obj=mention.reply_obj)
+                        self.write_message(response, reply_obj=mention.reply_obj)
                     if mention.sent:
                         if type(mention.sent) == datetime:
                             try:
