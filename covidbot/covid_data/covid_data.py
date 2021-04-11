@@ -147,7 +147,7 @@ class CovidData(object):
                 result = self.fill_trend(result, last_week, yesterday)
 
             # Check, how long incidence is in certain interval
-            possible_intervals = [35, 50, 100]
+            possible_intervals = [35, 50, 100, 200]
             threshold = 0
             for interval in possible_intervals:
                 if result.incidence < interval:
@@ -161,6 +161,13 @@ class CovidData(object):
                 if threshold_record:
                     result.incidence_interval_since = threshold_record['date'] + timedelta(days=1)
                     result.incidence_interval_upper_value = threshold
+            elif threshold:
+                cursor.execute("SELECT date FROM covid_data WHERE rs=%s AND incidence < 200 ORDER BY date DESC LIMIT 1",
+                               [district_id])
+                threshold_record = cursor.fetchone()
+                if threshold_record:
+                    result.incidence_interval_since = threshold_record['date'] + timedelta(days=1)
+                    result.incidence_interval_upper_value = -200
             return result
 
     def get_country_data(self) -> DistrictData:

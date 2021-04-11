@@ -256,11 +256,17 @@ class Bot(object):
         message += "<b>🦠 Infektionsdaten</b>\n"
         if current_data.incidence:
             message += "Die 7-Tage-Inzidenz liegt bei {incidence} {incidence_trend}."
-            if current_data.incidence_interval_since:
-                interval_length = current_data.date - current_data.incidence_interval_since
-                message += " Die Inzidenz ist damit seit {interval_length} unter {interval}." \
-                    .format(interval_length=format_noun(interval_length.days, FormattableNoun.DAYS),
-                            interval=current_data.incidence_interval_upper_value)
+            if current_data.incidence_interval_since is not None:
+                days = format_noun((current_data.date - current_data.incidence_interval_since).days,
+                                   FormattableNoun.DAYS)
+                interval = current_data.incidence_interval_upper_value
+                word = "unter"
+                if current_data.incidence_interval_upper_value < 0:
+                    interval = interval * -1
+                    word = "über"
+
+                message += " Die Inzidenz ist damit seit {interval_length} {word} {interval}."\
+                    .format(interval_length=days, interval=interval, word=word)
 
         if current_data.r_value:
             message += " Der 7-Tage-R-Wert liegt bei {r_value} {r_trend}." \
