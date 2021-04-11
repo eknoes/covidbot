@@ -50,7 +50,8 @@ class UserManager(object):
             cursor.execute('CREATE TABLE IF NOT EXISTS answered_messages '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(20), message_id BIGINT, '
                            'UNIQUE(platform, message_id))')
-            cursor.execute('CREATE TABLE IF NOT EXISTS platform_statistics (platform VARCHAR(100), followers INTEGER, UNIQUE(platform, followers))')
+            cursor.execute(
+                'CREATE TABLE IF NOT EXISTS platform_statistics (platform VARCHAR(100) PRIMARY KEY, followers INTEGER)')
             self.connection.commit()
 
     def set_user_activated(self, user_id: int, activated=True) -> None:
@@ -330,7 +331,7 @@ class UserManager(object):
 
     def get_social_network_user_number(self, network: str):
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT followers FROM platform_statistics WHERE platform=%s', [network])
+            cursor.execute('SELECT followers FROM platform_statistics WHERE platform=%s LIMIT 1', [network])
             row = cursor.fetchone()
             if row:
                 return row['followers']
