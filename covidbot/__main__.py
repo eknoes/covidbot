@@ -14,6 +14,7 @@ from prometheus_client import Info
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, Visualization
+from covidbot.facebook_interface import FacebookInterface
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
 from covidbot.user_manager import UserManager
@@ -53,7 +54,7 @@ class MessengerBotSetup:
             logging.getLogger().addHandler(stream_log_handler)
 
         if name not in ["signal", "threema", "telegram", "interactive", "feedback", "twitter", "mastodon", "instagram",
-                        "messenger"]:
+                        "messenger", "facebook"]:
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
@@ -177,6 +178,18 @@ class MessengerBotSetup:
                                       self.config['INSTAGRAM'].get('PUBLIC_URL'),
                                       user_manager, data, visualization,
                                       no_write=self.config['INSTAGRAM'].getboolean('DEBUG',
+                                                                                   fallback=False))
+
+        if self.name == "facebook":
+            if not self.config.has_section("FACEBOOK"):
+                raise ValueError("FACEBOOK is not configured")
+            from covidbot.instagram_interface import InstagramInterface
+            return FacebookInterface(self.config['FACEBOOK'].get('PAGE_ID'),
+                                      self.config['FACEBOOK'].get('PAGE_ACCESS_TOKEN'),
+                                      self.config['FACEBOOK'].get('WEB_DIR'),
+                                      self.config['FACEBOOK'].get('PUBLIC_URL'),
+                                      user_manager, data, visualization,
+                                      no_write=self.config['FACEBOOK'].getboolean('DEBUG',
                                                                                    fallback=False))
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -353,6 +366,8 @@ def main():
             platforms.append("mastodon")
         if config.has_section("INSTAGRAM"):
             platforms.append("instagram")
+        if config.has_section("FACEBOOK"):
+            platforms.append("facebook")
 
         for platform in platforms:
             with MessengerBotSetup(platform, config, setup_logs=False, monitoring=False) as iface:

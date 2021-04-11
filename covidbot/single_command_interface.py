@@ -128,11 +128,11 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if users:
-            self.log.error("Can't tweet to specific users!")
+            self.log.error("Can't send a message to specific users!")
             return
 
         if len(message) > 240:
-            self.log.error("Tweet can't be longer than 240 characters!")
+            self.log.error("Message can't be longer than 240 characters!")
             return
 
         self.write_message(message)
