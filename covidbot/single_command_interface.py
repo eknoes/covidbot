@@ -76,7 +76,8 @@ class SingleCommandInterface(MessengerInterface, ABC):
             if self.no_write:
                 print(f"Sent message: {tweet_text}")
                 self.user_manager.set_last_update(infections_uid, germany.date)
-            elif self.write_message([BotResponse(tweet_text, [self.viz.infections_graph(0), self.viz.incidence_graph(0)])]):
+            elif self.write_message(
+                    [BotResponse(tweet_text, [self.viz.infections_graph(0), self.viz.incidence_graph(0)])]):
                 self.user_manager.set_last_update(infections_uid, germany.date)
                 self.log.info("Tweet was successfully sent")
 
@@ -88,7 +89,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
             if self.no_write:
                 print(f"Sent message: {posts[0].message}")
                 self.user_manager.set_last_update(vaccinations_uid, germany.vaccinations.date)
-            elif self.write_message(posts, [self.viz.vaccination_graph(0)]):
+            elif self.write_message(posts):
                 self.user_manager.set_last_update(vaccinations_uid, germany.vaccinations.date)
                 self.log.info("Tweet was successfully sent")
 
@@ -104,13 +105,18 @@ class SingleCommandInterface(MessengerInterface, ABC):
                 self.log.info("Tweet was successfully sent")
                 self.user_manager.set_last_update(icu_uid, germany.icu_data.date)
 
-    def get_vaccination_shortpost(self, vacc: VaccinationData):
-        tweet_text = f"💉 Das {self.bmg_name} hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht." \
-                     f"\n\n{format_float(vacc.partial_rate * 100)}% der Bevölkerung haben mindestens eine #Impfung " \
-                     f"erhalten, {format_float(vacc.full_rate * 100)}% sind vollständig geimpft. Insgesamt wurden " \
-                     f"{format_int(vacc.vaccinated_partial)} Erstimpfungen und {format_int(vacc.vaccinated_full)} " \
-                     f"Zweitimpfungen durchgeführt. #COVID19"
-        return [BotResponse(tweet_text, [self.viz.vaccination_graph(0)])]
+    def get_vaccination_shortpost(self, vacc: VaccinationData) -> List[BotResponse]:
+        responses = [BotResponse(
+            f"💉 Das {self.bmg_name} hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht.\n\n"
+            f"{format_float(vacc.partial_rate * 100)}% der Bevölkerung haben mindestens eine #Impfung erhalten, "
+            f"{format_float(vacc.full_rate * 100)}% sind vollständig geimpft. Insgesamt wurden "
+            f"{format_int(vacc.vaccinated_partial)} Erstimpfungen und {format_int(vacc.vaccinated_full)} Zweitimpfungen"
+            f" durchgeführt. #COVID19",
+            [self.viz.vaccination_graph(0)]),
+            BotResponse(f"In den letzten 7 Tagen wurden im Schnitt täglich {format_int(vacc.avg_speed)} "
+                        f"Dosen verabreicht, bei diesem Tempo wäre die gesamte Bevölkerung in Deutschland "
+                        f"in {format_int(vacc.avg_days_to_finish)} Tagen geimpft.")]
+        return responses
 
     def get_icu_shortpost(self, icu: ICUData) -> List[BotResponse]:
         tweet_text = f"🏥 Die {self.divi_name} hat Daten über die #Intensivbetten in Deutschland für den " \
@@ -131,7 +137,8 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"{format_noun(district.new_deaths, FormattableNoun.DEATHS)} " \
                      f"{format_data_trend(district.deaths_trend)} in {district.name} gemeldet. Die #Inzidenz liegt " \
                      f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
-        return [BotResponse(tweet_text, [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)])]
+        return [
+            BotResponse(tweet_text, [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)])]
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if users:
