@@ -570,6 +570,7 @@ class TelegramInterface(MessengerInterface):
                     self.log.info(f"Migrated Chat {userid} to {e.new_chat_id}")
                 else:
                     self.log.warning(f"Could not migrate {userid} to {e.new_chat_id}")
+                    self._bot.disable_user(userid)
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
