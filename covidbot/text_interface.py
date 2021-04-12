@@ -127,30 +127,31 @@ class SimpleTextInterface(object):
                 self.chat_states[set_feedback] = (ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
                 response.message += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
                                     "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
-                response.choices = [UserChoice("Feedback weiterleiten", "Ja"), UserChoice("Abbrechen", "Nein")]
+                response.choices = [UserChoice("Feedback weiterleiten", "Ja", "Sende \"Ja\", um deine Nachricht als "
+                                                                              "Feedback weiterzuleiten"),
+                                    UserChoice("Abbrechen", "Nein", "Sende \"Nein\", um abzubrechen")]
             return [response]
 
         elif len(locations) == 1:
             return locations[0]
         else:
             choices = []
-            locations_list = response.message + "\n\n"
             for location in locations:
-                locations_list += f"• {location.name}\t{location.id}\n"
-                choices.append(UserChoice(location.name, str(location.id)))
-            locations_list += "\n"
-            locations_list += "Leider musst du deine Auswahl genauer angeben. Anstatt des kompletten Namens kannst du " \
-                              f"auch die ID nutzen, also bspw. Abo {locations[0].id} für {locations[0].name}"
-            return [BotResponse(locations_list, choices=choices)]
+                choices.append(UserChoice(location.name, str(location.id), f'{location.name}\t{location.id}',
+                                          alt_help=f"Leider musst du deine Auswahl genauer angeben. Anstatt des "
+                                                   f"kompletten Namens kannst du auch die ID nutzen, also bspw. "
+                                                   f"{location.id} für {location.name}."))
+            return [BotResponse(response.message, choices=choices)]
 
     def subscribeHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
         if not user_input:
             response, locations = self.bot.get_overview(user_id)
             if locations:
-                response.message += "\n"
+                choices = []
                 for loc in locations:
-                    response.message += f"• {loc.name}\t{loc.id}\n"
+                    choices.append(UserChoice(loc.name, str(loc.id), '{location.name}\t{location.id}'))
+                response.choices = choices
             return response
 
         location = self.parseLocationInput(user_input)
@@ -202,17 +203,13 @@ class SimpleTextInterface(object):
             choices = []
             for action_name, action in available_actions:
                 if action == UserDistrictActions.REPORT:
-                    choices.append(UserChoice(action_name, f'/daten {location.id}'))
-                    message += '• Schreibe "Daten", um die aktuellen Daten zu erhalten\n'
+                    choices.append(UserChoice(action_name, f'/daten {location.id}', 'Schreibe "Daten", um die aktuellen Daten zu erhalten'))
                 elif action == UserDistrictActions.SUBSCRIBE:
-                    choices.append(UserChoice(action_name, f'/abo {location.id}'))
-                    message += '• Schreibe "Abo", um den Ort zu abonnieren\n'
+                    choices.append(UserChoice(action_name, f'/abo {location.id}', 'Schreibe "Abo", um den Ort zu abonnieren'))
                 elif action == UserDistrictActions.UNSUBSCRIBE:
-                    choices.append(UserChoice(action_name, f'/beende {location.id}'))
-                    message += '• Schreibe "Beende", dein Abo zu beenden\n'
+                    choices.append(UserChoice(action_name, f'/beende {location.id}', 'Schreibe "Beende", dein Abo zu beenden'))
                 elif action == UserDistrictActions.RULES:
-                    choices.append(UserChoice(action_name, f'/regeln {location.id}'))
-                    message += '• Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten\n'
+                    choices.append(UserChoice(action_name, f'/regeln {location.id}', 'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'))
             return [BotResponse(message, choices=choices)]
         return location
 
@@ -253,5 +250,5 @@ class InteractiveInterface(SimpleTextInterface, MessengerInterface):
         while user_input != "":
             responses = self.handle_input(user_input, '1')
             for response in responses:
-                print(f"{adapt_text(response.message)}")
+                print(f"{adapt_text(response)}")
             user_input = input("> ")

@@ -67,7 +67,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.message:
             images = response.images
-            messages = split_message(adapt_text(response.message), max_chars=2000)
+            messages = split_message(adapt_text(str(response)), max_chars=2000)
             for i in range(0, len(messages)):
                 buttons = None
                 if response.choices and i == len(messages) - 1:

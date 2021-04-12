@@ -81,7 +81,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         """
         Answers a signal message with the given :class:`covidbot.BotResponse`
         """
-        reply.message = adapt_text(reply.message)
+        reply.message = str(adapt_text(reply))
 
         attachment = []
         if reply.images:

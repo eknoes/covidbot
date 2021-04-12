@@ -572,14 +572,20 @@ class Bot(object):
         platforms.sort(key=lambda p: p[1], reverse=True)
         messenger_strings = [f"{c} über {m}" for m, c in platforms]
         message += ", ".join(messenger_strings[:-1])
-        message += f" und {messenger_strings[-1:][0]}. "
+        if messenger_strings[-1:]:
+            message += f" und {messenger_strings[-1:][0]}. "
+        else:
+            message += '. '
 
         platforms = self._manager.get_users_per_network()
         platforms.sort(key=lambda p: p[1], reverse=True)
         messenger_strings = [f"{c} Follower auf {m}" for m, c in platforms]
         message += "Außerdem sind "
         message += ", ".join(messenger_strings[:-1])
-        message += f" und {messenger_strings[-1:][0]} aktiv.\n\n"
+        if messenger_strings[-1:]:
+            message += f" und {messenger_strings[-1:][0]}. "
+        else:
+            message += '. '
 
         message += "Die Top 10 der beliebtesten Orte sind:\n"
 

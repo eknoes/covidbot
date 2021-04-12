@@ -89,7 +89,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 SENT_IMAGES_COUNT.inc()
 
         if response.message:
-            message_parts = split_message(adapt_text(response.message, threema_format=True), max_bytes=3500)
+            message_parts = split_message(adapt_text(str(response), threema_format=True), max_bytes=3500)
             for m in message_parts:
                 response_msg = TextMessage(self.connection, text=m, to_id=user)
                 await response_msg.send()
