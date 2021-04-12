@@ -314,7 +314,7 @@ class UserManager(object):
     def is_message_answered(self, message_id: int) -> bool:
         with self.connection.cursor() as cursor:
             cursor.execute('SELECT id FROM answered_messages WHERE message_id=%s', [message_id])
-            if cursor.fetchone():
+            if cursor.fetchall():
                 return True
             return False
 
@@ -333,7 +333,7 @@ class UserManager(object):
     def get_social_network_user_number(self, network: str):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT followers FROM platform_statistics WHERE platform=%s LIMIT 1', [network])
-            row = cursor.fetchone()
-            if row:
-                return row['followers']
+            rows = cursor.fetchall()
+            if rows:
+                return rows[0]['followers']
             return 0
