@@ -1,8 +1,8 @@
 import csv
 import datetime
 import logging
-import re
 import os.path
+import re
 from enum import Enum
 from functools import reduce
 from typing import Optional, Tuple, List, Dict, Union, Callable
@@ -104,6 +104,18 @@ class Bot(object):
         return [
             BotResponse("Leider konnte deine Sprache nicht auf {language} gesetzt werde.".format(language=language))]
 
+    def resolve_geolocation(self, lon, lat) -> Optional[List[District]]:
+        district_id = self._location_service.find_rs(lon, lat)
+        if not district_id:
+            return None
+
+        results = [self._data.get_district(district_id)]
+        parent = results[0].parent
+        if parent:
+            results.append(self._data.get_district(parent))
+
+        return results
+
     def find_district_id(self, district_query: str) -> Tuple[Optional[BotResponse], Optional[List[District]]]:
         if not district_query:
             return BotResponse('Dieser Befehl benötigt eine Ortsangabe'), None
@@ -139,25 +151,7 @@ class Bot(object):
             message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
             return BotResponse(message), None
 
-    def find_district_id_from_geolocation(self, lon, lat) -> Tuple[Optional[BotResponse], Optional[List[District]]]:
-        district_id = self._location_service.find_rs(lon, lat)
-        if not district_id:
-            return BotResponse(
-                'Leider konnte kein Ort in den RKI Corona Daten zu {location} gefunden werden. Bitte beachte, dass '
-                'Daten nur für Orte innerhalb Deutschlands verfügbar sind.'.format(location="deinem Standort")), None
-        else:
-            district = self._data.get_district(district_id)
-            results = [district]
-
-            message = None
-            if district.parent:
-                message = BotResponse(
-                    "Die Daten für die folgenden Orte und Regionen sind für deinen Standort verfügbar")
-                results.append(self._data.get_district(district.parent))
-            return message, results
-
-    def get_possible_actions(self, user_identification: Union[int, str], district_id: int) -> Tuple[
-        str, List[Tuple[str, UserDistrictActions]]]:
+    def get_possible_actions(self, user_identification: Union[int, str], district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
         actions = [("Daten anzeigen", UserDistrictActions.REPORT)]
         district = self._data.get_district(district_id)
         user_id = self._manager.get_user_id(user_identification)
