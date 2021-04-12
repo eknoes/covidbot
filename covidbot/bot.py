@@ -569,13 +569,13 @@ class Bot(object):
     def get_statistic(self) -> List[BotResponse]:
         message = "Aktuell nutzen {total_user} Personen diesen Bot, davon "
         platforms = self._manager.get_users_per_messenger()
-        platforms.sort(key=lambda p: p[0], reverse=True)
+        platforms.sort(key=lambda p: p[1], reverse=True)
         messenger_strings = [f"{c} über {m}" for m, c in platforms]
         message += ", ".join(messenger_strings[:-1])
         message += f" und {messenger_strings[-1:][0]}. "
 
         platforms = self._manager.get_users_per_network()
-        platforms.sort(key=lambda p: p[0], reverse=True)
+        platforms.sort(key=lambda p: p[1], reverse=True)
         messenger_strings = [f"{c} Follower auf {m}" for m, c in platforms]
         message += "Außerdem sind "
         message += ", ".join(messenger_strings[:-1])
