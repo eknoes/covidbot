@@ -7,6 +7,7 @@ import traceback
 from enum import Enum
 from typing import List, Dict, Union
 
+import prometheus_async
 import telegram
 import ujson as json
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, ChatAction, \
@@ -17,7 +18,7 @@ from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, Call
 from covidbot.bot import Bot, UserHintService
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
+from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, RECV_MESSAGE_COUNT
 from covidbot.text_interface import SimpleTextInterface
 from covidbot.utils import BotResponse, split_message
 
@@ -222,6 +223,7 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
 
     @BOT_RESPONSE_TIME.time()
     def handle_callback_query(self, update: Update, context: CallbackContext) -> None:
+        RECV_MESSAGE_COUNT.inc()
         query = update.callback_query
         if query.message.message_id in self.deleted_callbacks:
             return
@@ -231,11 +233,15 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
         self.answer_callback_query(update, self.handle_input(query.data, update.effective_chat.id),
                                    disable_web_page_preview=True)
 
+    @BOT_RESPONSE_TIME.time()
     def handle_text(self, update: Update, context: CallbackContext):
+        RECV_MESSAGE_COUNT.inc()
         responses = self.handle_input(update.message.text, update.effective_chat.id)
         self.answer_update(update, responses, disable_web_page_preview=True)
 
+    @BOT_RESPONSE_TIME.time()
     def handle_location(self, update: Update, context: CallbackContext):
+        RECV_MESSAGE_COUNT.inc()
         responses = self.handle_geolocation(update.message.location.longitude, update.message.location.latitude,
                                             update.effective_chat.id)
         self.answer_update(update, responses, disable_web_page_preview=True)
