@@ -156,9 +156,8 @@ class SimpleTextInterface(object):
         choices = []
         for location in districts:
             choices.append(UserChoice(location.name, str(location.id), f'{location.name}\t{location.id}',
-                                      alt_help=f"Leider musst du deine Auswahl genauer angeben. Anstatt des "
-                                               f"kompletten Namens kannst du auch die ID nutzen, also bspw. "
-                                               f"{location.id} für {location.name}."))
+                                      alt_help=f"Anstatt des kompletten Namens kannst du auch die ID nutzen, also "
+                                               f"bspw. {location.id} für {location.name}."))
         return choices
 
     def subscribeHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
@@ -166,9 +165,7 @@ class SimpleTextInterface(object):
         if not user_input:
             response, locations = self.bot.get_overview(user_id)
             if locations:
-                choices = []
-                for loc in locations:
-                    choices.append(UserChoice(loc.name, str(loc.id), '{location.name}\t{location.id}'))
+                choices = self.generate_districts_choices(locations)
                 response.choices = choices
             return response
 
@@ -250,8 +247,11 @@ class SimpleTextInterface(object):
     def deleteMeHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('delete_me').inc()
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_DELETE_ME, None)
-        return [BotResponse(
-            "Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten löschen? Dann antworte bitte mit Ja.")]
+        choices = [UserChoice("Ja", "Ja", "Sende \"Ja\", um alle deine bei uns gespeicherten Daten von dir zu "
+                                          "löschen"),
+                   UserChoice("Abbrechen", "Nein", "Sende eine andere Nachricht, um keine Daten von dir zu löschen")]
+        return [BotResponse("Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten"
+                            " löschen?", choices=choices)]
 
     def getUpdates(self) -> List[Tuple[str, List[BotResponse]]]:
         return self.bot.get_unconfirmed_daily_reports()
