@@ -583,11 +583,11 @@ class Bot(object):
         message += "Außerdem sind "
         message += ", ".join(messenger_strings[:-1])
         if messenger_strings[-1:]:
-            message += f" und {messenger_strings[-1:][0]}. "
+            message += f" und {messenger_strings[-1:][0]}."
         else:
-            message += '. '
+            message += '.'
 
-        message += "Die Top 10 der beliebtesten Orte sind:\n"
+        message += "\n\nDie Top 10 der beliebtesten Orte sind:\n"
 
         i = 1
         for county in self._manager.get_ranked_subscriptions()[:10]:
