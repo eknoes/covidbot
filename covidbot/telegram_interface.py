@@ -229,7 +229,6 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
             return
 
         query.answer()
-        # Subscribe Callback
         self.answer_callback_query(update, self.handle_input(query.data, update.effective_chat.id),
                                    disable_web_page_preview=True)
 

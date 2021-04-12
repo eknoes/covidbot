@@ -22,7 +22,7 @@ class UserDistrictActions(Enum):
 
 
 class BotUserSettings:
-    REPORT_NO_GRAPHICS = "report_no_graphics"
+    REPORT_GRAPHICS = "report_graphics"
     REPORT_INCLUDE_ICU = "report_include_icu"
     REPORT_INCLUDE_VACCINATION = "report_include_vaccination"
     REPORT_EXTENSIVE_GRAPHICS = "report_extensive_graphics"
@@ -102,6 +102,10 @@ class Bot(object):
     def get_user_setting(self, user_identification: Union[int, str], setting: str, default: bool) -> bool:
         user_id = self._manager.get_user_id(user_identification, create_if_not_exists=False)
         return self._manager.get_user_setting(user_id, setting, default)
+
+    def set_user_setting(self, user_identification: Union[int, str], setting: str, value: bool):
+        user_id = self._manager.get_user_id(user_identification, create_if_not_exists=True)
+        return self._manager.set_user_setting(user_id, setting, value)
 
     def set_language(self, user_identification: Union[int, str], language: Optional[str]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)
@@ -390,7 +394,9 @@ class Bot(object):
 
     def _get_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
         # Visualization
-        graphs = [self.data_visualization.infections_graph(0)]
+        graphs = []
+        if self._manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
+            graphs.append(self.data_visualization.infections_graph(0))
 
         country = self._data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n"
@@ -431,11 +437,12 @@ class Bot(object):
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
 
-            # Generate multi-incidence graph for up to 8 districts
-            districts = subscriptions[-8:]
-            if 0 in subscriptions and 0 not in districts:
-                districts[0] = 0
-            graphs.append(self.data_visualization.multi_incidence_graph(districts))
+            if self._manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
+                # Generate multi-incidence graph for up to 8 districts
+                districts = subscriptions[-8:]
+                if 0 in subscriptions and 0 not in districts:
+                    districts[0] = 0
+                graphs.append(self.data_visualization.multi_incidence_graph(districts))
 
         if country.vaccinations and self._manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_VACCINATION, True):
             message += "<b>💉 Impfdaten</b>\n" \

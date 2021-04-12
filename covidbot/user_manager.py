@@ -342,6 +342,11 @@ class UserManager(object):
                 return rows[0]['followers']
             return 0
 
+    def set_user_setting(self, user_id: int, setting: str, value: bool):
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('INSERT INTO bot_user_settings (user_id, setting, value) VALUE (%s, %s, %s) ON DUPLICATE '
+                           'KEY UPDATE value=%s', [user_id, setting, value, value])
+
     def get_user_setting(self, user_id: int, setting: str, default: bool = False) -> bool:
         if user_id is None:
             return default

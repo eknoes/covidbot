@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Union, Optional, Tuple
 
-from covidbot.bot import Bot, UserDistrictActions
+from covidbot.bot import Bot, UserDistrictActions, BotUserSettings
 from covidbot.covid_data.models import District
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import BOT_COMMAND_COUNT
@@ -47,6 +47,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("löschmich", self.deleteMeHandler, False))
         self.handler_list.append(Handler("stop", self.deleteMeHandler, False))
         self.handler_list.append(Handler("debug", self.debugHandler, False))
+        self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
         self.handler_list.append(Handler("", self.directHandler, True))
 
     def handle_input(self, user_input: str, user_id: str) -> Optional[List[BotResponse]]:
@@ -243,6 +244,34 @@ class SimpleTextInterface(object):
     def debugHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('debug').inc()
         return self.bot.get_debug_report(user_id)
+
+    def graphicSettingsHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
+        BOT_COMMAND_COUNT.labels('graphic').inc()
+        if user_input:
+            if user_input[:3] == "ein":
+                self.bot.set_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True)
+                return [BotResponse("Dein Bericht enthält nun Grafiken.")]
+            elif user_input[:3] == "aus":
+                self.bot.set_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, False)
+                return [BotResponse("Dein Bericht enthält nun keine Grafiken mehr.")]
+
+        current = self.bot.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, default=True)
+        choices = []
+        state: str
+        if current:
+            state = 'aktiviert'
+            choices.append(UserChoice('Deaktivieren', '/grafik aus', 'Sende \"Grafik aus\", um Grafiken im Bericht '
+                                                                     'zu deaktivieren'))
+        else:
+            choices.append(UserChoice('Aktivieren', '/grafik ein', 'Sende \"Grafik ein\", um Grafiken im Bericht '
+                                                                     'zu aktivieren'))
+            state = 'deaktiviert'
+
+        choices.append(UserChoice("Abbrechen", "/noop", "Sende etwas anderes, um mit der Benutzung wie gewohnt "
+                                                        "fortzufahren"))
+        message = f"Die Verwendung von Grafiken im Bericht ist für dich {state}."
+
+        return [BotResponse(message, choices=choices)]
 
     def deleteMeHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('delete_me').inc()
