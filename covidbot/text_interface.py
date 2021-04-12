@@ -104,6 +104,19 @@ class SimpleTextInterface(object):
                     return [responses]
                 return responses
 
+    def handle_geolocation(self, lon, lat, user_id) -> List[BotResponse]:
+        districts = self.bot.resolve_geolocation(lon, lat)
+        if not districts:
+            return [BotResponse(
+                'Leider konnte kein Ort in den Corona Daten des RKI zu deinem Standort gefunden werden. Bitte beachte, '
+                'dass Daten nur für Orte innerhalb Deutschlands verfügbar sind.')]
+        else:
+            if len(districts) > 1:
+                choices = self.generate_districts_choices(districts)
+                return [BotResponse("Die Daten für die folgenden Orte und Regionen sind für deinen Standort verfügbar",
+                                    choices=choices)]
+            return self.handle_input(str(districts[0].id), user_id)
+
     def startHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('start').inc()
         return self.bot.start_message(user_id)
@@ -126,7 +139,7 @@ class SimpleTextInterface(object):
             if set_feedback != 0:
                 self.chat_states[set_feedback] = (ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
                 response.message += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
-                                    "antworte bitte \"Ja\". Deine Nachricht wird dann an die Entwickler weitergeleitet."
+                                    "kannst du diese Nachricht an die Entwickler weiterleiten."
                 response.choices = [UserChoice("Feedback weiterleiten", "Ja", "Sende \"Ja\", um deine Nachricht als "
                                                                               "Feedback weiterzuleiten"),
                                     UserChoice("Abbrechen", "Nein", "Sende \"Nein\", um abzubrechen")]
@@ -135,13 +148,18 @@ class SimpleTextInterface(object):
         elif len(locations) == 1:
             return locations[0]
         else:
-            choices = []
-            for location in locations:
-                choices.append(UserChoice(location.name, str(location.id), f'{location.name}\t{location.id}',
-                                          alt_help=f"Leider musst du deine Auswahl genauer angeben. Anstatt des "
-                                                   f"kompletten Namens kannst du auch die ID nutzen, also bspw. "
-                                                   f"{location.id} für {location.name}."))
+            choices = self.generate_districts_choices(locations)
             return [BotResponse(response.message, choices=choices)]
+
+    @staticmethod
+    def generate_districts_choices(districts: List[District]) -> List[UserChoice]:
+        choices = []
+        for location in districts:
+            choices.append(UserChoice(location.name, str(location.id), f'{location.name}\t{location.id}',
+                                      alt_help=f"Leider musst du deine Auswahl genauer angeben. Anstatt des "
+                                               f"kompletten Namens kannst du auch die ID nutzen, also bspw. "
+                                               f"{location.id} für {location.name}."))
+        return choices
 
     def subscribeHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
@@ -203,13 +221,17 @@ class SimpleTextInterface(object):
             choices = []
             for action_name, action in available_actions:
                 if action == UserDistrictActions.REPORT:
-                    choices.append(UserChoice(action_name, f'/daten {location.id}', 'Schreibe "Daten", um die aktuellen Daten zu erhalten'))
+                    choices.append(UserChoice(action_name, f'/daten {location.id}',
+                                              'Schreibe "Daten", um die aktuellen Daten zu erhalten'))
                 elif action == UserDistrictActions.SUBSCRIBE:
-                    choices.append(UserChoice(action_name, f'/abo {location.id}', 'Schreibe "Abo", um den Ort zu abonnieren'))
+                    choices.append(
+                        UserChoice(action_name, f'/abo {location.id}', 'Schreibe "Abo", um den Ort zu abonnieren'))
                 elif action == UserDistrictActions.UNSUBSCRIBE:
-                    choices.append(UserChoice(action_name, f'/beende {location.id}', 'Schreibe "Beende", dein Abo zu beenden'))
+                    choices.append(
+                        UserChoice(action_name, f'/beende {location.id}', 'Schreibe "Beende", dein Abo zu beenden'))
                 elif action == UserDistrictActions.RULES:
-                    choices.append(UserChoice(action_name, f'/regeln {location.id}', 'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'))
+                    choices.append(UserChoice(action_name, f'/regeln {location.id}',
+                                              'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'))
             return [BotResponse(message, choices=choices)]
         return location
 
