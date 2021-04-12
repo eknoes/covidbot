@@ -12,7 +12,7 @@ import prometheus_async.aio
 import semaphore
 from semaphore import ChatContext
 
-from covidbot.bot import Bot, UserHintService
+from covidbot.bot import Bot, UserHintService, BotUserSettings
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
     FAILED_MESSAGE_COUNT
@@ -73,7 +73,10 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             if not self.bot.is_user_activated(platform_id):
                 self.bot.enable_user(platform_id)
             replies = self.handle_input(text, platform_id)
+            disable_unicode = self.bot.get_user_setting(platform_id, BotUserSettings.DISABLE_FAKE_FORMAT, False)
             for reply in replies:
+                reply.message = str(adapt_text(reply, just_strip=disable_unicode))
+
                 await self.send_reply(ctx, reply)
             await ctx.message.typing_stopped()
 
@@ -81,8 +84,6 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         """
         Answers a signal message with the given :class:`covidbot.BotResponse`
         """
-        reply.message = str(adapt_text(reply))
-
         attachment = []
         if reply.images:
             for image in reply.images:
@@ -120,8 +121,9 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             message_counter = 0
             for userid, message in unconfirmed_reports:
                 self.log.info(f"Try to send report {message_counter}")
+                disable_unicode = self.bot.get_user_setting(userid, BotUserSettings.DISABLE_FAKE_FORMAT, False)
                 for elem in message:
-                    success = await bot.send_message(userid, adapt_text(elem.message), attachments=elem.images)
+                    success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode), attachments=elem.images)
                 if success:
                     self.bot.confirm_daily_report_send(userid)
                     self.log.warning(f"({message_counter}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
@@ -149,7 +151,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                                  profile_picture=self.profile_picture) as bot:
             backoff_time = random.uniform(0.5, 2)
             for user in users:
-                success = await bot.send_message(user, adapt_text(message))
+                disable_unicode = self.bot.get_user_setting(user, BotUserSettings.DISABLE_FAKE_FORMAT, False)
+                success = await bot.send_message(user, adapt_text(message, just_strip=disable_unicode))
                 backoff_time = self.backoff_timer(backoff_time, not success, user)
 
                 if append_report:
@@ -159,7 +162,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                         if elem.images:
                             for image in elem.images:
                                 attachments.append(self.get_attachment(image))
-                        success = await bot.send_message(user, adapt_text(elem.message), attachments)
+                        success = await bot.send_message(user, adapt_text(elem.message, just_strip=disable_unicode), attachments)
                         backoff_time = self.backoff_timer(backoff_time, not success, user)
 
     def backoff_timer(self, current_backoff: float, failed: bool, user_id: str) -> float:

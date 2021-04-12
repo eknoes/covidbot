@@ -9,7 +9,7 @@ import prometheus_async
 from fbmessenger import Messenger
 from fbmessenger.models import Message, PostbackButton
 
-from covidbot.bot import Bot, UserHintService
+from covidbot.bot import Bot, UserHintService, BotUserSettings
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
 from covidbot.text_interface import SimpleTextInterface
@@ -67,7 +67,8 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.message:
             images = response.images
-            messages = split_message(adapt_text(str(response)), max_chars=2000)
+            disable_unicode = self.bot.get_user_setting(user, BotUserSettings.DISABLE_FAKE_FORMAT, False)
+            messages = split_message(adapt_text(str(response), just_strip=disable_unicode), max_chars=2000)
             for i in range(0, len(messages)):
                 buttons = None
                 if response.choices and i == len(messages) - 1:
@@ -97,7 +98,8 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
         message = UserHintService.format_commands(message, self.bot.format_command)
 
         for user in users:
-            await self.fb_messenger.send_message(user, adapt_text(message))
+            disable_unicode = self.bot.get_user_setting(user, BotUserSettings.DISABLE_FAKE_FORMAT, False)
+            await self.fb_messenger.send_message(user, adapt_text(message, just_strip=disable_unicode))
 
             if append_report:
                 report = self.reportHandler("", user)

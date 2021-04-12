@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Dict
 
 from mysql.connector import MySQLConnection, IntegrityError
 
@@ -52,6 +52,10 @@ class UserManager(object):
                            'UNIQUE(platform, message_id))')
             cursor.execute(
                 'CREATE TABLE IF NOT EXISTS platform_statistics (platform VARCHAR(100) PRIMARY KEY, followers INTEGER)')
+            cursor.execute(
+                'CREATE TABLE IF NOT EXISTS bot_user_settings (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER '
+                'NOT NULL, setting VARCHAR(100), value TINYINT(1), UNIQUE(user_id, setting), FOREIGN KEY(user_id) '
+                'REFERENCES bot_user(user_id))')
             self.connection.commit()
 
     def set_user_activated(self, user_id: int, activated=True) -> None:
@@ -337,3 +341,19 @@ class UserManager(object):
             if rows:
                 return rows[0]['followers']
             return 0
+
+    def get_user_setting(self, user_id: int, setting: str, default: bool = False) -> bool:
+        if user_id is None:
+            return default
+
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT value FROM bot_user_settings WHERE user_id=%s AND setting=%s', [user_id, setting])
+            rows = cursor.fetchall()
+            if not rows:
+                return default
+
+            value = rows[0]['value']
+            if value is None:
+                return default
+
+            return value

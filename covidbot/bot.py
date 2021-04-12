@@ -21,6 +21,15 @@ class UserDistrictActions(Enum):
     RULES = 3
 
 
+class BotUserSettings:
+    REPORT_NO_GRAPHICS = "report_no_graphics"
+    REPORT_INCLUDE_ICU = "report_include_icu"
+    REPORT_INCLUDE_VACCINATION = "report_include_vaccination"
+    REPORT_EXTENSIVE_GRAPHICS = "report_extensive_graphics"
+    REPORT_SEND_EACH_DISTRICT = "report_send_each_district"
+    DISABLE_FAKE_FORMAT = "disable_fake_format"
+
+
 class UserHintService:
     FILE = "resources/user-tips.csv"
     current_hint: Optional[str] = None
@@ -89,6 +98,10 @@ class Bot(object):
         user_id = self._manager.get_user_id(user_identification)
         if user_id:
             self._manager.set_user_activated(user_id, activated=False)
+
+    def get_user_setting(self, user_identification: Union[int, str], setting: str, default: bool) -> bool:
+        user_id = self._manager.get_user_id(user_identification, create_if_not_exists=False)
+        return self._manager.get_user_setting(user_id, setting, default)
 
     def set_language(self, user_identification: Union[int, str], language: Optional[str]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)
@@ -373,9 +386,12 @@ class Bot(object):
         user = self._manager.get_user(user_id, with_subscriptions=True)
         if not user:
             return self._get_report([])
-        return self._get_report(user.subscriptions)
+        return self._get_report(user.subscriptions, user.id)
 
-    def _get_report(self, subscriptions: List[int]) -> List[BotResponse]:
+    def _get_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
+        # Visualization
+        graphs = [self.data_visualization.infections_graph(0)]
+
         country = self._data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n"
         message += "<b>🦠 Infektionszahlen</b>\n" \
@@ -415,8 +431,14 @@ class Bot(object):
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
 
-        if country.vaccinations:
-            message += "<b>💉  Impfdaten</b>\n" \
+            # Generate multi-incidence graph for up to 8 districts
+            districts = subscriptions[-8:]
+            if 0 in subscriptions and 0 not in districts:
+                districts[0] = 0
+            graphs.append(self.data_visualization.multi_incidence_graph(districts))
+
+        if country.vaccinations and self._manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_VACCINATION, True):
+            message += "<b>💉 Impfdaten</b>\n" \
                        "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
                        "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
                 .format(rate_full=format_float(country.vaccinations.full_rate * 100),
@@ -425,8 +447,11 @@ class Bot(object):
                         vacc_full=format_int(country.vaccinations.vaccinated_full),
                         date=country.vaccinations.date.strftime("%d.%m.%Y"),
                         doses=format_int(country.vaccinations.doses_diff))
+            if self._manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, False):
+                graphs.append(self.data_visualization.vaccination_graph(country.id))
+                graphs.append(self.data_visualization.vaccination_speed_graph(country.id))
 
-        if country.icu_data:
+        if country.icu_data and self._manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU, True):
             message += f"<b>🏥 Intensivbetten</b>\n" \
                        f"{format_float(country.icu_data.percent_occupied())}% " \
                        f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)}) der " \
@@ -450,15 +475,12 @@ class Bot(object):
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
 
-        # Add Visualization
-        graphs = [self.data_visualization.infections_graph(0)]
-        if subscriptions:
-            districts = subscriptions[-8:]
-            if 0 in subscriptions and 0 not in districts:
-                districts[0] = 0
-            graphs.append(self.data_visualization.multi_incidence_graph(districts))
+        reports = [BotResponse(message, graphs)]
 
-        return [BotResponse(message, graphs)]
+        if user_id and self._manager.get_user_setting(user_id, BotUserSettings.REPORT_SEND_EACH_DISTRICT, False):
+            for subscription in subscriptions:
+                reports += self.get_district_report(subscription)
+        return reports
 
     def delete_user(self, user_identification: Union[int, str]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification, create_if_not_exists=False)
@@ -552,7 +574,7 @@ class Bot(object):
                 continue
 
             if user.last_update is None or user.last_update.date() < data_update:
-                result.append((user.platform_id, self._get_report(user.subscriptions)))
+                result.append((user.platform_id, self._get_report(user.subscriptions, user.id)))
         return result
 
     def confirm_daily_report_send(self, user_identification: Union[int, str]):
