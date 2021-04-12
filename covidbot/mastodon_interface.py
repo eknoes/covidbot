@@ -25,14 +25,12 @@ class MastodonInterface(SingleCommandInterface):
                  visualization: Visualization, no_write: bool = False):
         super().__init__(user_manager, covid_data, visualization, 5, no_write)
         self.mastodon = Mastodon(access_token=access_token, api_base_url=mastodon_url)
-        #USER_COUNT.labels(platform="mastodon").set_function(self.get_follower_number)
+        self.update_follower_number()
 
-    def get_follower_number(self) -> int:
+    def update_follower_number(self):
         info = self.mastodon.account(323011)
-        self.update_metrics()
         number = info['followers_count']
         self.user_manager.set_social_network_user_number(number)
-        return number
 
     def upload_media(self, filename: str) -> str:
         upload_resp = self.mastodon.media_post(filename, mime_type="image/jpeg")
