@@ -7,7 +7,8 @@ from typing import List, Union
 import prometheus_async
 import threema.gateway as threema
 from aiohttp import web
-from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage
+from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage, \
+    DeliveryReceipt
 
 from covidbot.bot import Bot, UserHintService
 from covidbot.messenger_interface import MessengerInterface
@@ -75,6 +76,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
 
                 # Just exit on exception
                 os.kill(os.getpid(), signal.SIGINT)
+        elif type(message) == DeliveryReceipt:
+            pass
         else:
             self.log.warning(f"Received unknown message type {type(message)}: {message}")
 
