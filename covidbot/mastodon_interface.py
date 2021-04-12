@@ -25,7 +25,7 @@ class MastodonInterface(SingleCommandInterface):
                  visualization: Visualization, no_write: bool = False):
         super().__init__(user_manager, covid_data, visualization, 5, no_write)
         self.mastodon = Mastodon(access_token=access_token, api_base_url=mastodon_url)
-        USER_COUNT.labels(platform="mastodon").set_function(self.get_follower_number)
+        #USER_COUNT.labels(platform="mastodon").set_function(self.get_follower_number)
 
     def get_follower_number(self) -> int:
         info = self.mastodon.account(323011)
