@@ -18,7 +18,8 @@ from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, Call
 from covidbot.bot import Bot, UserHintService
 from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
-from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, RECV_MESSAGE_COUNT
+from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, RECV_MESSAGE_COUNT, \
+    BOT_SEND_MESSAGE_ERRORS
 from covidbot.text_interface import SimpleTextInterface
 from covidbot.utils import BotResponse, split_message
 
@@ -130,54 +131,69 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
 
         """
         success = True
-        for response in responses:
-            if response.images:
-                self.updater.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
-                if len(response.images) == 1 and not response.choices:
-                    photo = response.images[0]
-                    caption = None
-                    if len(response.message) <= 1024:
-                        caption = response.message
+        try:
+            for response in responses:
+                if response.images:
+                    self.updater.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
+                    if len(response.images) == 1 and not response.choices:
+                        photo = response.images[0]
+                        caption = None
+                        if len(response.message) <= 1024:
+                            caption = response.message
 
-                    message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo).media,
-                                                              caption=caption, parse_mode=ParseMode.HTML)
-                    SENT_IMAGES_COUNT.inc(len(response.images))
+                        message_obj = self.updater.bot.send_photo(chat_id, self.get_input_media_photo(photo).media,
+                                                                  caption=caption, parse_mode=ParseMode.HTML)
+                        SENT_IMAGES_COUNT.inc(len(response.images))
 
-                    if message_obj.photo[0]:
-                        self.set_file_id(photo, message_obj.photo[0].file_id)
+                        if message_obj.photo[0]:
+                            self.set_file_id(photo, message_obj.photo[0].file_id)
 
-                    if caption:
-                        if not message_obj:
-                            success = False
-                        continue
-                else:
-                    files = []
-                    for photo in response.images:
-                        files.append(self.get_input_media_photo(photo))
+                        if caption:
+                            if not message_obj:
+                                success = False
+                            continue
+                    else:
+                        files = []
+                        for photo in response.images:
+                            files.append(self.get_input_media_photo(photo))
 
-                    sent_messages = self.updater.bot.send_media_group(chat_id, files)
-                    if sent_messages:
-                        for i in range(0, len(sent_messages)):
-                            if sent_messages[i].photo:
-                                self.set_file_id(response.images[i], sent_messages[i].photo[0].file_id)
-                    SENT_IMAGES_COUNT.inc(len(response.images))
+                        sent_messages = self.updater.bot.send_media_group(chat_id, files)
+                        if sent_messages:
+                            for i in range(0, len(sent_messages)):
+                                if sent_messages[i].photo:
+                                    self.set_file_id(response.images[i], sent_messages[i].photo[0].file_id)
+                        SENT_IMAGES_COUNT.inc(len(response.images))
 
-            messages = split_message(response.message, max_bytes=4096)
-            reply_markup = None
-            for i in range(0, len(messages)):
-                if response.choices and i == len(messages) - 1:
-                    buttons = []
-                    for choice in response.choices:
-                        buttons.append([InlineKeyboardButton(choice.label, callback_data=choice.callback_data)])
-                    reply_markup = InlineKeyboardMarkup(buttons)
+                messages = split_message(response.message, max_bytes=4096)
+                reply_markup = None
+                for i in range(0, len(messages)):
+                    if response.choices and i == len(messages) - 1:
+                        buttons = []
+                        for choice in response.choices:
+                            buttons.append([InlineKeyboardButton(choice.label, callback_data=choice.callback_data)])
+                        reply_markup = InlineKeyboardMarkup(buttons)
 
-                if self.updater.bot.send_message(chat_id, messages[i], parse_mode=ParseMode.HTML,
-                                                 disable_web_page_preview=disable_web_page_preview,
-                                                 reply_markup=reply_markup):
-                    SENT_MESSAGE_COUNT.inc()
-                else:
-                    success = False
-
+                    if self.updater.bot.send_message(chat_id, messages[i], parse_mode=ParseMode.HTML,
+                                                     disable_web_page_preview=disable_web_page_preview,
+                                                     reply_markup=reply_markup):
+                        SENT_MESSAGE_COUNT.inc()
+                    else:
+                        success = False
+        except BadRequest as e:
+            self.log.warning(f"Bad Request on sending Telegram message to {chat_id}: {e.message}", exc_info=e)
+            success = False
+            BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='bad-request').inc()
+        except Unauthorized:
+            self._bot.delete_user(chat_id)
+            logging.warning(f"Deleted user {chat_id} as he blocked us")
+            BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='unauthorized').inc()
+        except ChatMigrated as e:
+            if self._bot.change_platform_id(str(chat_id), str(e.new_chat_id)):
+                self.log.info(f"Migrated Chat {chat_id} to {e.new_chat_id}")
+                return self.send_message(e.new_chat_id, responses, disable_web_page_preview)
+            else:
+                self.log.warning(f"Could not migrate {chat_id} to {e.new_chat_id}")
+                self._bot.disable_user(chat_id)
         return success
 
     @BOT_RESPONSE_TIME.time()
@@ -261,24 +277,12 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
                     self.log.info(f"Sleep for {1.05 - flood_window_diff}s")
                     time.sleep(1.05 - flood_window_diff)
 
-            try:
-                sent_msg = self.send_message(userid, message, disable_web_page_preview=True)
-                if sent_msg:
-                    self._bot.confirm_daily_report_send(userid)
-                    sliding_flood_window.append(time.perf_counter())
+            sent_msg = self.send_message(userid, message, disable_web_page_preview=True)
+            if sent_msg:
+                self._bot.confirm_daily_report_send(userid)
+                sliding_flood_window.append(time.perf_counter())
 
-                self.log.warning(f"Sent report to {userid}!")
-            except Unauthorized:
-                self._bot.delete_user(userid)
-                logging.warning(f"Deleted user {userid} as he blocked us")
-            except BadRequest as e:
-                self.log.error(f"Bad Request while sending report to {userid}: {e.message}", exc_info=e)
-            except ChatMigrated as e:
-                if self._bot.change_platform_id(userid, str(e.new_chat_id)):
-                    self.log.info(f"Migrated Chat {userid} to {e.new_chat_id}")
-                else:
-                    self.log.warning(f"Could not migrate {userid} to {e.new_chat_id}")
-                    self._bot.disable_user(userid)
+            self.log.warning(f"Sent report to {userid}!")
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
@@ -287,27 +291,21 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
         message = UserHintService.format_commands(message, self._bot.format_command)
         sliding_flood_window = []
         for uid in users:
-            try:
-                if len(sliding_flood_window) >= 5:
-                    # We want to send 25 messages per second max (might be even more due to append_report)
-                    flood_window_diff = time.perf_counter() - sliding_flood_window.pop(0)
-                    if flood_window_diff < 1.05:  # safety margin
-                        self.log.info(f"Sleep for {1.05 - flood_window_diff}s")
-                        time.sleep(1.05 - flood_window_diff)
+            if len(sliding_flood_window) >= 5:
+                # We want to send 25 messages per second max (might be even more due to append_report)
+                flood_window_diff = time.perf_counter() - sliding_flood_window.pop(0)
+                if flood_window_diff < 1.05:  # safety margin
+                    self.log.info(f"Sleep for {1.05 - flood_window_diff}s")
+                    time.sleep(1.05 - flood_window_diff)
 
-                self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML)
-                if append_report:
-                    self.send_message(uid, self._bot.get_report(uid))
-                    # As 2 messages are sent
-                    sliding_flood_window.append(time.perf_counter())
-
+            self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML)
+            if append_report:
+                self.send_message(uid, self._bot.get_report(uid))
+                # As 2 messages are sent
                 sliding_flood_window.append(time.perf_counter())
-                self.log.warning(f"Sent message to {str(uid)}")
-            except BadRequest as error:
-                self.log.warning(f"Could not send message to {str(uid)}: {str(error)}")
-            except Unauthorized:
-                self._bot.delete_user(uid)
-                self.log.warning(f"Could not send message to {str(uid)} as he blocked us")
+
+            sliding_flood_window.append(time.perf_counter())
+            self.log.warning(f"Sent message to {str(uid)}")
 
     def error_callback(self, update: object, context: CallbackContext):
         # Send all errors to maintainers
