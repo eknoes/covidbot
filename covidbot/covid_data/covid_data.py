@@ -98,7 +98,8 @@ class CovidData(object):
                     if record:
                         vaccination_data.avg_speed = int(record['avg_7day'])
                         population_to_be_vaccinated = 2*record['population'] - (vaccination_data.vaccinated_full + vaccination_data.vaccinated_partial)
-                        vaccination_data.avg_days_to_finish = math.ceil(population_to_be_vaccinated / vaccination_data.avg_speed)
+                        if vaccination_data.avg_speed > 0:
+                            vaccination_data.avg_days_to_finish = math.ceil(population_to_be_vaccinated / vaccination_data.avg_speed)
 
                     result.vaccinations = vaccination_data
             # Check if ICU data is available
