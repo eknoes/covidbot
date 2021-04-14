@@ -1,6 +1,7 @@
 import csv
 import logging
 import random
+import time
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
 from typing import Optional, Dict
@@ -26,7 +27,7 @@ class Updater(ABC):
         if random.uniform(0.0, 1.0) > chance:
             return None
 
-        header = {"User-Agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
+        header = {} # {"User-Agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
         last_update = self.get_last_update()
         if last_update:
             # need to use our own day/month, as locale can't be changed on the fly and we have to ensure not asking for
@@ -385,7 +386,6 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
         return new_data
 
 
-# As a backup, it provides numbers only for Germany not for the single states, but is more up-to-date
 class ICUGermanyUpdater(Updater):
     log = logging.getLogger(__name__)
     URL = "https://diviexchange.blob.core.windows.net/%24web/DIVI_Intensivregister_Auszug_pro_Landkreis.csv"
@@ -435,6 +435,99 @@ class ICUGermanyUpdater(Updater):
             if last_update != self.get_last_update():
                 return True
         return False
+
+
+class ICUGermanyHistoryUpdater(Updater):
+    log = logging.getLogger(__name__)
+
+    def get_last_update(self) -> Optional[datetime]:
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT MIN(updated) FROM icu_beds")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
+    def update(self) -> bool:
+        first_update = self.get_last_update()
+
+        if first_update and first_update.year == 2020:
+            pass
+            #return False
+
+        first_report = date(2020, 4, 24)
+        first_id = 3974
+        for single_date in (first_report + timedelta(n) for n in range((date.today() - first_report).days)):
+            found = False
+
+            if single_date == date(year=2020, month=5, day=6):
+                first_id = 3691
+
+            time.sleep(2)
+
+            while not found:
+                url = f"https://www.divi.de/divi-intensivregister-tagesreport-archiv-csv/viewdocument/{first_id}/divi-intensivregister-{single_date.strftime('%Y-%m-%d')}-09-15"
+                print(url)
+                first_id += 1
+
+                try:
+                    response = self.get_resource(url)
+                except Exception:
+                    response = None
+
+                if response:
+                    self.log.debug("Got historic ICU Data from DIVI")
+                    divi_data = response.splitlines()
+                    reader = csv.DictReader(divi_data)
+                    results = []
+
+                    key_district_id = "gemeindeschluessel"
+                    if key_district_id not in reader.fieldnames:
+                        key_district_id = "kreis"
+
+                    key_covid_ventilated = "faelle_covid_aktuell_invasiv_beatmet"
+                    if key_covid_ventilated not in reader.fieldnames:
+                        key_covid_ventilated = "faelle_covid_aktuell_beatmet"
+
+                    if key_covid_ventilated not in reader.fieldnames:
+                        key_covid_ventilated = None
+
+                    key_covid = "faelle_covid_aktuell"
+                    if key_covid not in reader.fieldnames:
+                        key_covid = None
+
+                    for row in reader:
+                        # Berlin is here AGS = 11000
+                        if row[key_district_id] == '11000':
+                            row[key_district_id] = '11'
+
+                        if key_covid_ventilated:
+                            num_ventilated = row[key_covid_ventilated]
+                        else:
+                            num_ventilated = None
+
+                        if key_covid:
+                            num_covid = row[key_covid]
+                        else:
+                            num_covid = None
+
+                        data_from = single_date
+                        if 'daten_stand' in reader.fieldnames:
+                            data_from = row['daten_stand']
+
+                        results.append(
+                            (row[key_district_id], data_from, row['betten_frei'], row['betten_belegt'],
+                             num_covid, num_ventilated, data_from))
+
+                    with self.connection.cursor() as cursor:
+                        for row in results:
+                            cursor.execute(
+                                "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
+                                " covid_ventilated, updated) VALUES (%s, %s, %s, %s, %s, %s, %s)", row)
+                    found = True
+                else:
+                    self.log.warning(f"Not available: {url}")
+
+        raise Exception
 
 
 class RulesGermanyUpdater(Updater):
