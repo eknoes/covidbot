@@ -93,7 +93,7 @@ class CovidData(object):
                                                        vaccination_record['rate_full'], vaccination_record['rate_partial'],
                                                        vaccination_record['date'], doses_diff=vaccination_record['doses_diff'])
 
-                    cursor.execute('SELECT (MAX(vaccinated_full) - MIN(vaccinated_full) + MAX(vaccinated_partial) - MIN(vaccinated_partial)) / 7 as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) GROUP BY district_id', [district_id, last_update])
+                    cursor.execute('SELECT AVG(doses_diff) as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) GROUP BY district_id', [district_id, last_update])
                     record = cursor.fetchone()
                     if record:
                         vaccination_data.avg_speed = int(record['avg_7day'])
