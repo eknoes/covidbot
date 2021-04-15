@@ -251,7 +251,14 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
     @BOT_RESPONSE_TIME.time()
     def handle_text(self, update: Update, context: CallbackContext):
         RECV_MESSAGE_COUNT.inc()
-        responses = self.handle_input(update.message.text, update.effective_chat.id)
+        message = update.message.text
+
+        # Strip own mentions
+        mention_pos = message.find('@' + context.bot.username)
+        if mention_pos != -1:
+            message = message[:mention_pos] + message[mention_pos + len('@' + context.bot.username):]
+
+        responses = self.handle_input(message, update.effective_chat.id)
         self.answer_update(update, responses, disable_web_page_preview=True)
 
     @BOT_RESPONSE_TIME.time()
