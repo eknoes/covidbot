@@ -168,7 +168,8 @@ class Bot(object):
             message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
             return BotResponse(message), None
 
-    def get_possible_actions(self, user_identification: Union[int, str], district_id: int) -> Tuple[str, List[Tuple[str, UserDistrictActions]]]:
+    def get_possible_actions(self, user_identification: Union[int, str], district_id: int) -> Tuple[
+        str, List[Tuple[str, UserDistrictActions]]]:
         actions = [("Daten anzeigen", UserDistrictActions.REPORT)]
         district = self._data.get_district(district_id)
         user_id = self._manager.get_user_id(user_identification)
@@ -444,7 +445,8 @@ class Bot(object):
                     districts[0] = 0
                 graphs.append(self.data_visualization.multi_incidence_graph(districts))
 
-        if country.vaccinations and self._manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_VACCINATION, True):
+        if country.vaccinations and self._manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_VACCINATION,
+                                                                   True):
             message += "<b>💉 Impfdaten</b>\n" \
                        "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
                        "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
@@ -706,7 +708,8 @@ class Bot(object):
                     'Wählst du "Starte Abo" aus, wird dieser Ort in deinem '
                     'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
                     'stattdessen angeboten, das Abo wieder zu beenden. '
-                    'Du kannst beliebig viele Orte abonnieren! '
+                    'Du kannst beliebig viele Orte abonnieren! Wenn du "Regeln" auswählst, erhältst du die aktuell '
+                    'gütligen Regeln für dein Bundesland. '
                     'Sende {info_command} um die Erläuterung zu den verschiedenen Daten und Quellen mit weiteren '
                     'Informationen zu erhalten.'
                     '\n\n'
@@ -754,12 +757,15 @@ class Bot(object):
                             "\n\nMehr Informationen zum R-Wert stellt bspw. die <a href='https://www.tagesschau.de/faktenfinder/r-wert-101.html'>Tagesschau</a> zur Verfügung.\n"
                             "\n\n<b>Woher kommen die Daten?</b>\n"
                             "Unsere Quellen sind die maschinenlesbaren Daten des RKI zu den Impfungen, Neuinfektionen und "
-                            "dem R-Wert. "
+                            "dem R-Wert. Die Daten über die Intensivbetten kommen DIVI-Intensivregister, die aktuellen Regeln "
+                            "werden vom Kompetenzzentrum Tourismus des Bundes bezogen.\n"
                             "Diese laden wir automatisiert an den folgenden Stellen herunter:\n"
                             "• <a href='https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv'>Neuinfektionen</a>\n"
                             "• <a href='https://services.arcgis.com/OLiydejKCZTGhvWg/ArcGIS/rest/services/Impftabelle_mit_Zweitimpfungen/FeatureServer/0'>Impfdaten für Deutschland und die Bundesländer</a>\n"
                             "• <a href='https://impfdashboard.de'>Impfdaten für Deutschland</a>\n"
-                            "• <a href='https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv'>R-Wert</a>")]
+                            "• <a href='https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv'>R-Wert</a>"
+                            "• <a href='https://www.intensivregister.de/#/aktuelle-lage/reports'>Intensivregister</a>"
+                            "• <a href='https://tourismus-wegweiser.de'>Tourismus-Wegweiser</a>")]
 
     def format_command(self, command: str):
         if command:
