@@ -763,8 +763,8 @@ class Bot(object):
                             "• <a href='https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv'>Neuinfektionen</a>\n"
                             "• <a href='https://services.arcgis.com/OLiydejKCZTGhvWg/ArcGIS/rest/services/Impftabelle_mit_Zweitimpfungen/FeatureServer/0'>Impfdaten für Deutschland und die Bundesländer</a>\n"
                             "• <a href='https://impfdashboard.de'>Impfdaten für Deutschland</a>\n"
-                            "• <a href='https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv'>R-Wert</a>"
-                            "• <a href='https://www.intensivregister.de/#/aktuelle-lage/reports'>Intensivregister</a>"
+                            "• <a href='https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv'>R-Wert</a>\n"
+                            "• <a href='https://www.intensivregister.de/#/aktuelle-lage/reports'>Intensivregister</a>\n"
                             "• <a href='https://tourismus-wegweiser.de'>Tourismus-Wegweiser</a>")]
 
     def format_command(self, command: str):
