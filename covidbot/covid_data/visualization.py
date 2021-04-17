@@ -7,6 +7,7 @@ from typing import Optional, Tuple, List
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 from matplotlib import gridspec
 from matplotlib.axes import Axes
 from matplotlib.cbook import get_sample_data
@@ -71,7 +72,7 @@ class Visualization:
         ax4 = fig.add_subplot(gs[14:, 2])
         plt.axis('off')
 
-        # Annotate the 2nd position with another image (a Grace Hopper portrait)
+        # Annotate the 2nd position with D64 logo
         with get_sample_data(os.path.abspath('resources/d64-logo.png')) as logo:
             arr_img = plt.imread(logo, format='png')
 
@@ -388,6 +389,64 @@ class Visualization:
         self.teardown_plt(fig)
         return filepath
 
+    def icu_graph(self, district_id: int) -> Optional[str]:
+        district_name = None
+        current_date = None
+        colors = ['#911425', '#DE354B', '#1fa2de', '']
+        y_data = {'covid-ventilated': [],
+                  'covid-not-ventilated': [],
+                  'no-covid': [],
+                  }
+        x_data = []
+
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT date, (clear + occupied) as total, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds WHERE district_id=%s ORDER BY date', [district_id])
+            for row in cursor.fetchall():
+                if not row['occupied_covid'] or not row['covid_ventilated']:
+                    continue
+
+                y_data['no-covid'].append((row['occupied'] - row['occupied_covid']) / row['total'] * 100)
+                y_data['covid-not-ventilated'].append((row['occupied_covid'] - row['covid_ventilated']) / row['total'] * 100)
+                y_data['covid-ventilated'].append(row['covid_ventilated'] / row['total'] * 100)
+
+                x_data.append(row['date'])
+
+                if not current_date or current_date < row['date']:
+                    current_date = row['date']
+            cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [district_id])
+            district_name = cursor.fetchall()[0]['county_name']
+
+        filepath = os.path.abspath(
+            os.path.join(self.graphics_dir, f"icu-{current_date.isoformat()}-{district_id}.jpg"))
+
+        # Do not draw new graphic if its cached
+        if not self.disable_cache and os.path.isfile(filepath):
+            CACHED_GRAPHS.labels(type='icu').inc()
+            return filepath
+        CREATED_GRAPHS.labels(type='icu').inc()
+
+        fig, ax1 = self.setup_plot(current_date, f"Auslastung der Intensivstationen ({district_name})", "Auslastung",
+                                   source="DIVI-Intensivregister")
+
+        # Plot data
+        plt.xticks(x_data, rotation='30', ha='right')
+        ax1.stackplot(x_data, y_data.values(), colors=colors,
+                      labels=['Covid (beatmet)', 'Covid (ohne Beatmung)', 'Andere'], zorder=0)
+        # Add legend
+        plt.legend(loc='upper left')
+
+        ax1.set_ylim(bottom=0, top=100)
+
+        # Add a label every 7 days
+        self.set_monthly_formatter(ax1)
+        ax1.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter())
+
+        # Save to file
+        plt.show()
+        plt.savefig(filepath, format='JPEG')
+        self.teardown_plt(fig)
+        return filepath
+
     def _get_covid_data(self, field: str, district_id: int, duration: int) -> Tuple[
         str, datetime.date, List[datetime.date], List[int]]:
         district_name: Optional[str]
@@ -429,6 +488,13 @@ class Visualization:
         # One tick every 7 days for easier comparison
         formatter = mdates.DateFormatter("%a, %d.%m.")
         ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=weekday))
+        ax1.xaxis.set_major_formatter(formatter)
+        ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
+
+    def set_monthly_formatter(self, ax1):
+        # One tick every 7 days for easier comparison
+        formatter = mdates.DateFormatter("%m/%y")
+        ax1.xaxis.set_major_locator(mdates.MonthLocator())
         ax1.xaxis.set_major_formatter(formatter)
         ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 

@@ -258,6 +258,8 @@ class Bot(object):
                                       self.data_visualization.vaccination_speed_graph(district_id)])]
 
     def get_district_report(self, district_id: int) -> List[BotResponse]:
+        graphics = [self.data_visualization.infections_graph(district_id),
+                    self.data_visualization.incidence_graph(district_id)]
         current_data = self._data.get_district_data(district_id)
         sources = [f'Infektionsdaten vom {current_data.date.strftime("%d.%m.%Y")}. '
                    f'Infektionsdaten und R-Wert vom Robert Koch-Institut (RKI), '
@@ -313,11 +315,13 @@ class Bot(object):
                        f"Insgesamt gibt es {format_noun(current_data.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
             sources.append(f'Intensivbettenauslastung vom {current_data.icu_data.date.strftime("%d.%m.%Y")}. '
                            f'Daten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.')
+            graphics.append(self.data_visualization.icu_graph(district_id))
 
         related_vaccinations = None
         if current_data.vaccinations:
             related_vaccinations = current_data.vaccinations
             message += "<b>💉 Impfdaten</b>\n"
+            graphics.append(self.data_visualization.vaccination_graph(district_id))
         else:
             if current_data.parent:
                 parent_district = self._data.get_district_data(current_data.parent)
@@ -356,8 +360,7 @@ class Bot(object):
                    'der Daten zu erhalten.' \
             .format(info_command=self.format_command("Info"), date=current_data.date.strftime("%d.%m.%Y"))
 
-        return [BotResponse(message, [self.data_visualization.infections_graph(district_id),
-                                      self.data_visualization.incidence_graph(district_id)])]
+        return [BotResponse(message, graphics)]
 
     def subscribe(self, user_identification: Union[int, str], district_id: Optional[int]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)
