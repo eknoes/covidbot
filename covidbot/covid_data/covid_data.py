@@ -1,7 +1,7 @@
 import logging
 import math
 from datetime import date, timedelta
-from typing import Tuple, List, Optional
+from typing import List, Optional
 
 from mysql.connector import MySQLConnection
 
