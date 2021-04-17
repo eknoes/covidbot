@@ -129,7 +129,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"({format_float(icu.percent_covid())}%) liegen Patient:innen" \
                      f" mit #COVID19, davon werden {format_int(icu.covid_ventilated)} beatmet. " \
                      f"Insgesamt gibt es {format_noun(icu.total_beds(), FormattableNoun.BEDS)}."
-        return [BotResponse(tweet_text)]
+        return [BotResponse(tweet_text, [self.viz.icu_graph(0)])]
 
     def get_infection_shortpost(self, district_id: int) -> List[BotResponse]:
         district = self.data.get_district_data(district_id)
