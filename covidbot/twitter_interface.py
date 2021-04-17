@@ -8,7 +8,7 @@ from TwitterAPI import TwitterAPI, TwitterResponse
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.metrics import SENT_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
-    API_RESPONSE_CODE, USER_COUNT
+    API_RESPONSE_CODE
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 from covidbot.utils import replace_by_list, BotResponse
@@ -33,6 +33,8 @@ class TwitterInterface(SingleCommandInterface):
         super().__init__(user_manager, covid_data, visualization, 15, no_write)
         self.twitter = TwitterAPI(consumer_key, consumer_secret, access_token_key, access_token_secret,
                                   api_version='1.1')
+        self.twitter.CONNECTION_TIMEOUT = 20
+        self.twitter.REST_TIMEOUT = 20
         self.rki_name = "@rki_de"
         self.bmg_name = "@BMG_Bund"
         self.update_follower_number()
