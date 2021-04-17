@@ -1,6 +1,7 @@
 import csv
 import logging
 import random
+import re
 import time
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
@@ -27,7 +28,7 @@ class Updater(ABC):
         if random.uniform(0.0, 1.0) > chance:
             return None
 
-        header = {} # {"User-Agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
+        header = {}  # {"User-Agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
         last_update = self.get_last_update()
         if last_update:
             # need to use our own day/month, as locale can't be changed on the fly and we have to ensure not asking for
@@ -45,7 +46,7 @@ class Updater(ABC):
         elif response.status_code == 304:
             self.log.info("No new data available")
         else:
-            raise ValueError(f"Updater Response Status Code is {response.status_code}: {response.reason}")
+            raise ValueError(f"Updater Response Status Code is {response.status_code}: {response.reason}\n{url}")
 
     @abstractmethod
     def update(self) -> bool:
@@ -448,32 +449,31 @@ class ICUGermanyHistoryUpdater(Updater):
                 return row[0]
 
     def update(self) -> bool:
-        first_update = self.get_last_update()
+        if self.get_last_update() == date(2020, 4, 25):
+            return False
 
-        if first_update and first_update.year == 2020:
-            pass
-            #return False
+        new_data = False
 
-        first_report = date(2020, 4, 24)
-        first_id = 3974
-        for single_date in (first_report + timedelta(n) for n in range((date.today() - first_report).days)):
-            found = False
+        csv_list = self.get_resource(
+            'https://www.divi.de/divi-intensivregister-tagesreport-archiv-csv?start=0&limit=500')
+        urls = []
 
-            if single_date == date(year=2020, month=5, day=6):
-                first_id = 3691
+        for url in re.finditer(
+                '/divi-intensivregister-tagesreport-archiv-csv/viewdocument/\d{4}/divi-intensivregister-(202[01])-(\d\d)-(\d\d)[-\d]*',
+                csv_list):
+            urls.append(
+                ('https://www.divi.de' + url.group(0), date(int(url.group(1)), int(url.group(2)), int(url.group(3)))))
 
-            time.sleep(2)
+        for url, data_date in urls:
+            with self.connection.cursor(dictionary=True) as cursor:
+                cursor.execute('SELECT * FROM icu_beds WHERE date=%s', [data_date])
+                data = cursor.fetchall()
+                if data:
+                    print(f"Data for {data_date} already exists, skipping")
+                    continue
 
-            while not found:
-                url = f"https://www.divi.de/divi-intensivregister-tagesreport-archiv-csv/viewdocument/{first_id}/divi-intensivregister-{single_date.strftime('%Y-%m-%d')}-09-15"
-                print(url)
-                first_id += 1
-
-                try:
-                    response = self.get_resource(url)
-                except Exception:
-                    response = None
-
+                print(f"Get data for {data_date}")
+                response = self.get_resource(url)
                 if response:
                     self.log.debug("Got historic ICU Data from DIVI")
                     divi_data = response.splitlines()
@@ -510,25 +510,18 @@ class ICUGermanyHistoryUpdater(Updater):
                         else:
                             num_covid = None
 
-                        data_from = single_date
-                        if 'daten_stand' in reader.fieldnames:
-                            data_from = row['daten_stand']
+                        row_contents = [row[key_district_id], data_date, row['betten_frei'], row['betten_belegt'],
+                                        num_covid, num_ventilated, data_date]
+                        results.append(row_contents)
 
-                        results.append(
-                            (row[key_district_id], data_from, row['betten_frei'], row['betten_belegt'],
-                             num_covid, num_ventilated, data_from))
-
-                    with self.connection.cursor() as cursor:
-                        for row in results:
-                            cursor.execute(
-                                "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
-                                " covid_ventilated, updated) VALUES (%s, %s, %s, %s, %s, %s, %s)", row)
-                    found = True
+                    cursor.executemany(
+                        "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
+                        " covid_ventilated, updated) VALUES (%s, %s, %s, %s, %s, %s, %s)", results)
+                    self.connection.commit()
+                    new_data = True
                 else:
                     self.log.warning(f"Not available: {url}")
-
-        raise Exception
-
+        return new_data
 
 class RulesGermanyUpdater(Updater):
     log = logging.getLogger(__name__)
