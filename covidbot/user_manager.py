@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple, Union, Dict
 
-from mysql.connector import MySQLConnection, IntegrityError
+from mysql.connector import MySQLConnection, IntegrityError, OperationalError
 
 
 @dataclass
@@ -214,12 +214,17 @@ class UserManager(object):
             return cursor.fetchone()[0] + self.get_messenger_user_number()
 
     def get_user_number(self, platform: str) -> int:
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user WHERE platform=%s", [platform])
-            row = cursor.fetchone()
-            if row and 'user_num' in row and row['user_num']:
-                return row['user_num']
-            return 0
+        try:
+            with self.connection.cursor(dictionary=True) as cursor:
+                cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user WHERE platform=%s", [platform])
+                row = cursor.fetchone()
+                if row and 'user_num' in row and row['user_num']:
+                    return row['user_num']
+                return 0
+        except OperationalError as e:
+            self.log.exception(f"OperationalError: {e.msg}", exc_info=e)
+            self.connection.reconnect()
+            return self.get_user_number(platform)
 
     def get_ranked_subscriptions(self) -> List[Tuple[int, str]]:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -235,14 +240,19 @@ class UserManager(object):
             return result
 
     def get_mean_subscriptions(self) -> float:
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(*)/COUNT(DISTINCT user_id) as mean FROM subscriptions ORDER BY user_id "
-                           "LIMIT 1")
-            row = cursor.fetchone()
+        try:
+            with self.connection.cursor(dictionary=True) as cursor:
+                cursor.execute("SELECT COUNT(*)/COUNT(DISTINCT user_id) as mean FROM subscriptions ORDER BY user_id "
+                               "LIMIT 1")
+                row = cursor.fetchone()
 
-            if row['mean']:
-                return row['mean']
-            return 1.0
+                if row['mean']:
+                    return row['mean']
+                return 1.0
+        except OperationalError as e:
+            self.log.exception(f"OperationalError: {e.msg}", exc_info=e)
+            self.connection.reconnect()
+            return self.get_mean_subscriptions()
 
     def get_most_subscriptions(self) -> int:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -335,12 +345,17 @@ class UserManager(object):
         self.connection.commit()
 
     def get_social_network_user_number(self, network: str):
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT followers FROM platform_statistics WHERE platform=%s LIMIT 1', [network])
-            rows = cursor.fetchall()
-            if rows:
-                return rows[0]['followers']
-            return 0
+        try:
+            with self.connection.cursor(dictionary=True) as cursor:
+                cursor.execute('SELECT followers FROM platform_statistics WHERE platform=%s LIMIT 1', [network])
+                rows = cursor.fetchall()
+                if rows:
+                    return rows[0]['followers']
+                return 0
+        except OperationalError as e:
+            self.log.exception(f"OperationalError: {e.msg}", exc_info=e)
+            self.connection.reconnect()
+            return self.get_social_network_user_number(network)
 
     def set_user_setting(self, user_id: int, setting: str, value: bool):
         with self.connection.cursor(dictionary=True) as cursor:

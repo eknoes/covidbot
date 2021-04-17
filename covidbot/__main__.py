@@ -4,16 +4,13 @@ import configparser
 import locale
 import logging
 import os
-import threading
 from os.path import abspath
 from sys import exit
 from typing import List
-from wsgiref.simple_server import make_server
 
 import prometheus_client
 from mysql.connector import connect, MySQLConnection
 from prometheus_client import Info
-from prometheus_client.exposition import ThreadingWSGIServer
 
 from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, Visualization
@@ -66,15 +63,7 @@ class MessengerBotSetup:
         monitor_port = self.config.getint(name.upper(), "PROMETHEUS_PORT", fallback=0)
         if monitoring and monitor_port > 0:
             try:
-                #prometheus_client.start_http_server(monitor_port, '0.0.0.0')
-
-                # Just to debug prometheus crashes
-                app = prometheus_client.make_wsgi_app()
-                httpd = make_server('0.0.0.0', monitor_port, app, ThreadingWSGIServer)
-                t = threading.Thread(target=httpd.serve_forever)
-                t.daemon = True
-                t.start()
-
+                prometheus_client.start_http_server(monitor_port, '0.0.0.0')
             except OSError as e:
                 logging.error("Error while starting Prometheus Endpoint", exc_info=e)
             i = Info('platform', 'Bot Platform')
