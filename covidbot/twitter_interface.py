@@ -33,8 +33,8 @@ class TwitterInterface(SingleCommandInterface):
         super().__init__(user_manager, covid_data, visualization, 15, no_write)
         self.twitter = TwitterAPI(consumer_key, consumer_secret, access_token_key, access_token_secret,
                                   api_version='1.1')
-        self.twitter.CONNECTION_TIMEOUT = 20
-        self.twitter.REST_TIMEOUT = 20
+        self.twitter.CONNECTION_TIMEOUT = 30
+        self.twitter.REST_TIMEOUT = 30
         self.rki_name = "@rki_de"
         self.bmg_name = "@BMG_Bund"
         self.update_follower_number()
