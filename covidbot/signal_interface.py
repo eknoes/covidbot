@@ -178,7 +178,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         """
         if not failed:
             self.log.info(f"Sent message to {user_id}")
-            if current_backoff > 1:
+            if current_backoff > 1.5:
                 new_backoff = 0.7 * current_backoff
             else:
                 new_backoff = current_backoff
@@ -187,6 +187,7 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
             # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
             self.bot.disable_user(user_id)
             new_backoff = 2 ^ ceil(current_backoff)
+            self.log.warning(f"New backoff time: {new_backoff}s")
         self.log.info(f"Sleeping {new_backoff}s to avoid server limitations")
         time.sleep(new_backoff)
         return new_backoff
