@@ -136,7 +136,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         district = self.data.get_district_data(district_id)
         date_str = "Am " + district.date.strftime('%d. %B %Y')
         if district.date == datetime.date.today() - datetime.timedelta(days=1):
-            date_str = "Heute sind leider noch keien Daten verfügbar. Gestern"
+            date_str = "Heute sind leider noch keine Daten verfügbar. Gestern"
         tweet_text = f"🦠 {date_str} wurden " \
                      f"{format_noun(district.new_cases, FormattableNoun.INFECTIONS, hashtag='#')} " \
                      f"{format_data_trend(district.cases_trend)} und " \
