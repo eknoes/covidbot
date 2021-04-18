@@ -132,6 +132,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         return [BotResponse(tweet_text, [self.viz.icu_graph(0)])]
 
     def get_infection_shortpost(self, district_id: int) -> List[BotResponse]:
+        graphs = [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)]
         district = self.data.get_district_data(district_id)
         date_str = "Am " + district.date.strftime('%d. %B %Y')
         if district.date == datetime.date.today() - datetime.timedelta(days=1):
@@ -142,8 +143,13 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"{format_noun(district.new_deaths, FormattableNoun.DEATHS)} " \
                      f"{format_data_trend(district.deaths_trend)} in {district.name} gemeldet. Die #Inzidenz liegt " \
                      f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
-        return [
-            BotResponse(tweet_text, [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)])]
+        if district.vaccinations:
+            graphs.append(self.viz.vaccination_graph(district_id))
+
+        if district.icu_data:
+            graphs.append(self.viz.icu_graph(district_id))
+
+        return [BotResponse(tweet_text, graphs)]
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if users:
