@@ -402,7 +402,7 @@ class Visualization:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT date, (clear + occupied) as total, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds WHERE district_id=%s ORDER BY date', [district_id])
             for row in cursor.fetchall():
-                if not row['occupied_covid'] or not row['covid_ventilated']:
+                if row['occupied_covid'] is None or row['covid_ventilated'] is None:
                     continue
 
                 y_data['no-covid'].append((row['occupied'] - row['occupied_covid']) / row['total'] * 100)
@@ -442,7 +442,7 @@ class Visualization:
         ax1.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter())
 
         # Save to file
-        plt.show()
+        # plt.show()
         plt.savefig(filepath, format='JPEG')
         self.teardown_plt(fig)
         return filepath
