@@ -321,7 +321,8 @@ class Bot(object):
         if current_data.vaccinations:
             related_vaccinations = current_data.vaccinations
             message += "<b>💉 Impfdaten</b>\n"
-            graphics.append(self.data_visualization.vaccination_graph(district_id))
+            # TODO: Daten fehlen
+            #graphics.append(self.data_visualization.vaccination_graph(district_id))
         else:
             if current_data.parent:
                 parent_district = self._data.get_district_data(current_data.parent)

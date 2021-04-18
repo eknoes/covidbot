@@ -144,7 +144,9 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"{format_data_trend(district.deaths_trend)} in {district.name} gemeldet. Die #Inzidenz liegt " \
                      f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
         if district.vaccinations:
-            graphs.append(self.viz.vaccination_graph(district_id))
+            pass
+            # TODO: Daten fehlen für ne Woche
+            #graphs.append(self.viz.vaccination_graph(district_id))
 
         if district.icu_data:
             graphs.append(self.viz.icu_graph(district_id))
