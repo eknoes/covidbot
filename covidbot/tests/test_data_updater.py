@@ -5,7 +5,7 @@ from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
     VaccinationGermanyImpfdashboardUpdater
-from covidbot.covid_data.updater import clean_district_name, ICUGermanyUpdater, RulesGermanyUpdater
+from covidbot.covid_data import clean_district_name, ICUGermanyUpdater, RulesGermanyUpdater
 
 
 class TestUpdater(TestCase):

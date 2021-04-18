@@ -5,4 +5,5 @@ from .updater.vaccination import VaccinationGermanyUpdater, VaccinationGermanyIm
 from .updater.rvalue import RValueGermanyUpdater
 from .updater.rules import RulesGermanyUpdater
 from .updater.icu import ICUGermanyUpdater, ICUGermanyHistoryUpdater
+from .updater.utils import clean_district_name
 from .visualization import Visualization
