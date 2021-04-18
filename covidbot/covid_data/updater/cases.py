@@ -1,3 +1,5 @@
+import csv
+import itertools
 import logging
 from datetime import datetime, date
 from typing import Optional, Dict
@@ -122,3 +124,108 @@ class RKIUpdater(Updater):
                                'SET covid_data.incidence = incidence.incidence '
                                'WHERE covid_data.incidence IS NULL AND covid_data.date = incidence.date '
                                'AND covid_data.rs = incidence.rs')
+
+
+class RKIHistoryUpdater(RKIUpdater):
+    CASES_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/cases-rki-by-ags.csv"
+    INCIDENCE_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/more-data/7di-rki-by-ags.csv"
+
+    def get_last_update(self) -> Optional[datetime]:
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT MIN(date) FROM covid_data WHERE total_cases IS NOT NULL and incidence IS NOT NULL")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
+    def update(self) -> bool:
+        if self.get_last_update() == date(2020, 3, 3):
+            return False
+        updated = False
+        if self.update_cases():
+            self.log.info("New case data available")
+            updated = True
+
+        if self.update_incidences():
+            self.log.info("New incidence data available")
+            updated = True
+        return updated
+
+    def update_cases(self) -> bool:
+        cases = self.get_resource(self.CASES_URL)
+
+        cases_csv = csv.DictReader(cases.splitlines())
+
+        sum_cases = {}
+        new_cases = False
+        with self.connection.cursor() as cursor:
+            for row in cases_csv:
+                updated = None
+                for field in cases_csv.fieldnames:
+                    if field[:3] == "sum":
+                        continue
+                    elif field[:4] == "time":
+                        updated = row[field]
+                        updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
+                        cursor.execute(
+                            'SELECT * FROM covid_data WHERE date=%s AND rs > 1000 AND total_cases IS NOT NULL',
+                            [updated])
+                        records = cursor.fetchall()
+                        if records:
+                            return new_cases
+                        print(f"Data from {updated}")
+                        continue
+
+                    district_id = field
+                    if district_id == '11000':
+                        district_id = '11'
+                    cases_num = int(row[field])
+                    if not sum_cases.get(district_id):
+                        sum_cases[district_id] = 0
+
+                    sum_cases[district_id] += cases_num
+                    cursor.execute(
+                        'INSERT INTO covid_data (rs, date, total_cases) VALUE (%s, %s, %s) ON DUPLICATE KEY UPDATE covid_data.total_cases=%s',
+                        [int(district_id), updated, sum_cases[district_id], sum_cases[district_id]])
+                    new_cases = True
+                self.connection.commit()
+
+        return new_cases
+
+    def update_incidences(self) -> bool:
+        incidences = self.get_resource(self.INCIDENCE_URL)
+        incidences_csv = csv.DictReader(incidences.splitlines())
+
+        new_data = False
+        with self.connection.cursor() as cursor:
+            for row in incidences_csv:
+                updated = None
+                for field in incidences_csv.fieldnames:
+                    if field[:3] == "sum":
+                        continue
+                    elif field[:4] == "time":
+                        updated = row[field]
+                        updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
+                        cursor.execute(
+                            'SELECT * FROM covid_data WHERE date=%s AND rs > 1000 AND incidence IS NOT NULL',
+                            [updated])
+                        records = cursor.fetchall()
+                        if records:
+                            return new_data
+                        continue
+
+                    district_id = field[:-4]
+                    if district_id == '11000':
+                        district_id = '11'
+
+                    if district_id == 'germany':
+                        district_id = '0'
+
+                    incidence = float(row[field])
+
+                    cursor.execute(
+                        'INSERT INTO covid_data (rs, date, incidence) VALUE (%s, %s, %s) ON DUPLICATE KEY UPDATE covid_data.incidence=%s',
+                        [int(district_id), updated, incidence, incidence])
+                    new_data = True
+                self.connection.commit()
+
+        return new_data
