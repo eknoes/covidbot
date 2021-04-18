@@ -402,7 +402,7 @@ class Visualization:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT date, (clear + occupied) as total, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds WHERE district_id=%s ORDER BY date', [district_id])
             for row in cursor.fetchall():
-                if row['occupied_covid'] is None or row['covid_ventilated'] is None:
+                if row['occupied_covid'] is None or row['covid_ventilated'] is None or row['total'] == 0:
                     continue
 
                 y_data['no-covid'].append((row['occupied'] - row['occupied_covid']) / row['total'] * 100)
