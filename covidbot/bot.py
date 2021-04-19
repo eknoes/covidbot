@@ -257,6 +257,36 @@ class Bot(object):
         return [BotResponse(message, [self.data_visualization.vaccination_graph(district_id),
                                       self.data_visualization.vaccination_speed_graph(district_id)])]
 
+    def get_history_report(self, district_id: int) -> List[BotResponse]:
+        graphics = [self.data_visualization.incidence_graph(district_id, duration=900)]
+        data = self._data.get_district_history(district_id)
+
+        message = "<b>Pandemieverlauf für {district_name}</b>\n" \
+                  "Das RKI meldete am {first_case} den ersten Covid19-Fall in {district_name}. Seitdem wurden " \
+                  "{total_cases} Erkrankungen und {total_deaths} Todesfälle im Zusammenhang mit Covid19 gemeldet.\n\n" \
+                  "Am {max_date} wurden mit {max_cases} Fällen die höchste Fallzahl an einem Tag gemeldet."\
+            .format(district_name=data.name,
+                    first_case=data.first_case.strftime("%d.%m.%Y"), total_cases=format_int(data.total_cases),
+                    total_deaths=format_int(data.total_deaths), max_cases=format_int(data.max_cases),
+                    max_date=data.max_cases_date.strftime("%d.%m.%Y"))
+
+        current = self._data.get_district_data(district_id)
+        if current.icu_data:
+            graphics.append(self.data_visualization.icu_graph(district_id))
+
+        if current.vaccinations:
+            graphics.append(self.data_visualization.vaccination_graph(district_id))
+
+        message += "\n\n" \
+                   "<b>Quelle & Aufzeichnungsbeginn</b>\n" \
+                   "Die Datenaufzeichnung des RKI startete am 02.03.2020. " \
+                   "Infektionsdaten vom {data_date}. Infektionsdaten und R-Wert vom Robert Koch-Institut (RKI), " \
+                   "Lizenz: dl-de/by-2-0. Weitere Informationen findest Du im " \
+                   "<a href='https://corona.rki.de'>Dashboard des RKI</a>."\
+            .format(data_date=current.date.strftime("%d.%m.%Y"))
+
+        return [BotResponse(message, graphics)]
+
     def get_district_report(self, district_id: int) -> List[BotResponse]:
         graphics = [self.data_visualization.infections_graph(district_id),
                     self.data_visualization.incidence_graph(district_id)]

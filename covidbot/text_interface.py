@@ -41,6 +41,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("lösche", self.unsubscribeHandler, True))
         self.handler_list.append(Handler("datenschutz", self.privacyHandler, False))
         self.handler_list.append(Handler("daten", self.currentDataHandler, True))
+        self.handler_list.append(Handler("historie", self.historyHandler, True))
         self.handler_list.append(Handler("bericht", self.reportHandler, False))
         self.handler_list.append(Handler("statistik", self.statHandler, False))
         self.handler_list.append(Handler("loeschmich", self.deleteMeHandler, False))
@@ -58,7 +59,7 @@ class SimpleTextInterface(object):
         if user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
-                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln"]:
+                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln", "historie"]:
                     user_input += " " + str(state[1])
                 del self.chat_states[user_id]
             elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
@@ -204,6 +205,17 @@ class SimpleTextInterface(object):
         location = self.parseLocationInput(user_input)
         if type(location) == District:
             return self.bot.get_district_report(location.id)
+        return location
+
+    def historyHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
+        BOT_COMMAND_COUNT.labels('history').inc()
+
+        if not user_input:
+            return [BotResponse("Dieser Befehl benötigt eine Ortsangabe.")]
+
+        location = self.parseLocationInput(user_input)
+        if type(location) == District:
+            return self.bot.get_history_report(location.id)
         return location
 
     def reportHandler(self, user_input: str, user_id: str) -> List[BotResponse]:

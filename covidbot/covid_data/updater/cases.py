@@ -172,7 +172,6 @@ class RKIHistoryUpdater(RKIUpdater):
                         records = cursor.fetchall()
                         if records:
                             return new_cases
-                        print(f"Data from {updated}")
                         continue
 
                     district_id = field
@@ -187,6 +186,7 @@ class RKIHistoryUpdater(RKIUpdater):
                         'INSERT INTO covid_data (rs, date, total_cases) VALUE (%s, %s, %s) ON DUPLICATE KEY UPDATE covid_data.total_cases=%s',
                         [int(district_id), updated, sum_cases[district_id], sum_cases[district_id]])
                     new_cases = True
+                self.calculate_aggregated_values(updated)
                 self.connection.commit()
 
         return new_cases

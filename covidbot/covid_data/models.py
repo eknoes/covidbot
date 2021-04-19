@@ -84,3 +84,12 @@ class DistrictData(District):
     r_value: Optional[RValueData] = None
     icu_data: Optional[ICUData] = None
     rules: Optional[RuleData] = None
+
+
+@dataclass
+class DistrictHistoryData(District):
+    total_cases: Optional[int] = None
+    total_deaths: Optional[int] = None
+    first_case: Optional[date] = None
+    max_cases: Optional[int] = None
+    max_cases_date: Optional[date] = None

@@ -382,9 +382,12 @@ class Visualization:
         # Add a label every 7 days
         plt.plot(x_data, y_data, color="#1fa2de", zorder=3, linewidth=3)
         ax1.set_ylim(bottom=0)
-        self.set_weekday_formatter(ax1, current_date.weekday())
-
+        if len(x_data) < 60:
+            self.set_weekday_formatter(ax1, current_date.weekday())
+        else:
+            self.set_monthly_formatter(ax1)
         # Save to file
+        plt.show()
         plt.savefig(filepath, format='JPEG')
         self.teardown_plt(fig)
         return filepath

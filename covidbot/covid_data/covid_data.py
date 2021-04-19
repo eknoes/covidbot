@@ -6,7 +6,7 @@ from typing import List, Optional
 from mysql.connector import MySQLConnection
 
 from covidbot.covid_data.models import TrendValue, District, VaccinationData, RValueData, DistrictData, ICUData, \
-    RuleData
+    RuleData, DistrictHistoryData
 from covidbot.metrics import LOCATION_DB_LOOKUP
 
 
@@ -54,6 +54,23 @@ class CovidData(object):
             for child in children:
                 children_data.append((self.get_district_data(child)))
             return children_data
+
+    def get_district_history(self, district_id: int) -> DistrictHistoryData:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT new_cases as max_cases, date, county_name, type, parent FROM covid_data_calculated WHERE rs=%s AND new_cases=(SELECT MAX(new_cases) FROM covid_data_calculated WHERE rs=%s)', [district_id, district_id])
+            row = cursor.fetchone()
+            history = DistrictHistoryData(row['county_name'], district_id, row['type'], row['parent'],
+                                          max_cases=row['max_cases'], max_cases_date=row['date'])
+
+            cursor.execute('SELECT date FROM covid_data WHERE rs=%s and total_cases > 0 ORDER BY date LIMIT 1', [district_id])
+            row = cursor.fetchone()
+            history.first_case = row['date']
+
+            cursor.execute('SELECT total_cases, total_deaths FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT 1', [district_id])
+            row = cursor.fetchone()
+            history.total_cases = row['total_cases']
+            history.total_deaths = row['total_deaths']
+            return history
 
     def get_district_data(self, district_id: int) \
             -> Optional[DistrictData]:
