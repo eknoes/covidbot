@@ -147,11 +147,11 @@ def replace_by_list(text: str, search: List[str], replace: List[str], ignore_lin
 
 def format_data_trend(value: TrendValue) -> str:
     if value == TrendValue.UP:
-        return "↗"
+        return " ↗"
     elif value == TrendValue.SAME:
-        return "➡"
+        return " ➡"
     elif value == TrendValue.DOWN:
-        return "↘"
+        return " ↘"
     else:
         return ""
 

@@ -270,7 +270,7 @@ class Bot(object):
 
         message += "<b>🦠 Infektionsdaten</b>\n"
         if current_data.incidence:
-            message += "Die 7-Tage-Inzidenz liegt bei {incidence} {incidence_trend}."
+            message += "Die 7-Tage-Inzidenz liegt bei {incidence}{incidence_trend}."
             if current_data.incidence_interval_since is not None:
                 days = format_noun((current_data.date - current_data.incidence_interval_since).days,
                                    FormattableNoun.DAYS)
@@ -284,7 +284,7 @@ class Bot(object):
                     .format(interval_length=days, interval=interval, word=word)
 
         if current_data.r_value:
-            message += " Der 7-Tage-R-Wert liegt bei {r_value} {r_trend}." \
+            message += " Der 7-Tage-R-Wert liegt bei {r_value}{r_trend}." \
                 .format(r_value=format_float(current_data.r_value.r_value_7day),
                         r_trend=format_data_trend(current_data.r_value.r_trend))
         message += "\n\n"
@@ -406,11 +406,11 @@ class Bot(object):
         country = self._data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n"
         message += "<b>🦠 Infektionszahlen</b>\n" \
-                   "Insgesamt wurden bundesweit {new_cases} {new_cases_trend} und " \
-                   "{new_deaths} {new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence} " \
+                   "Insgesamt wurden bundesweit {new_cases}{new_cases_trend} und " \
+                   "{new_deaths}{new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence}" \
                    "{incidence_trend}."
         if country.r_value:
-            message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value} {r_trend}." \
+            message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value}{r_trend}." \
                 .format(r_value=format_float(country.r_value.r_value_7day),
                         r_trend=format_data_trend(country.r_value.r_trend))
         message += "\n\n"
@@ -507,7 +507,7 @@ class Bot(object):
 
     @staticmethod
     def format_district_data(district: DistrictData) -> str:
-        return "{name}: {incidence} {incidence_trend} ({new_cases}, {new_deaths})" \
+        return "{name}: {incidence}{incidence_trend} ({new_cases}, {new_deaths})" \
             .format(name=district.name,
                     incidence=format_float(district.incidence),
                     incidence_trend=format_data_trend(district.incidence_trend),
