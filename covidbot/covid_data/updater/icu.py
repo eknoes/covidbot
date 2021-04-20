@@ -69,7 +69,7 @@ class ICUGermanyHistoryUpdater(Updater):
                 return row[0]
 
     def update(self) -> bool:
-        if self.get_last_update() == date(2020, 4, 24):
+        if self.get_last_update().date() == date(2020, 4, 24):
             return False
 
         new_data = False
