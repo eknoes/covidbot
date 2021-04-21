@@ -138,6 +138,12 @@ class CovidData(object):
                                                new_deaths=record['new_deaths'], date=record['date'])
                 if result.date - comparison_data.date == timedelta(days=1):
                     yesterday = comparison_data
+                    if result.r_value:
+                        cursor.execute('SELECT `7day_r_value`, r_date FROM covid_r_value WHERE district_id=%s '
+                                       'AND r_date=SUBDATE(%s, 1) LIMIT 1', [district_id, result.r_value.date])
+                        row = cursor.fetchone()
+                        if row:
+                            yesterday.r_value = RValueData(row['r_date'], row['7day_r_value'])
                 else:
                     last_week = comparison_data
 
