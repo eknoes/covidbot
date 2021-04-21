@@ -35,7 +35,7 @@ def get_connection(cfg, autocommit=False) -> MySQLConnection:
                          port=cfg['DATABASE'].get('PORT'),
                          host=cfg['DATABASE'].get('HOST', 'localhost'), autocommit=autocommit)
     with connection.cursor() as c:
-        c.execute('SET SESSION MAX_EXECUTION_TIME=1000')
+        c.execute('SET @@MAX_STATEMENT_TIME=30')
     return connection
 
 
