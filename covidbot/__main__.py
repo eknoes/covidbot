@@ -29,11 +29,14 @@ def parse_config(config_file: str):
 
 
 def get_connection(cfg, autocommit=False) -> MySQLConnection:
-    return connect(database=cfg['DATABASE'].get('DATABASE'),
-                   user=cfg['DATABASE'].get('USER'),
-                   password=cfg['DATABASE'].get('PASSWORD'),
-                   port=cfg['DATABASE'].get('PORT'),
-                   host=cfg['DATABASE'].get('HOST', 'localhost'), autocommit=autocommit)
+    connection = connect(database=cfg['DATABASE'].get('DATABASE'),
+                         user=cfg['DATABASE'].get('USER'),
+                         password=cfg['DATABASE'].get('PASSWORD'),
+                         port=cfg['DATABASE'].get('PORT'),
+                         host=cfg['DATABASE'].get('HOST', 'localhost'), autocommit=autocommit)
+    with connection.cursor() as c:
+        c.execute('SET SESSION MAX_EXECUTION_TIME=1000')
+    return connection
 
 
 class MessengerBotSetup:
@@ -101,10 +104,14 @@ class MessengerBotSetup:
         USER_COUNT.labels(platform="telegram").set_function(lambda: user_monitor.get_user_number("telegram"))
         USER_COUNT.labels(platform="signal").set_function(lambda: user_monitor.get_user_number("signal"))
         USER_COUNT.labels(platform="messenger").set_function(lambda: user_monitor.get_user_number("messenger"))
-        USER_COUNT.labels(platform="facebook").set_function(lambda: user_monitor.get_social_network_user_number("facebook"))
-        USER_COUNT.labels(platform="instagram").set_function(lambda: user_monitor.get_social_network_user_number("instagram"))
-        USER_COUNT.labels(platform="twitter").set_function(lambda: user_monitor.get_social_network_user_number("twitter"))
-        USER_COUNT.labels(platform="mastodon").set_function(lambda: user_monitor.get_social_network_user_number("mastodon"))
+        USER_COUNT.labels(platform="facebook").set_function(
+            lambda: user_monitor.get_social_network_user_number("facebook"))
+        USER_COUNT.labels(platform="instagram").set_function(
+            lambda: user_monitor.get_social_network_user_number("instagram"))
+        USER_COUNT.labels(platform="twitter").set_function(
+            lambda: user_monitor.get_social_network_user_number("twitter"))
+        USER_COUNT.labels(platform="mastodon").set_function(
+            lambda: user_monitor.get_social_network_user_number("mastodon"))
 
         AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_monitor.get_mean_subscriptions())
 
@@ -190,12 +197,12 @@ class MessengerBotSetup:
                 raise ValueError("FACEBOOK is not configured")
             from covidbot.instagram_interface import InstagramInterface
             return FacebookInterface(self.config['FACEBOOK'].get('PAGE_ID'),
-                                      self.config['FACEBOOK'].get('PAGE_ACCESS_TOKEN'),
-                                      self.config['FACEBOOK'].get('WEB_DIR'),
-                                      self.config['FACEBOOK'].get('PUBLIC_URL'),
-                                      user_manager, data, visualization,
-                                      no_write=self.config['FACEBOOK'].getboolean('DEBUG',
-                                                                                   fallback=False))
+                                     self.config['FACEBOOK'].get('PAGE_ACCESS_TOKEN'),
+                                     self.config['FACEBOOK'].get('WEB_DIR'),
+                                     self.config['FACEBOOK'].get('PUBLIC_URL'),
+                                     user_manager, data, visualization,
+                                     no_write=self.config['FACEBOOK'].getboolean('DEBUG',
+                                                                                 fallback=False))
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         for db_conn in self.connections:
@@ -341,7 +348,8 @@ def main():
             from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, \
                 VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, RKIUpdater, ICUGermanyUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, RKIHistoryUpdater
-            for updater in [RKIHistoryUpdater(conn), ICUGermanyHistoryUpdater(conn), VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn), RulesGermanyUpdater(conn),
+            for updater in [RKIHistoryUpdater(conn), ICUGermanyHistoryUpdater(conn),
+                            VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn), RulesGermanyUpdater(conn),
                             VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:
                     if updater.update():
