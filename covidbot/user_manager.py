@@ -217,7 +217,10 @@ class UserManager(object):
     def get_total_user_number(self) -> int:
         with self.connection.cursor() as cursor:
             cursor.execute('SELECT SUM(followers) FROM platform_statistics')
-            return cursor.fetchone()[0] + self.get_messenger_user_number()
+            row = cursor.fetchone()
+            if not row:
+                return 0 + self.get_messenger_user_number()
+            return row[0] + self.get_messenger_user_number()
 
     def get_user_number(self, platform: str) -> int:
         try:
