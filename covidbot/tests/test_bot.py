@@ -40,6 +40,7 @@ class TestBot(TestCase):
             cursor.execute("DROP TABLE IF EXISTS subscriptions;")
             cursor.execute("DROP TABLE IF EXISTS bot_user_settings;")
             cursor.execute("DROP TABLE IF EXISTS user_feedback;")
+            cursor.execute("DROP TABLE IF EXISTS bot_user_sent_reports;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
 
         self.man = UserManager("unittest", self.conn, activated_default=True)
