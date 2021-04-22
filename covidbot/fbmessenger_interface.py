@@ -7,6 +7,7 @@ from typing import List, Union
 
 import prometheus_async
 from fbmessenger import Messenger
+from fbmessenger.errors import MessengerError
 from fbmessenger.models import Message, PostbackButton
 
 from covidbot.bot import Bot, UserHintService, BotUserSettings
@@ -86,10 +87,14 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
         if not unconfirmed_reports:
             return
         for userid, message in unconfirmed_reports:
-            for elem in message:
-                await self.send_bot_response(userid, elem)
-            self.bot.confirm_daily_report_send(userid)
-            self.log.warning(f"Sent report to {userid}")
+            try:
+                for elem in message:
+                    await self.send_bot_response(userid, elem)
+                self.bot.confirm_daily_report_send(userid)
+                self.log.warning(f"Sent report to {userid}")
+            except MessengerError as e:
+                self.log.exception(f"Can't send report: {e.code} {e.subcode} {e.message}", exc_info=e)
+                self.bot.disable_user(userid)
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
         if not users:
