@@ -84,8 +84,7 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
 
     async def send_unconfirmed_reports(self) -> None:
         unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
-        if not unconfirmed_reports:
-            return
+
         for userid, message in unconfirmed_reports:
             try:
                 for elem in message:

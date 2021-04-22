@@ -107,29 +107,24 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
         """
         Send unconfirmed daily reports to the specific users
         """
-        # Get reports
-        unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
-        if not unconfirmed_reports:
+        if not self.bot.unconfirmed_daily_reports_available():
             return
-
-        # Get the current graph as attachement dict
-        self.log.warning(f"{len(unconfirmed_reports)} to send!")
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
             backoff_time = random.uniform(0.5, 2)
             message_counter = 0
-            for userid, message in unconfirmed_reports:
+            for userid, message in self.bot.get_unconfirmed_daily_reports():
                 self.log.info(f"Try to send report {message_counter}")
                 disable_unicode = self.bot.get_user_setting(userid, BotUserSettings.DISABLE_FAKE_FORMAT, False)
                 for elem in message:
                     success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode), attachments=elem.images)
                 if success:
                     self.bot.confirm_daily_report_send(userid)
-                    self.log.warning(f"({message_counter}/{len(unconfirmed_reports)}) Sent daily report to {userid}")
+                    self.log.warning(f"({message_counter}) Sent daily report to {userid}")
                 else:
                     self.log.error(
-                        f"({message_counter}/{len(unconfirmed_reports)}) Error sending daily report to {userid}")
+                        f"({message_counter}) Error sending daily report to {userid}")
 
                 backoff_time = self.backoff_timer(backoff_time, not success, userid)
                 message_counter += 1

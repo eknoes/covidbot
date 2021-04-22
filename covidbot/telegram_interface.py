@@ -270,13 +270,12 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
 
     async def send_unconfirmed_reports(self) -> None:
         self.log.debug("Check for new daily reports update")
-        messages = self._bot.get_unconfirmed_daily_reports()
-        if not messages:
+        if not self.bot.unconfirmed_daily_reports_available():
             return
 
         # Avoid flood limits of 30 messages / second
         sliding_flood_window = []
-        for userid, message in messages:
+        for userid, message in self._bot.get_unconfirmed_daily_reports():
             if len(sliding_flood_window) >= 25:
                 # We want to send 25 messages per second max
                 flood_window_diff = time.perf_counter() - sliding_flood_window.pop(0)

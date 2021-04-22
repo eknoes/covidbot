@@ -573,7 +573,7 @@ class Bot(object):
             ("Dieser Befehl wurde nicht verstanden. Sende <code>{help_command}</code> um einen Überblick über die "
              "Funktionen zu bekommen!").format(help_command=self.format_command("hilfe")))]
 
-    def get_unconfirmed_daily_reports(self) -> Optional[Generator[Tuple[Union[int, str], List[BotResponse]], None, None]]:
+    def get_unconfirmed_daily_reports(self) -> Generator[Tuple[Union[int, str], List[BotResponse]], None, None]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
@@ -591,6 +591,23 @@ class Bot(object):
 
         for user in users:
             yield user.platform_id, self._get_report(user.subscriptions, user.id)
+
+    def unconfirmed_daily_reports_available(self) -> bool:
+        """
+        Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
+        arrived
+        :rtype: Optional[list[Tuple[str, str]]]
+        :return: List of (userid, message)
+        """
+        data_update = self._data.get_last_update()
+        for user in self._manager.get_all_user(with_subscriptions=True):
+            if not user.activated or not user.subscriptions:
+                continue
+
+            if user.last_update is None or user.last_update.date() < data_update:
+                return True
+
+        return False
 
     def confirm_daily_report_send(self, user_identification: Union[int, str]):
         updated = self._data.get_last_update()

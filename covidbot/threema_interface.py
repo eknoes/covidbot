@@ -96,10 +96,10 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 SENT_MESSAGE_COUNT.inc()
 
     async def send_unconfirmed_reports(self) -> None:
-        unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
-        if not unconfirmed_reports:
+        if not self.bot.unconfirmed_daily_reports_available():
             return
-        for userid, message in unconfirmed_reports:
+
+        for userid, message in self.bot.get_unconfirmed_daily_reports():
             try:
                 for elem in message:
                     await self.send_bot_response(userid, elem)

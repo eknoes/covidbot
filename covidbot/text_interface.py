@@ -283,9 +283,6 @@ class SimpleTextInterface(object):
         return [BotResponse("Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten"
                             " löschen?", choices=choices)]
 
-    def getUpdates(self) -> List[Tuple[str, List[BotResponse]]]:
-        return self.bot.get_unconfirmed_daily_reports()
-
     def confirm_daily_report_send(self, user_identification: Union[int, str]):
         return self.bot.confirm_daily_report_send(user_identification)
 
