@@ -56,6 +56,9 @@ class UserManager(object):
                 'CREATE TABLE IF NOT EXISTS bot_user_settings (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER '
                 'NOT NULL, setting VARCHAR(100), value TINYINT(1), UNIQUE(user_id, setting), FOREIGN KEY(user_id) '
                 'REFERENCES bot_user(user_id))')
+            cursor.execute('CREATE TABLE IF NOT EXISTS bot_user_sent_reports (id INTEGER PRIMARY KEY AUTO_INCREMENT,'
+                           ' user_id INTEGER NOT NULL, sent_report DATETIME DEFAULT NOW(), FOREIGN KEY(user_id) '
+                           'REFERENCES bot_user(user_id))')
             self.connection.commit()
 
     def set_user_activated(self, user_id: int, activated=True) -> None:
@@ -163,6 +166,8 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('DELETE FROM subscriptions WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM user_feedback WHERE user_id=%s', [user_id])
+            cursor.execute('DELETE FROM bot_user_settings WHERE user_id=%s', [user_id])
+            cursor.execute('DELETE FROM bot_user_sent_reports WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM bot_user WHERE user_id=%s', [user_id])
             self.connection.commit()
             if cursor.rowcount > 0:
@@ -173,9 +178,10 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET last_update=%s, sent_report=%s WHERE user_id=%s",
                            [last_update, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), user_id])
+            cursor.execute("INSERT INTO bot_user_sent_reports (user_id, sent_report) VALUE (%s, NOW())", [user_id])
+            self.connection.commit()
             if cursor.rowcount == 0:
                 return False
-            self.connection.commit()
             return True
 
     def set_language(self, user_id: int, language: str) -> bool:
