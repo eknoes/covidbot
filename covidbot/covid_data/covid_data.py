@@ -157,7 +157,7 @@ class CovidData(object):
             possible_intervals = [35, 50, 100, 200]
             threshold = 0
             for interval in possible_intervals:
-                if result.incidence < interval:
+                if result.incidence and result.incidence < interval:
                     threshold = interval
                     break
 
