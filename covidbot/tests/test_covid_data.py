@@ -46,6 +46,7 @@ class CovidDataTest(TestCase):
 
     def test_find_ags(self):
         self.assertEqual(2, len(self.data.search_district_by_name("Kassel")), "2 Entities should be found for Kassel")
+        self.assertEqual(1, len(self.data.search_district_by_name("Essen")), "Exact match should be chosen")
         self.assertEqual(1, len(self.data.search_district_by_name("Berlin")), "Exact match should be chosen")
         self.assertEqual(1, len(self.data.search_district_by_name("Kassel Stadt")),
                          "Kassel Stadt should match SK Kassel")

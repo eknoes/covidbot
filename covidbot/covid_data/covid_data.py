@@ -20,7 +20,7 @@ class CovidData(object):
 
     @LOCATION_DB_LOOKUP.time()
     def search_district_by_name(self, search_str: str) -> List[District]:
-        search_str = search_str.lower()
+        search_str = search_str.lower().strip()
         search_str = search_str.replace(" ", "%")
         results = []
         with self.connection.cursor(dictionary=True) as cursor:
@@ -31,10 +31,19 @@ class CovidData(object):
                 cursor.execute('SELECT rs, county_name FROM counties WHERE LOWER(county_name) LIKE %s OR '
                                'concat(LOWER(type), LOWER(county_name)) LIKE %s',
                                ['%' + search_str + '%', '%' + search_str + '%'])
+            search_str = search_str.replace("%", " ")
+            exact_matches = []
             for row in cursor.fetchall():
-                if row['county_name'].lower() == search_str.replace("%", " "):
+                if row['county_name'].lower() == search_str:
                     return [District(row['county_name'], row['rs'])]
+
+                if len(search_str) < len(row['county_name']) and row['county_name'][:len(search_str) + 1].lower() == search_str + " ":
+                    exact_matches.append(District(row['county_name'], row['rs']))
+
                 results.append(District(row['county_name'], row['rs']))
+
+            if len(exact_matches) == 1:
+                return exact_matches
         return results
 
     def get_district(self, district_id: int) -> District:
