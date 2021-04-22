@@ -87,10 +87,11 @@ class SimpleTextInterface(object):
 
         # Check whether user has to be activated
         if not self.bot.is_user_activated(user_id):
-            self.chat_states[user_id] = (ChatBotState.NOT_ACTIVATED, None)
-            return [
-                BotResponse("Dein Account wurde noch nicht aktiviert, bitte wende dich an die Entwickler. Bis diese "
-                            "deinen Account aktivieren, kannst du den Bot leider noch nicht nutzen.")]
+            self.bot.enable_user(user_id)
+            # self.chat_states[user_id] = (ChatBotState.NOT_ACTIVATED, None)
+            # return [
+            #    BotResponse("Dein Account wurde noch nicht aktiviert, bitte wende dich an die Entwickler. Bis diese "
+            #                "deinen Account aktivieren, kannst du den Bot leider noch nicht nutzen.")]
 
         for handler in self.handler_list:
             if handler.command == user_input[:len(handler.command)].lower():
