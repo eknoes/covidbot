@@ -5,7 +5,7 @@ import os.path
 import re
 from enum import Enum
 from functools import reduce
-from typing import Optional, Tuple, List, Dict, Union, Callable
+from typing import Optional, Tuple, List, Dict, Union, Callable, Generator
 
 from covidbot.covid_data import CovidData, DistrictData, Visualization
 from covidbot.covid_data.models import District
@@ -573,22 +573,24 @@ class Bot(object):
             ("Dieser Befehl wurde nicht verstanden. Sende <code>{help_command}</code> um einen Überblick über die "
              "Funktionen zu bekommen!").format(help_command=self.format_command("hilfe")))]
 
-    def get_unconfirmed_daily_reports(self) -> Optional[List[Tuple[Union[int, str], List[BotResponse]]]]:
+    def get_unconfirmed_daily_reports(self) -> Optional[Generator[Tuple[Union[int, str], List[BotResponse]], None, None]]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
         :rtype: Optional[list[Tuple[str, str]]]
         :return: List of (userid, message)
         """
-        result = []
+        users = []
         data_update = self._data.get_last_update()
         for user in self._manager.get_all_user(with_subscriptions=True):
             if not user.activated or not user.subscriptions:
                 continue
 
             if user.last_update is None or user.last_update.date() < data_update:
-                result.append((user.platform_id, self._get_report(user.subscriptions, user.id)))
-        return result
+                users.append(user)
+
+        for user in users:
+            yield user.platform_id, self._get_report(user.subscriptions, user.id)
 
     def confirm_daily_report_send(self, user_identification: Union[int, str]):
         updated = self._data.get_last_update()
