@@ -37,7 +37,8 @@ class CovidData(object):
                 if row['county_name'].lower() == search_str:
                     return [District(row['county_name'], row['rs'])]
 
-                if len(search_str) < len(row['county_name']) and row['county_name'][:len(search_str) + 1].lower() == search_str + " ":
+                if len(search_str) < len(row['county_name']) and row['county_name'][
+                                                                 :len(search_str) + 1].lower() == search_str + " ":
                     exact_matches.append(District(row['county_name'], row['rs']))
 
                 results.append(District(row['county_name'], row['rs']))
@@ -86,7 +87,8 @@ class CovidData(object):
                                   date=record['date'])
 
             # Check if vaccination data is available
-            cursor.execute('SELECT MAX(date) as last_update FROM covid_vaccinations WHERE district_id=%s', [district_id])
+            cursor.execute('SELECT MAX(date) as last_update FROM covid_vaccinations WHERE district_id=%s',
+                           [district_id])
             vacc_date = cursor.fetchone()
             if vacc_date:
                 last_update = vacc_date['last_update']
@@ -99,16 +101,22 @@ class CovidData(object):
                 if vaccination_record:
                     vaccination_data = VaccinationData(vaccination_record['vaccinated_full'],
                                                        vaccination_record['vaccinated_partial'],
-                                                       vaccination_record['rate_full'], vaccination_record['rate_partial'],
-                                                       vaccination_record['date'], doses_diff=vaccination_record['doses_diff'])
+                                                       vaccination_record['rate_full'],
+                                                       vaccination_record['rate_partial'],
+                                                       vaccination_record['date'],
+                                                       doses_diff=vaccination_record['doses_diff'])
 
-                    cursor.execute('SELECT AVG(doses_diff) as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) GROUP BY district_id', [district_id, last_update])
+                    cursor.execute(
+                        'SELECT AVG(doses_diff) as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) GROUP BY district_id',
+                        [district_id, last_update])
                     record = cursor.fetchone()
                     if record:
                         vaccination_data.avg_speed = int(record['avg_7day'])
-                        population_to_be_vaccinated = 2*record['population'] - (vaccination_data.vaccinated_full + vaccination_data.vaccinated_partial)
+                        population_to_be_vaccinated = 2 * record['population'] - (
+                                    vaccination_data.vaccinated_full + vaccination_data.vaccinated_partial)
                         if vaccination_data.avg_speed > 0:
-                            vaccination_data.avg_days_to_finish = math.ceil(population_to_be_vaccinated / vaccination_data.avg_speed)
+                            vaccination_data.avg_days_to_finish = math.ceil(
+                                population_to_be_vaccinated / vaccination_data.avg_speed)
 
                     result.vaccinations = vaccination_data
             # Check if ICU data is available
@@ -141,7 +149,8 @@ class CovidData(object):
                 [district_id, result.date, result.date])
             last_week, yesterday = None, None
             for record in cursor.fetchall():
-                comparison_data = DistrictData(name=record['county_name'], id=district_id, incidence=record['incidence'],
+                comparison_data = DistrictData(name=record['county_name'], id=district_id,
+                                               incidence=record['incidence'],
                                                type=record['type'], total_cases=record['total_cases'],
                                                total_deaths=record['total_deaths'], new_cases=record['new_cases'],
                                                new_deaths=record['new_deaths'], date=record['date'])
@@ -163,27 +172,27 @@ class CovidData(object):
                 result = self.fill_trend(result, last_week, yesterday)
 
             # Check, how long incidence is in certain interval
-            possible_intervals = [35, 50, 100, 200]
-            threshold = 0
-            for interval in possible_intervals:
-                if result.incidence and result.incidence < interval:
-                    threshold = interval
-                    break
+            if result.incidence < 100:
+                threshold_values = [25, 50, 100]
+                threshold = 0
+                while result.incidence > threshold_values[threshold] and len(threshold_values) > threshold:
+                    threshold += 1
+                operator = ">="
+                result.incidence_interval_threshold = threshold_values[threshold]
+            else:
+                threshold_values = [200, 165, 100]
+                threshold = 0
+                while result.incidence < threshold_values[threshold] and len(threshold_values) > threshold:
+                    threshold += 1
+                operator = "<"
+                result.incidence_interval_threshold = threshold_values[threshold]
 
-            if threshold:
-                cursor.execute("SELECT date FROM covid_data WHERE rs=%s AND incidence >= %s ORDER BY date DESC LIMIT 1",
-                               [district_id, threshold])
-                threshold_record = cursor.fetchone()
-                if threshold_record:
-                    result.incidence_interval_since = threshold_record['date'] + timedelta(days=1)
-                    result.incidence_interval_upper_value = threshold
-            elif threshold:
-                cursor.execute("SELECT date FROM covid_data WHERE rs=%s AND incidence < 200 ORDER BY date DESC LIMIT 1",
-                               [district_id])
-                threshold_record = cursor.fetchone()
-                if threshold_record:
-                    result.incidence_interval_since = threshold_record['date'] + timedelta(days=1)
-                    result.incidence_interval_upper_value = -200
+            cursor.execute(f'SELECT date FROM covid_data_calculated WHERE rs=%s AND incidence {operator} %s '
+                           f'ORDER BY date DESC LIMIT 1', [district_id, result.incidence_interval_threshold])
+            rows = cursor.fetchall()
+            if rows:
+                result.incidence_interval_since = rows[0]['date']
+
             return result
 
     def get_country_data(self) -> DistrictData:

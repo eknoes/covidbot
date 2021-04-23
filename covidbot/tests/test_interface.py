@@ -53,3 +53,4 @@ class TestBot(TestCase):
         self.assertIsNotNone(self.interface.handle_input("Statistik", uid))
         self.assertIsNotNone(self.interface.handle_input("Regeln Berlin", uid))
         self.assertIsNotNone(self.interface.handle_input("Loeschmich", uid))
+        self.assertIsNotNone(self.interface.handle_input("Ja", uid))

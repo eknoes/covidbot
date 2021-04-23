@@ -73,7 +73,7 @@ class DistrictData(District):
     incidence: Optional[float] = None
     incidence_trend: Optional[TrendValue] = None
     incidence_interval_since: Optional[datetime.date] = None
-    incidence_interval_upper_value: Optional[int] = None
+    incidence_interval_threshold: Optional[int] = None
     new_cases: Optional[int] = None
     cases_trend: Optional[TrendValue] = None
     new_deaths: Optional[int] = None
