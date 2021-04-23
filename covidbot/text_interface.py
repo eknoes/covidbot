@@ -48,6 +48,7 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("stop", self.deleteMeHandler, False))
         self.handler_list.append(Handler("debug", self.debugHandler, False))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
+        self.handler_list.append(Handler("beta", self.betaSettingsHandler, True))
         self.handler_list.append(Handler("", self.directHandler, True))
 
     def handle_input(self, user_input: str, user_id: str) -> Optional[List[BotResponse]]:
@@ -271,6 +272,32 @@ class SimpleTextInterface(object):
         choices.append(UserChoice("Abbrechen", "/noop", "Sende etwas anderes, um mit der Benutzung wie gewohnt "
                                                         "fortzufahren"))
         message = f"Die Verwendung von Grafiken im Bericht ist für dich {state}."
+
+        return [BotResponse(message, choices=choices)]
+
+    def betaSettingsHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
+        BOT_COMMAND_COUNT.labels('beta').inc()
+        if user_input:
+            if user_input[:3] == "ein":
+                self.bot.set_user_setting(user_id, BotUserSettings.BETA, True)
+                return [BotResponse("Du nimmst nun an der Beta teil.")]
+            elif user_input[:3] == "aus":
+                self.bot.set_user_setting(user_id, BotUserSettings.BETA, False)
+                return [BotResponse("Du nimmst nun nicht mehr an der Beta teil.")]
+
+        current = self.bot.get_user_setting(user_id, BotUserSettings.BETA, default=False)
+        choices = []
+        state: str
+        if current:
+            state = ''
+            choices.append(UserChoice('Deaktivieren', '/beta aus', 'Sende \"Beta aus\", um nicht an der Beta teilzunehmen'))
+        else:
+            choices.append(UserChoice('Aktivieren', '/beta ein', 'Sende \"Beta ein\", um an der Beta teilzunehmen'))
+            state = ' nicht'
+
+        choices.append(UserChoice("Abbrechen", "/noop", "Sende etwas anderes, um mit der Benutzung wie gewohnt "
+                                                        "fortzufahren"))
+        message = f"Du nutzt die Beta-Version{state}. In der Beta Version testen wir aktuell einen verbesserten Bericht."
 
         return [BotResponse(message, choices=choices)]
 

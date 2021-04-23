@@ -177,14 +177,14 @@ class CovidData(object):
                 threshold = 0
                 while result.incidence > threshold_values[threshold] and len(threshold_values) > threshold:
                     threshold += 1
-                operator = ">="
+                operator = ">"
                 result.incidence_interval_threshold = threshold_values[threshold]
             else:
                 threshold_values = [200, 165, 100]
                 threshold = 0
                 while result.incidence < threshold_values[threshold] and len(threshold_values) > threshold:
                     threshold += 1
-                operator = "<"
+                operator = "<="
                 result.incidence_interval_threshold = threshold_values[threshold]
 
             cursor.execute(f'SELECT date FROM covid_data_calculated WHERE rs=%s AND incidence {operator} %s '

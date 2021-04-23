@@ -22,6 +22,7 @@ class UserDistrictActions(Enum):
 
 
 class BotUserSettings:
+    BETA = "beta"
     REPORT_GRAPHICS = "report_graphics"
     REPORT_INCLUDE_ICU = "report_include_icu"
     REPORT_INCLUDE_VACCINATION = "report_include_vaccination"
@@ -396,7 +397,100 @@ class Bot(object):
         user = self._manager.get_user(user_id, with_subscriptions=True)
         if not user:
             return self._get_report([])
+
+        if self._manager.get_user_setting(user_id, BotUserSettings.BETA, False):
+            return self._get_new_report(user.subscriptions, user_id)
         return self._get_report(user.subscriptions, user.id)
+
+    def _get_new_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
+        # Visualization
+        graphs = []
+        if self._manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
+            graphs.append(self.data_visualization.infections_graph(0))
+
+        country = self._data.get_country_data()
+        message = "<b>Corona-Bericht vom {date}</b>\n\n"
+        message += "<b>🦠 Infektionszahlen</b>\n" \
+                   "Insgesamt wurden bundesweit {new_cases}{new_cases_trend} und " \
+                   "{new_deaths}{new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence}" \
+                   "{incidence_trend}."
+        if country.r_value:
+            message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value}{r_trend}." \
+                .format(r_value=format_float(country.r_value.r_value_7day),
+                        r_trend=format_data_trend(country.r_value.r_trend))
+        message += "\n\n"
+        message = message.format(date=self._data.get_last_update().strftime("%d.%m.%Y"),
+                                 new_cases=format_noun(country.new_cases, FormattableNoun.INFECTIONS),
+                                 new_cases_trend=format_data_trend(country.cases_trend),
+                                 new_deaths=format_noun(country.new_deaths, FormattableNoun.DEATHS),
+                                 new_deaths_trend=format_data_trend(country.deaths_trend),
+                                 incidence=format_float(country.incidence),
+                                 incidence_trend=format_data_trend(country.incidence_trend))
+        if subscriptions and len(subscriptions) > 0:
+            message += "In deinen abonnierten Orten ist die Lage wie folgt:"
+
+            # Split Bundeslaender from other
+            districts = list(map(lambda rs: self._data.get_district_data(rs), subscriptions))
+            states = list(filter(lambda d: d.type == "Bundesland", districts))
+            cities = list(filter(lambda d: d.type != "Bundesland" and d.type != "Staat", districts))
+            districts = self.sort_districts(states) + self.sort_districts(cities)
+            if len(districts) > 0:
+                for district in districts:
+                    threshold_info = ""
+                    if district.incidence_interval_since is not None:
+                        date_interval = district.date - district.incidence_interval_since
+                        days = format_noun(date_interval.days, FormattableNoun.DAYS)
+
+                        if district.incidence < district.incidence_interval_threshold:
+                            word = "unter"
+                        else:
+                            word = "über"
+
+                        threshold_info = "Seit {interval_length} {word} {interval}" \
+                            .format(interval_length=days, interval=district.incidence_interval_threshold, word=word)
+
+                    message += "\n\n<b>{name}</b>: {incidence}{incidence_trend}\n" \
+                               "• {threshold_info}\n" \
+                               "• {new_cases}, {new_deaths}" \
+                        .format(name=district.name,
+                                incidence=format_float(district.incidence),
+                                incidence_trend=format_data_trend(district.incidence_trend),
+                                new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
+                                new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS),
+                                threshold_info=threshold_info)
+                    if district.icu_data:
+                        message += "\n• {percent_occupied}% ({beds_occupied}) belegt, davon {beds_covid} ({percent_covid}%) mit Covid19" \
+                            .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
+                                    percent_occupied=format_float(district.icu_data.percent_occupied()),
+                                    beds_covid=format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS),
+                                    percent_covid=format_float(district.icu_data.percent_covid()))
+                message += "\n\n"
+            if self._manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
+                # Generate multi-incidence graph for up to 8 districts
+                districts = subscriptions[-8:]
+                if 0 in subscriptions and 0 not in districts:
+                    districts[0] = 0
+                graphs.append(self.data_visualization.multi_incidence_graph(districts))
+
+        user_hint = self.user_hints.get_hint_of_today()
+        if user_hint:
+            message += f"{user_hint}\n\n"
+
+        message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
+                   ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
+                   '<a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
+                   'Intensivbettendaten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.</i>' \
+                   '\n\n' \
+                   '<i>Sende {info_command} um eine Erläuterung ' \
+                   'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
+                   'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
+
+        message += "\n\n<b>Dies ist ein Entwurf für einen verbesserten Bericht. Wir würden uns sehr über Feedback " \
+                   "freuen, sende uns einfach eine Nachricht und bestätige dann, dass diese an uns weitergeleitet " \
+                   "werden darf. Danke 🙏</b>"
+
+        reports = [BotResponse(message, graphs)]
+        return reports
 
     def _get_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
         # Visualization
@@ -427,21 +521,21 @@ class Bot(object):
                        "dir abonnierten Orte wie folgt aus:\n\n"
 
             # Split Bundeslaender from other
-            subscribed_districts = list(map(lambda rs: self._data.get_district_data(rs), subscriptions))
-            subscribed_states = list(filter(lambda d: d.type == "Bundesland", subscribed_districts))
-            subscribed_cities = list(
-                filter(lambda d: d.type != "Bundesland" and d.type != "Staat", subscribed_districts))
-            if len(subscribed_states) > 0:
+            subscription_data = list(map(lambda rs: self._data.get_district_data(rs), subscriptions))
+            subscribed_bls = list(filter(lambda d: d.type == "Bundesland", subscription_data))
+            subscribed_cities = list(filter(lambda d: d.type != "Bundesland" and d.type != "Staat", subscription_data))
+            if len(subscribed_bls) > 0:
                 message += "<b>Bundesländer</b>\n"
-                data = map(lambda district: self.format_district_data(district),
-                           self.sort_districts(subscribed_states))
-                message += "\n\n".join(data) + "\n\n"
+                data = map(lambda district: "• " + self.format_district_data(district),
+                           self.sort_districts(subscribed_bls))
+                message += "\n".join(data) + "\n\n"
 
-            if len(subscribed_cities) > 0:
-                message += "<b>Städte und Landkreise:</b>\n"
-                data = map(lambda district: self.format_district_data(district),
-                           self.sort_districts(subscribed_cities))
-                message += "\n\n".join(data) + "\n\n"
+            grouped_districts = self.group_districts(subscribed_cities)
+            for key in grouped_districts:
+                message += "<b>Städte und Landkreise mit Inzidenz >" + str(key) + ":</b>\n"
+                data = map(lambda district: "• " + self.format_district_data(district),
+                           self.sort_districts(grouped_districts[key]))
+                message += "\n".join(data) + "\n\n"
 
             if self._manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
                 # Generate multi-incidence graph for up to 8 districts
@@ -507,35 +601,13 @@ class Bot(object):
         return self._manager.change_platform_id(old_id, new_id)
 
     @staticmethod
-    def format_district_data(district: DistrictData, detailed: bool = True) -> str:
-        threshold_info = ""
-        if district.incidence_interval_since is not None:
-            days = format_noun((district.date - district.incidence_interval_since).days,
-                               FormattableNoun.DAYS)
-            interval = district.incidence_interval_threshold
-
-            if district.incidence < district.incidence_interval_threshold:
-                word = "unter"
-            else:
-                word = "über"
-
-            threshold_info = "Seit {interval_length} {word} {interval}" \
-                .format(interval_length=days, interval=interval, word=word)
-
-        message = "{name}: {incidence}{incidence_trend}\n" \
-                  "<i>🦠 {new_cases}, {new_deaths}, {threshold_info}</i>\n" \
+    def format_district_data(district: DistrictData) -> str:
+        return "{name}: {incidence}{incidence_trend} ({new_cases}, {new_deaths})" \
             .format(name=district.name,
                     incidence=format_float(district.incidence),
                     incidence_trend=format_data_trend(district.incidence_trend),
                     new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
-                    new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS), threshold_info=threshold_info)
-        if detailed and district.icu_data:
-            message += "<i>🏥 {percent_occupied}% ({beds_occupied}) belegt, davon {beds_covid} ({percent_covid}%) mit Covid19</i>" \
-                .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
-                        percent_occupied=format_float(district.icu_data.percent_occupied()),
-                        beds_covid=format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS),
-                        percent_covid=format_float(district.icu_data.percent_covid()))
-        return message
+                    new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
 
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:
