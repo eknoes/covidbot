@@ -439,7 +439,10 @@ class Bot(object):
                     threshold_info = ""
                     if district.incidence_interval_since is not None:
                         date_interval = district.date - district.incidence_interval_since
-                        days = format_noun(date_interval.days, FormattableNoun.DAYS)
+                        if date_interval.days != 0:
+                            days = format_noun(date_interval.days, FormattableNoun.DAYS)
+                        else:
+                            days = "heute"
 
                         if district.incidence < district.incidence_interval_threshold:
                             word = "unter"
@@ -448,6 +451,9 @@ class Bot(object):
 
                         threshold_info = "Seit {interval_length} {word} {interval}" \
                             .format(interval_length=days, interval=district.incidence_interval_threshold, word=word)
+
+                        if date_interval.days in [3, 5]:
+                            threshold_info = f"🔔 {threshold_info}"
 
                     message += "\n\n<b>{name}</b>: {incidence}{incidence_trend}\n" \
                                "• {threshold_info}\n" \
@@ -459,7 +465,7 @@ class Bot(object):
                                 new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS),
                                 threshold_info=threshold_info)
                     if district.icu_data:
-                        message += "\n• {percent_occupied}% ({beds_occupied}) belegt, davon {beds_covid} ({percent_covid}%) mit Covid19" \
+                        message += "\n• {percent_occupied}% ({beds_occupied}) belegt, in {beds_covid} ({percent_covid}%) Covid19-Patient:innen" \
                             .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
                                     percent_occupied=format_float(district.icu_data.percent_occupied()),
                                     beds_covid=format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS),
@@ -471,6 +477,18 @@ class Bot(object):
                 if 0 in subscriptions and 0 not in districts:
                     districts[0] = 0
                 graphs.append(self.data_visualization.multi_incidence_graph(districts))
+
+        if country.vaccinations and self._manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_VACCINATION,
+                                                                   True):
+            message += "<b>💉 Impfdaten</b>\n" \
+                       "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
+                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
+                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
+                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
+                        vacc_full=format_int(country.vaccinations.vaccinated_full),
+                        date=country.vaccinations.date.strftime("%d.%m.%Y"),
+                        doses=format_int(country.vaccinations.doses_diff))
 
         user_hint = self.user_hints.get_hint_of_today()
         if user_hint:
