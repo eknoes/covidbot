@@ -450,9 +450,6 @@ class Bot(object):
                         threshold_info = "Seit {interval_length} {word} {interval}" \
                             .format(interval_length=days, interval=district.incidence_interval_threshold, word=word)
 
-                        if date_interval.days in [3, 5]:
-                            threshold_info = f"🔔 {threshold_info}"
-
                     message += "<b>{name}</b>: {incidence}{incidence_trend}\n" \
                                "• {threshold_info}\n" \
                                "• {new_cases}, {new_deaths}" \
@@ -700,7 +697,10 @@ class Bot(object):
                 users.append(user)
 
         for user in users:
-            yield user.platform_id, self._get_report(user.subscriptions, user.id)
+            if self._manager.get_user_setting(user.id, BotUserSettings.BETA, False):
+                yield user.platform_id, self._get_new_report(user.subscriptions, user.id)
+            else:
+                yield user.platform_id, self._get_report(user.subscriptions, user.id)
 
     def unconfirmed_daily_reports_available(self) -> bool:
         """
