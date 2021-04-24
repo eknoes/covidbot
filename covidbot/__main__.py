@@ -368,8 +368,16 @@ def main():
                                                                    [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Forward Feedback
-        with MessengerBotSetup("feedback", config, setup_logs=False, monitoring=False) as iface:
-            asyncio.run(iface.send_unconfirmed_reports())
+        try:
+            with MessengerBotSetup("feedback", config, setup_logs=False, monitoring=False) as iface:
+                asyncio.run(iface.send_unconfirmed_reports())
+        except Exception as error:
+            # Data did not make it through plausibility check
+            logging.exception(f"Exception happened on forwarding Feedback: {error}",
+                              exc_info=error)
+            with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
+                asyncio.run(telegram.send_message_to_users(f"Exception happened on forwarding Feedback: {error}",
+                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Check Tweets & Co
         platforms = []
