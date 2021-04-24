@@ -64,7 +64,7 @@ class SimpleTextInterface(object):
                 del self.chat_states[user_id]
             elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
                 if user_input.lower().strip() == "ja":
-                    self.bot.add_user_feedback(user_id, state[1])
+                    self.bot.add_user_feedback(user_id, state[1].replace("<", "&lt;").replace(">", "&gt;"))
                     del self.chat_states[user_id]
                     BOT_COMMAND_COUNT.labels('send_feedback').inc()
                     return [BotResponse("Danke für dein wertvolles Feedback!")]

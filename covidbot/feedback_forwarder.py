@@ -25,7 +25,6 @@ class FeedbackForwarder(MessengerInterface):
             if i == 20:
                 time.sleep(1)
             i += 1
-            message = message.replace("<", "&lt;").replace(">", "&gt;")
             sent = self.updater.bot.send_message(chat_id=self.dev_chat_id, text=message, parse_mode=ParseMode.HTML,
                                                  timeout=10)
             if sent:
