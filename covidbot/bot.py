@@ -427,8 +427,6 @@ class Bot(object):
                                  incidence=format_float(country.incidence),
                                  incidence_trend=format_data_trend(country.incidence_trend))
         if subscriptions and len(subscriptions) > 0:
-            message += "In deinen abonnierten Orten ist die Lage wie folgt:"
-
             # Split Bundeslaender from other
             districts = list(map(lambda rs: self._data.get_district_data(rs), subscriptions))
             states = list(filter(lambda d: d.type == "Bundesland", districts))
@@ -455,7 +453,7 @@ class Bot(object):
                         if date_interval.days in [3, 5]:
                             threshold_info = f"🔔 {threshold_info}"
 
-                    message += "\n\n<b>{name}</b>: {incidence}{incidence_trend}\n" \
+                    message += "<b>{name}</b>: {incidence}{incidence_trend}\n" \
                                "• {threshold_info}\n" \
                                "• {new_cases}, {new_deaths}" \
                         .format(name=district.name,
@@ -470,7 +468,7 @@ class Bot(object):
                                     percent_occupied=format_float(district.icu_data.percent_occupied()),
                                     beds_covid=format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS),
                                     percent_covid=format_float(district.icu_data.percent_covid()))
-                message += "\n\n"
+                    message += "\n\n"
             if self._manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
                 # Generate multi-incidence graph for up to 8 districts
                 districts = subscriptions[-8:]
@@ -504,8 +502,7 @@ class Bot(object):
                    'Fortschritt</a>.</i>'.format(info_command=self.format_command("Info"))
 
         message += "\n\n<b>Dies ist ein Entwurf für einen verbesserten Bericht. Wir würden uns sehr über Feedback " \
-                   "freuen, sende uns einfach eine Nachricht und bestätige dann, dass diese an uns weitergeleitet " \
-                   "werden darf. Danke 🙏</b>"
+                   "freuen, sende uns einfach eine Nachricht. Danke 🙏</b>"
 
         reports = [BotResponse(message, graphs)]
         return reports
