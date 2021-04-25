@@ -113,7 +113,7 @@ class CovidData(object):
                     if record:
                         vaccination_data.avg_speed = int(record['avg_7day'])
                         population_to_be_vaccinated = 2 * record['population'] - (
-                                    vaccination_data.vaccinated_full + vaccination_data.vaccinated_partial)
+                                vaccination_data.vaccinated_full + vaccination_data.vaccinated_partial)
                         if vaccination_data.avg_speed > 0:
                             vaccination_data.avg_days_to_finish = math.ceil(
                                 population_to_be_vaccinated / vaccination_data.avg_speed)
@@ -124,9 +124,19 @@ class CovidData(object):
                            'WHERE district_id=%s ORDER BY date DESC LIMIT 1', [district_id])
             row = cursor.fetchone()
             if row:
-                icu_data = ICUData(date=row['date'], clear_beds=row['clear'], occupied_beds=row['occupied'],
-                                   occupied_covid=row['occupied_covid'], covid_ventilated=row['covid_ventilated'])
-                result.icu_data = icu_data
+                result.icu_data = ICUData(date=row['date'], clear_beds=row['clear'], occupied_beds=row['occupied'],
+                                          occupied_covid=row['occupied_covid'],
+                                          covid_ventilated=row['covid_ventilated'])
+
+                cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds '
+                               'WHERE district_id=%s AND date=SUBDATE(%s, 7) LIMIT 1', [district_id, result.icu_data.date])
+                row_lastweek = cursor.fetchone()
+                if row_lastweek:
+                    icu_yesterday = ICUData(date=row_lastweek['date'], clear_beds=row_lastweek['clear'],
+                                            occupied_beds=row_lastweek['occupied'],
+                                            occupied_covid=row_lastweek['occupied_covid'],
+                                            covid_ventilated=row_lastweek['covid_ventilated'])
+                    result.icu_data = self.fill_trend_icu(result.icu_data, icu_yesterday)
 
             # Check if R-Value is available
             if district_id == 0:
@@ -239,6 +249,31 @@ class CovidData(object):
                     today.r_value.r_trend = TrendValue.SAME
                 if yesterday.r_value.r_value_7day > today.r_value.r_value_7day:
                     today.r_value.r_trend = TrendValue.DOWN
+
+        return today
+
+    @staticmethod
+    def fill_trend_icu(today: ICUData, yesterday: ICUData) -> ICUData:
+        if not yesterday:
+            return today
+
+        if not yesterday.occupied_beds or not today.occupied_beds:
+            today.occupied_beds_trend = None
+        elif yesterday.occupied_beds < today.occupied_beds:
+            today.occupied_beds_trend = TrendValue.UP
+        elif yesterday.occupied_beds > today.occupied_beds:
+            today.occupied_beds_trend = TrendValue.DOWN
+        else:
+            today.occupied_beds_trend = TrendValue.SAME
+
+        if not yesterday.occupied_covid or not today.occupied_covid:
+            today.occupied_covid_trend = None
+        elif yesterday.occupied_covid < today.occupied_covid:
+            today.occupied_covid_trend = TrendValue.UP
+        elif yesterday.occupied_covid > today.occupied_covid:
+            today.occupied_covid_trend = TrendValue.DOWN
+        else:
+            today.occupied_covid_trend = TrendValue.SAME
 
         return today
 

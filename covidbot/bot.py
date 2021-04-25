@@ -306,12 +306,15 @@ class Bot(object):
                                  total_deaths=format_int(current_data.total_deaths))
 
         if current_data.icu_data:
-            message += f"<b>🏥️ Intensivbetten</b>\n" \
+            message += f"<b>🏥 Intensivbetten</b>\n" \
                        f"{format_float(current_data.icu_data.percent_occupied())}% " \
-                       f"({format_noun(current_data.icu_data.occupied_beds, FormattableNoun.BEDS)}) der " \
-                       f"Intensivbetten sind aktuell belegt. " \
+                       f"({format_noun(current_data.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
+                       f"{format_data_trend(current_data.icu_data.occupied_beds_trend)} " \
+                       f"der Intensivbetten sind aktuell belegt. " \
                        f"In {format_noun(current_data.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
-                       f"({format_float(current_data.icu_data.percent_covid())}%) liegen Patient:innen" \
+                       f"({format_float(current_data.icu_data.percent_covid())}%)" \
+                       f"{format_data_trend(current_data.icu_data.occupied_covid_trend)} " \
+                       f" liegen Patient:innen" \
                        f" mit COVID-19, davon müssen {format_noun(current_data.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
                        f" ({format_float(current_data.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
                        f"Insgesamt gibt es {format_noun(current_data.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
@@ -460,11 +463,13 @@ class Bot(object):
                                 new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS),
                                 threshold_info=threshold_info)
                     if district.icu_data:
-                        message += "\n• {percent_occupied}% ({beds_occupied}) belegt, in {beds_covid} ({percent_covid}%) Covid19-Patient:innen" \
+                        message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in {beds_covid} ({percent_covid}%){covid_trend} Covid19-Patient:innen" \
                             .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
                                     percent_occupied=format_float(district.icu_data.percent_occupied()),
+                                    occupied_trend=format_data_trend(district.icu_data.occupied_beds_trend),
                                     beds_covid=format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS),
-                                    percent_covid=format_float(district.icu_data.percent_covid()))
+                                    percent_covid=format_float(district.icu_data.percent_covid()),
+                                    covid_trend=format_data_trend(district.icu_data.occupied_covid_trend))
                     message += "\n\n"
             if self._manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
                 # Generate multi-incidence graph for up to 8 districts
@@ -574,10 +579,13 @@ class Bot(object):
         if country.icu_data and self._manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU, True):
             message += f"<b>🏥 Intensivbetten</b>\n" \
                        f"{format_float(country.icu_data.percent_occupied())}% " \
-                       f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)}) der " \
-                       f"Intensivbetten sind aktuell belegt. " \
+                       f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
+                       f"{format_data_trend(country.icu_data.occupied_beds_trend)} " \
+                       f"der Intensivbetten sind aktuell belegt. " \
                        f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
-                       f"({format_float(country.icu_data.percent_covid())}%) liegen Patient:innen" \
+                       f"({format_float(country.icu_data.percent_covid())}%)" \
+                       f"{format_data_trend(country.icu_data.occupied_covid_trend)} " \
+                       f" liegen Patient:innen" \
                        f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
                        f" ({format_float(country.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
                        f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"

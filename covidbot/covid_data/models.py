@@ -44,6 +44,8 @@ class ICUData:
     occupied_beds: int
     occupied_covid: int
     covid_ventilated: int
+    occupied_beds_trend: Optional[TrendValue] = None
+    occupied_covid_trend: Optional[TrendValue] = None
 
     def total_beds(self) -> int:
         return self.clear_beds + self.occupied_beds
