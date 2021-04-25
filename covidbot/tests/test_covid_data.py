@@ -28,6 +28,7 @@ class CovidDataTest(TestCase):
             cursor.execute("TRUNCATE TABLE covid_r_value;")
             cursor.execute("TRUNCATE TABLE icu_beds;")
             cursor.execute("TRUNCATE TABLE district_rules;")
+            cursor.execute("TRUNCATE TABLE county_alt_names;")
             # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM counties ORDER BY parent DESC;")
             with open("resources/2021-01-16-testdata-counties.sql", "r") as f:
@@ -52,8 +53,8 @@ class CovidDataTest(TestCase):
                          "Kassel Stadt should match SK Kassel")
         self.assertEqual(1, len(self.data.search_district_by_name("Stadt Kassel")),
                          "Stadt Kassel should match SK Kassel")
-        self.assertEqual(1, len(self.data.search_district_by_name("Göttingen")),
-                         "Göttingen should match")
+        self.assertEqual(1, len(self.data.search_district_by_name("Göttingen")), "Göttingen should match")
+        self.assertEqual(1, len(self.data.search_district_by_name("NRW")), "NRW should match")
         self.assertEqual(1, len(self.data.search_district_by_name("Kassel Land")), "Kassel Land should match LK Kassel")
         self.assertEqual(1, len(self.data.search_district_by_name("Bundesland Hessen")), "Exact match should be chosen")
 

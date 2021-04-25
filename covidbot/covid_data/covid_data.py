@@ -21,7 +21,7 @@ class CovidData(object):
     @LOCATION_DB_LOOKUP.time()
     def search_district_by_name(self, search_str: str) -> List[District]:
         search_str = search_str.lower().strip()
-        search_str = search_str.replace(" ", "%")
+        query_str = '%' + search_str.replace(" ", "%") + '%'
         results = []
         with self.connection.cursor(dictionary=True) as cursor:
             if search_str.isdigit():
@@ -30,8 +30,8 @@ class CovidData(object):
             else:
                 cursor.execute('SELECT rs, county_name FROM counties WHERE LOWER(county_name) LIKE %s OR '
                                'concat(LOWER(type), LOWER(county_name)) LIKE %s',
-                               ['%' + search_str + '%', '%' + search_str + '%'])
-            search_str = search_str.replace("%", " ")
+                               [query_str, query_str])
+
             exact_matches = []
             for row in cursor.fetchall():
                 if row['county_name'].lower() == search_str:
@@ -42,6 +42,13 @@ class CovidData(object):
                     exact_matches.append(District(row['county_name'], row['rs']))
 
                 results.append(District(row['county_name'], row['rs']))
+
+            if not search_str.isdigit():
+                cursor.execute('SELECT district_id, c.county_name FROM county_alt_names '
+                               'LEFT JOIN counties c on c.rs = county_alt_names.district_id '
+                               'WHERE LOWER(alt_name) LIKE %s', [query_str])
+                for row in cursor.fetchall():
+                    results.append(District(row['county_name'], row['district_id']))
 
             if len(exact_matches) == 1:
                 return exact_matches
@@ -290,10 +297,16 @@ class CovidDatabaseCreator:
         log.debug("Creating Tables")
         with connection.cursor(dictionary=False) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS counties '
-                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci, type VARCHAR(30),'
+                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci, type VARCHAR(30),'
                            'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
                            'UNIQUE(rs, county_name))')
+
+            cursor.execute('CREATE TABLE IF NOT EXISTS county_alt_names '
+                           '(district_id INTEGER, alt_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci PRIMARY KEY, '
+                           'added DATETIME DEFAULT NOW(), delete_at DATETIME DEFAULT ADDDATE(NOW(), INTERVAL 14 DAY), '
+                           'FOREIGN KEY(district_id) REFERENCES counties(rs) ON DELETE NO ACTION)')
+
             # Raw Infection Data
             cursor.execute(
                 'CREATE TABLE IF NOT EXISTS covid_data (id INTEGER PRIMARY KEY AUTO_INCREMENT, rs INTEGER, date DATE NULL DEFAULT NULL,'
@@ -345,5 +358,9 @@ class CovidDatabaseCreator:
             # Insert if not exists
             cursor.execute("INSERT IGNORE INTO counties (rs, county_name, type, parent) "
                            "VALUES (0, 'Deutschland', 'Staat', NULL)")
+
+            # Insert common abbreviations
+            cursor.execute("INSERT IGNORE INTO county_alt_names (district_id, alt_name) "
+                           "VALUES (5, 'NRW'), (8, 'BaWü'), (7, 'RLP')")
             connection.commit()
             log.debug("Committed Tables")
