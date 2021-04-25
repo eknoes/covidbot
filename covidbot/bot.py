@@ -137,7 +137,7 @@ class Bot(object):
 
     def find_district_id(self, district_query: str) -> Tuple[Optional[BotResponse], Optional[List[District]]]:
         if not district_query:
-            return BotResponse('Dieser Befehl benötigt eine Ortsangabe'), None
+            return BotResponse('Dieser Befehl benötigt eine Ortsangabe, sende "(Befehl) (Ort)"'), None
 
         possible_district = self._data.search_district_by_name(district_query)
         online_match = False
@@ -855,12 +855,12 @@ class Bot(object):
 
         message += ('\n\n'
                     '<b>🔔 Täglicher Bericht</b>\n'
-                    'Sendest du "Starte Abo", wird dieser Ort in deinem '
+                    'Sendest du "Starte Abo", wird der von gewählte Ort in deinem '
                     'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
                     'stattdessen angeboten, das Abo wieder zu beenden. '
                     'Du kannst beliebig viele Orte abonnieren!\n\n'
                     '<b>📈 Einmalig Informationen erhalten</b>\n'
-                    'Sendest du "Daten", erhältst Du einmalig Informationen über diesen Ort. Diese '
+                    'Sendest du "Daten", erhältst Du einmalig Informationen über den zuvor gewählten Ort. Diese '
                     'enthalten eine Grafik die für diesen Ort generiert wurde.\n'
                     'Wenn du "Regeln" sendest, erhältst du die aktuell gültigen Regeln für dein Bundesland. '
                     'Sende {info_command} um die Erläuterung zu den verschiedenen Daten und Quellen mit weiteren '

@@ -141,7 +141,10 @@ class SimpleTextInterface(object):
         BOT_COMMAND_COUNT.labels('vaccinations').inc()
         return self.bot.get_vaccination_overview(0)
 
-    def parseLocationInput(self, location_query: str, set_feedback=None) -> Union[List[BotResponse], District]:
+    def parseLocationInput(self, location_query: str, set_feedback=None, help_command="Befehl") -> Union[List[BotResponse], District]:
+        if not location_query:
+            return [BotResponse(f'Dieser Befehl benötigt eine Ortsangabe, sende {self.bot.format_command(help_command + " Ort")}')]
+
         response, locations = self.bot.find_district_id(location_query)
         if not locations:
             if set_feedback != 0:
@@ -184,20 +187,16 @@ class SimpleTextInterface(object):
 
     def rulesHandler(self, user_input: str, user_id: str) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('rules').inc()
-        if not user_input:
-            return [BotResponse("Dieser Befehl benötigt eine Ortsangabe.")]
 
-        location = self.parseLocationInput(user_input)
+        location = self.parseLocationInput(user_input, help_command="Regeln")
         if type(location) == District:
             return self.bot.get_rules(location.id)
         return location
 
     def unsubscribeHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('unsubscribe').inc()
-        if not user_input:
-            return [BotResponse("Dieser Befehl benötigt eine Ortsangabe.")]
 
-        location = self.parseLocationInput(user_input)
+        location = self.parseLocationInput(user_input, help_command='Beende')
         if type(location) == District:
             return self.bot.unsubscribe(user_id, location.id)
         return location
@@ -205,10 +204,7 @@ class SimpleTextInterface(object):
     def currentDataHandler(self, user_input: str, user_id: str) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('district_data').inc()
 
-        if not user_input:
-            return [BotResponse("Dieser Befehl benötigt eine Ortsangabe.")]
-
-        location = self.parseLocationInput(user_input)
+        location = self.parseLocationInput(user_input, help_command="Daten")
         if type(location) == District:
             return self.bot.get_district_report(location.id)
         return location
