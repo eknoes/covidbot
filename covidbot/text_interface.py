@@ -164,7 +164,7 @@ class SimpleTextInterface(object):
         choices = []
         for location in districts:
             choices.append(UserChoice(location.name, str(location.id), f'{location.name}\t{location.id}',
-                                      alt_help=f"Anstatt des kompletten Namens kannst du auch die ID nutzen, also "
+                                      alt_help=f"Anstatt des kompletten Namens kannst du auch die zugeordnete nutzen, also "
                                                f"bspw. {location.id} für {location.name}."))
         return choices
 

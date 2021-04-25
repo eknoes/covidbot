@@ -394,7 +394,7 @@ class Bot(object):
         choices.append(UserChoice("Regeln anzeigen", f'/regeln {district_id}',
                                   f'Schreibe "Regeln {district_id}", um die aktuell gültigen Regeln zu erhalten'))
         choices.append(UserChoice("Abbrechen", f'/noop',
-                                  f'Sende einen anderen Befehl oder beliebigen Ort um fortzufahren'))
+                                  f'Für mehr Optionen sende "Hilfe" oder einen beliebigen Ort'))
 
         return [BotResponse(message.format(name=self._data.get_district(district_id).name), choices=choices)]
 
