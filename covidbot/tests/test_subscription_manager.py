@@ -165,6 +165,7 @@ class TestSubscriptionManager(TestCase):
             cursor.execute("TRUNCATE TABLE icu_beds;")
             cursor.execute("TRUNCATE TABLE district_rules;")
             # noinspection SqlWithoutWhere
+            cursor.execute("TRUNCATE TABLE county_alt_names")
             cursor.execute("DELETE FROM counties ORDER BY parent DESC")
             cursor.executemany("INSERT INTO counties (rs, county_name) VALUES (%s, %s)", [(1, "Test1"), (2, "Test2")])
         self.assertEqual(self.test_manager.get_messenger_user_number(), 3,
