@@ -11,7 +11,8 @@ from covidbot.covid_data import CovidData, DistrictData, Visualization
 from covidbot.covid_data.models import District
 from covidbot.location_service import LocationService
 from covidbot.user_manager import UserManager, BotUser
-from covidbot.utils import format_data_trend, format_int, format_float, format_noun, FormattableNoun, BotResponse
+from covidbot.utils import format_data_trend, format_int, format_float, format_noun, FormattableNoun, BotResponse, \
+    UserChoice
 
 
 class UserDistrictActions(Enum):
@@ -180,7 +181,7 @@ class Bot(object):
             actions.append(("Beende Abo", UserDistrictActions.UNSUBSCRIBE))
             verb = "beenden"
         else:
-            actions.append(("Starte Abo", UserDistrictActions.SUBSCRIBE))
+            actions.append(("Abo hinzufügen", UserDistrictActions.SUBSCRIBE))
             verb = "starten"
         actions.append(("Regeln anzeigen", UserDistrictActions.RULES))
         message = "Möchtest du dein Abo von {name} {verb}, die aktuellen Daten oder geltende Regeln erhalten?" \
@@ -370,22 +371,32 @@ class Bot(object):
 
     def subscribe(self, user_identification: Union[int, str], district_id: Optional[int]) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)
+        choices = []
         if self._manager.add_subscription(user_id, district_id):
             message = "Dein Abonnement für {name} wurde erstellt."
             # Send more on first subscription
             user = self._manager.get_user(user_id, True)
-            if len(user.subscriptions) == 1:
+            if len(user.subscriptions) <= 2:
                 message += " "
                 message += (
                     f"Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
                     f"einen weiteren Ort!\n\n"
                     f"Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
-                    f"erfährst du über den {self.format_command('hilfe')} Befehl. "
+                    f"erfährst du über den {self.format_command('Hilfe')} Befehl. "
                     f"Danke, dass du unseren Bot benutzt!")
+                choices.append(UserChoice("Hilfe anzeigen", '/hilfe', f'Schreibe "Hilfe", um Informationen zur '
+                                                                      f'Benutzung zu bekommen'))
         else:
             message = "Du hast {name} bereits abonniert."
-        return [BotResponse(message.format(name=self._data.get_district(district_id).name))] + self.get_district_report(
-            district_id)
+
+        choices.append(UserChoice("Daten anzeigen", f'/daten {district_id}',
+                                  f'Schreibe "Daten {district_id}", um die aktuellen Daten zu erhalten'))
+        choices.append(UserChoice("Regeln anzeigen", f'/regeln {district_id}',
+                                  f'Schreibe "Regeln {district_id}", um die aktuell gültigen Regeln zu erhalten'))
+        choices.append(UserChoice("Abbrechen", f'/noop',
+                                  f'Sende einen anderen Befehl oder beliebigen Ort um fortzufahren'))
+
+        return [BotResponse(message.format(name=self._data.get_district(district_id).name), choices=choices)]
 
     def unsubscribe(self, user_identification: Union[int, str], district_id: int) -> List[BotResponse]:
         user_id = self._manager.get_user_id(user_identification)

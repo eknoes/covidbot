@@ -12,7 +12,7 @@ from covidbot.utils import adapt_text, BotResponse, UserChoice
 @dataclass
 class Handler:
     command: str
-    method: Callable[[str, str], Union[BotResponse, List[BotResponse]]]
+    method: Callable[[str, str], Optional[Union[BotResponse, List[BotResponse]]]]
     has_args: bool
 
 
@@ -49,9 +49,10 @@ class SimpleTextInterface(object):
         self.handler_list.append(Handler("debug", self.debugHandler, False))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
         self.handler_list.append(Handler("beta", self.betaSettingsHandler, True))
+        self.handler_list.append(Handler("noop", lambda x, y: None, False))
         self.handler_list.append(Handler("", self.directHandler, True))
 
-    def handle_input(self, user_input: str, user_id: str) -> Optional[List[BotResponse]]:
+    def handle_input(self, user_input: str, user_id: str) -> List[BotResponse]:
         # Strip / on /command
         if user_input[0] == "/":
             user_input = user_input[1:]
@@ -77,7 +78,7 @@ class SimpleTextInterface(object):
                 if self.bot.is_user_activated(user_id):
                     del self.chat_states[user_id]
                 else:
-                    return None
+                    return []
             elif state[0] == ChatBotState.WAITING_FOR_DELETE_ME:
                 del self.chat_states[user_id]
                 if user_input.strip().lower() == "ja":
@@ -105,6 +106,10 @@ class SimpleTextInterface(object):
                 responses = handler.method(text_in, user_id)
                 if type(responses) is BotResponse:
                     return [responses]
+
+                if responses is None:
+                    responses = []
+
                 return responses
 
     def handle_geolocation(self, lon, lat, user_id) -> List[BotResponse]:
