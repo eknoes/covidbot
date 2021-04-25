@@ -857,7 +857,8 @@ class Bot(object):
                     '<b>🔔 Täglicher Bericht</b>\n'
                     'Sendest du "Starte Abo", wird der von gewählte Ort in deinem '
                     'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
-                    'stattdessen angeboten, das Abo wieder zu beenden. '
+                    'stattdessen angeboten, das Abo wieder zu beenden. Alternativ kannst du auch {abo_example} oder '
+                    '{beende_example} senden.\n'
                     'Du kannst beliebig viele Orte abonnieren!\n\n'
                     '<b>📈 Einmalig Informationen erhalten</b>\n'
                     'Sendest du "Daten", erhältst Du einmalig Informationen über den zuvor gewählten Ort. Diese '
@@ -887,7 +888,8 @@ class Bot(object):
             .format(stat_command=self.format_command('Statistik'), report_command=self.format_command('Bericht'),
                     abo_command=self.format_command('Abo'), privacy_command=self.format_command('Datenschutz'),
                     help_command=self.format_command('Hilfe'), info_command=self.format_command('Info'),
-                    vacc_command=self.format_command('Impfungen'), deleteme_command=self.format_command('Loeschmich'))
+                    vacc_command=self.format_command('Impfungen'), deleteme_command=self.format_command('Loeschmich'),
+                    abo_example=self.format_command('Abo ORT'), beende_example=self.format_command('Beende ORT'))
         return [BotResponse(message)]
 
     @staticmethod
