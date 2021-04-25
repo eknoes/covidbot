@@ -15,7 +15,7 @@ class VaccinationGermanyUpdater(Updater):
           "+Impfungen_kumulativ%2C+Zweitimpfungen_kumulativ%2C+Differenz_zum_Vortag%2C+Impf_Quote%2C" \
           "+Impf_Quote_Zweitimpfungen%2C+Datenstand&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly" \
           "=false&returnDistinctValues=false&cacheHint=false&orderByFields=Datenstand+DESC&groupByFieldsForStatistics" \
-          "=&outStatistics=&having=&resultOffset=&resultRecordCount=51&sqlFormat=none&f=pjson&token= "
+          "=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token= "
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
@@ -47,7 +47,7 @@ class VaccinationGermanyUpdater(Updater):
                         self.log.warning(f"Can't find district_id for {row['Bundesland']}!")
                         continue
 
-                    updated = datetime.fromtimestamp(row['Datenstand'] // 1000).date()
+                    updated = datetime.fromtimestamp(row['Datenstand'] // 1000).date() - timedelta(days=1)
                     cursor.execute("SELECT id FROM covid_vaccinations WHERE date = %s AND district_id=%s",
                                    [updated, district_id])
                     record = cursor.fetchone()
@@ -109,7 +109,7 @@ class VaccinationGermanyImpfdashboardUpdater(Updater):
             with self.connection.cursor() as cursor:
                 for row in reader:
                     # The other vaccination source uses another timeformat, so we have to add a day
-                    updated = (datetime.fromisoformat(row['date']) + timedelta(days=1))
+                    updated = datetime.fromisoformat(row['date'])
                     cursor.execute("SELECT id FROM covid_vaccinations WHERE date = %s AND district_id=%s",
                                    [updated, district_id])
                     if cursor.fetchone():
