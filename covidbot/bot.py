@@ -474,7 +474,7 @@ class Bot(object):
                                 new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS),
                                 threshold_info=threshold_info)
                     if district.icu_data:
-                        message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in {beds_covid} ({percent_covid}%){covid_trend} Covid19-Patient:innen" \
+                        message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in {percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen" \
                             .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
                                     percent_occupied=format_float(district.icu_data.percent_occupied()),
                                     occupied_trend=format_data_trend(district.icu_data.occupied_beds_trend),
