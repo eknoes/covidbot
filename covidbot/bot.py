@@ -774,6 +774,9 @@ class Bot(object):
                                 new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
                                 new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS),
                                 threshold_info=threshold_info)
+                    if district.new_cases < 0 or district.new_deaths < 0:
+                        message += "\n• <i>Eine negative Differenz zum Vortag ist idR. auf eine Korrektur der Daten " \
+                                   "durch das Gesundheitsamt zurückzuführen</i>"
                     if district.icu_data:
                         message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in {percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen" \
                             .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),

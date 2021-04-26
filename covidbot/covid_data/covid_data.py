@@ -1,5 +1,6 @@
 import logging
 import math
+import re
 from datetime import date, timedelta
 from typing import List, Optional
 
@@ -28,8 +29,8 @@ class CovidData(object):
                 cursor.execute('SELECT rs, county_name FROM counties WHERE rs = %s',
                                [int(search_str)])
             else:
-                cursor.execute('SELECT rs, county_name FROM counties WHERE LOWER(county_name) LIKE %s OR '
-                               'concat(LOWER(type), LOWER(county_name)) LIKE %s',
+                cursor.execute('SELECT rs, county_name FROM counties WHERE LOWER(county_name) LIKE %s '
+                               'OR concat(LOWER(type), LOWER(county_name)) LIKE %s',
                                [query_str, query_str])
 
             exact_matches = []
@@ -298,13 +299,13 @@ class CovidDatabaseCreator:
         log.debug("Creating Tables")
         with connection.cursor(dictionary=False) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS counties '
-                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci, type VARCHAR(30),'
+                           '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30),'
                            'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
                            'FOREIGN KEY(parent) REFERENCES counties(rs) ON DELETE NO ACTION,'
                            'UNIQUE(rs, county_name))')
 
             cursor.execute('CREATE TABLE IF NOT EXISTS county_alt_names '
-                           '(district_id INTEGER, alt_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci PRIMARY KEY, '
+                           '(district_id INTEGER, alt_name VARCHAR(255) PRIMARY KEY, '
                            'added DATETIME DEFAULT NOW(), delete_at DATETIME DEFAULT ADDDATE(NOW(), INTERVAL 14 DAY), '
                            'FOREIGN KEY(district_id) REFERENCES counties(rs) ON DELETE NO ACTION)')
 

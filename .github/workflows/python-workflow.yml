@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mariadb:
-        image: mariadb:10.3
+        image: mariadb:10.3.22
         env:
           MYSQL_ROOT_PASSWORD: covid_bot
           MYSQL_DATABASE: covid_test_db

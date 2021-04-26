@@ -45,6 +45,9 @@ class CovidDataTest(TestCase):
     def tearDown(self) -> None:
         del self.data
 
+    def test_unicode(self):
+        self.assertIsNotNone(self.data.search_district_by_name("den neuen Bericht finde ich super! 👍🏽"))
+
     def test_find_ags(self):
         self.assertEqual(2, len(self.data.search_district_by_name("Kassel")), "2 Entities should be found for Kassel")
         self.assertEqual(1, len(self.data.search_district_by_name("Essen")), "Exact match should be chosen")
