@@ -25,7 +25,7 @@ class GeoLookup:
 
     def find_rs(self, lon: float, lat: float) -> Optional[int]:
         if not self.json_data:
-            raise BaseException("GeoLookup has to be used in with context")
+            raise Exception("GeoLookup has to be used in with context")
 
         point = Point(lon, lat)
 

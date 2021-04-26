@@ -58,8 +58,9 @@ class TwitterInterface(SingleCommandInterface):
                     with open(file, "rb") as f:
                         upload_resp = self.twitter.request('media/upload', None, {'media': f.read()})
                         if upload_resp.status_code != 200:
-                            raise ValueError(f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
-                                             f"{upload_resp.text}")
+                            raise ValueError(
+                                f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
+                                f"{upload_resp.text}")
 
                         media_ids.append(upload_resp.json()['media_id'])
 

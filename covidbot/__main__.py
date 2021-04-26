@@ -12,11 +12,11 @@ import prometheus_client
 from mysql.connector import connect, MySQLConnection
 from prometheus_client import Info
 
-from covidbot.bot import Bot
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.facebook_interface import FacebookInterface
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
+from covidbot.bot import Bot
 from covidbot.user_manager import UserManager
 
 LOGGING_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -34,8 +34,6 @@ def get_connection(cfg, autocommit=False) -> MySQLConnection:
                          password=cfg['DATABASE'].get('PASSWORD'),
                          port=cfg['DATABASE'].get('PORT'),
                          host=cfg['DATABASE'].get('HOST', 'localhost'), autocommit=autocommit)
-    with connection.cursor() as c:
-        c.execute('SET @@MAX_STATEMENT_TIME=30')
     return connection
 
 
@@ -80,9 +78,9 @@ class MessengerBotSetup:
             location_feature = False
 
         if self.name == "telegram":
-            command_format = "<code>/{command}</code>"
+            command_format = lambda command: f"<code>/{command}</code>"
         else:
-            command_format = '"{command}"'
+            command_format = lambda command: f'"{command}"'
 
         # Setup CovidData, Bot and UserManager
         data_conn = get_connection(self.config, autocommit=True)
@@ -96,7 +94,8 @@ class MessengerBotSetup:
         data = CovidData(data_conn)
         visualization = Visualization(data_conn, self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
         user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
-        bot = Bot(data, user_manager, visualization, command_format=command_format, location_feature=location_feature)
+        bot = Bot(user_manager, data, visualization, command_formatter=command_format,
+                  has_location_feature=location_feature)
 
         # Setup database monitoring
         user_monitor = UserManager("monitor", user_monitor_conn)
@@ -138,8 +137,8 @@ class MessengerBotSetup:
             if not self.config.has_section("SIGNAL"):
                 raise ValueError("SIGNAL is not configured")
             from covidbot.signal_interface import SignalInterface
-            return SignalInterface(self.config['SIGNAL'].get('PHONE_NUMBER'),
-                                   self.config['SIGNAL'].get('SIGNALD_SOCKET'), bot,
+            return SignalInterface(bot, self.config['SIGNAL'].get('PHONE_NUMBER'),
+                                   self.config['SIGNAL'].get('SIGNALD_SOCKET'),
                                    dev_chat=self.config['SIGNAL'].get('DEV_CHAT'))
 
         if self.name == "telegram":
@@ -156,7 +155,7 @@ class MessengerBotSetup:
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
 
         if self.name == "interactive":
-            from covidbot.text_interface import InteractiveInterface
+            from covidbot.bot import InteractiveInterface
             return InteractiveInterface(bot)
 
         if self.name == "twitter":
@@ -234,12 +233,7 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
             message += f"{line}\n"
             line = input("> ")
 
-    with_report = False
-    if input("Do you want to append the current report? (y/N): ").lower() == "y":
-        with_report = True
-
     print("\n\n++ Please confirm ++")
-    print(f"Append Report? {with_report}")
     print(f"Message:\n{message}")
     if recipients:
         print(f"To: {recipients}")
@@ -257,13 +251,13 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
 
     if messenger_interface:
         with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
-            await iface.send_message_to_users(message, recipients, with_report)
+            await iface.send_message_to_users(message, recipients)
 
     else:
         for messenger_interface in ["telegram", "threema", "signal", "messenger"]:
             try:
                 with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
-                    await iface.send_message_to_users(message, recipients, with_report)
+                    await iface.send_message_to_users(message, recipients)
             except Exception as e:
                 logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
 

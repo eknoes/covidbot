@@ -7,7 +7,6 @@ import traceback
 from enum import Enum
 from typing import List, Dict, Union
 
-import prometheus_async
 import telegram
 import ujson as json
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, ChatAction, \
@@ -15,12 +14,11 @@ from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButt
 from telegram.error import BadRequest, TelegramError, Unauthorized, ChatMigrated
 from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
-from covidbot.bot import Bot, UserHintService
-from covidbot.covid_data.visualization import Visualization
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, RECV_MESSAGE_COUNT, \
     BOT_SEND_MESSAGE_ERRORS
-from covidbot.text_interface import SimpleTextInterface
+from covidbot.bot import Bot
+from covidbot.user_hint_service import UserHintService
 from covidbot.utils import BotResponse, split_message
 
 '''
@@ -50,19 +48,16 @@ class TelegramCallbacks(Enum):
     DISCARD = "discard"
 
 
-class TelegramInterface(SimpleTextInterface, MessengerInterface):
-    _bot: Bot
-    _viz: Visualization
+class TelegramInterface(MessengerInterface):
+    bot: Bot
     cache: Dict[str, str] = {}
     log = logging.getLogger(__name__)
     dev_chat_id: int
-    feedback_cache: Dict[int, str] = {}
     deleted_callbacks: List[int] = []
 
     def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
-        super().__init__(bot)
         self.dev_chat_id = dev_chat_id
-        self._bot = bot
+        self.bot = bot
         self.updater = Updater(api_key)
 
     def run(self):
@@ -184,16 +179,16 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
             success = False
             BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='bad-request').inc()
         except Unauthorized:
-            self._bot.delete_user(chat_id)
+            self.bot.delete_user(chat_id)
             logging.warning(f"Deleted user {chat_id} as he blocked us")
             BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='unauthorized').inc()
         except ChatMigrated as e:
-            if self._bot.change_platform_id(str(chat_id), str(e.new_chat_id)):
+            if self.bot.change_platform_id(str(chat_id), str(e.new_chat_id)):
                 self.log.info(f"Migrated Chat {chat_id} to {e.new_chat_id}")
                 return self.send_message(e.new_chat_id, responses, disable_web_page_preview)
             else:
                 self.log.warning(f"Could not migrate {chat_id} to {e.new_chat_id}")
-                self._bot.disable_user(chat_id)
+                self.bot.disable_user(chat_id)
         return success
 
     @BOT_RESPONSE_TIME.time()
@@ -244,8 +239,13 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
         if query.message.message_id in self.deleted_callbacks:
             return
 
-        query.answer()
-        self.answer_callback_query(update, self.handle_input(query.data, update.effective_chat.id),
+        try:
+            query.answer()
+        except BadRequest as e:
+            # Avoid exception on too old callback queries
+            self.log.exception("Error while answering callback query", exc_info=e)
+
+        self.answer_callback_query(update, self.bot.handle_input(query.data, update.effective_chat.id),
                                    disable_web_page_preview=True)
 
     @BOT_RESPONSE_TIME.time()
@@ -258,14 +258,14 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
         if mention_pos != -1:
             message = message[:mention_pos] + message[mention_pos + len('@' + context.bot.username):]
 
-        responses = self.handle_input(message, update.effective_chat.id)
+        responses = self.bot.handle_input(message, update.effective_chat.id)
         self.answer_update(update, responses, disable_web_page_preview=True)
 
     @BOT_RESPONSE_TIME.time()
     def handle_location(self, update: Update, context: CallbackContext):
         RECV_MESSAGE_COUNT.inc()
-        responses = self.handle_geolocation(update.message.location.longitude, update.message.location.latitude,
-                                            update.effective_chat.id)
+        responses = self.bot.handle_geolocation(update.message.location.longitude, update.message.location.latitude,
+                                                update.effective_chat.id)
         self.answer_update(update, responses, disable_web_page_preview=True)
 
     async def send_unconfirmed_reports(self) -> None:
@@ -275,7 +275,7 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
 
         # Avoid flood limits of 30 messages / second
         sliding_flood_window = []
-        for userid, message in self._bot.get_unconfirmed_daily_reports():
+        for userid, message in self.bot.get_unconfirmed_daily_reports():
             if len(sliding_flood_window) >= 25:
                 # We want to send 25 messages per second max
                 flood_window_diff = time.perf_counter() - sliding_flood_window.pop(0)
@@ -285,16 +285,16 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
 
             sent_msg = self.send_message(userid, message, disable_web_page_preview=True)
             if sent_msg:
-                self._bot.confirm_daily_report_send(userid)
+                self.bot.confirm_daily_report_send(userid)
                 sliding_flood_window.append(time.perf_counter())
 
             self.log.warning(f"Sent report to {userid}!")
 
-    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         if not users:
-            users = map(lambda x: x.platform_id, self._bot.get_all_user())
+            users = map(lambda x: x.platform_id, self.bot.get_all_users())
 
-        message = UserHintService.format_commands(message, self._bot.format_command)
+        message = UserHintService.format_commands(message, self.bot.command_formatter)
         sliding_flood_window = []
         for uid in users:
             if len(sliding_flood_window) >= 5:
@@ -305,11 +305,6 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
                     time.sleep(1.05 - flood_window_diff)
 
             self.updater.bot.send_message(uid, message, parse_mode=telegram.ParseMode.HTML)
-            if append_report:
-                self.send_message(uid, self._bot.get_report(uid))
-                # As 2 messages are sent
-                sliding_flood_window.append(time.perf_counter())
-
             sliding_flood_window.append(time.perf_counter())
             self.log.warning(f"Sent message to {str(uid)}")
 
@@ -340,8 +335,10 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
                     self.log.warning("Can't send message to developers!")
 
             # Inform user that an error happened
-            if update and type(update) == Update and update.effective_chat.id:
-                self.send_message(update.effective_chat.id, self._bot.get_error_message())
+            if update:
+                if type(update) == Update:
+                    if update.effective_chat.id:
+                        self.send_message(update.effective_chat.id, [self.bot.get_error_message()])
         except Exception as e:
             self.log.error("Can't send error to developers", exc_info=e)
 
@@ -352,7 +349,7 @@ class TelegramInterface(SimpleTextInterface, MessengerInterface):
                 user_id = update.effective_chat.id
 
             logging.warning(f"TelegramError: Unauthorized chat_id {user_id}", exc_info=context.error)
-            if user_id and self._bot.delete_user(user_id):
+            if user_id and self.bot.delete_user(user_id):
                 logging.info(f"Removed {user_id} from users")
         elif isinstance(context.error, TelegramError):
             logging.warning(f"TelegramError: While sending {context.chat_data}", exc_info=context.error)

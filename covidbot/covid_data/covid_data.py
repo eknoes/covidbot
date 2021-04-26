@@ -136,7 +136,8 @@ class CovidData(object):
                                           covid_ventilated=row['covid_ventilated'])
 
                 cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds '
-                               'WHERE district_id=%s AND date=SUBDATE(%s, 7) LIMIT 1', [district_id, result.icu_data.date])
+                               'WHERE district_id=%s AND date=SUBDATE(%s, 7) LIMIT 1',
+                               [district_id, result.icu_data.date])
                 row_lastweek = cursor.fetchone()
                 if row_lastweek:
                     icu_yesterday = ICUData(date=row_lastweek['date'], clear_beds=row_lastweek['clear'],

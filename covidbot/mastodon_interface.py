@@ -1,10 +1,10 @@
 import logging
-from typing import List, Optional, Iterable, Dict
+from typing import List, Optional, Iterable
 
 from mastodon import Mastodon, MastodonAPIError
 
 from covidbot.covid_data import CovidData, Visualization
-from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_TIME, SENT_MESSAGE_COUNT, USER_COUNT
+from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_TIME, SENT_MESSAGE_COUNT
 from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 from covidbot.utils import general_tag_pattern, BotResponse
@@ -49,9 +49,11 @@ class MastodonInterface(SingleCommandInterface):
             try:
                 with API_RESPONSE_TIME.labels(platform='mastodon').time():
                     if not reply_obj:
-                        response = self.mastodon.status_post(message.message, media_ids=media_ids, language="deu", visibility="unlisted")
+                        response = self.mastodon.status_post(message.message, media_ids=media_ids, language="deu",
+                                                             visibility="unlisted")
                     else:
-                        response = self.mastodon.status_reply(reply_obj, message.message, media_ids=media_ids, language="deu",)
+                        response = self.mastodon.status_reply(reply_obj, message.message, media_ids=media_ids,
+                                                              language="deu", )
                 self.update_metrics()
                 if response:
                     self.log.info(f"Toot sent successfully {len(message.message)} chars)")
@@ -73,7 +75,8 @@ class MastodonInterface(SingleCommandInterface):
 
     def get_mentions(self) -> Iterable[SingleArgumentRequest]:
         with API_RESPONSE_TIME.labels(platform='mastodon').time():
-            notifications = self.mastodon.notifications(exclude_types=['follow', 'favourite', 'reblog' 'poll', 'follow_request'])
+            notifications = self.mastodon.notifications(
+                exclude_types=['follow', 'favourite', 'reblog' 'poll', 'follow_request'])
         self.update_metrics()
         mentions = []
         bot_name = "@D64_Covidbot"

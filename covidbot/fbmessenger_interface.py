@@ -10,20 +10,22 @@ from fbmessenger import Messenger
 from fbmessenger.errors import MessengerError
 from fbmessenger.models import Message, PostbackButton
 
-from covidbot.bot import Bot, UserHintService, BotUserSettings
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
-from covidbot.text_interface import SimpleTextInterface
+from covidbot.bot import Bot, BotUserSettings
+from covidbot.user_hint_service import UserHintService
 from covidbot.utils import adapt_text, BotResponse, split_message
 
 
-class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
+class FBMessengerInterface(MessengerInterface):
     bot: Bot
     fb_messenger: Messenger
     port: int
+    log = logging.getLogger(__name__)
 
-    def __init__(self, bot: Bot, access_token: str, verify_token: str, port: int, web_dir: str, public_url: str):
-        super().__init__(bot)
+    def __init__(self, bot: Bot, access_token: str, verify_token: str, port: int, web_dir: str,
+                 public_url: str):
+        self.bot = bot
         self.fb_messenger = Messenger(access_token, verify_token, self.handle_messenger_msg, web_dir, public_url)
         self.port = port
 
@@ -44,14 +46,14 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
             user_input = message.text
             if message.payload:
                 user_input = message.payload
-            responses = self.handle_input(user_input, message.sender_id)
+            responses = self.bot.handle_input(user_input, message.sender_id)
             for response in responses:
                 await self.send_bot_response(message.sender_id, response)
         except Exception as e:
             self.log.exception("An error happened while handling a FB Messenger message", exc_info=e)
             self.log.exception(f"Message from {message.sender_id}: {message.text}")
             self.log.exception("Exiting!")
-            await self.fb_messenger.send_reply(message, adapt_text(self.bot.get_error_message()[0].message))
+            await self.fb_messenger.send_reply(message, adapt_text(self.bot.get_error_message().message))
 
             try:
                 tb_list = traceback.format_exception(None, e, e.__traceback__)
@@ -95,20 +97,15 @@ class FBMessengerInterface(SimpleTextInterface, MessengerInterface):
                 self.log.exception(f"Can't send report: {e.code} {e.subcode} {e.message}", exc_info=e)
                 self.bot.disable_user(userid)
 
-    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         if not users:
-            users = map(lambda x: x.platform_id, self.bot.get_all_user())
+            users = map(lambda x: x.platform_id, self.bot.get_all_users())
 
-        message = UserHintService.format_commands(message, self.bot.format_command)
+        message = UserHintService.format_commands(message, self.bot.command_formatter)
 
         for user in users:
             disable_unicode = self.bot.get_user_setting(user, BotUserSettings.DISABLE_FAKE_FORMAT, False)
             await self.fb_messenger.send_message(user, adapt_text(message, just_strip=disable_unicode))
-
-            if append_report:
-                report = self.reportHandler("", user)
-                for elem in report:
-                    await self.send_bot_response(user, elem)
             self.log.warning(f"Sent message to {user}")
 
     async def sendMessageToDev(self, message: str):

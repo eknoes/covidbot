@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple, Union, Dict
+from typing import List, Optional, Tuple, Union
 
 from mysql.connector import MySQLConnection, IntegrityError, OperationalError
 
@@ -88,7 +88,7 @@ class UserManager(object):
                 cursor.execute("UPDATE bot_user SET platform_id=%s WHERE platform_id=%s", [new_id, old_id])
                 if cursor.rowcount:
                     return True
-            except IntegrityError as e:
+            except IntegrityError:
                 pass
             return False
 

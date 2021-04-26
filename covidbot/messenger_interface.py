@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Union, List
 
@@ -13,13 +14,12 @@ class MessengerInterface(ABC):
         pass
 
     @abstractmethod
-    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         """Sends a message to a set of users
 
         Args:
             message: Message to sent, may contain HTML
             users: List of platform_id, if empty send to all users
-            append_report: Flag if the current report of a certain user should be appended
         """
         pass
 

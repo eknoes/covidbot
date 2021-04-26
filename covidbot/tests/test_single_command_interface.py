@@ -34,7 +34,8 @@ class TestSingleCommandInterface(TestCase):
         self.assertEqual(5515, self.interface.find_district("Münster Westfalen"),
                          "Result for Münster Westfalen should be Münster")
         self.assertEqual(6435, self.interface.find_district("Hanau"), "Result for Hanau should be MKK")
-        self.assertEqual(9772, self.interface.find_district("Landkreis Augsburg"), "Result for LK Augsburg should be correct")
+        self.assertEqual(9772, self.interface.find_district("Landkreis Augsburg"),
+                         "Result for LK Augsburg should be correct")
         self.assertEqual(8221, self.interface.find_district("Betreutes Trinken"),
                          "Result for Betreutes Trinken should be Heidelberg")
         self.assertEqual(8215, self.interface.find_district("Rheinstetten"), "Result for Rheinstetten is missing")
@@ -58,4 +59,5 @@ class TestSingleCommandInterface(TestCase):
         self.assertIsNone(self.interface.find_district("Super! Funktioniert klasse"))
         self.assertIsNone(self.interface.find_district("Das ist echt großartig, was ihr geleistet habt."))
         self.assertIsNone(self.interface.find_district("Klar..."))
-        self.assertIsNone(self.interface.find_district("Bitte korrigiert bei den Regeln für Berlin die Angabe zu den Kindern."))
+        self.assertIsNone(
+            self.interface.find_district("Bitte korrigiert bei den Regeln für Berlin die Angabe zu den Kindern."))

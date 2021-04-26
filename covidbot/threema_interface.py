@@ -10,23 +10,24 @@ from aiohttp import web
 from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage, \
     DeliveryReceipt
 
-from covidbot.bot import Bot, UserHintService
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT, BOT_RESPONSE_TIME
-from covidbot.text_interface import SimpleTextInterface
+from covidbot.bot import Bot
+from covidbot.user_hint_service import UserHintService
 from covidbot.utils import adapt_text, BotResponse, split_message
 
 
-class ThreemaInterface(SimpleTextInterface, MessengerInterface):
+class ThreemaInterface(MessengerInterface):
     threema_id: str
     secret: str
     private_key: str
     bot: Bot
     connection: threema.Connection
     dev_chat: str
+    log = logging.getLogger(__name__)
 
     def __init__(self, threema_id: str, threema_secret: str, threema_key: str, bot: Bot, dev_chat: str):
-        super().__init__(bot)
+        self.bot = bot
         self.threema_id = threema_id
         self.threema_secret = threema_secret
         self.threema_key = threema_key
@@ -50,7 +51,7 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
             RECV_MESSAGE_COUNT.inc()
             message: TextMessage
             try:
-                responses = self.handle_input(message.text, message.from_id)
+                responses = self.bot.handle_input(message.text, message.from_id)
                 for response in responses:
                     await self.send_bot_response(message.from_id, response)
             except Exception as e:
@@ -59,7 +60,8 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 self.log.exception("Exiting!")
 
                 try:
-                    response_msg = TextMessage(self.connection, text=adapt_text(self.bot.get_error_message()[0], True),
+                    response_msg = TextMessage(self.connection,
+                                               text=adapt_text(self.bot.get_error_message().message, True),
                                                to_id=message.from_id)
                     await response_msg.send()
                 except Exception:
@@ -111,19 +113,14 @@ class ThreemaInterface(SimpleTextInterface, MessengerInterface):
                 if error.status == 404:
                     self.bot.delete_user(userid)
 
-    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         if not users:
-            users = map(lambda x: x.platform_id, self.bot.get_all_user())
+            users = map(lambda x: x.platform_id, self.bot.get_all_users())
 
-        message = UserHintService.format_commands(message, self.bot.format_command)
+        message = UserHintService.format_commands(message, self.bot.command_formatter)
 
         for user in users:
             await TextMessage(self.connection, text=adapt_text(message, True), to_id=user).send()
-
-            if append_report:
-                report = self.reportHandler("", user)
-                for elem in report:
-                    await self.send_bot_response(user, elem)
             self.log.warning(f"Sent message to {user}")
 
     async def sendMessageToDev(self, message: str):

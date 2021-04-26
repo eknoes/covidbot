@@ -390,7 +390,6 @@ class Visualization:
         return filepath
 
     def icu_graph(self, district_id: int) -> Optional[str]:
-        district_name = None
         current_date = None
         colors = ['#911425', '#DE354B', '#1fa2de', '']
         y_data = {'covid-ventilated': [],
@@ -400,13 +399,16 @@ class Visualization:
         x_data = []
 
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT date, (clear + occupied) as total, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds WHERE district_id=%s ORDER BY date', [district_id])
+            cursor.execute(
+                'SELECT date, (clear + occupied) as total, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds WHERE district_id=%s ORDER BY date',
+                [district_id])
             for row in cursor.fetchall():
                 if row['occupied_covid'] is None or row['covid_ventilated'] is None or row['total'] == 0:
                     continue
 
                 y_data['no-covid'].append((row['occupied'] - row['occupied_covid']) / row['total'] * 100)
-                y_data['covid-not-ventilated'].append((row['occupied_covid'] - row['covid_ventilated']) / row['total'] * 100)
+                y_data['covid-not-ventilated'].append(
+                    (row['occupied_covid'] - row['covid_ventilated']) / row['total'] * 100)
                 y_data['covid-ventilated'].append(row['covid_ventilated'] / row['total'] * 100)
 
                 x_data.append(row['date'])

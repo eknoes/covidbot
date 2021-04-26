@@ -31,4 +31,5 @@ API_RESPONSE_CODE = Counter('bot_api_response_code', 'Twitter API response codes
 API_RESPONSE_TIME = Summary('bot_api_response_time', 'Twitter API response time', ['platform'])
 
 # Error Metrics
-BOT_SEND_MESSAGE_ERRORS = Counter('bot_send_message_error', 'Number of errors while sending a message', ['platform', 'error'])
+BOT_SEND_MESSAGE_ERRORS = Counter('bot_send_message_error', 'Number of errors while sending a message',
+                                  ['platform', 'error'])

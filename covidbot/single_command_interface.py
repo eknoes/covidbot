@@ -146,7 +146,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         if district.vaccinations:
             pass
             # TODO: Daten fehlen für ne Woche
-            #graphs.append(self.viz.vaccination_graph(district_id))
+            # graphs.append(self.viz.vaccination_graph(district_id))
 
         if district.icu_data:
             graphs.append(self.viz.icu_graph(district_id))

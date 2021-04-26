@@ -1,13 +1,12 @@
 import csv
-import itertools
 import logging
 from datetime import datetime, date
 from typing import Optional, Dict
 
 import ujson as json
 
-from covidbot.covid_data.updater.utils import clean_district_name
 from covidbot.covid_data.updater.updater import Updater
+from covidbot.covid_data.updater.utils import clean_district_name
 
 
 class RKIUpdater(Updater):

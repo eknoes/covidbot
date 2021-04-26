@@ -32,7 +32,7 @@ class FeedbackForwarder(MessengerInterface):
             else:
                 self.log.error(f"Could not forward feedback {feedback_id}")
 
-    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         raise NotImplementedError("This is just an interface to forward feedback from users to developers")
 
     def run(self) -> None:

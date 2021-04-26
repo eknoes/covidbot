@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import random
 import re
@@ -12,23 +13,25 @@ import prometheus_async.aio
 import semaphore
 from semaphore import ChatContext
 
-from covidbot.bot import Bot, UserHintService, BotUserSettings
 from covidbot.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
     FAILED_MESSAGE_COUNT
-from covidbot.text_interface import SimpleTextInterface
+from covidbot.bot import Bot, BotUserSettings
+from covidbot.user_hint_service import UserHintService
 from covidbot.utils import adapt_text, BotResponse
 
 
-class SignalInterface(SimpleTextInterface, MessengerInterface):
+class SignalInterface(MessengerInterface):
     phone_number: str
     socket: str
     profile_name: Optional[str] = None  # = "Covid Update"
     profile_picture: Optional[str] = None  # = os.path.abspath("resources/logo.png")
     dev_chat: str = None
+    bot: Bot
+    log = logging.getLogger(__name__)
 
-    def __init__(self, phone_number: str, socket: str, bot: Bot, dev_chat: str):
-        super().__init__(bot)
+    def __init__(self, bot: Bot, phone_number: str, socket: str, dev_chat: str):
+        self.bot = bot
         self.phone_number = phone_number
         self.socket = socket
         self.dev_chat = dev_chat
@@ -67,12 +70,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 text = re.sub('\nhttps://maps.google.com/maps\?q=.*', '', text)
                 # Strip URL so it is searched for the contained address
             platform_id = ctx.message.source.uuid
-            # Currently, we disable user that produce errors on sending the daily report
-            # If they would query our bot, we'd like to have them activated before we process their query
-            # This is a hacky workaround for https://github.com/eknoes/covidbot/issues/103
-            if not self.bot.is_user_activated(platform_id):
-                self.bot.enable_user(platform_id)
-            replies = self.handle_input(text, platform_id)
+
+            replies = self.bot.handle_input(text, platform_id)
             disable_unicode = self.bot.get_user_setting(platform_id, BotUserSettings.DISABLE_FAKE_FORMAT, False)
             for reply in replies:
                 reply.message = str(adapt_text(reply, just_strip=disable_unicode))
@@ -118,7 +117,8 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 self.log.info(f"Try to send report {message_counter}")
                 disable_unicode = self.bot.get_user_setting(userid, BotUserSettings.DISABLE_FAKE_FORMAT, False)
                 for elem in message:
-                    success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode), attachments=elem.images)
+                    success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode),
+                                                     attachments=elem.images)
                 if success:
                     self.bot.confirm_daily_report_send(userid)
                     self.log.warning(f"({message_counter}) Sent daily report to {userid}")
@@ -129,18 +129,17 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 backoff_time = self.backoff_timer(backoff_time, not success, userid)
                 message_counter += 1
 
-    async def send_message_to_users(self, message: str, users: List[str], append_report=False) -> None:
+    async def send_message_to_users(self, message: str, users: List[str]) -> None:
         """
         Send a message to specific or all users
         Args:
             message: Message to send
             users: List of user ids or None for all signal users
-            append_report: True if a current report should be appended
         """
         if not users:
-            users = map(lambda x: x.platform_id, self.bot.get_all_user())
+            users = map(lambda x: x.platform_id, self.bot.get_all_users())
 
-        message = UserHintService.format_commands(message, self.bot.format_command)
+        message = UserHintService.format_commands(message, self.bot.command_formatter)
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
@@ -149,16 +148,6 @@ class SignalInterface(SimpleTextInterface, MessengerInterface):
                 disable_unicode = self.bot.get_user_setting(user, BotUserSettings.DISABLE_FAKE_FORMAT, False)
                 success = await bot.send_message(user, adapt_text(message, just_strip=disable_unicode))
                 backoff_time = self.backoff_timer(backoff_time, not success, user)
-
-                if append_report:
-                    response = self.reportHandler("", user)
-                    attachments = []
-                    for elem in response:
-                        if elem.images:
-                            for image in elem.images:
-                                attachments.append(self.get_attachment(image))
-                        success = await bot.send_message(user, adapt_text(elem.message, just_strip=disable_unicode), attachments)
-                        backoff_time = self.backoff_timer(backoff_time, not success, user)
 
     def backoff_timer(self, current_backoff: float, failed: bool, user_id: str) -> float:
         """
