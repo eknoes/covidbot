@@ -823,7 +823,7 @@ class Bot(object):
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.command_formatter("Info"))
 
-        message += '\n\n🧒🏽👦🏻 Sharing is caring: <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a> 👩🏾🧑🏼'
+        message += '\n\n🧒🏽👦🏻 Sharing is caring 👩🏾🧑🏼 <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a>'
 
         message += "\n\n<b>Dies ist ein Entwurf für einen verbesserten Bericht. Wir würden uns sehr über Feedback " \
                    "freuen, sende uns einfach eine Nachricht. Danke 🙏</b>"
@@ -926,7 +926,7 @@ class Bot(object):
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.command_formatter("Info"))
 
-        message += '\n\n🧒🏽👦🏻 Sharing is caring: <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a> 👩🏾🧑🏼'
+        message += '\n\n🧒🏽👦🏻 Sharing is caring 👩🏾🧑🏼 <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a>'
 
         reports = [BotResponse(message, graphs)]
         return reports
