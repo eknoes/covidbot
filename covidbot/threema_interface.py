@@ -99,6 +99,7 @@ class ThreemaInterface(MessengerInterface):
 
     async def send_unconfirmed_reports(self) -> None:
         if not self.bot.unconfirmed_daily_reports_available():
+            await self.connection.close()
             return
 
         for userid, message in self.bot.get_unconfirmed_daily_reports():
@@ -112,6 +113,7 @@ class ThreemaInterface(MessengerInterface):
                                exc_info=error)
                 if error.status == 404:
                     self.bot.delete_user(userid)
+        await self.connection.close()
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         if not users:
