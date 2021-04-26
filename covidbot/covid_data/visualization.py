@@ -203,8 +203,8 @@ class Visualization:
 
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(b.user_id) as count, bot_date FROM "
-                           "(SELECT DISTINCT date(added) as bot_date FROM bot_user) as dates "
-                           "LEFT JOIN bot_user b ON date(b.added) <= bot_date GROUP BY bot_date ORDER BY bot_date")
+                           "(SELECT DISTINCT date(created) as bot_date FROM bot_user) as dates "
+                           "LEFT JOIN bot_user b ON date(b.created) <= bot_date GROUP BY bot_date ORDER BY bot_date")
 
             y_data = []
             x_data = []
