@@ -23,15 +23,6 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
-    services:
-      mariadb:
-        image: mariadb:10.3.22
-        env:
-          MYSQL_ROOT_PASSWORD: covid_bot
-          MYSQL_DATABASE: covid_test_db
-        ports:
-          - 3307:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -43,5 +34,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Test with unittest
+      uses: getong/mariadb-action@v1.1
+      with:
+        host port: 3307
+        container port: 3307
+        collation server: 'utf8mb4_unicode_ci'
+        mariadb version: '10.3.22'
+        mysql database: 'covid_test_db'
+        mysql root password: 'covid_bot'
       run: |
         python -m unittest
