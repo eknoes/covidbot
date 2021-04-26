@@ -107,21 +107,20 @@ class SignalInterface(MessengerInterface):
         """
         Send unconfirmed daily reports to the specific users
         """
-        if not self.bot.unconfirmed_daily_reports_available():
+        if not self.bot.user_messages_available():
             return
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
             backoff_time = random.uniform(0.5, 2)
             message_counter = 0
-            for userid, message in self.bot.get_unconfirmed_daily_reports():
+            for userid, message in self.bot.get_available_user_messages():
                 self.log.info(f"Try to send report {message_counter}")
                 disable_unicode = self.bot.get_user_setting(userid, BotUserSettings.DISABLE_FAKE_FORMAT, False)
                 for elem in message:
                     success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode),
                                                      attachments=elem.images)
                 if success:
-                    self.bot.confirm_daily_report_send(userid)
                     self.log.warning(f"({message_counter}) Sent daily report to {userid}")
                 else:
                     self.log.error(

@@ -1,6 +1,5 @@
 import logging
 import math
-import re
 from datetime import date, timedelta
 from typing import List, Optional
 
@@ -92,7 +91,7 @@ class CovidData(object):
                                   parent=record['parent'], type=record['type'],
                                   total_cases=record['total_cases'], total_deaths=record['total_deaths'],
                                   new_cases=record['new_cases'], new_deaths=record['new_deaths'],
-                                  date=record['date'])
+                                  date=record['date'], last_update=record['last_update'])
 
             # Check if vaccination data is available
             cursor.execute('SELECT MAX(date) as last_update FROM covid_vaccinations WHERE district_id=%s',
@@ -101,7 +100,7 @@ class CovidData(object):
             if vacc_date:
                 last_update = vacc_date['last_update']
                 cursor.execute('SELECT vaccinated_full, vaccinated_partial, rate_full, rate_partial, '
-                               'date, doses_diff '
+                               'date, doses_diff, last_update '
                                'FROM covid_vaccinations WHERE district_id=%s and date<=%s '
                                'ORDER BY date DESC LIMIT 1',
                                [district_id, last_update])
@@ -112,7 +111,8 @@ class CovidData(object):
                                                        vaccination_record['rate_full'],
                                                        vaccination_record['rate_partial'],
                                                        vaccination_record['date'],
-                                                       doses_diff=vaccination_record['doses_diff'])
+                                                       doses_diff=vaccination_record['doses_diff'],
+                                                       last_update=vaccination_record['last_update'])
 
                     cursor.execute(
                         'SELECT AVG(doses_diff) as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) GROUP BY district_id',
@@ -128,15 +128,15 @@ class CovidData(object):
 
                     result.vaccinations = vaccination_data
             # Check if ICU data is available
-            cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds '
+            cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated, updated FROM icu_beds '
                            'WHERE district_id=%s ORDER BY date DESC LIMIT 1', [district_id])
             row = cursor.fetchone()
             if row:
                 result.icu_data = ICUData(date=row['date'], clear_beds=row['clear'], occupied_beds=row['occupied'],
                                           occupied_covid=row['occupied_covid'],
-                                          covid_ventilated=row['covid_ventilated'])
+                                          covid_ventilated=row['covid_ventilated'], last_update=row['updated'])
 
-                cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated FROM icu_beds '
+                cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated, updated FROM icu_beds '
                                'WHERE district_id=%s AND date=SUBDATE(%s, 7) LIMIT 1',
                                [district_id, result.icu_data.date])
                 row_lastweek = cursor.fetchone()
@@ -144,7 +144,8 @@ class CovidData(object):
                     icu_yesterday = ICUData(date=row_lastweek['date'], clear_beds=row_lastweek['clear'],
                                             occupied_beds=row_lastweek['occupied'],
                                             occupied_covid=row_lastweek['occupied_covid'],
-                                            covid_ventilated=row_lastweek['covid_ventilated'])
+                                            covid_ventilated=row_lastweek['covid_ventilated'],
+                                            last_update=row['updated'])
                     result.icu_data = self.fill_trend_icu(result.icu_data, icu_yesterday)
 
             # Check if R-Value is available
@@ -312,7 +313,7 @@ class CovidDatabaseCreator:
             # Raw Infection Data
             cursor.execute(
                 'CREATE TABLE IF NOT EXISTS covid_data (id INTEGER PRIMARY KEY AUTO_INCREMENT, rs INTEGER, date DATE NULL DEFAULT NULL,'
-                'total_cases INT, incidence FLOAT, total_deaths INT,'
+                'total_cases INT, incidence FLOAT, total_deaths INT, last_update DATETIME DEFAULT NOW(), '
                 'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
 
             # Vaccination Data
@@ -329,7 +330,7 @@ class CovidDatabaseCreator:
             # Intensive care information
             cursor.execute('CREATE TABLE IF NOT EXISTS icu_beds (id INTEGER PRIMARY KEY AUTO_INCREMENT,'
                            'district_id INTEGER, date DATE, clear INTEGER, occupied INTEGER,'
-                           'occupied_covid INTEGER, covid_ventilated INTEGER, updated DATETIME,'
+                           'occupied_covid INTEGER, covid_ventilated INTEGER, updated DATETIME DEFAULT NOW(),'
                            'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, date))')
 
             # Rule Data
@@ -350,7 +351,7 @@ class CovidDatabaseCreator:
                                'SELECT c.rs, c.county_name, c.type, c.parent, covid_data.date, '
                                'covid_data.total_cases, covid_data.total_cases - y.total_cases as new_cases, '
                                'covid_data.total_deaths, covid_data.total_deaths - y.total_deaths as new_deaths, '
-                               'covid_data.incidence '
+                               'covid_data.incidence, covid_data.last_update '
                                'FROM covid_data '
                                'LEFT JOIN covid_data y on y.rs = covid_data.rs AND '
                                'y.date = subdate(covid_data.date, 1) '

@@ -99,15 +99,14 @@ class ThreemaInterface(MessengerInterface):
                 SENT_MESSAGE_COUNT.inc()
 
     async def send_unconfirmed_reports(self) -> None:
-        if not self.bot.unconfirmed_daily_reports_available():
+        if not self.bot.user_messages_available():
             await self.connection.close()
             return
 
-        for userid, message in self.bot.get_unconfirmed_daily_reports():
+        for userid, message in self.bot.get_available_user_messages():
             try:
                 for elem in message:
                     await self.send_bot_response(userid, elem)
-                self.bot.confirm_daily_report_send(userid)
                 self.log.warning(f"Sent report to {userid}")
             except threema.KeyServerError as error:
                 self.log.error(f"Got KeyServer Error {error.status}: {error.status_description[error.status]} ",

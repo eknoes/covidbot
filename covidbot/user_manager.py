@@ -5,13 +5,16 @@ from typing import List, Optional, Tuple, Union
 
 from mysql.connector import MySQLConnection, IntegrityError, OperationalError
 
+from covidbot.utils import ReportType
+
 
 @dataclass
 class BotUser:
     id: int
     platform_id: Union[int, str]
-    last_update: datetime
     language: str
+    created: datetime
+    subscribed_reports: Optional[List[ReportType]] = None
     subscriptions: Optional[List[int]] = None
     activated: bool = False
 
@@ -34,10 +37,8 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS bot_user '
                            '(user_id INTEGER PRIMARY KEY AUTO_INCREMENT, '
-                           'last_update DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
                            'language VARCHAR(20) DEFAULT NULL, created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
                            'platform_id VARCHAR(100), platform VARCHAR(20),'
-                           'sent_report DATETIME(6) DEFAULT NULL, '
                            'activated TINYINT(1) DEFAULT FALSE NOT NULL, UNIQUE(platform_id, platform))')
             cursor.execute('CREATE TABLE IF NOT EXISTS subscriptions '
                            '(user_id INTEGER, rs INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
@@ -57,8 +58,12 @@ class UserManager(object):
                 'NOT NULL, setting VARCHAR(100), value TINYINT(1), UNIQUE(user_id, setting), FOREIGN KEY(user_id) '
                 'REFERENCES bot_user(user_id))')
             cursor.execute('CREATE TABLE IF NOT EXISTS bot_user_sent_reports (id INTEGER PRIMARY KEY AUTO_INCREMENT,'
-                           ' user_id INTEGER NOT NULL, sent_report DATETIME DEFAULT NOW(), FOREIGN KEY(user_id) '
-                           'REFERENCES bot_user(user_id))')
+                           ' user_id INTEGER NOT NULL, sent_report DATETIME DEFAULT NOW(), report VARCHAR(40),'
+                           ' FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
+            cursor.execute('CREATE TABLE IF NOT EXISTS report_subscriptions '
+                           '(user_id INTEGER, added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), '
+                           'report VARCHAR(40) NOT NULL, '
+                           'UNIQUE(user_id, report), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             self.connection.commit()
 
     def set_user_activated(self, user_id: int, activated=True) -> None:
@@ -111,15 +116,36 @@ class UserManager(object):
                 return False
             return True
 
+    def add_report_subscription(self, user_id: int, report: ReportType) -> bool:
+        with self.connection.cursor(dictionary=True) as cursor:
+            try:
+                cursor.execute('INSERT INTO report_subscriptions (user_id, report) VALUES (%s, %s)', [user_id, report.value])
+                if cursor.rowcount == 1:
+                    self.connection.commit()
+                    return True
+            except IntegrityError:
+                return False
+            return False
+
+    def rm_report_subscription(self, user_id: int, report: ReportType) -> bool:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('DELETE FROM report_subscriptions WHERE user_id=%s AND report=%s', [user_id, report])
+            self.connection.commit()
+            if cursor.rowcount == 0:
+                return False
+            return True
+
     def get_all_user(self, with_subscriptions=False, filter_id=None) -> List[BotUser]:
         result = []
         with self.connection.cursor(dictionary=True) as cursor:
             if with_subscriptions:
-                query = ("SELECT bot_user.user_id, platform_id, last_update, language, rs, activated FROM bot_user "
+                query = ("SELECT bot_user.user_id, platform_id, created, language, rs, activated, report FROM bot_user "
                          "LEFT JOIN subscriptions s on bot_user.user_id = s.user_id "
+                         "LEFT JOIN report_subscriptions r on bot_user.user_id = r.user_id "
                          "WHERE platform=%s")
             else:
-                query = "SELECT bot_user.user_id, platform_id, last_update, language, activated FROM bot_user WHERE platform=%s"
+                query = "SELECT user_id, platform_id, language, activated, created " \
+                        "FROM bot_user WHERE platform=%s"
             args = [self.platform]
 
             if filter_id:
@@ -142,15 +168,20 @@ class UserManager(object):
                         language = row['language']
 
                     current_user = BotUser(id=row['user_id'], platform_id=row['platform_id'],
-                                           last_update=row['last_update'], language=language,
-                                           activated=row['activated'])
+                                           language=language, activated=row['activated'], created=row['created'])
 
                 if with_subscriptions:
                     if not current_user.subscriptions:
                         current_user.subscriptions = []
 
-                    if row['rs'] is not None:
+                    if row['rs'] is not None and row['rs'] not in current_user.subscriptions:
                         current_user.subscriptions.append(row['rs'])
+
+                    if not current_user.subscribed_reports:
+                        current_user.subscribed_reports = []
+
+                    if row['report'] is not None and row['report'] not in current_user.subscribed_reports:
+                        current_user.subscribed_reports.append(ReportType(row['report']))
 
             if current_user:
                 result.append(current_user)
@@ -165,6 +196,7 @@ class UserManager(object):
     def delete_user(self, user_id: int) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('DELETE FROM subscriptions WHERE user_id=%s', [user_id])
+            cursor.execute('DELETE FROM report_subscriptions WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM user_feedback WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM bot_user_settings WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM bot_user_sent_reports WHERE user_id=%s', [user_id])
@@ -174,15 +206,22 @@ class UserManager(object):
                 return True
         return False
 
-    def set_last_update(self, user_id: int, last_update: datetime) -> bool:
+    def add_sent_report(self, user_id: int, report: ReportType) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("UPDATE bot_user SET last_update=%s, sent_report=%s WHERE user_id=%s",
-                           [last_update, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), user_id])
-            cursor.execute("INSERT INTO bot_user_sent_reports (user_id, sent_report) VALUE (%s, NOW())", [user_id])
+            cursor.execute("INSERT INTO bot_user_sent_reports (user_id, report, sent_report) VALUE (%s, %s, NOW())",
+                           [user_id, report.value])
             self.connection.commit()
             if cursor.rowcount == 0:
                 return False
             return True
+
+    def get_last_updates(self, user_id: int, report: ReportType) -> Optional[datetime]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT sent_report FROM bot_user_sent_reports WHERE user_id=%s AND report=%s '
+                           'ORDER BY sent_report DESC LIMIT 1', [user_id, report.value])
+            row = cursor.fetchone()
+            if row:
+                return row['sent_report']
 
     def set_language(self, user_id: int, language: str) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
@@ -195,12 +234,14 @@ class UserManager(object):
     def create_user(self, identifier: str) -> Union[int, bool]:
         with self.connection.cursor(dictionary=True) as cursor:
             try:
-                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, activated=%s,"
-                               "last_update=(SELECT MAX(date) FROM covid_data)",
+                cursor.execute("INSERT INTO bot_user SET platform_id=%s, platform=%s, activated=%s",
                                [identifier, self.platform, self.activated_default])
                 if cursor.rowcount == 1:
                     self.connection.commit()
-                    return cursor.lastrowid
+                    user_id = cursor.lastrowid
+                    cursor.execute("INSERT INTO report_subscriptions (user_id, report) VALUE (%s, %s)",
+                                   [user_id, ReportType.CASES_GERMANY.value])
+                    return user_id
             except IntegrityError:
                 return False
             return False

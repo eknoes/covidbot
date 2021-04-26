@@ -45,6 +45,7 @@ class TestBot(TestCase):
     def setUp(self) -> None:
         with self.conn.cursor() as cursor:
             cursor.execute('TRUNCATE subscriptions')
+            cursor.execute('TRUNCATE report_subscriptions')
             cursor.execute('TRUNCATE bot_user_settings')
             cursor.execute('TRUNCATE bot_user_sent_reports')
             cursor.execute('TRUNCATE user_feedback')
@@ -63,10 +64,12 @@ class TestBot(TestCase):
         self.user_manager.add_subscription(uid1, hessen_id)
         self.user_manager.add_subscription(uid2, bayern_id)
 
-        self.user_manager.set_last_update(uid1, datetime.now() - timedelta(days=2))
-        self.user_manager.set_last_update(uid2, datetime.now() - timedelta(days=2))
+        with self.conn.cursor() as cursor:
+            for uid in [uid1, uid2]:
+                cursor.execute('UPDATE bot_user SET created=%s WHERE user_id=%s',
+                               [datetime.now() - timedelta(days=2), uid])
 
-        update = self.interface.get_unconfirmed_daily_reports()
+        update = self.interface.get_available_user_messages()
         i = 0
         for uid, reports in update:
             if uid == platform_id1:
@@ -81,26 +84,19 @@ class TestBot(TestCase):
             i += 1
 
         self.assertEqual(2, i, "New data should trigger 2 updates")
-
-        self.assertEqual(2, len([1 for _ in self.interface.get_unconfirmed_daily_reports()]),
-                         "Without setting last_updated, new reports should be generated")
-        self.interface.confirm_daily_report_send(platform_id1)
-        self.assertEqual(1, len([1 for _ in self.interface.get_unconfirmed_daily_reports()]),
-                         "Setting last_updated should remove a report from the list")
-        self.interface.confirm_daily_report_send(platform_id2)
-        self.assertEqual([], [1 for _ in self.interface.get_unconfirmed_daily_reports()],
+        self.assertEqual([], [1 for _ in self.interface.get_available_user_messages()],
                          "If both users already have current report, "
                          "it should not be sent again")
 
     def test_update_no_subscribers(self):
-        self.assertEqual([], [1 for _ in self.interface.get_unconfirmed_daily_reports()],
+        self.assertEqual([], [1 for _ in self.interface.get_available_user_messages()],
                          "Empty subscribers should generate empty "
                          "update list")
 
     def test_no_update_new_subscriber(self):
         user1 = self.user_manager.get_user_id("uid1")
         self.user_manager.add_subscription(user1, 0)
-        self.assertEqual([], [1 for _ in self.interface.get_unconfirmed_daily_reports()],
+        self.assertEqual([], [1 for _ in self.interface.get_available_user_messages()],
                          "New subscriber should get his first report on next day")
 
     def test_sort_districts(self):

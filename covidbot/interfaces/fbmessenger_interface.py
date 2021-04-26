@@ -86,13 +86,12 @@ class FBMessengerInterface(MessengerInterface):
                 SENT_MESSAGE_COUNT.inc()
 
     async def send_unconfirmed_reports(self) -> None:
-        unconfirmed_reports = self.bot.get_unconfirmed_daily_reports()
+        unconfirmed_reports = self.bot.get_available_user_messages()
 
         for userid, message in unconfirmed_reports:
             try:
                 for elem in message:
                     await self.send_bot_response(userid, elem)
-                self.bot.confirm_daily_report_send(userid)
                 self.log.warning(f"Sent report to {userid}")
             except MessengerError as e:
                 self.log.exception(f"Can't send report: {e.code} {e.subcode} {e.message}", exc_info=e)

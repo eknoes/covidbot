@@ -14,7 +14,7 @@ from covidbot.location_service import LocationService
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT, SINGLE_COMMAND_RESPONSE_TIME
 from covidbot.user_manager import UserManager
-from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
+from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int, ReportType
 from covidbot.interfaces.bot_response import BotResponse
 
 
@@ -41,9 +41,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
     divi_name: str = "DIVI"
     bmg_name: str = "BMG"
 
-    INFECTIONS_UID = "infections"
-    VACCINATIONS_UID = "vaccinations"
-    ICU_UID = "icu"
+    user_id: int
 
     def __init__(self, user_manager: UserManager, covid_data: CovidData, visualization: Visualization, sleep_sec: int,
                  no_write: bool = False):
@@ -54,6 +52,15 @@ class SingleCommandInterface(MessengerInterface, ABC):
         self.sleep_sec = sleep_sec
         self.no_write = no_write
         self.timezone = pytz.timezone("Europe/Berlin")
+        self.user_id = self.user_manager.get_user_id("single-command")
+        reports = user_manager.get_user(self.user_id, with_subscriptions=True).subscribed_reports
+
+        if ReportType.CASES_GERMANY not in reports:
+            self.user_manager.add_report_subscription(self.user_id, ReportType.CASES_GERMANY)
+        if ReportType.ICU_GERMANY not in reports:
+            self.user_manager.add_report_subscription(self.user_id, ReportType.ICU_GERMANY)
+        if ReportType.VACCINATION_GERMANY not in reports:
+            self.user_manager.add_report_subscription(self.user_id, ReportType.VACCINATION_GERMANY)
 
     async def send_unconfirmed_reports(self) -> None:
         germany = self.data.get_country_data()
@@ -64,9 +71,12 @@ class SingleCommandInterface(MessengerInterface, ABC):
         if datetime.datetime.now().hour < 6:
             return
 
+        if self.user_manager.get_user(self.user_id).created.date() == datetime.date.today():
+            return
+
         # Infections
-        infections_uid = self.user_manager.get_user_id(self.INFECTIONS_UID)
-        if self.user_manager.get_user(infections_uid).last_update.date() < germany.date:
+        last_update = self.user_manager.get_last_updates(self.user_id, ReportType.CASES_GERMANY)
+        if not last_update or last_update < germany.last_update:
             tweet_text = f"🦠 Das {self.rki_name} hat für den {germany.date.strftime('%d. %B %Y')} neue Infektionszahlen veröffentlicht.\n\n" \
                          f"Es wurden {format_noun(germany.new_cases, FormattableNoun.INFECTIONS, hashtag='#')} " \
                          f"{format_data_trend(germany.cases_trend)} und " \
@@ -76,35 +86,35 @@ class SingleCommandInterface(MessengerInterface, ABC):
                          f"aktuelle R-Wert beträgt {format_float(germany.r_value.r_value_7day)}. #COVID19"
             if self.no_write:
                 print(f"Sent message: {tweet_text}")
-                self.user_manager.set_last_update(infections_uid, germany.date)
+                self.user_manager.add_sent_report(self.user_id, ReportType.CASES_GERMANY)
             elif self.write_message(
                     [BotResponse(tweet_text, [self.viz.infections_graph(0), self.viz.incidence_graph(0)])]):
-                self.user_manager.set_last_update(infections_uid, germany.date)
                 self.log.info("Tweet was successfully sent")
+                self.user_manager.add_sent_report(self.user_id, ReportType.CASES_GERMANY)
 
         # Vaccinations
-        vaccinations_uid = self.user_manager.get_user_id(self.VACCINATIONS_UID)
-        if self.user_manager.get_user(vaccinations_uid).last_update.date() < germany.vaccinations.date:
+        last_update = self.user_manager.get_last_updates(self.user_id, ReportType.VACCINATION_GERMANY)
+        if not last_update or last_update < germany.vaccinations.last_update:
             posts = self.get_vaccination_shortpost(germany.vaccinations)
 
             if self.no_write:
                 print(f"Sent message: {posts[0].message}")
-                self.user_manager.set_last_update(vaccinations_uid, germany.vaccinations.date)
+                self.user_manager.add_sent_report(self.user_id, ReportType.VACCINATION_GERMANY)
             elif self.write_message(posts):
-                self.user_manager.set_last_update(vaccinations_uid, germany.vaccinations.date)
+                self.user_manager.add_sent_report(self.user_id, ReportType.VACCINATION_GERMANY)
                 self.log.info("Tweet was successfully sent")
 
-        # Vaccinations
-        icu_uid = self.user_manager.get_user_id(self.ICU_UID)
-        if self.user_manager.get_user(icu_uid).last_update.date() < germany.icu_data.date:
+        # ICU
+        last_update = self.user_manager.get_last_updates(self.user_id, ReportType.ICU_GERMANY)
+        if not last_update or last_update < germany.icu_data.last_update:
             posts = self.get_icu_shortpost(germany.icu_data)
 
             if self.no_write:
                 print(f"Sent message: {posts[0].message}")
-                self.user_manager.set_last_update(icu_uid, germany.icu_data.date)
+                self.user_manager.add_sent_report(self.user_id, ReportType.ICU_GERMANY)
             elif self.write_message(posts):
                 self.log.info("Tweet was successfully sent")
-                self.user_manager.set_last_update(icu_uid, germany.icu_data.date)
+                self.user_manager.add_sent_report(self.user_id, ReportType.ICU_GERMANY)
 
     def get_vaccination_shortpost(self, vacc: VaccinationData) -> List[BotResponse]:
         responses = [BotResponse(

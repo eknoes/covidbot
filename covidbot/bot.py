@@ -1,6 +1,7 @@
 import logging
 import re
 from dataclasses import dataclass
+from datetime import date
 from enum import Enum
 from functools import reduce
 from typing import Callable, Dict, List, Union, Optional, Tuple, Generator
@@ -13,7 +14,7 @@ from covidbot.metrics import BOT_COMMAND_COUNT
 from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
 from covidbot.utils import adapt_text, format_float, format_int, format_noun, FormattableNoun, \
-    format_data_trend
+    format_data_trend, ReportType
 from covidbot.interfaces.bot_response import UserChoice, BotResponse
 
 
@@ -933,7 +934,7 @@ class Bot(object):
                     new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
 
-    def get_unconfirmed_daily_reports(self) -> Generator[Tuple[Union[int, str], List[BotResponse]], None, None]:
+    def get_available_user_messages(self) -> Generator[Tuple[Union[int, str], List[BotResponse]], None, None]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
@@ -943,39 +944,40 @@ class Bot(object):
         users = []
         data_update = self.covid_data.get_last_update()
         for user in self.user_manager.get_all_user(with_subscriptions=True):
-            if not user.activated or not user.subscriptions:
+            if not user.activated or not user.subscriptions or user.created.date() == date.today():
                 continue
 
-            if user.last_update is None or user.last_update.date() < data_update:
-                users.append(user)
+            if ReportType.CASES_GERMANY in user.subscribed_reports:
+                last_update = self.user_manager.get_last_updates(user.id, ReportType.CASES_GERMANY)
+                if not last_update or last_update.date() < data_update:
+                    users.append((user, ReportType.CASES_GERMANY))
 
-        for user in users:
-            if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA, False):
-                yield user.platform_id, self._get_new_report(user.subscriptions, user.id)
+        for user, report in users:
+            if report == ReportType.CASES_GERMANY:
+                if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA, False):
+                    yield user.platform_id, self._get_new_report(user.subscriptions, user.id)
+                else:
+                    yield user.platform_id, self._get_report(user.subscriptions, user.id)
+                self.user_manager.add_sent_report(user.id, ReportType.CASES_GERMANY)
             else:
-                yield user.platform_id, self._get_report(user.subscriptions, user.id)
+                self.log.error(f"Unknown report type for user {user.id}: {report}")
 
-    def unconfirmed_daily_reports_available(self) -> bool:
+    def user_messages_available(self) -> bool:
         """
-        Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
-        arrived
-        :rtype: Optional[list[Tuple[str, str]]]
-        :return: List of (userid, message)
+        Checks whether there are messages for specific users available
+        :rtype: bool
+        :return: True if messages are available
         """
         data_update = self.covid_data.get_last_update()
         for user in self.user_manager.get_all_user(with_subscriptions=True):
-            if not user.activated or not user.subscriptions:
+            if not user.activated or not user.subscriptions or user.created.date() == date.today():
                 continue
 
-            if user.last_update is None or user.last_update.date() < data_update:
-                return True
-
+            if ReportType.CASES_GERMANY in user.subscribed_reports:
+                last_update = self.user_manager.get_last_updates(user.id, ReportType.CASES_GERMANY)
+                if not last_update or last_update.date() < data_update:
+                    return True
         return False
-
-    def confirm_daily_report_send(self, user_identification: Union[int, str]):
-        updated = self.covid_data.get_last_update()
-        user_id = self.user_manager.get_user_id(user_identification)
-        self.user_manager.set_last_update(user_id, updated)
 
     def parseLocationInput(self, location_query: str, set_feedback=None, help_command="Befehl") -> Union[
         List[BotResponse], District]:

@@ -25,6 +25,7 @@ class VaccinationData:
     full_rate: float
     partial_rate: float
     date: date
+    last_update: datetime
     avg_speed: Optional[int] = None
     avg_days_to_finish: Optional[int] = None
     doses_diff: Optional[int] = None
@@ -44,6 +45,7 @@ class ICUData:
     occupied_beds: int
     occupied_covid: int
     covid_ventilated: int
+    last_update: datetime
     occupied_beds_trend: Optional[TrendValue] = None
     occupied_covid_trend: Optional[TrendValue] = None
 
@@ -71,10 +73,10 @@ class RuleData:
 
 @dataclass
 class DistrictData(District):
-    date: Optional[datetime.date] = None
+    date: Optional[date] = None
     incidence: Optional[float] = None
     incidence_trend: Optional[TrendValue] = None
-    incidence_interval_since: Optional[datetime.date] = None
+    incidence_interval_since: Optional[date] = None
     incidence_interval_threshold: Optional[int] = None
     new_cases: Optional[int] = None
     cases_trend: Optional[TrendValue] = None
@@ -86,3 +88,4 @@ class DistrictData(District):
     r_value: Optional[RValueData] = None
     icu_data: Optional[ICUData] = None
     rules: Optional[RuleData] = None
+    last_update: Optional[datetime] = None

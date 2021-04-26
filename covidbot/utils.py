@@ -205,3 +205,9 @@ def split_message(message: str, max_chars: Optional[int] = None, max_bytes: Opti
     if current_part:
         messages.append(current_part.strip('\n'))
     return messages
+
+
+class ReportType(Enum):
+    CASES_GERMANY = "cases-germany"
+    VACCINATION_GERMANY = "vaccinations-germany"
+    ICU_GERMANY = "icu-germany"

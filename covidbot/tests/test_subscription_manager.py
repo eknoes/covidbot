@@ -6,6 +6,7 @@ from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import CovidData
 from covidbot.user_manager import UserManager
+from covidbot.utils import ReportType
 
 
 class TestSubscriptionManager(TestCase):
@@ -26,6 +27,7 @@ class TestSubscriptionManager(TestCase):
             cursor.execute("DROP TABLE IF EXISTS bot_user_settings;")
             cursor.execute("DROP TABLE IF EXISTS user_feedback;")
             cursor.execute("DROP TABLE IF EXISTS bot_user_sent_reports;")
+            cursor.execute("DROP TABLE IF EXISTS report_subscriptions;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
 
         self.test_manager = UserManager("unittest", self.conn)
@@ -71,24 +73,7 @@ class TestSubscriptionManager(TestCase):
         self.assertListEqual([1], user2.subscriptions)
         self.assertIsNone(self.test_manager.get_user(3), "Return None for a non existing user")
 
-        last_update = None
-        with self.conn.cursor() as cursor:
-            cursor.execute("SELECT MAX(date) FROM covid_data")
-            row = cursor.fetchone()
-            if row:
-                last_update = row[0]
-
-        self.assertEqual(last_update, user1.last_update.date(),
-                         "After user creation, last_update should be the last_update of CovidData")
-
-        expected_update = datetime.now()
-        expected_language = "en"
-        self.test_manager.set_last_update(uid1, expected_update)
-        self.test_manager.set_language(uid1, "en")
-
         current_user1 = self.test_manager.get_user(uid1, with_subscriptions=False)
-        self.assertEqual(expected_update, current_user1.last_update)
-        self.assertEqual(expected_language, current_user1.language)
         self.assertIsNone(current_user1.subscriptions, "with_subscriptions=False should not return any subscriptions")
 
         self.test_manager.delete_user(uid1)
@@ -102,6 +87,10 @@ class TestSubscriptionManager(TestCase):
         uid2 = self.test_manager.create_user("testuser2")
         self.assertEqual(self.test_manager.get_user(uid2, with_subscriptions=True).subscriptions, [],
                          "New user should have no subscriptions")
+
+        self.assertCountEqual([ReportType.CASES_GERMANY],
+                              self.test_manager.get_user(uid2, with_subscriptions=True).subscribed_reports,
+                              f"New user should be subscribed to {ReportType.CASES_GERMANY}")
 
     def test_create_user(self):
         self.assertTrue(self.test_manager.create_user("1"), "Creating a non-existing user should return True")
