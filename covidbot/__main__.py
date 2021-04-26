@@ -341,8 +341,8 @@ def main():
         with get_connection(config, autocommit=False) as conn:
             from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, \
                 VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, RKIUpdater, ICUGermanyUpdater, \
-                RulesGermanyUpdater, ICUGermanyHistoryUpdater, RKIHistoryUpdater
-            for updater in [RKIUpdater(conn), RKIHistoryUpdater(conn), ICUGermanyHistoryUpdater(conn),
+                RulesGermanyUpdater, ICUGermanyHistoryUpdater
+            for updater in [RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
                             VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:

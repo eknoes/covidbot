@@ -781,11 +781,12 @@ class Bot(object):
                         message += "\n• <i>Eine negative Differenz zum Vortag ist idR. auf eine Korrektur der Daten " \
                                    "durch das Gesundheitsamt zurückzuführen</i>"
                     if district.icu_data:
-                        message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in {percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen" \
+                        message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in {percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen, {clear_beds} frei" \
                             .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
                                     percent_occupied=format_float(district.icu_data.percent_occupied()),
                                     occupied_trend=format_data_trend(district.icu_data.occupied_beds_trend),
                                     beds_covid=format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS),
+                                    clear_beds=format_noun(district.icu_data.clear_beds, FormattableNoun.BEDS),
                                     percent_covid=format_float(district.icu_data.percent_covid()),
                                     covid_trend=format_data_trend(district.icu_data.occupied_covid_trend))
                     message += "\n\n"
@@ -821,6 +822,8 @@ class Bot(object):
                    '<i>Sende {info_command} um eine Erläuterung ' \
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.command_formatter("Info"))
+
+        message += '\n\n🧒🏽👦🏻 Sharing is caring: <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a> 👩🏾🧑🏼'
 
         message += "\n\n<b>Dies ist ein Entwurf für einen verbesserten Bericht. Wir würden uns sehr über Feedback " \
                    "freuen, sende uns einfach eine Nachricht. Danke 🙏</b>"
@@ -922,6 +925,8 @@ class Bot(object):
                    '<i>Sende {info_command} um eine Erläuterung ' \
                    'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
                    'Fortschritt</a>.</i>'.format(info_command=self.command_formatter("Info"))
+
+        message += '\n\n🧒🏽👦🏻 Sharing is caring: <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a> 👩🏾🧑🏼'
 
         reports = [BotResponse(message, graphs)]
         return reports
