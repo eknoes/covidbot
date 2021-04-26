@@ -10,11 +10,12 @@ from fbmessenger import Messenger
 from fbmessenger.errors import MessengerError
 from fbmessenger.models import Message, PostbackButton
 
-from covidbot.messenger_interface import MessengerInterface
+from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
 from covidbot.bot import Bot, BotUserSettings
 from covidbot.user_hint_service import UserHintService
-from covidbot.utils import adapt_text, BotResponse, split_message
+from covidbot.utils import adapt_text, split_message
+from covidbot.interfaces.bot_response import BotResponse
 
 
 class FBMessengerInterface(MessengerInterface):

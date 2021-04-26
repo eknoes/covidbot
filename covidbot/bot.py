@@ -8,12 +8,13 @@ from typing import Callable, Dict, List, Union, Optional, Tuple, Generator
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.covid_data.models import District, DistrictData
 from covidbot.location_service import LocationService
-from covidbot.messenger_interface import MessengerInterface
+from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import BOT_COMMAND_COUNT
 from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
-from covidbot.utils import adapt_text, BotResponse, UserChoice, format_float, format_int, format_noun, FormattableNoun, \
+from covidbot.utils import adapt_text, format_float, format_int, format_noun, FormattableNoun, \
     format_data_trend
+from covidbot.interfaces.bot_response import UserChoice, BotResponse
 
 
 class UserDistrictActions(Enum):

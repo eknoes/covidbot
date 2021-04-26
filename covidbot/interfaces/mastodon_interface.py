@@ -5,9 +5,10 @@ from mastodon import Mastodon, MastodonAPIError
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.metrics import API_RATE_LIMIT, API_RESPONSE_TIME, SENT_MESSAGE_COUNT
-from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
+from covidbot.interfaces.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
-from covidbot.utils import general_tag_pattern, BotResponse
+from covidbot.utils import general_tag_pattern
+from covidbot.interfaces.bot_response import BotResponse
 
 
 class MastodonInterface(SingleCommandInterface):

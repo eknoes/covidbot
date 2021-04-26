@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import CovidData, Visualization
-from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
+from covidbot.interfaces.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 
 

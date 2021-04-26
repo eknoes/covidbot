@@ -7,9 +7,9 @@ from typing import List, Optional, Iterable
 import requests
 
 from covidbot.covid_data import CovidData, Visualization
-from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
+from covidbot.interfaces.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
-from covidbot.utils import BotResponse
+from covidbot.interfaces.bot_response import BotResponse
 
 
 class InstagramInterface(SingleCommandInterface):

@@ -5,7 +5,7 @@ from typing import List, Union
 from telegram import ParseMode
 from telegram.ext import Updater
 
-from covidbot.messenger_interface import MessengerInterface
+from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.user_manager import UserManager
 
 

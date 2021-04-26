@@ -13,12 +13,13 @@ import prometheus_async.aio
 import semaphore
 from semaphore import ChatContext
 
-from covidbot.messenger_interface import MessengerInterface
+from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
     FAILED_MESSAGE_COUNT
 from covidbot.bot import Bot, BotUserSettings
 from covidbot.user_hint_service import UserHintService
-from covidbot.utils import adapt_text, BotResponse
+from covidbot.utils import adapt_text
+from covidbot.interfaces.bot_response import BotResponse
 
 
 class SignalInterface(MessengerInterface):

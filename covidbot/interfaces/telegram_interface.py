@@ -14,12 +14,13 @@ from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButt
 from telegram.error import BadRequest, TelegramError, Unauthorized, ChatMigrated
 from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
-from covidbot.messenger_interface import MessengerInterface
+from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, RECV_MESSAGE_COUNT, \
     BOT_SEND_MESSAGE_ERRORS
 from covidbot.bot import Bot
 from covidbot.user_hint_service import UserHintService
-from covidbot.utils import BotResponse, split_message
+from covidbot.utils import split_message
+from covidbot.interfaces.bot_response import BotResponse
 
 '''
 Telegram Aktionen:

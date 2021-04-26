@@ -13,8 +13,8 @@ from mysql.connector import connect, MySQLConnection
 from prometheus_client import Info
 
 from covidbot.covid_data import CovidData, Visualization
-from covidbot.facebook_interface import FacebookInterface
-from covidbot.messenger_interface import MessengerInterface
+from covidbot.interfaces.facebook_interface import FacebookInterface
+from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
 from covidbot.bot import Bot
 from covidbot.user_manager import UserManager
@@ -118,7 +118,7 @@ class MessengerBotSetup:
         if self.name == "threema":
             if not self.config.has_section("THREEMA"):
                 raise ValueError("THREEMA is not configured")
-            from covidbot.threema_interface import ThreemaInterface
+            from covidbot.interfaces.threema_interface import ThreemaInterface
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
                                     self.config['THREEMA'].get('PRIVATE_KEY'), bot,
                                     dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
@@ -126,7 +126,7 @@ class MessengerBotSetup:
         if self.name == "messenger":
             if not self.config.has_section("MESSENGER"):
                 raise ValueError("MESSENGER is not configured")
-            from covidbot.fbmessenger_interface import FBMessengerInterface
+            from covidbot.interfaces.fbmessenger_interface import FBMessengerInterface
             return FBMessengerInterface(bot, self.config['MESSENGER'].get('PAGE_ACCESS_TOKEN'),
                                         self.config['MESSENGER'].get('VERIFY'),
                                         self.config['MESSENGER'].getint('PORT', fallback=8080),
@@ -136,7 +136,7 @@ class MessengerBotSetup:
         if self.name == "signal":
             if not self.config.has_section("SIGNAL"):
                 raise ValueError("SIGNAL is not configured")
-            from covidbot.signal_interface import SignalInterface
+            from covidbot.interfaces.signal_interface import SignalInterface
             return SignalInterface(bot, self.config['SIGNAL'].get('PHONE_NUMBER'),
                                    self.config['SIGNAL'].get('SIGNALD_SOCKET'),
                                    dev_chat=self.config['SIGNAL'].get('DEV_CHAT'))
@@ -144,13 +144,13 @@ class MessengerBotSetup:
         if self.name == "telegram":
             if not self.config.has_section("TELEGRAM"):
                 raise ValueError("TELEGRAM is not configured")
-            from covidbot.telegram_interface import TelegramInterface
+            from covidbot.interfaces.telegram_interface import TelegramInterface
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
         if self.name == "feedback":
             if not self.config.has_section("TELEGRAM"):
                 raise ValueError("TELEGRAM is not configured")
-            from covidbot.feedback_forwarder import FeedbackForwarder
+            from covidbot.interfaces.feedback_forwarder import FeedbackForwarder
             return FeedbackForwarder(api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
 
@@ -161,7 +161,7 @@ class MessengerBotSetup:
         if self.name == "twitter":
             if not self.config.has_section("TWITTER"):
                 raise ValueError("TWITTER is not configured")
-            from covidbot.twitter_interface import TwitterInterface
+            from covidbot.interfaces.twitter_interface import TwitterInterface
             return TwitterInterface(self.config['TWITTER'].get('API_KEY'), self.config['TWITTER'].get('API_SECRET'),
                                     self.config['TWITTER'].get('ACCESS_TOKEN'),
                                     self.config['TWITTER'].get('ACCESS_SECRET'),
@@ -172,7 +172,7 @@ class MessengerBotSetup:
         if self.name == "mastodon":
             if not self.config.has_section("MASTODON"):
                 raise ValueError("MASTODON is not configured")
-            from covidbot.mastodon_interface import MastodonInterface
+            from covidbot.interfaces.mastodon_interface import MastodonInterface
             return MastodonInterface(self.config['MASTODON'].get('ACCESS_TOKEN'),
                                      self.config['MASTODON'].get('INSTANCE_URL'),
                                      user_manager, data, visualization,
@@ -182,7 +182,7 @@ class MessengerBotSetup:
         if self.name == "instagram":
             if not self.config.has_section("INSTAGRAM"):
                 raise ValueError("INSTAGRAM is not configured")
-            from covidbot.instagram_interface import InstagramInterface
+            from covidbot.interfaces.instagram_interface import InstagramInterface
             return InstagramInterface(self.config['INSTAGRAM'].get('ACCOUNT_ID'),
                                       self.config['INSTAGRAM'].get('ACCESS_TOKEN'),
                                       self.config['INSTAGRAM'].get('WEB_DIR'),
@@ -194,7 +194,7 @@ class MessengerBotSetup:
         if self.name == "facebook":
             if not self.config.has_section("FACEBOOK"):
                 raise ValueError("FACEBOOK is not configured")
-            from covidbot.instagram_interface import InstagramInterface
+            from covidbot.interfaces.instagram_interface import InstagramInterface
             return FacebookInterface(self.config['FACEBOOK'].get('PAGE_ID'),
                                      self.config['FACEBOOK'].get('PAGE_ACCESS_TOKEN'),
                                      self.config['FACEBOOK'].get('WEB_DIR'),
@@ -342,8 +342,8 @@ def main():
             from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, \
                 VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, RKIUpdater, ICUGermanyUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, RKIHistoryUpdater
-            for updater in [RKIHistoryUpdater(conn), ICUGermanyHistoryUpdater(conn),
-                            VaccinationGermanyImpfdashboardUpdater(conn), RKIUpdater(conn), RulesGermanyUpdater(conn),
+            for updater in [RKIUpdater(conn), RKIHistoryUpdater(conn), ICUGermanyHistoryUpdater(conn),
+                            VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
                             VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:
                     if updater.update():

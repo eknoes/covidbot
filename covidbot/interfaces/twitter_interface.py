@@ -9,9 +9,10 @@ from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.metrics import SENT_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
     API_RESPONSE_CODE
-from covidbot.single_command_interface import SingleCommandInterface, SingleArgumentRequest
+from covidbot.interfaces.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
-from covidbot.utils import replace_by_list, BotResponse
+from covidbot.utils import replace_by_list
+from covidbot.interfaces.bot_response import BotResponse
 
 
 class TwitterInterface(SingleCommandInterface):

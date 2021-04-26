@@ -11,10 +11,11 @@ import pytz
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.covid_data.models import ICUData, VaccinationData
 from covidbot.location_service import LocationService
-from covidbot.messenger_interface import MessengerInterface
+from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT, SINGLE_COMMAND_RESPONSE_TIME
 from covidbot.user_manager import UserManager
-from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int, BotResponse
+from covidbot.utils import format_noun, FormattableNoun, format_data_trend, format_float, format_int
+from covidbot.interfaces.bot_response import BotResponse
 
 
 @dataclass

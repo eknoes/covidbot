@@ -10,11 +10,12 @@ from aiohttp import web
 from threema.gateway.e2e import create_application, add_callback_route, TextMessage, Message, ImageMessage, \
     DeliveryReceipt
 
-from covidbot.messenger_interface import MessengerInterface
+from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, SENT_IMAGES_COUNT, BOT_RESPONSE_TIME
 from covidbot.bot import Bot
 from covidbot.user_hint_service import UserHintService
-from covidbot.utils import adapt_text, BotResponse, split_message
+from covidbot.utils import adapt_text, split_message
+from covidbot.interfaces.bot_response import BotResponse
 
 
 class ThreemaInterface(MessengerInterface):

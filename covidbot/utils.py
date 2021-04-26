@@ -1,43 +1,16 @@
 import re
 import string
-from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Union, Callable
 
 from covidbot.covid_data.models import TrendValue
+from covidbot.interfaces.bot_response import BotResponse
 
 a_pattern = re.compile("<a href=[\"\']([:/\w\-.=?&]*)[\"\']>([ \w\-.]*)</a>")
 bold_pattern = re.compile("<b>(.*?)</b>")
 italic_pattern = re.compile("<i>(.*?)</i>")
 general_tag_pattern = re.compile("<[^<]+?>")
 link_pattern = re.compile("\s?(\(http[s]?://[\w.\-]*([/\w\-.])*\))\s?")
-
-
-@dataclass
-class UserChoice:
-    label: str
-    callback_data: str
-    alt_text: str
-    alt_help: Optional[str] = None
-
-
-@dataclass
-class BotResponse:
-    message: str
-    images: Optional[List[str]] = None
-    choices: List[UserChoice] = None
-
-    def __str__(self):
-        if not self.choices:
-            return self.message
-
-        message = self.message + '\n\n'
-        for choice in self.choices:
-            message += f'• {choice.alt_text}\n'
-
-        if self.choices[0].alt_help:
-            message += f'\n{self.choices[0].alt_help}'
-        return message
 
 
 def adapt_text(text: Union[BotResponse, str], threema_format=False, just_strip=False) -> Union[BotResponse, str]:
