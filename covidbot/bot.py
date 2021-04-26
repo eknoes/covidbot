@@ -643,17 +643,18 @@ class Bot(object):
 
     def debugHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('debug').inc()
-        if not user_input:
-            return [BotResponse("Für dich sind aktuell keine Debug informationen verfügbar.")]
-
         user = self.user_manager.get_user(user_id, with_subscriptions=True)
+
+        if not user:
+            return [BotResponse("Für dich sind aktuell keine Debug informationen verfügbar.")]
 
         return [BotResponse(f"<b>Debug Informationen</b>\n"
                             f"platform_id: {user.platform_id}\n"
                             f"user_id: {user.id}\n"
                             f"lang: {user.language}\n"
-                            f"last_update: {user.last_update}\n"
-                            f"subscriptions: {user.subscriptions}")]
+                            f"last_update: {self.user_manager.get_last_updates(user.id, ReportType.CASES_GERMANY)}\n"
+                            f"subscriptions: {user.subscriptions}\n"
+                            f"reports: {[x.value for x in user.subscribed_reports]}")]
 
     def graphicSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('graphic').inc()

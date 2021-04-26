@@ -7,3 +7,5 @@ UPDATE bot_user_sent_reports SET report='cases-germany' WHERE report IS NULL;
 alter table bot_user change added created datetime(6) default current_timestamp(6) not null;
 
 DROP VIEW covid_data_calculated;
+
+INSERT IGNORE INTO report_subscriptions (user_id, report) SELECT user_id, 'cases-germany' FROM bot_user
