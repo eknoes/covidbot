@@ -29,11 +29,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Test with unittest
+    - name: Start MariaDB
       uses: getong/mariadb-action@v1.1
       with:
         host port: 3307
@@ -42,5 +38,10 @@ jobs:
         mariadb version: '10.3.22'
         mysql database: 'covid_test_db'
         mysql root password: 'covid_bot'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Test with unittest
       run: |
         python -m unittest
