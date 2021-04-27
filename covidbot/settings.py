@@ -55,7 +55,7 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.REPORT_EXTENSIVE_GRAPHICS:
             return "Mit dieser Option werden im Bericht weitere Grafiken versendet."
         elif setting == BotUserSettings.FORMATTING:
-            return "Signal und Facebook-Messenger Nutzer:innen können mit dieser Option die Formatierung der " \
+            return "Signal und Facebook Messenger Nutzer:innen können mit dieser Option die Formatierung der " \
                    "Nachrichten (de)aktivieren. Diese ist auf manchen Geräten bei Signal und Facebook " \
                    "Messenger nicht lesbar."
 
