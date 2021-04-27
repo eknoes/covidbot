@@ -816,6 +816,20 @@ class Bot(object):
                         date=country.vaccinations.date.strftime("%d.%m.%Y"),
                         doses=format_int(country.vaccinations.doses_diff))
 
+        if country.icu_data and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU, False):
+            message += f"<b>🏥 Intensivbetten</b>\n" \
+                       f"{format_float(country.icu_data.percent_occupied())}% " \
+                       f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
+                       f"{format_data_trend(country.icu_data.occupied_beds_trend)} " \
+                       f"der Intensivbetten sind aktuell belegt. " \
+                       f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
+                       f"({format_float(country.icu_data.percent_covid())}%)" \
+                       f"{format_data_trend(country.icu_data.occupied_covid_trend)} " \
+                       f" liegen Patient:innen" \
+                       f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
+                       f" ({format_float(country.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
+                       f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
+
         user_hint = self.user_hints.get_hint_of_today()
         if user_hint:
             message += f"{user_hint}\n\n"
