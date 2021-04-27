@@ -16,7 +16,8 @@ from semaphore import ChatContext
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
     FAILED_MESSAGE_COUNT
-from covidbot.bot import Bot, BotUserSettings
+from covidbot.bot import Bot
+from covidbot.settings import BotUserSettings
 from covidbot.user_hint_service import UserHintService
 from covidbot.utils import adapt_text
 from covidbot.interfaces.bot_response import BotResponse
@@ -73,7 +74,7 @@ class SignalInterface(MessengerInterface):
             platform_id = ctx.message.source.uuid
 
             replies = self.bot.handle_input(text, platform_id)
-            disable_unicode = self.bot.get_user_setting(platform_id, BotUserSettings.DISABLE_FAKE_FORMAT, False)
+            disable_unicode = not self.bot.get_user_setting(platform_id, BotUserSettings.FORMATTING)
             for reply in replies:
                 reply.message = str(adapt_text(reply, just_strip=disable_unicode))
 
@@ -116,7 +117,7 @@ class SignalInterface(MessengerInterface):
             message_counter = 0
             for userid, message in self.bot.get_available_user_messages():
                 self.log.info(f"Try to send report {message_counter}")
-                disable_unicode = self.bot.get_user_setting(userid, BotUserSettings.DISABLE_FAKE_FORMAT, False)
+                disable_unicode = not self.bot.get_user_setting(userid, BotUserSettings.FORMATTING)
                 for elem in message:
                     success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode),
                                                      attachments=elem.images)
@@ -145,7 +146,7 @@ class SignalInterface(MessengerInterface):
                                  profile_picture=self.profile_picture) as bot:
             backoff_time = random.uniform(0.5, 2)
             for user in users:
-                disable_unicode = self.bot.get_user_setting(user, BotUserSettings.DISABLE_FAKE_FORMAT, False)
+                disable_unicode = not self.bot.get_user_setting(user, BotUserSettings.FORMATTING)
                 success = await bot.send_message(user, adapt_text(message, just_strip=disable_unicode))
                 backoff_time = self.backoff_timer(backoff_time, not success, user)
 

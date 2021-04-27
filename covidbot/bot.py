@@ -13,6 +13,7 @@ from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import BOT_COMMAND_COUNT
 from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
+from covidbot.settings import BotUserSettings
 from covidbot.utils import adapt_text, format_float, format_int, format_noun, FormattableNoun, \
     format_data_trend, ReportType
 from covidbot.interfaces.bot_response import UserChoice, BotResponse
@@ -23,16 +24,6 @@ class UserDistrictActions(Enum):
     UNSUBSCRIBE = 1
     REPORT = 2
     RULES = 3
-
-
-class BotUserSettings:
-    BETA = "beta"
-    REPORT_GRAPHICS = "report_graphics"
-    REPORT_INCLUDE_ICU = "report_include_icu"
-    REPORT_INCLUDE_VACCINATION = "report_include_vaccination"
-    REPORT_EXTENSIVE_GRAPHICS = "report_extensive_graphics"
-    REPORT_SEND_EACH_DISTRICT = "report_send_each_district"
-    DISABLE_FAKE_FORMAT = "disable_fake_format"
 
 
 @dataclass
@@ -85,6 +76,8 @@ class Bot(object):
         self.handler_list.append(Handler("löschmich", self.deleteMeHandler, False))
         self.handler_list.append(Handler("stop", self.deleteMeHandler, False))
         self.handler_list.append(Handler("debug", self.debugHandler, False))
+        self.handler_list.append(Handler("einstellungen", self.settingsHandler, True))
+        self.handler_list.append(Handler("einstellung", self.settingsHandler, True))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
         self.handler_list.append(Handler("beta", self.betaSettingsHandler, True))
         self.handler_list.append(Handler("noop", lambda x, y: None, False))
@@ -100,9 +93,9 @@ class Bot(object):
     def change_platform_id(self, old_platform_id: str, new_platform_id: str) -> bool:
         return self.user_manager.change_platform_id(old_platform_id, new_platform_id)
 
-    def get_user_setting(self, user_identification: Union[int, str], setting: str, default: bool) -> bool:
+    def get_user_setting(self, user_identification: Union[int, str], setting: BotUserSettings) -> bool:
         user_id = self.user_manager.get_user_id(user_identification, create_if_not_exists=False)
-        return self.user_manager.get_user_setting(user_id, setting, default)
+        return self.user_manager.get_user_setting(user_id, setting)
 
     def disable_user(self, user_identification: Union[int, str]):
         user_id = self.user_manager.get_user_id(user_identification)
@@ -560,7 +553,7 @@ class Bot(object):
         if not user:
             return self._get_report([])
 
-        if self.user_manager.get_user_setting(user_id, BotUserSettings.BETA, False):
+        if self.user_manager.get_user_setting(user_id, BotUserSettings.BETA):
             return self._get_new_report(user.subscriptions, user_id)
         return self._get_report(user.subscriptions, user.id)
 
@@ -656,6 +649,69 @@ class Bot(object):
                             f"subscriptions: {user.subscriptions}\n"
                             f"reports: {[x.value for x in user.subscribed_reports]}")]
 
+    def settingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
+        BOT_COMMAND_COUNT.labels('settings').inc()
+
+        if user_input:
+            user_input = user_input.split()
+            for setting in [BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
+                            BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
+                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS]:
+                if BotUserSettings.command_key(setting) != user_input[0]:
+                    continue
+
+                if len(user_input) >= 2:
+                    user_choice, word = None, None
+                    if user_input[1][:3] == "ein" or user_input[1][:2] == "an":
+                        user_choice = True
+                        word = "ein"
+                    elif user_input[1][:3] == "aus":
+                        user_choice = False
+                        word = "aus"
+
+                    if user_choice is not None and word:
+                        self.user_manager.set_user_setting(user_id, setting, user_choice)
+                        return self.settingsHandler("", user_id) + [BotResponse(f"{BotUserSettings.title(setting)} wurde {word}geschaltet.")]
+
+                command_without_args = f'/einstellung {BotUserSettings.command_key(setting)}'
+
+                if self.user_manager.get_user_setting(user_id, setting):
+                    option = "aus"
+                    current = "ein"
+                else:
+                    option = "ein"
+                    current = "aus"
+
+                choice = [
+                    UserChoice(BotUserSettings.title(setting) + f' {option}schalten', command_without_args + f' {option}',
+                               f'Sende zum {option}schalten {self.command_formatter(command_without_args + f" {option}")}')]
+
+                return [BotResponse(f"<b>{BotUserSettings.title(setting)}:</b> {current}"
+                                    f"\n{BotUserSettings.description(setting)}", choices=choice)]
+
+            return [BotResponse("Ich verstehe deine Eingabe leider nicht.")] + self.settingsHandler("", user_id)
+        else:
+            message = "<b>Einstellungen</b>\n"
+            choices = []
+
+            for setting in [BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
+                            BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
+                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS]:
+                if self.user_manager.get_user_setting(user_id, setting):
+                    choice = "aus"
+                    current = "ein"
+                else:
+                    choice = "ein"
+                    current = "aus"
+
+                command = f"/einstellung {BotUserSettings.command_key(setting)} {choice}"
+                choices.append(UserChoice(f"{BotUserSettings.title(setting)} {choice}schalten", command,
+                                          f"Sende {self.command_formatter(command)}, um {BotUserSettings.title(setting)} "
+                                          f"{choice}zuschalten"))
+                message += f"<b>{BotUserSettings.title(setting)}: {current}</b>\n" \
+                           f"{BotUserSettings.description(setting)}\n\n"
+            return [BotResponse(message, choices=choices)]
+
     def graphicSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('graphic').inc()
         if user_input:
@@ -666,7 +722,7 @@ class Bot(object):
                 self.user_manager.set_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, False)
                 return [BotResponse("Dein Bericht enthält nun keine Grafiken mehr.")]
 
-        current = self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, default=True)
+        current = self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS)
         choices = []
         state: str
         if current:
@@ -694,7 +750,7 @@ class Bot(object):
                 self.user_manager.set_user_setting(user_id, BotUserSettings.BETA, False)
                 return [BotResponse("Du nimmst nun nicht mehr an der Beta teil.")]
 
-        current = self.user_manager.get_user_setting(user_id, BotUserSettings.BETA, default=False)
+        current = self.user_manager.get_user_setting(user_id, BotUserSettings.BETA)
         choices = []
         state: str
         if current:
@@ -723,7 +779,7 @@ class Bot(object):
     def _get_new_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
         # Visualization
         graphs = []
-        if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
+        if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
             graphs.append(self.visualization.infections_graph(0))
 
         country = self.covid_data.get_country_data()
@@ -796,7 +852,7 @@ class Bot(object):
                                     vacc_full=format_float(district.vaccinations.full_rate * 100),
                                     )
                     message += "\n\n"
-            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
+            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
                 # Generate multi-incidence graph for up to 8 districts
                 districts = subscriptions[-8:]
                 if 0 in subscriptions and 0 not in districts:
@@ -805,7 +861,7 @@ class Bot(object):
 
         if country.vaccinations and self.user_manager.get_user_setting(user_id,
                                                                        BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                                                                       True):
+                                                                       ):
             message += "<b>💉 Impfdaten</b>\n" \
                        "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
                        "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
@@ -815,8 +871,11 @@ class Bot(object):
                         vacc_full=format_int(country.vaccinations.vaccinated_full),
                         date=country.vaccinations.date.strftime("%d.%m.%Y"),
                         doses=format_int(country.vaccinations.doses_diff))
+            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
+                graphs.append(self.visualization.vaccination_graph(country.id))
+                graphs.append(self.visualization.vaccination_speed_graph(country.id))
 
-        if country.icu_data and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU, False):
+        if country.icu_data and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
             message += f"<b>🏥 Intensivbetten</b>\n" \
                        f"{format_float(country.icu_data.percent_occupied())}% " \
                        f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
@@ -829,6 +888,8 @@ class Bot(object):
                        f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
                        f" ({format_float(country.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
                        f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
+            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
+                graphs.append(self.visualization.icu_graph(country.id))
 
         user_hint = self.user_hints.get_hint_of_today()
         if user_hint:
@@ -845,8 +906,13 @@ class Bot(object):
 
         message += '\n\n🧒🏽👦🏻 Sharing is caring 👩🏾🧑🏼 <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a>'
 
-        message += "\n\n<b>Dies ist ein Entwurf für einen verbesserten Bericht. Wir würden uns sehr über Feedback " \
-                   "freuen, sende uns einfach eine Nachricht. Danke 🙏</b>"
+        message += "\n\nDies ist ein Entwurf für einen verbesserten Bericht. Wir würden uns sehr über Feedback " \
+                   "freuen, sende uns einfach eine Nachricht. Danke 🙏"
+
+        message += "\n\n<b>Danke für das bisherige Feedback! Wir haben den Bericht jetzt auch konfigurierbar gemacht, " \
+                   "so kann man bspw. einstellen, ob man den Impfüberblick oder die Intensivbettenlage sehen möchte. " \
+                   f"Sende einfach {self.command_formatter('Einstellungen')} um einen Überblick über die Optionen zu " \
+                   f"erhalten.</b>"
 
         reports = [BotResponse(message, graphs)]
         return reports
@@ -854,7 +920,7 @@ class Bot(object):
     def _get_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
         # Visualization
         graphs = []
-        if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
+        if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
             graphs.append(self.visualization.infections_graph(0))
 
         country = self.covid_data.get_country_data()
@@ -896,7 +962,7 @@ class Bot(object):
                            self.sort_districts(grouped_districts[key]))
                 message += "\n".join(data) + "\n\n"
 
-            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
+            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
                 # Generate multi-incidence graph for up to 8 districts
                 districts = subscriptions[-8:]
                 if 0 in subscriptions and 0 not in districts:
@@ -904,8 +970,7 @@ class Bot(object):
                 graphs.append(self.visualization.multi_incidence_graph(districts))
 
         if country.vaccinations and self.user_manager.get_user_setting(user_id,
-                                                                       BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                                                                       True):
+                                                                       BotUserSettings.REPORT_INCLUDE_VACCINATION):
             message += "<b>💉 Impfdaten</b>\n" \
                        "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
                        "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
@@ -915,11 +980,11 @@ class Bot(object):
                         vacc_full=format_int(country.vaccinations.vaccinated_full),
                         date=country.vaccinations.date.strftime("%d.%m.%Y"),
                         doses=format_int(country.vaccinations.doses_diff))
-            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, False):
+            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
                 graphs.append(self.visualization.vaccination_graph(country.id))
                 graphs.append(self.visualization.vaccination_speed_graph(country.id))
 
-        if country.icu_data and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU, True):
+        if country.icu_data and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
             message += f"<b>🏥 Intensivbetten</b>\n" \
                        f"{format_float(country.icu_data.percent_occupied())}% " \
                        f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
@@ -980,7 +1045,7 @@ class Bot(object):
 
         for user, report in users:
             if report == ReportType.CASES_GERMANY:
-                if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA, False):
+                if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA):
                     yield user.platform_id, self._get_new_report(user.subscriptions, user.id)
                 else:
                     yield user.platform_id, self._get_report(user.subscriptions, user.id)

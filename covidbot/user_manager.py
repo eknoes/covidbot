@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple, Union
 
 from mysql.connector import MySQLConnection, IntegrityError, OperationalError
 
+from covidbot.settings import BotUserSettings
 from covidbot.utils import ReportType
 
 
@@ -407,17 +408,18 @@ class UserManager(object):
             self.connection.reconnect()
             return self.get_social_network_user_number(network)
 
-    def set_user_setting(self, user_id: int, setting: str, value: bool):
+    def set_user_setting(self, user_id: int, setting: BotUserSettings, value: bool):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('INSERT INTO bot_user_settings (user_id, setting, value) VALUE (%s, %s, %s) ON DUPLICATE '
-                           'KEY UPDATE value=%s', [user_id, setting, value, value])
+                           'KEY UPDATE value=%s', [user_id, setting.value, value, value])
 
-    def get_user_setting(self, user_id: int, setting: str, default: bool = False) -> bool:
+    def get_user_setting(self, user_id: int, setting: BotUserSettings) -> bool:
+        default = BotUserSettings.default(setting)
         if user_id is None:
             return default
 
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT value FROM bot_user_settings WHERE user_id=%s AND setting=%s', [user_id, setting])
+            cursor.execute('SELECT value FROM bot_user_settings WHERE user_id=%s AND setting=%s', [user_id, setting.value])
             rows = cursor.fetchall()
             if not rows:
                 return default

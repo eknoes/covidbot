@@ -12,7 +12,8 @@ from fbmessenger.models import Message, PostbackButton
 
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME
-from covidbot.bot import Bot, BotUserSettings
+from covidbot.bot import Bot
+from covidbot.settings import BotUserSettings
 from covidbot.user_hint_service import UserHintService
 from covidbot.utils import adapt_text, split_message
 from covidbot.interfaces.bot_response import BotResponse
@@ -71,7 +72,7 @@ class FBMessengerInterface(MessengerInterface):
     async def send_bot_response(self, user: str, response: BotResponse):
         if response.message:
             images = response.images
-            disable_unicode = self.bot.get_user_setting(user, BotUserSettings.DISABLE_FAKE_FORMAT, False)
+            disable_unicode = not self.bot.get_user_setting(user, BotUserSettings.FORMATTING)
             messages = split_message(adapt_text(str(response), just_strip=disable_unicode), max_chars=2000)
             for i in range(0, len(messages)):
                 buttons = None
@@ -104,7 +105,7 @@ class FBMessengerInterface(MessengerInterface):
         message = UserHintService.format_commands(message, self.bot.command_formatter)
 
         for user in users:
-            disable_unicode = self.bot.get_user_setting(user, BotUserSettings.DISABLE_FAKE_FORMAT, False)
+            disable_unicode = not self.bot.get_user_setting(user, BotUserSettings.FORMATTING)
             await self.fb_messenger.send_message(user, adapt_text(message, just_strip=disable_unicode))
             self.log.warning(f"Sent message to {user}")
 

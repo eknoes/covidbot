@@ -78,7 +78,11 @@ class MessengerBotSetup:
             location_feature = False
 
         if self.name == "telegram":
-            command_format = lambda command: f"<code>/{command}</code>"
+            def telegram_format(command: str) -> str:
+                if len(command.split()) == 1:
+                    return f"/{command}"
+                return f"<code>/{command}</code>"
+            command_format = telegram_format
         else:
             command_format = lambda command: f'"{command}"'
 
