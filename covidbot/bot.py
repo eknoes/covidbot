@@ -815,13 +815,18 @@ class Bot(object):
                                                                        ):
             message += "<b>💉 Impfdaten</b>\n" \
                        "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
+                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft. " \
+                       "Bei dem Impftempo der letzten 7 Tage werden {vacc_speed} Dosen pro Tag verabreicht und in " \
+                       "{vacc_days_to_finish} Tagen wäre die gesamte Bevölkerung vollständig geschützt." \
+                       "\n\n" \
                 .format(rate_full=format_float(country.vaccinations.full_rate * 100),
                         rate_partial=format_float(country.vaccinations.partial_rate * 100),
                         vacc_partial=format_int(country.vaccinations.vaccinated_partial),
                         vacc_full=format_int(country.vaccinations.vaccinated_full),
                         date=country.vaccinations.date.strftime("%d.%m.%Y"),
-                        doses=format_int(country.vaccinations.doses_diff))
+                        doses=format_int(country.vaccinations.doses_diff),
+                        vacc_speed=format_int(country.vaccinations.avg_speed),
+                        vacc_days_to_finish=format_int(country.vaccinations.avg_days_to_finish))
             if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
                 graphs.append(self.visualization.vaccination_graph(country.id))
                 graphs.append(self.visualization.vaccination_speed_graph(country.id))
@@ -857,13 +862,11 @@ class Bot(object):
 
         message += '\n\n🧒🏽👦🏻 Sharing is caring 👩🏾🧑🏼 <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a>'
 
-        message += "\n\nDies ist ein Entwurf für einen verbesserten Bericht. Wir würden uns sehr über Feedback " \
-                   "freuen, sende uns einfach eine Nachricht. Danke 🙏"
-
         message += "\n\n<b>Danke für das bisherige Feedback! Wir haben den Bericht jetzt auch konfigurierbar gemacht, " \
                    "so kann man bspw. einstellen, ob man den Impfüberblick oder die Intensivbettenlage sehen möchte. " \
                    f"Sende einfach {self.command_formatter('Einstellungen')} um einen Überblick über die Optionen zu " \
-                   f"erhalten.</b>"
+                   f"erhalten. Wir würden uns sehr über Feedback " \
+                   "freuen, sende uns einfach eine Nachricht. Danke 🙏</b>"
 
         reports = [BotResponse(message, graphs)]
         return reports
