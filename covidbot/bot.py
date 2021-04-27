@@ -752,7 +752,11 @@ class Bot(object):
             districts = self.sort_districts(states) + self.sort_districts(cities)
             if len(districts) > 0:
                 for district in districts:
-                    threshold_info = ""
+                    message += "<b>{name}</b>: {incidence}{incidence_trend}" \
+                        .format(name=district.name,
+                                incidence=format_float(district.incidence),
+                                incidence_trend=format_data_trend(district.incidence_trend))
+
                     if district.incidence_interval_since is not None:
                         date_interval = district.date - district.incidence_interval_since
                         if date_interval.days != 0:
@@ -765,19 +769,14 @@ class Bot(object):
                         else:
                             word = "über"
 
-                        threshold_info = "Seit {interval_length} {word} {interval}" \
+                        message += "\n• Seit {interval_length} {word} {interval}" \
                             .format(interval_length=days, interval=district.incidence_interval_threshold, word=word)
 
-                    message += "<b>{name}</b>: {incidence}{incidence_trend}\n" \
-                               "• {threshold_info}\n" \
-                               "• {new_cases}, {new_deaths}" \
-                        .format(name=district.name,
-                                incidence=format_float(district.incidence),
-                                incidence_trend=format_data_trend(district.incidence_trend),
-                                new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
-                                new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS),
-                                threshold_info=threshold_info)
-                    if district.new_cases < 0 or district.new_deaths < 0:
+                    message += "\n• {new_cases}, {new_deaths}" \
+                        .format(new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
+                                new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
+                    if (district.new_cases and district.new_cases < 0) or (
+                            district.new_deaths and district.new_deaths < 0):
                         message += "\n• <i>Eine negative Differenz zum Vortag ist idR. auf eine Korrektur der Daten " \
                                    "durch das Gesundheitsamt zurückzuführen</i>"
                     if district.icu_data:
@@ -789,6 +788,13 @@ class Bot(object):
                                     clear_beds=format_noun(district.icu_data.clear_beds, FormattableNoun.BEDS),
                                     percent_covid=format_float(district.icu_data.percent_covid()),
                                     covid_trend=format_data_trend(district.icu_data.occupied_covid_trend))
+
+                    if district.vaccinations:
+                        message += "\n• {no_doses} Neuimpfungen, {vacc_partial}% min. eine, {vacc_full}% beide Impfungen erhalten" \
+                            .format(no_doses=format_int(district.vaccinations.doses_diff),
+                                    vacc_partial=format_float(district.vaccinations.partial_rate * 100),
+                                    vacc_full=format_float(district.vaccinations.full_rate * 100),
+                                    )
                     message += "\n\n"
             if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS, True):
                 # Generate multi-incidence graph for up to 8 districts
