@@ -673,7 +673,7 @@ class Bot(object):
                         self.user_manager.set_user_setting(user_id, setting, user_choice)
                         return self.settingsHandler("", user_id) + [BotResponse(f"{BotUserSettings.title(setting)} wurde {word}geschaltet.")]
 
-                command_without_args = f'/einstellung {BotUserSettings.command_key(setting)}'
+                command_without_args = f'einstellung {BotUserSettings.command_key(setting)}'
 
                 if self.user_manager.get_user_setting(user_id, setting):
                     option = "aus"
@@ -683,7 +683,7 @@ class Bot(object):
                     current = "aus"
 
                 choice = [
-                    UserChoice(BotUserSettings.title(setting) + f' {option}schalten', command_without_args + f' {option}',
+                    UserChoice(BotUserSettings.title(setting) + f' {option}schalten', '/' + command_without_args + f' {option}',
                                f'Sende zum {option}schalten {self.command_formatter(command_without_args + f" {option}")}')]
 
                 return [BotResponse(f"<b>{BotUserSettings.title(setting)}:</b> {current}"
@@ -704,8 +704,8 @@ class Bot(object):
                     choice = "ein"
                     current = "aus"
 
-                command = f"/einstellung {BotUserSettings.command_key(setting)} {choice}"
-                choices.append(UserChoice(f"{BotUserSettings.title(setting)} {choice}schalten", command,
+                command = f"einstellung {BotUserSettings.command_key(setting)} {choice}"
+                choices.append(UserChoice(f"{BotUserSettings.title(setting)} {choice}schalten", '/' + command,
                                           f"Sende {self.command_formatter(command)}, um {BotUserSettings.title(setting)} "
                                           f"{choice}zuschalten"))
                 message += f"<b>{BotUserSettings.title(setting)}: {current}</b>\n" \
