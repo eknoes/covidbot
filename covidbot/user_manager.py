@@ -209,12 +209,15 @@ class UserManager(object):
 
     def add_sent_report(self, user_id: int, report: ReportType) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("INSERT INTO bot_user_sent_reports (user_id, report, sent_report) VALUE (%s, %s, NOW())",
-                           [user_id, report.value])
-            self.connection.commit()
-            if cursor.rowcount == 0:
-                return False
-            return True
+            try:
+                cursor.execute("INSERT INTO bot_user_sent_reports (user_id, report, sent_report) VALUE (%s, %s, NOW())",
+                               [user_id, report.value])
+                self.connection.commit()
+                if cursor.rowcount == 0:
+                    return False
+                return True
+            except IntegrityError as e:
+                self.log.error(f"Can't add sent report for {user_id}:\n{e}", exc_info=e)
 
     def get_last_updates(self, user_id: int, report: ReportType) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:

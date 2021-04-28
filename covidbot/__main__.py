@@ -218,7 +218,7 @@ async def sendUpdates(messenger_iface: str, config: configparser):
             await iface.send_unconfirmed_reports()
             logging.info(f"Checked for daily reports on {messenger_iface}")
     except Exception as e:
-        logging.error(f"Got exception while sending daily reports for {messenger_iface}: {e}", exc_info=e)
+        logging.error(f"Got exception while sending daily reports for {messenger_iface}:\n{e}", exc_info=e)
 
 
 async def send_all(message: str, recipients: List[str], config_dict, messenger_interface=None):
