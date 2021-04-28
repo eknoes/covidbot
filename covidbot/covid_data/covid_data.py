@@ -200,7 +200,7 @@ class CovidData(object):
                 operator = ">"
                 result.incidence_interval_threshold = threshold_values[threshold]
             else:
-                threshold_values = [200, 165, 100]
+                threshold_values = [200, 165, 150, 100]
                 threshold = 0
                 while result.incidence < threshold_values[threshold] and len(threshold_values) > threshold:
                     threshold += 1
