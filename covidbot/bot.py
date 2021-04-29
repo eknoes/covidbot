@@ -979,7 +979,7 @@ class Bot(object):
                     new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
 
-    def get_available_user_messages(self) -> Generator[ReportType, Tuple[Union[int, str], List[BotResponse]], None, None]:
+    def get_available_user_messages(self) -> Generator[Tuple[ReportType, Union[int, str], List[BotResponse]], None, None]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
