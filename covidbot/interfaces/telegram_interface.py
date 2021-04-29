@@ -276,7 +276,7 @@ class TelegramInterface(MessengerInterface):
 
         # Avoid flood limits of 30 messages / second
         sliding_flood_window = []
-        for userid, message in self.bot.get_available_user_messages():
+        for report_type, userid, message in self.bot.get_available_user_messages():
             if len(sliding_flood_window) >= 25:
                 # We want to send 25 messages per second max
                 flood_window_diff = time.perf_counter() - sliding_flood_window.pop(0)
@@ -286,6 +286,7 @@ class TelegramInterface(MessengerInterface):
 
             sent_msg = self.send_message(userid, message, disable_web_page_preview=True)
             if sent_msg:
+                self.bot.confirm_message_send(report_type, userid)
                 sliding_flood_window.append(time.perf_counter())
 
             self.log.warning(f"Sent report to {userid}!")

@@ -103,11 +103,12 @@ class ThreemaInterface(MessengerInterface):
             await self.connection.close()
             return
 
-        for userid, message in self.bot.get_available_user_messages():
+        for report_type, userid, message in self.bot.get_available_user_messages():
             try:
                 for elem in message:
                     await self.send_bot_response(userid, elem)
                 self.log.warning(f"Sent report to {userid}")
+                self.bot.confirm_message_send(report_type, userid)
             except threema.KeyServerError as error:
                 self.log.error(f"Got KeyServer Error {error.status}: {error.status_description[error.status]} ",
                                exc_info=error)

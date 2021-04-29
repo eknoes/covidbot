@@ -115,7 +115,7 @@ class SignalInterface(MessengerInterface):
                                  profile_picture=self.profile_picture) as bot:
             backoff_time = random.uniform(0.5, 2)
             message_counter = 0
-            for userid, message in self.bot.get_available_user_messages():
+            for report_type, userid, message in self.bot.get_available_user_messages():
                 self.log.info(f"Try to send report {message_counter}")
                 disable_unicode = not self.bot.get_user_setting(userid, BotUserSettings.FORMATTING)
                 for elem in message:
@@ -123,6 +123,7 @@ class SignalInterface(MessengerInterface):
                                                      attachments=elem.images)
                 if success:
                     self.log.warning(f"({message_counter}) Sent daily report to {userid}")
+                    self.bot.confirm_message_send(report_type, userid)
                 else:
                     self.log.error(
                         f"({message_counter}) Error sending daily report to {userid}")

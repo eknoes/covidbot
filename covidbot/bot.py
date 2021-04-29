@@ -295,7 +295,6 @@ class Bot(object):
             return [BotResponse(
                 f"Leider kann für {parent_data.name} keine Impfübersicht generiert werden, da keine Daten vorliegen.")]
 
-        children_data = self.covid_data.get_children_data(district_id)
         message = f"<b>💉 Impfdaten ({parent_data.name})</b>\n"
         message += "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
                    " - Stand {vacc_date} - vollständig geimpft. " \
@@ -311,6 +310,7 @@ class Bot(object):
                     vacc_speed=format_int(parent_data.vaccinations.avg_speed),
                     vacc_days_to_finish=format_int(parent_data.vaccinations.avg_days_to_finish))
 
+        children_data = self.covid_data.get_children_data(district_id)
         earliest_data = reduce(
             lambda x, y: x if x.vaccinations.date < y.vaccinations.date else y,
             children_data)
@@ -979,7 +979,7 @@ class Bot(object):
                     new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
 
-    def get_available_user_messages(self) -> Generator[Tuple[Union[int, str], List[BotResponse]], None, None]:
+    def get_available_user_messages(self) -> Generator[ReportType, Tuple[Union[int, str], List[BotResponse]], None, None]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
@@ -1000,12 +1000,16 @@ class Bot(object):
         for user, report in users:
             if report == ReportType.CASES_GERMANY:
                 if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA):
-                    yield user.platform_id, self._get_new_report(user.subscriptions, user.id)
+                    yield ReportType.CASES_GERMANY, user.platform_id, self._get_new_report(user.subscriptions, user.id)
                 else:
-                    yield user.platform_id, self._get_report(user.subscriptions, user.id)
-                self.user_manager.add_sent_report(user.id, ReportType.CASES_GERMANY)
+                    yield ReportType.CASES_GERMANY, user.platform_id, self._get_report(user.subscriptions, user.id)
             else:
                 self.log.error(f"Unknown report type for user {user.id}: {report}")
+
+    def confirm_message_send(self, report_type: ReportType, user_id: Union[str, int]):
+        user_id = self.user_manager.get_user_id(user_id)
+        if user_id:
+            self.user_manager.add_sent_report(user_id, report_type)
 
     def user_messages_available(self) -> bool:
         """
