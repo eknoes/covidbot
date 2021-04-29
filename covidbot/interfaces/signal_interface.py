@@ -113,7 +113,7 @@ class SignalInterface(MessengerInterface):
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
-            backoff_time = random.uniform(0.5, 2)
+            backoff_time = random.uniform(1, 4)
             message_counter = 0
             for report_type, userid, message in self.bot.get_available_user_messages():
                 self.log.info(f"Try to send report {message_counter}")
@@ -164,7 +164,7 @@ class SignalInterface(MessengerInterface):
         """
         if not failed:
             self.log.info(f"Sent message to {user_id}")
-            if current_backoff > 1.5:
+            if current_backoff > 2:
                 new_backoff = 0.7 * current_backoff
             else:
                 new_backoff = current_backoff
@@ -172,7 +172,7 @@ class SignalInterface(MessengerInterface):
             self.log.error(f"Error sending message to {user_id}")
             # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
             self.bot.disable_user(user_id)
-            new_backoff = 2 ^ ceil(current_backoff)
+            new_backoff = 2*current_backoff
             self.log.warning(f"New backoff time: {new_backoff}s")
         self.log.info(f"Sleeping {new_backoff}s to avoid server limitations")
         time.sleep(new_backoff)
