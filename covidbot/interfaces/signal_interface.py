@@ -115,6 +115,7 @@ class SignalInterface(MessengerInterface):
                                  profile_picture=self.profile_picture) as bot:
             backoff_time = random.uniform(2, 6)
             message_counter = 0
+            err_counter = 0
             for report_type, userid, message in self.bot.get_available_user_messages():
                 self.log.info(f"Try to send report {message_counter}")
                 disable_unicode = not self.bot.get_user_setting(userid, BotUserSettings.FORMATTING)
@@ -127,14 +128,16 @@ class SignalInterface(MessengerInterface):
                     backoff_time = self.backoff_timer(backoff_time, not success, userid)
 
                 if success:
+                    err_counter = 0
                     self.log.warning(f"({message_counter}) Sent daily report to {userid}")
                     self.bot.confirm_message_send(report_type, userid)
                 else:
+                    err_counter += 1
                     self.log.error(
                         f"({message_counter}) Error sending daily report to {userid}")
                     # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
                     self.bot.disable_user(userid)
-                    if backoff_time > 600:
+                    if err_counter > 3:
                         raise Exception("Can't send reports on signal")
 
                 message_counter += 1
