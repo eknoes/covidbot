@@ -71,7 +71,7 @@ class TestBot(TestCase):
 
         update = self.interface.get_available_user_messages()
         i = 0
-        for uid, reports in update:
+        for _, uid, reports in update:
             if uid == platform_id1:
                 self.assertRegex(reports[0].message, "Hessen", "A subscribed district must be part of the daily report")
                 self.assertEqual(self.interface.reportHandler("", uid1), reports,
