@@ -113,7 +113,7 @@ class SignalInterface(MessengerInterface):
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
                                  profile_picture=self.profile_picture) as bot:
-            backoff_time = random.uniform(1, 4)
+            backoff_time = random.uniform(2, 6)
             message_counter = 0
             for report_type, userid, message in self.bot.get_available_user_messages():
                 self.log.info(f"Try to send report {message_counter}")
@@ -121,14 +121,22 @@ class SignalInterface(MessengerInterface):
                 for elem in message:
                     success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode),
                                                      attachments=elem.images)
+                    if not success:
+                        break
+
+                    backoff_time = self.backoff_timer(backoff_time, not success, userid)
+
                 if success:
                     self.log.warning(f"({message_counter}) Sent daily report to {userid}")
                     self.bot.confirm_message_send(report_type, userid)
                 else:
                     self.log.error(
                         f"({message_counter}) Error sending daily report to {userid}")
+                    # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
+                    self.bot.disable_user(userid)
+                    if backoff_time > 600:
+                        raise Exception("Can't send reports on signal")
 
-                backoff_time = self.backoff_timer(backoff_time, not success, userid)
                 message_counter += 1
 
     async def send_message_to_users(self, message: str, users: List[str]) -> None:
@@ -170,8 +178,6 @@ class SignalInterface(MessengerInterface):
                 new_backoff = current_backoff
         else:
             self.log.error(f"Error sending message to {user_id}")
-            # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
-            self.bot.disable_user(user_id)
             new_backoff = 2*current_backoff
             self.log.warning(f"New backoff time: {new_backoff}s")
         self.log.info(f"Sleeping {new_backoff}s to avoid server limitations")
