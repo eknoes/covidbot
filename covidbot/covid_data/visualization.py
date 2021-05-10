@@ -351,7 +351,7 @@ class Visualization:
                      linewidth=1, label=d.get('name'))
 
         # Add legend
-        plt.legend()
+        plt.legend(loc="lower left")
 
         ax1.set_ylim(bottom=0)
 
