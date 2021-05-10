@@ -1,7 +1,7 @@
 import logging
 import math
 from datetime import date, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from mysql.connector import MySQLConnection
 
@@ -218,6 +218,23 @@ class CovidData(object):
     def get_country_data(self) -> DistrictData:
         return self.get_district_data(0)
 
+    def get_icu_general_info(self) -> Dict:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT MAX(date) as current FROM icu_beds')
+            current_date = cursor.fetchone()['current']
+
+            result = {'full': None, 'close2full': None}
+            cursor.execute('SELECT COUNT(*) as num_full FROM icu_beds WHERE date=%s AND clear=0', [current_date])
+            record = cursor.fetchone()
+            if record:
+                result['full'] = record['num_full']
+
+            cursor.execute('SELECT COUNT(*) as num_close FROM icu_beds WHERE date=%s AND (occupied / (clear + occupied)) > 0.9', [current_date])
+            record = cursor.fetchone()
+            if record:
+                result['close2full'] = record['num_close']
+
+            return result
     @staticmethod
     def fill_trend(today: DistrictData, last_week: DistrictData, yesterday: Optional[DistrictData]) -> DistrictData:
         if not yesterday:

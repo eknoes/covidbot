@@ -110,7 +110,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
             posts = self.get_icu_shortpost(germany.icu_data)
 
             if self.no_write:
-                print(f"Sent message: {posts[0].message}")
+                print(f"Sent message: {posts[1].message}")
                 self.user_manager.add_sent_report(self.user_id, ReportType.ICU_GERMANY)
             elif self.write_message(posts):
                 self.log.info("Tweet was successfully sent")
@@ -140,7 +140,21 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"({format_float(icu.percent_covid())}%) liegen Patient:innen" \
                      f" mit #COVID19, davon werden {format_int(icu.covid_ventilated)} beatmet. " \
                      f"Insgesamt gibt es {format_noun(icu.total_beds(), FormattableNoun.BEDS)}."
-        return [BotResponse(tweet_text, [self.viz.icu_graph(0)])]
+        post = [BotResponse(tweet_text, [self.viz.icu_graph(0)])]
+
+        icu_info = self.data.get_icu_general_info()
+        if icu_info:
+            second_tweet = ""
+            if icu_info.get('full'):
+                second_tweet += f"{icu_info.get('full')} Krankenhäuser haben keine freien Intensivbetten mehr."
+
+            if icu_info.get('close2full'):
+                second_tweet += f" In {icu_info.get('close2full')} Krankenhäuser sind mindestens 90% der Intensivbetten belegt."
+
+            if second_tweet:
+                post.append(BotResponse(second_tweet))
+
+        return post
 
     def get_infection_shortpost(self, district_id: int) -> List[BotResponse]:
         graphs = [self.viz.incidence_graph(district_id), self.viz.infections_graph(district_id)]
