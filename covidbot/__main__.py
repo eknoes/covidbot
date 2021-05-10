@@ -343,12 +343,11 @@ def main():
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
-            from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, \
-                VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, RKIUpdater, ICUGermanyUpdater, \
-                RulesGermanyUpdater, ICUGermanyHistoryUpdater
-            for updater in [RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
+            from covidbot.covid_data import CovidData, VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, RKIUpdater, ICUGermanyUpdater, \
+                RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater
+            for updater in [RKIUpdater(conn), ICUGermanyHistoryUpdater(conn), VaccinationGermanyStatesImpfdashboardUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
-                            VaccinationGermanyUpdater(conn), RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
+                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")

@@ -64,3 +64,13 @@ class Updater(ABC):
                 for row in rows:
                     if row[1] == district_name:
                         return row[0]
+
+            cursor.execute('SELECT district_id, alt_name FROM county_alt_names WHERE alt_name LIKE %s', [f'%{district_name}%'])
+            rows = cursor.fetchall()
+            if rows:
+                if len(rows) == 1:
+                    return rows[0][0]
+
+                for row in rows:
+                    if row[1] == district_name:
+                        return row[0]

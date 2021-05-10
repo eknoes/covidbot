@@ -364,6 +364,7 @@ class CovidDatabaseCreator:
 
             # Insert common abbreviations
             cursor.execute("INSERT IGNORE INTO county_alt_names (district_id, alt_name) "
-                           "VALUES (5, 'NRW'), (8, 'BaWü'), (7, 'RLP')")
+                           "VALUES (5, 'NRW'), (8, 'BaWü'), (7, 'RLP'), (1, 'DE-SH'), (2, 'DE-HH'), (3, 'DE-NI'), (4, 'DE-HB'), (5, 'DE-NW'), (6, 'DE-HE'), (7, 'DE-RP'), (8, 'DE-BW'), (9, 'DE-BY'), (10, 'DE-SL'), (11, 'DE-BE'), (12, 'DE-BB'), (13, 'DE-MV'), (14, 'DE-SN'), (15, 'DE-ST'), (16, 'DE-TH')")
+
             connection.commit()
             log.debug("Committed Tables")
