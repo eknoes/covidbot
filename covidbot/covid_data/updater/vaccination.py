@@ -95,7 +95,7 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
 
         metadata = json.loads(metadata_response)
         data_date = datetime.fromisoformat(metadata["vaccinationsLastUpdated"])
-        if data_date <= last_update:
+        if last_update and data_date <= last_update:
             return False
 
 

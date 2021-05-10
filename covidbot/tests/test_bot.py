@@ -4,9 +4,9 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
+from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyStatesImpfdashboardUpdater, RValueGermanyUpdater, \
     Visualization, DistrictData
-from covidbot.bot import Bot, UserDistrictActions
+from covidbot.bot import Bot
 from covidbot.user_manager import UserManager
 
 
@@ -29,7 +29,7 @@ class TestBot(TestCase):
 
         # Update Data
         RKIUpdater(cls.conn).update()
-        VaccinationGermanyUpdater(cls.conn).update()
+        VaccinationGermanyStatesImpfdashboardUpdater(cls.conn).update()
         RValueGermanyUpdater(cls.conn).update()
 
         cls.user_manager = UserManager("unittest", cls.conn, activated_default=True)

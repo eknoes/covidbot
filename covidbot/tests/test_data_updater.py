@@ -3,8 +3,8 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import RKIUpdater, VaccinationGermanyUpdater, RValueGermanyUpdater, \
-    VaccinationGermanyImpfdashboardUpdater
+from covidbot.covid_data import RKIUpdater, RValueGermanyUpdater, \
+    VaccinationGermanyImpfdashboardUpdater, VaccinationGermanyStatesImpfdashboardUpdater
 from covidbot.covid_data import clean_district_name, ICUGermanyUpdater, RulesGermanyUpdater
 
 
@@ -32,8 +32,8 @@ class TestUpdater(TestCase):
         rki.update()
         updater = VaccinationGermanyImpfdashboardUpdater(self.conn)
         self.assertTrue(updater.update(), "VaccinationGermanyImpfdashboardUpdater should update")
-        updater = VaccinationGermanyUpdater(self.conn)
-        self.assertTrue(updater.update(), "VaccinationGermanyUpdater should update")
+        updater = VaccinationGermanyStatesImpfdashboardUpdater(self.conn)
+        self.assertTrue(updater.update(), "VaccinationGermanyStatesImpfdashboardUpdater should update")
         updater = RValueGermanyUpdater(self.conn)
         self.assertTrue(updater.update(), "RValueGermanyUpdater should update")
         updater = ICUGermanyUpdater(self.conn)

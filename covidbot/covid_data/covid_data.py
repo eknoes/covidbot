@@ -115,7 +115,7 @@ class CovidData(object):
                                                        last_update=vaccination_record['last_update'])
 
                     cursor.execute(
-                        'SELECT AVG(doses_diff) as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) GROUP BY district_id',
+                        'SELECT AVG(doses_diff) as avg_7day, population FROM covid_vaccinations LEFT JOIN counties c on c.rs = covid_vaccinations.district_id WHERE district_id=%s AND date > SUBDATE(%s, 7) AND doses_diff IS NOT NULL GROUP BY district_id',
                         [district_id, last_update])
                     record = cursor.fetchone()
                     if record:
