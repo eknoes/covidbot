@@ -939,7 +939,7 @@ class Bot(object):
                 graphs.append(self.visualization.vaccination_graph(country.id))
                 graphs.append(self.visualization.vaccination_speed_graph(country.id))
 
-        if country.icu_data and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
+        if country.icu_data: #and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
             message += f"<b>🏥 Intensivbetten</b>\n" \
                        f"{format_float(country.icu_data.percent_occupied())}% " \
                        f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
