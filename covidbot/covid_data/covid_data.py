@@ -224,12 +224,13 @@ class CovidData(object):
             current_date = cursor.fetchone()['current']
 
             result = {'full': None, 'close2full': None}
-            cursor.execute('SELECT COUNT(*) as num_full FROM icu_beds WHERE date=%s AND clear=0', [current_date])
+            # TODO: Use districts table to identify non-aggregated values
+            cursor.execute('SELECT COUNT(*) as num_full FROM icu_beds WHERE date=%s AND clear=0 AND district_id > 16', [current_date])
             record = cursor.fetchone()
             if record:
                 result['full'] = record['num_full']
 
-            cursor.execute('SELECT COUNT(*) as num_close FROM icu_beds WHERE date=%s AND (occupied / (clear + occupied)) > 0.9', [current_date])
+            cursor.execute('SELECT COUNT(*) as num_close FROM icu_beds WHERE date=%s AND (occupied / (clear + occupied)) > 0.9 AND district_id > 16', [current_date])
             record = cursor.fetchone()
             if record:
                 result['close2full'] = record['num_close']
