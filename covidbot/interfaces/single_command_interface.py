@@ -146,7 +146,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         if icu_info:
             second_tweet = ""
             if icu_info.get('full'):
-                second_tweet += f"{icu_info.get('full')} Orte haben keine freien Intensivbetten mehr."
+                second_tweet += f"{icu_info.get('full')} Orte haben keine freien Intensivbetten mehr. "
 
             if icu_info.get('close2full'):
                 second_tweet += f"In {icu_info.get('close2full')} Orten sind mindestens 90% der Intensivbetten belegt."
