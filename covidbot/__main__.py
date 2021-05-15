@@ -124,8 +124,8 @@ class MessengerBotSetup:
                 raise ValueError("THREEMA is not configured")
             from covidbot.interfaces.threema_interface import ThreemaInterface
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
-                                    self.config['THREEMA'].get('PRIVATE_KEY'), bot,
-                                    dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
+                                    self.config['THREEMA'].get('PRIVATE_KEY'), self.config['THREEMA'].get('CALLBACK_PATH'),
+                                    bot, dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
 
         if self.name == "messenger":
             if not self.config.has_section("MESSENGER"):

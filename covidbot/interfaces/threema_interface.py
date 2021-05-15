@@ -27,7 +27,7 @@ class ThreemaInterface(MessengerInterface):
     dev_chat: str
     log = logging.getLogger(__name__)
 
-    def __init__(self, threema_id: str, threema_secret: str, threema_key: str, bot: Bot, dev_chat: str):
+    def __init__(self, threema_id: str, threema_secret: str, threema_key: str, callback_path: str, bot: Bot, dev_chat: str):
         self.bot = bot
         self.threema_id = threema_id
         self.threema_secret = threema_secret
@@ -38,12 +38,13 @@ class ThreemaInterface(MessengerInterface):
             key=self.threema_key
         )
         self.dev_chat = dev_chat
+        self.callback_path = callback_path
 
     def run(self):
         logging.info("Run Threema Interface")
         # Create the application and register the handler for incoming messages
         application = create_application(self.connection)
-        add_callback_route(self.connection, application, self.handle_threema_msg, path='/gateway_callback')
+        add_callback_route(self.connection, application, self.handle_threema_msg, path=self.callback_path)
         web.run_app(application, port=9000, access_log=logging.getLogger('threema_api'))
 
     @prometheus_async.aio.time(BOT_RESPONSE_TIME)
