@@ -504,6 +504,6 @@ class Visualization:
     @staticmethod
     def tick_formatter_german_numbers(tick_value, position) -> str:
         if tick_value > 999999:
-            tick_value = int(tick_value / 1000000)
-            return str(tick_value) + " Mio."
+            tick_value = float(tick_value / 1000000)
+            return str(tick_value).replace(".", ",") + " Mio."
         return utils.format_int(int(tick_value))
