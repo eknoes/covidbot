@@ -3,12 +3,12 @@ import re
 from datetime import datetime
 from typing import List, Optional, Iterable
 
-from TwitterAPI import TwitterAPI, TwitterResponse
+from TwitterAPI import TwitterAPI, TwitterResponse, TwitterConnectionError
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.location_service import LocationService
 from covidbot.metrics import SENT_MESSAGE_COUNT, API_RATE_LIMIT, API_RESPONSE_TIME, \
-    API_RESPONSE_CODE
+    API_RESPONSE_CODE, API_ERROR
 from covidbot.interfaces.single_command_interface import SingleCommandInterface, SingleArgumentRequest
 from covidbot.user_manager import UserManager
 from covidbot.utils import replace_by_list
@@ -95,8 +95,13 @@ class TwitterInterface(SingleCommandInterface):
         API_RESPONSE_CODE.labels(platform='twitter', code=response.status_code).inc()
 
     def get_mentions(self) -> Iterable[SingleArgumentRequest]:
-        with API_RESPONSE_TIME.labels(platform='twitter').time():
-            response = self.twitter.request(f"statuses/mentions_timeline", params={'tweet_mode': 'extended'})
+        try:
+            with API_RESPONSE_TIME.labels(platform='twitter').time():
+                response = self.twitter.request(f"statuses/mentions_timeline", params={'tweet_mode': 'extended'})
+        except TwitterConnectionError as e:
+            self.log.warning(f"TwitterConnectionError while fetching mentions: {e}", exc_info=e)
+            API_ERROR.inc()
+            return []
         self.update_twitter_metrics(response)
         mentions = []
         if 200 <= response.status_code < 300:

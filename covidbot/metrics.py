@@ -29,6 +29,7 @@ LOCATION_DB_LOOKUP = Summary('bot_location_db_lookup', 'Time used for database l
 API_RATE_LIMIT = Gauge('bot_api_rate_limit', 'Current Rate Limit', ['platform', 'type'])
 API_RESPONSE_CODE = Counter('bot_api_response_code', 'Twitter API response codes', ['platform', 'code'])
 API_RESPONSE_TIME = Summary('bot_api_response_time', 'Twitter API response time', ['platform'])
+API_ERROR = Counter('bot_api_connection_error', 'Twitter API connection error')
 
 # Error Metrics
 BOT_SEND_MESSAGE_ERRORS = Counter('bot_send_message_error', 'Number of errors while sending a message',
