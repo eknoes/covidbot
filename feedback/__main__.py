@@ -13,10 +13,11 @@ routes = web.RouteTableDef()
 config = parse_config('config.ini')
 connection = get_connection(config, autocommit=True)
 user_manager = FeedbackManager(connection)
+base_url = config.get('FEEDBACK', 'BASE_URL', fallback='')
 
 
-@routes.get(r"/user/{user_id:\d+}")
-@routes.get("/")
+@routes.get(base_url + r"/user/{user_id:\d+}")
+@routes.get(base_url + "/")
 @aiohttp_jinja2.template('single.jinja2')
 async def show_user(request):
     communication = user_manager.get_all_communication()
@@ -34,10 +35,10 @@ async def show_user(request):
     if not user:
         raise HTTPNotFound()
 
-    return {'messagelist': communication, 'user': user}
+    return {'messagelist': communication, 'user': user, 'base_url': base_url}
 
 
-@routes.post(r"/user/{user_id:\d+}")
+@routes.post(base_url + r"/user/{user_id:\d+}")
 async def post_user(request: Request):
     user_id = int(request.match_info["user_id"])
     form = await request.post()
@@ -47,7 +48,7 @@ async def post_user(request: Request):
         user_manager.mark_user_unread(user_id)
     elif form.get('reply'):
         user_manager.message_user(user_id, form.get('reply-message'))
-    raise HTTPFound(f'/user/{request.match_info["user_id"]}')
+    raise HTTPFound(base_url + f'/user/{request.match_info["user_id"]}')
 
 
 def run():
@@ -56,7 +57,7 @@ def run():
     app.add_routes([web.static('/static', 'resources/feedback-templates/static')])
     aiohttp_jinja2.setup(app,
                          loader=jinja2.FileSystemLoader('resources/feedback-templates/'))
-    web.run_app(app)
+    web.run_app(app, port=config.getint("FEEDBACK", "PORT", fallback=8080))
 
 
 if __name__ == "__main__":

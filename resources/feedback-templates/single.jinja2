@@ -2,7 +2,7 @@
 {% block messagelist %}
     {%  for item in messagelist %}
         <div class="email-item email-item{% if item.user_id == user.user_id %}-selected{% elif item.state().value == "unread" %}-unread{% elif item.state().value == "answered" %}-answered{% endif %}  pure-g">
-            <a href="/user/{{ item.user_id }}">
+            <a href="{{ base_url }}/user/{{ item.user_id }}">
             <div class="pure-u">
                 <h5 class="email-name">{{ item.platform }}</h5>
                 <h4 class="email-subject">Nutzer #{{ item.user_id }}</h4>
@@ -23,7 +23,7 @@
 </div>
 
 <div class="email-content-controls pure-u-2-3">
-    <form method="post" class="pure-form-aligned pure-form" action="/user/{{ user.user_id }}">
+    <form method="post" class="pure-form-aligned pure-form" action="{{ base_url }}/user/{{ user.user_id }}">
         <div class="pure-u-1-5">
             {% if user.state().value == "unread" %}
                 <input type="submit" class="pure-button pure-button-primary" name="mark_read" value="Als Gelesen markieren">
@@ -44,7 +44,7 @@
 {% endblock %}
 {% block replyform %}
 <div class="reply-form pure-u-4-5">
-    <form class="pure-form-stacked" method="POST"  action="/user/{{ user.user_id }}">
+    <form class="pure-form-stacked" method="POST"  action="{{ base_url }}/user/{{ user.user_id }}">
         <div class="pure-u-1-1">
             <label for="reply-textarea"></label>
             <textarea id="reply-textarea" name="reply-message" class="pure-u-1-1" placeholder=""></textarea>

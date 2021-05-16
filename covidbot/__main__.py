@@ -54,7 +54,7 @@ class MessengerBotSetup:
             stream_log_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
             logging.getLogger().addHandler(stream_log_handler)
 
-        if name not in ["signal", "threema", "telegram", "interactive", "feedback", "twitter", "mastodon", "instagram",
+        if name not in ["signal", "threema", "telegram", "interactive", "twitter", "mastodon", "instagram",
                         "messenger", "facebook"]:
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
@@ -153,12 +153,6 @@ class MessengerBotSetup:
             from covidbot.interfaces.telegram_interface import TelegramInterface
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
                                      dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
-        if self.name == "feedback":
-            if not self.config.has_section("TELEGRAM"):
-                raise ValueError("TELEGRAM is not configured")
-            from covidbot.interfaces.feedback_forwarder import FeedbackForwarder
-            return FeedbackForwarder(api_key=self.config['TELEGRAM'].get('API_KEY'),
-                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"), user_manager=user_manager)
 
         if self.name == "interactive":
             from covidbot.bot import InteractiveInterface
@@ -345,18 +339,6 @@ def main():
                         asyncio.run(telegram.send_message_to_users(f"Exception happened on Data Update with "
                                                                    f"{updater.__class__.__name__}: {error}",
                                                                    [config["TELEGRAM"].get("DEV_CHAT")]))
-
-        # Forward Feedback
-        try:
-            with MessengerBotSetup("feedback", config, setup_logs=False, monitoring=False) as iface:
-                asyncio.run(iface.send_unconfirmed_reports())
-        except Exception as error:
-            # Data did not make it through plausibility check
-            logging.exception(f"Exception happened on forwarding Feedback: {error}",
-                              exc_info=error)
-            with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                asyncio.run(telegram.send_message_to_users(f"Exception happened on forwarding Feedback: {error}",
-                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Check Tweets & Co
         platforms = []
