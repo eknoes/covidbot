@@ -94,7 +94,7 @@ class FeedbackManager(object):
                 state = TicketState.SENT
                 if row['is_read'] == '1' and row['from_user'] == 1:
                     state = TicketState.READ
-                elif row['is_read'] == '0' and row['from_user'] == 0:
+                elif not row['is_read'] and row['from_user'] == 0:
                     state = TicketState.CREATED
 
                 results[row['user_id']].messages.append(
