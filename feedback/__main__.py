@@ -54,7 +54,7 @@ async def post_user(request: Request):
 def run():
     app = web.Application()
     app.add_routes(routes)
-    app.add_routes([web.static('/static', 'resources/feedback-templates/static')])
+    app.add_routes([web.static(base_url + '/static', 'resources/feedback-templates/static')])
     aiohttp_jinja2.setup(app,
                          loader=jinja2.FileSystemLoader('resources/feedback-templates/'))
     web.run_app(app, port=config.getint("FEEDBACK", "PORT", fallback=8080))
