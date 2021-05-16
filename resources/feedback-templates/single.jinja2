@@ -7,7 +7,7 @@
                 <h5 class="email-name">{{ item.last_communication_str() }}</h5>
                 <h4 class="email-subject">Nutzer #{{ item.user_id }}</h4>
                 <p class="email-desc">
-                    {{ item.desc() }}
+                    {{ item.desc() | safe }}
                 </p>
             </div>
             </a>
