@@ -1,6 +1,6 @@
 import aiohttp_jinja2
 import jinja2
-from aiohttp.web_exceptions import HTTPNotFound, HTTPFound
+from aiohttp.web_exceptions import HTTPNotFound, HTTPFound, HTTPBadRequest
 from aiohttp.web_request import Request
 
 from covidbot.__main__ import get_connection, parse_config
@@ -47,7 +47,9 @@ async def post_user(request: Request):
     elif form.get('mark_unread'):
         user_manager.mark_user_unread(user_id)
     elif form.get('reply'):
-        user_manager.message_user(user_id, form.get('reply-message'))
+        user_manager.message_user(user_id, form.get('message'))
+    else:
+        raise HTTPBadRequest(reason="You have to make some action")
     raise HTTPFound(base_url + f'/user/{request.match_info["user_id"]}')
 
 
