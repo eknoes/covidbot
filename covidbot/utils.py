@@ -207,7 +207,8 @@ def split_message(message: str, max_chars: Optional[int] = None, max_bytes: Opti
     return messages
 
 
-class ReportType(Enum):
+class MessageType(Enum):
     CASES_GERMANY = "cases-germany"
     VACCINATION_GERMANY = "vaccinations-germany"
     ICU_GERMANY = "icu-germany"
+    USER_MESSAGE = "user-message"

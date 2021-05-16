@@ -82,6 +82,7 @@ class MessengerBotSetup:
                 if len(command.split()) == 1:
                     return f"/{command}"
                 return f"<code>/{command}</code>"
+
             command_format = telegram_format
         else:
             command_format = lambda command: f'"{command}"'
@@ -124,7 +125,8 @@ class MessengerBotSetup:
                 raise ValueError("THREEMA is not configured")
             from covidbot.interfaces.threema_interface import ThreemaInterface
             return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
-                                    self.config['THREEMA'].get('PRIVATE_KEY'), self.config['THREEMA'].get('CALLBACK_PATH'),
+                                    self.config['THREEMA'].get('PRIVATE_KEY'),
+                                    self.config['THREEMA'].get('CALLBACK_PATH'),
                                     bot, dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
 
         if self.name == "messenger":
@@ -221,15 +223,7 @@ async def sendUpdates(messenger_iface: str, config: configparser):
         logging.error(f"Got exception while sending daily reports for {messenger_iface}:\n{e}", exc_info=e)
 
 
-async def send_all(message: str, recipients: List[str], config_dict, messenger_interface=None):
-    if not messenger_interface and recipients:
-        print("You have to specify a messenger if you want to send a message to certain users!")
-        return
-
-    if messenger_interface and messenger_interface not in ["signal", "threema", "telegram", "messenger"]:
-        print("Your messenger name is invalid.")
-        return
-
+async def send_all(message: str, recipients: List[int], config_dict):
     if not message:
         message = ""
         line = input("Please type a message:\n> ")
@@ -244,26 +238,16 @@ async def send_all(message: str, recipients: List[str], config_dict, messenger_i
     else:
         print("To all users")
 
-    if messenger_interface:
-        print(f"On {messenger_interface}")
-    else:
-        print(f"On all messengers")
-
     if input("PLEASE CONFIRM SENDING! (y/N)").lower() != "y":
         print("Aborting...")
         return
 
-    if messenger_interface:
-        with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
-            await iface.send_message_to_users(message, recipients)
+    user_manager = UserManager("message-sender", get_connection(config_dict))
+    if not recipients:
+        recipients = map(lambda x: x.id, user_manager.get_all_user(all_platforms=True))
 
-    else:
-        for messenger_interface in ["telegram", "threema", "signal", "messenger"]:
-            try:
-                with MessengerBotSetup(messenger_interface, config_dict, setup_logs=False, monitoring=False) as iface:
-                    await iface.send_message_to_users(message, recipients)
-            except Exception as e:
-                logging.error(f"Got exception while sending message on {messenger_interface}: ", exc_info=e)
+    for r in recipients:
+        user_manager.add_user_message(r, message)
 
 
 def main():
@@ -288,8 +272,8 @@ def main():
                         action='store_true')
     parser.add_argument('--message-user', help='Send a message to users', action='store_true')
     parser.add_argument('--file', help='Message, requires --message-user', metavar='MESSAGE_FILE', action='store')
-    parser.add_argument('--all', help='Intended receivers, requires --platform', action='store_true')
-    parser.add_argument('--specific', help='Intended receivers, requires --platform', metavar='USER',
+    parser.add_argument('--all', help='Send to all users, mutually exclusive with --specific', action='store_true')
+    parser.add_argument('--specific', help='Send to a list of users, mutually exclusive with --all', metavar='USER',
                         action='store', nargs="+", type=str)
 
     # Just for testing
@@ -321,10 +305,6 @@ def main():
         print("You can't send a message to --all and --specific")
         exit(1)
 
-    if args.specific and not args.platform:
-        print("--Platform required for --specific USER1 USER2 ...")
-        exit(1)
-
     # Read Config
     config = parse_config(args.config)
 
@@ -343,9 +323,11 @@ def main():
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
-            from covidbot.covid_data import CovidData, VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, RKIUpdater, ICUGermanyUpdater, \
+            from covidbot.covid_data import CovidData, VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, \
+                RKIUpdater, ICUGermanyUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater
-            for updater in [RKIUpdater(conn), ICUGermanyHistoryUpdater(conn), VaccinationGermanyStatesImpfdashboardUpdater(conn),
+            for updater in [RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
+                            VaccinationGermanyStatesImpfdashboardUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
                             RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:
@@ -424,8 +406,7 @@ def main():
         if args.specific:
             recipients_input = args.specific
 
-        messenger = args.platform
-        asyncio.run(send_all(message_input, recipients_input, config, messenger))
+        asyncio.run(send_all(message_input, recipients_input, config))
     elif args.platform:
         with MessengerBotSetup(args.platform, config, logging_level) as interface:
             logging.info(f"### Start {args.platform} Bot ###")

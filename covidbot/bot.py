@@ -15,7 +15,7 @@ from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
 from covidbot.settings import BotUserSettings
 from covidbot.utils import adapt_text, format_float, format_int, format_noun, FormattableNoun, \
-    format_data_trend, ReportType
+    format_data_trend, MessageType
 from covidbot.interfaces.bot_response import UserChoice, BotResponse
 
 
@@ -646,7 +646,7 @@ class Bot(object):
                             f"platform_id: {user.platform_id}\n"
                             f"user_id: {user.id}\n"
                             f"lang: {user.language}\n"
-                            f"last_update: {self.user_manager.get_last_updates(user.id, ReportType.CASES_GERMANY)}\n"
+                            f"last_update: {self.user_manager.get_last_updates(user.id, MessageType.CASES_GERMANY)}\n"
                             f"subscriptions: {user.subscriptions}\n"
                             f"reports: {[x.value for x in user.subscribed_reports]}")]
 
@@ -980,7 +980,7 @@ class Bot(object):
                     new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
 
-    def get_available_user_messages(self) -> Generator[Tuple[ReportType, Union[int, str], List[BotResponse]], None, None]:
+    def get_available_user_messages(self) -> Generator[Tuple[MessageType, Union[int, str], List[BotResponse]], None, None]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
@@ -990,26 +990,38 @@ class Bot(object):
         users = []
         data_update = self.covid_data.get_last_update()
         for user in self.user_manager.get_all_user(with_subscriptions=True):
-            if not user.activated or not user.subscriptions or user.created.date() == date.today():
+            if not user.activated:
                 continue
 
-            if ReportType.CASES_GERMANY in user.subscribed_reports:
-                last_update = self.user_manager.get_last_updates(user.id, ReportType.CASES_GERMANY)
+            if MessageType.CASES_GERMANY in user.subscribed_reports and user.subscriptions and user.created.date() != date.today():
+                last_update = self.user_manager.get_last_updates(user.id, MessageType.CASES_GERMANY)
                 if not last_update or last_update.date() < data_update:
-                    users.append((user, ReportType.CASES_GERMANY))
+                    users.append((user, MessageType.CASES_GERMANY))
+
+            if self.user_manager.get_user_messages(user.id):
+                users.append((user, MessageType.USER_MESSAGE))
 
         for user, report in users:
-            if report == ReportType.CASES_GERMANY:
+            if report == MessageType.CASES_GERMANY:
                 if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA):
-                    yield ReportType.CASES_GERMANY, user.platform_id, self._get_new_report(user.subscriptions, user.id)
+                    yield MessageType.CASES_GERMANY, user.platform_id, self._get_new_report(user.subscriptions, user.id)
                 else:
-                    yield ReportType.CASES_GERMANY, user.platform_id, self._get_report(user.subscriptions, user.id)
+                    yield MessageType.CASES_GERMANY, user.platform_id, self._get_report(user.subscriptions, user.id)
+            elif report == MessageType.USER_MESSAGE:
+                messages = self.user_manager.get_user_messages(user.id)
+                if messages:
+                    responses = []
+                    for m in messages:
+                        responses.append(BotResponse(m))
+                    yield MessageType.USER_MESSAGE, user.platform_id, responses
             else:
                 self.log.error(f"Unknown report type for user {user.id}: {report}")
 
-    def confirm_message_send(self, report_type: ReportType, user_id: Union[str, int]):
+    def confirm_message_send(self, report_type: MessageType, user_id: Union[str, int]):
         user_id = self.user_manager.get_user_id(user_id)
         if user_id:
+            if report_type == MessageType.USER_MESSAGE:
+                self.user_manager.confirm_user_messages_sent(user_id)
             self.user_manager.add_sent_report(user_id, report_type)
 
     def user_messages_available(self) -> bool:
@@ -1020,13 +1032,16 @@ class Bot(object):
         """
         data_update = self.covid_data.get_last_update()
         for user in self.user_manager.get_all_user(with_subscriptions=True):
-            if not user.activated or not user.subscriptions or user.created.date() == date.today():
+            if not user.activated:
                 continue
 
-            if ReportType.CASES_GERMANY in user.subscribed_reports:
-                last_update = self.user_manager.get_last_updates(user.id, ReportType.CASES_GERMANY)
+            if MessageType.CASES_GERMANY in user.subscribed_reports and user.subscriptions and user.created.date() != date.today():
+                last_update = self.user_manager.get_last_updates(user.id, MessageType.CASES_GERMANY)
                 if not last_update or last_update.date() < data_update:
                     return True
+
+            if self.user_manager.get_user_messages(user.id):
+                return True
         return False
 
     def parseLocationInput(self, location_query: str, set_feedback=None, help_command="Befehl") -> Union[

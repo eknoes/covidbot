@@ -6,7 +6,7 @@ from mysql.connector import MySQLConnection
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import CovidData
 from covidbot.user_manager import UserManager
-from covidbot.utils import ReportType
+from covidbot.utils import MessageType
 
 
 class TestSubscriptionManager(TestCase):
@@ -28,6 +28,7 @@ class TestSubscriptionManager(TestCase):
             cursor.execute("DROP TABLE IF EXISTS user_feedback;")
             cursor.execute("DROP TABLE IF EXISTS bot_user_sent_reports;")
             cursor.execute("DROP TABLE IF EXISTS report_subscriptions;")
+            cursor.execute("DROP TABLE IF EXISTS user_responses;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
 
         self.test_manager = UserManager("unittest", self.conn)
@@ -88,9 +89,9 @@ class TestSubscriptionManager(TestCase):
         self.assertEqual(self.test_manager.get_user(uid2, with_subscriptions=True).subscriptions, [],
                          "New user should have no subscriptions")
 
-        self.assertCountEqual([ReportType.CASES_GERMANY],
+        self.assertCountEqual([MessageType.CASES_GERMANY],
                               self.test_manager.get_user(uid2, with_subscriptions=True).subscribed_reports,
-                              f"New user should be subscribed to {ReportType.CASES_GERMANY}")
+                              f"New user should be subscribed to {MessageType.CASES_GERMANY}")
 
     def test_create_user(self):
         self.assertTrue(self.test_manager.create_user("1"), "Creating a non-existing user should return True")

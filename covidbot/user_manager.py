@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple, Union
 from mysql.connector import MySQLConnection, IntegrityError, OperationalError
 
 from covidbot.settings import BotUserSettings
-from covidbot.utils import ReportType
+from covidbot.utils import MessageType
 
 
 @dataclass
@@ -15,7 +15,7 @@ class BotUser:
     platform_id: Union[int, str]
     language: str
     created: datetime
-    subscribed_reports: Optional[List[ReportType]] = None
+    subscribed_reports: Optional[List[MessageType]] = None
     subscriptions: Optional[List[int]] = None
     activated: bool = False
 
@@ -49,6 +49,10 @@ class UserManager(object):
                            'added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL, '
                            'replied TINYINT(1) NOT NULL DEFAULT 0, forwarded TINYINT(1) NOT NULL DEFAULT 0, '
                            'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
+            cursor.execute('CREATE TABLE IF NOT EXISTS user_responses '
+                           '(id INT AUTO_INCREMENT PRIMARY KEY, receiver_id INT NOT NULL, '
+                           'created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), sent DATETIME(6) DEFAULT NULL,'
+                           'message TEXT, FOREIGN KEY(receiver_id) REFERENCES bot_user(user_id))')
             cursor.execute('CREATE TABLE IF NOT EXISTS answered_messages '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(20), message_id BIGINT, '
                            'UNIQUE(platform, message_id))')
@@ -117,7 +121,7 @@ class UserManager(object):
                 return False
             return True
 
-    def add_report_subscription(self, user_id: int, report: ReportType) -> bool:
+    def add_report_subscription(self, user_id: int, report: MessageType) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             try:
                 cursor.execute('INSERT INTO report_subscriptions (user_id, report) VALUES (%s, %s)', [user_id, report.value])
@@ -128,7 +132,7 @@ class UserManager(object):
                 return False
             return False
 
-    def rm_report_subscription(self, user_id: int, report: ReportType) -> bool:
+    def rm_report_subscription(self, user_id: int, report: MessageType) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('DELETE FROM report_subscriptions WHERE user_id=%s AND report=%s', [user_id, report])
             self.connection.commit()
@@ -136,21 +140,28 @@ class UserManager(object):
                 return False
             return True
 
-    def get_all_user(self, with_subscriptions=False, filter_id=None) -> List[BotUser]:
+    def get_all_user(self, with_subscriptions=False, filter_id=None, all_platforms=False) -> List[BotUser]:
         result = []
         with self.connection.cursor(dictionary=True) as cursor:
+            args = []
             if with_subscriptions:
                 query = ("SELECT bot_user.user_id, platform_id, created, language, rs, activated, report FROM bot_user "
                          "LEFT JOIN subscriptions s on bot_user.user_id = s.user_id "
-                         "LEFT JOIN report_subscriptions r on bot_user.user_id = r.user_id "
-                         "WHERE platform=%s")
+                         "LEFT JOIN report_subscriptions r on bot_user.user_id = r.user_id")
+                
             else:
                 query = "SELECT user_id, platform_id, language, activated, created " \
-                        "FROM bot_user WHERE platform=%s"
-            args = [self.platform]
+                        "FROM bot_user"
+
+            if not all_platforms:
+                query += " WHERE platform=%s"
+                args.append(self.platform)
 
             if filter_id:
-                query += " AND bot_user.user_id=%s"
+                if not all_platforms:
+                    query += " AND bot_user.user_id=%s"
+                else:
+                    query += " WHERE bot_user.user_id=%s"
                 args.append(filter_id)
             query += " ORDER BY bot_user.user_id"
 
@@ -182,7 +193,7 @@ class UserManager(object):
                         current_user.subscribed_reports = []
 
                     if row['report'] is not None and row['report'] not in current_user.subscribed_reports:
-                        current_user.subscribed_reports.append(ReportType(row['report']))
+                        current_user.subscribed_reports.append(MessageType(row['report']))
 
             if current_user:
                 result.append(current_user)
@@ -207,7 +218,7 @@ class UserManager(object):
                 return True
         return False
 
-    def add_sent_report(self, user_id: int, report: ReportType) -> bool:
+    def add_sent_report(self, user_id: int, report: MessageType) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
             try:
                 cursor.execute("INSERT INTO bot_user_sent_reports (user_id, report, sent_report) VALUE (%s, %s, NOW())",
@@ -219,7 +230,7 @@ class UserManager(object):
             except IntegrityError as e:
                 self.log.error(f"Can't add sent report for {user_id}:\n{e}", exc_info=e)
 
-    def get_last_updates(self, user_id: int, report: ReportType) -> Optional[datetime]:
+    def get_last_updates(self, user_id: int, report: MessageType) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT sent_report FROM bot_user_sent_reports WHERE user_id=%s AND report=%s '
                            'ORDER BY sent_report DESC LIMIT 1', [user_id, report.value])
@@ -244,7 +255,7 @@ class UserManager(object):
                     self.connection.commit()
                     user_id = cursor.lastrowid
                     cursor.execute("INSERT INTO report_subscriptions (user_id, report) VALUE (%s, %s)",
-                                   [user_id, ReportType.CASES_GERMANY.value])
+                                   [user_id, MessageType.CASES_GERMANY.value])
                     return user_id
             except IntegrityError:
                 return False
@@ -336,6 +347,24 @@ class UserManager(object):
                 results.append((str(row['platform']).capitalize(), row['followers']))
             return results
 
+    def add_user_message(self, recipient_id: int, message: str):
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('INSERT INTO user_responses (receiver_id, message) VALUE (%s, %s)', [recipient_id, message])
+        self.connection.commit()
+
+    def get_user_messages(self, user_id: int) -> List[str]:
+        messages = []
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT message FROM user_responses WHERE receiver_id=%s AND sent IS NULL", [user_id])
+            for m in cursor.fetchall():
+                messages.append(m['message'])
+        return messages
+
+    def confirm_user_messages_sent(self, user_id: int):
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('UPDATE user_responses SET sent=CURRENT_TIMESTAMP() WHERE receiver_id=%s AND sent IS NULL',
+                           [user_id])
+
     def add_feedback(self, user_id: int, feedback: str) -> Optional[int]:
         if not feedback:
             return None
@@ -362,7 +391,7 @@ class UserManager(object):
                            f"Plattform: {row['platform']}\n" \
                            f"Plattform ID: {row['platform_id']}\n" \
                            f"Befehl zum Antworten:\n" \
-                           f"<code>python -m covidbot --message-user --platform {row['platform']} --specific {row['platform_id']}" \
+                           f"<code>python -m covidbot --message-user --specific {row['user_id']}" \
                            f"</code>"
                 results.append((row['id'], feedback))
             return results

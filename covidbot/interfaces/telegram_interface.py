@@ -190,6 +190,7 @@ class TelegramInterface(MessengerInterface):
             else:
                 self.log.warning(f"Could not migrate {chat_id} to {e.new_chat_id}")
                 self.bot.disable_user(chat_id)
+                success = False
         return success
 
     @BOT_RESPONSE_TIME.time()
