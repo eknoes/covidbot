@@ -44,7 +44,10 @@ class Communication:
     platform: str
     messages: List[SingleTicket]
 
-    def last_communication(self) -> str:
+    def last_communication(self) -> datetime:
+        return self.messages[-1].date
+
+    def last_communication_str(self) -> str:
         return self.messages[-1].date.strftime("%d.%m.%Y %H:%m")
 
     def state(self) -> CommunicationState:
@@ -104,10 +107,10 @@ class FeedbackManager(object):
         bottom_communication = []
         for key, value in results.items():
             value.messages.sort(key=lambda x: x.date)
-            if value.state() == CommunicationState.ANSWERED:
-                bottom_communication.append(value)
-            else:
+            if value.state() == CommunicationState.UNREAD:
                 top_communication.append(value)
+            else:
+                bottom_communication.append(value)
 
         top_communication.sort(key=lambda x: x.last_communication(), reverse=True)
         bottom_communication.sort(key=lambda x: x.last_communication(), reverse=True)
