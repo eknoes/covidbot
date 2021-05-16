@@ -1,0 +1,97 @@
+<html lang="de">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Covidbot Feedback</title>
+        <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/grids-responsive-min.css">
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+<div id="layout" class="content pure-g">
+    <div id="list" class="pure-u-1">
+        {% block messagelist %}
+        {% endblock %}
+    </div>
+
+    <div id="main" class="pure-u-1">
+        <div class="email-content">
+            <div class="email-content-header pure-g">
+                {% block messageheader %}
+                {% endblock %}
+            </div>
+
+            <div id="chat-body" class="email-content-body pure-g">
+                {% block messages %}
+                {% endblock %}
+            </div>
+
+            <div id="chat-footer" class="email-content-footer pure-g">
+                {% block replyform %}
+                {% endblock %}
+                <div class="pure-u-1-1">
+                <h5>Hilfe</h5>
+                <ul>
+                    <li>📤 Nachricht wird versendet</li>
+                    <li>✉️ Nachricht ist gesendet</li>
+                    <li>📃 Nachricht wurde gelesen</li>
+                </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Script to make the Menu link work -->
+<!-- Just stripped down version of the js/ui.js script for the side-menu layout -->
+<script>
+    element = document.getElementById('chat-footer')
+    element.scrollIntoView()
+
+    function getElements() {
+        return {
+            menu: document.getElementById('nav'),
+            menuLink: document.getElementById('menuLink')
+        };
+    }
+
+    function toggleClass(element, className) {
+        var classes = element.className.split(/\s+/);
+        var length = classes.length;
+        var i = 0;
+
+        for (; i < length; i++) {
+            if (classes[i] === className) {
+                classes.splice(i, 1);
+                break;
+            }
+        }
+        // The className is not found
+        if (length === classes.length) {
+            classes.push(className);
+        }
+
+        element.className = classes.join(' ');
+    }
+
+    function toggleMenu() {
+        var active = 'active';
+        var elements = getElements();
+
+        toggleClass(elements.menu, active);
+    }
+
+    function handleEvent(e) {
+        var elements = getElements();
+
+        if (e.target.id === elements.menuLink.id) {
+            toggleMenu();
+            e.preventDefault();
+        } else if (elements.menu.className.indexOf('active') !== -1) {
+            toggleMenu();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('click', handleEvent);
+    });
+</script>    </body>
+</html>

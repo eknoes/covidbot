@@ -46,8 +46,8 @@ class UserManager(object):
                            'UNIQUE(user_id, rs), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             cursor.execute('CREATE TABLE IF NOT EXISTS user_feedback '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, user_id INTEGER,'
-                           'added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL, '
-                           'replied TINYINT(1) NOT NULL DEFAULT 0, forwarded TINYINT(1) NOT NULL DEFAULT 0, '
+                           'added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL, is_read'
+                           ' TINYINT(1) NOT NULL DEFAULT 0, is_tagged TINYINT(1) NOT NULL DEFAULT 0, '
                            'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             cursor.execute('CREATE TABLE IF NOT EXISTS user_responses '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, receiver_id INT NOT NULL, '
@@ -376,37 +376,6 @@ class UserManager(object):
                 self.connection.commit()
                 return new_id
             return None
-
-    def get_not_forwarded_feedback(self) -> List[Tuple[int, str]]:
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute(
-                "SELECT id, feedback, platform, platform_id, user_feedback.user_id, user_feedback.added FROM user_feedback "
-                "LEFT JOIN bot_user bu on bu.user_id = user_feedback.user_id "
-                "WHERE forwarded=0")
-            results = []
-            for row in cursor.fetchall():
-                feedback = f"<b>Neues Feedback von {row['user_id']}</b>\n" \
-                           f"{row['feedback']}\n\n" \
-                           f"Datum: {row['added']}\n" \
-                           f"Plattform: {row['platform']}\n" \
-                           f"Plattform ID: {row['platform_id']}\n" \
-                           f"Befehl zum Antworten:\n" \
-                           f"<code>python -m covidbot --message-user --specific {row['user_id']}" \
-                           f"</code>"
-                results.append((row['id'], feedback))
-            return results
-
-    def confirm_feedback_forwarded(self, feedback_id: int):
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("UPDATE user_feedback SET forwarded=1 WHERE id=%s", [feedback_id])
-
-    def rm_feedback(self, feedback_id) -> bool:
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('DELETE FROM user_feedback WHERE id=%s', [feedback_id])
-            if cursor.rowcount == 1:
-                self.connection.commit()
-                return True
-            return False
 
     def is_message_answered(self, message_id: int) -> bool:
         with self.connection.cursor() as cursor:
