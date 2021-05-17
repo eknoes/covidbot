@@ -128,17 +128,22 @@ a {
     border-radius: 3px;
 }
 
-.ticket-tag-frage {
-    background: #ffc94c;
-}
-.ticket-tag-lob {
+.ticket-tag-hilfe {
     background: #47A1B3;
 }
 .ticket-tag-idee {
     background: #40c365;
 }
 .ticket-tag-bug {
-    background: #FF4090;
+    background: red;
+}
+
+.ticket-tag-sönke {
+    background: palevioletred;
+}
+
+.ticket-tag-erik {
+    background: yellow;
 }
 
 button.add-ticket-tag-button, button.remove-ticket-tag-button {

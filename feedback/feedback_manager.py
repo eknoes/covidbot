@@ -159,4 +159,4 @@ class FeedbackManager(object):
 
     @staticmethod
     def get_available_tags() -> List[str]:
-        return ["idee", "frage", "lob", "bug"]
+        return ["hilfe", "idee", "bug", "sönke", "erik"]
