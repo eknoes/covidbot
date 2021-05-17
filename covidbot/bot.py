@@ -487,9 +487,9 @@ class Bot(object):
                 .format(r_value=format_float(current_data.r_value.r_value_7day),
                         r_trend=format_data_trend(current_data.r_value.r_trend))
         message += "\n\n"
-        message += "Neuinfektionen (seit gestern): {new_cases} {new_cases_trend}\n" \
+        message += "Neuinfektionen (seit gestern): {new_cases}{new_cases_trend}\n" \
                    "Infektionen seit Ausbruch der Pandemie: {total_cases}\n\n" \
-                   "Neue Todesfälle (seit gestern): {new_deaths} {new_deaths_trend}\n" \
+                   "Neue Todesfälle (seit gestern): {new_deaths}{new_deaths_trend}\n" \
                    "Todesfälle seit Ausbruch der Pandemie: {total_deaths}\n\n"
 
         message = message.format(district_name=current_data.name,
