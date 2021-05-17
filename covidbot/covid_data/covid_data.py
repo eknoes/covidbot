@@ -126,7 +126,7 @@ class CovidData(object):
                     result.cases_trend = get_trend(comparison_data.new_cases, result.new_cases)
                     result.deaths_trend = get_trend(comparison_data.new_deaths, result.new_deaths)
 
-            cursor.execute('SELECT alt_name FROM county_alt_names WHERE alt_name LIKE \'DE-%\' AND district_id=%s OR district_id=(SELECT parent FROM counties WHERE rs=%s) LIMIT 1', [district_id, district_id])
+            cursor.execute('SELECT alt_name FROM county_alt_names WHERE alt_name LIKE \'DE-%\' AND (district_id=%s OR district_id=(SELECT parent FROM counties WHERE rs=%s)) LIMIT 1', [district_id, district_id])
             state_name = None
             record = cursor.fetchone()
             if record:
