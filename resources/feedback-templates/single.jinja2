@@ -14,7 +14,7 @@
     {% endif %}
     {%  for item in messagelist %}
         <div {% if item.user_id == user.user_id %}id="mail-selected"{% endif %} class="email-item email-item{% if item.user_id == user.user_id %}-selected{% elif item.state().value == "unread" %}-unread{% elif item.state().value == "answered" %}-answered{% endif %}  pure-g">
-            <a href="{{ base_url }}/user/{{ item.user_id }}{% if active_status %}?status={{ active_status }}{% endif %}">
+            <a href="{{ base_url }}/user/{{ item.user_id }}{% if active_status and active_tag %}?status={{ active_status }}&tag={{ active_tag }}{% elif active_status %}?status={{ active_status }}{% elif active_tag %}?tag={{ active_tag }}{% endif %}">
             <div class="pure-u">
                 <h5 class="email-name">{{ item.last_communication_str() }}</h5>
                 <h4 class="email-subject">{{ item.platform | capitalize() }}nutzer:in #{{ item.user_id }}</h4>

@@ -61,7 +61,7 @@ async def show_user(request: Request):
             communication = comm_unread + comm_read + comm_answered
 
     active_tag = None
-    if 'tag' in request.query:
+    if 'tag' in request.query and (not user or request.query['tag'] in user.tags):
         communication = list(filter(lambda x: request.query['tag'] in x.tags, communication))
         active_tag = request.query['tag']
 
