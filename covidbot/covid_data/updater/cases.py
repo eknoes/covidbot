@@ -174,6 +174,7 @@ class RKIHistoryUpdater(RKIUpdater):
                                    'ON DUPLICATE KEY UPDATE covid_data.total_cases=%s',
                                    [int(district_id), updated, cases_num, cases_num])
                     new_cases = True
+                self.calculate_aggregated_values(updated)
                 self.connection.commit()
 
         return new_cases
