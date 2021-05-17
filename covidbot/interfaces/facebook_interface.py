@@ -55,7 +55,12 @@ class FacebookInterface(SingleCommandInterface):
         message = urllib.parse.quote_plus(message_text)
 
         if media_file:
-            filename = os.path.basename(shutil.copy2(media_file, self.web_dir))
+            try:
+                file_loc = shutil.copy2(media_file, self.web_dir)
+            except shutil.SameFileError:
+                file_loc = media_file
+
+            filename = self.url + os.path.basename(file_loc)
             url = self.url + filename
             response = requests.request("POST", f"https://graph.facebook.com/{self.page_id}/photos?"
                                                 f"caption={message}&url={url}&access_token={self.access_token}")

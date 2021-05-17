@@ -51,7 +51,12 @@ class InstagramInterface(SingleCommandInterface):
         if not media_file:
             raise ValueError("Instagram Interface can just post a single media file with caption")
 
-        url = self.url + os.path.basename(shutil.copy2(media_file, self.web_dir))
+        try:
+            file_loc = shutil.copy2(media_file, self.web_dir)
+        except shutil.SameFileError:
+            file_loc = media_file
+
+        url = self.url + os.path.basename(file_loc)
         message_text += "\n\nUnser Covidbot versorgt Dich einmal am Tag mit den aktuellen Infektions-, Todes- und " \
                         "Impfzahlen der von Dir ausgewählten Orte. Abonniere ihn einfach auf Telegram, Threema oder " \
                         "Signal. Den Link dazu findest du in unserer Bio!"
