@@ -49,6 +49,10 @@ a {
     height: 100%;
 }
 
+#main {
+    border-top: 1px solid #DDDDDD;
+}
+
 /* Make the navigation 100% width on phones */
 #nav {
     width: 100%;
@@ -282,6 +286,8 @@ p.message-meta {
         height: 40px;
     }
 
+
+
 @media (max-width: 40em) {
     div#list, div#main {
         overflow-y: scroll;
@@ -385,6 +391,7 @@ p.message-meta {
         margin: 0;
         padding: 0;
         width: 100%;
+        border: none;
     }
 
     .email-content-header {
