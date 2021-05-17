@@ -17,7 +17,7 @@
             <a href="{{ base_url }}/user/{{ item.user_id }}">
             <div class="pure-u">
                 <h5 class="email-name">{{ item.last_communication_str() }}</h5>
-                <h4 class="email-subject">Nutzer #{{ item.user_id }}</h4>
+                <h4 class="email-subject">{{ item.platform | capitalize() }}nutzer:in #{{ item.user_id }}</h4>
                 <p class="email-desc">
                     {{ item.desc() | safe }}
                 </p>
@@ -28,16 +28,17 @@
 {% endblock %}
 {% block messageheader %}
     {% if user %}
-        <h1 class="email-content-title">Nutzer #{{ user.user_id }}</h1>
+        <h1 class="email-content-title">{{ user.platform | capitalize() }}nutzer:in #{{ user.user_id }}</h1>
         <p class="email-content-subtitle">
-            Via <a>{{ user.platform }}</a> am <span>{{ user.last_communication_str() }} Uhr</span>
+            Über <b>{{ user.platform | capitalize() }}</b> am <span>{{ user.last_communication_str() }} Uhr</span>
         </p>
         <p class="ticket-tags">{{ user.get_tags_html() | safe }}</p>
     {% endif %}
 {% endblock %}
 {% block messagecontrols %}
     {% if user %}
-        <form method="post" class="pure-form-stacked pure-form" action="{{ base_url }}/user/{{ user.user_id }}">
+        <form method="post" class="pure-form-stacked pure-form">
+            <input type="hidden" name="user_id" value="{{ user.user_id }}">
             <div class="pure-u-sm-1-2 pure-u-1-1">
                 {% for t in available_tags %}
                     {% if not t in user.tags %}
@@ -74,7 +75,9 @@
 {% endblock %}
 {% block replyform %}
     {% if user %}
-    <form class="pure-form-stacked" method="POST"  action="{{ base_url }}/user/{{ user.user_id }}">
+    <form class="pure-form-stacked" method="POST">
+        <input type="hidden" name="user_id" value="{{ user.user_id }}">
+
         <div class="pure-u-1-1">
             <label for="reply-textarea"></label>
             <textarea id="reply-textarea" name="message" class="pure-u-1-1" placeholder=""></textarea>

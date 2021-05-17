@@ -1,14 +1,12 @@
 import aiohttp_jinja2
 import jinja2
+from aiohttp import web
 from aiohttp.web_exceptions import HTTPNotFound, HTTPFound, HTTPBadRequest
 from aiohttp.web_request import Request
 from mysql.connector import OperationalError
 
 from covidbot.__main__ import get_connection, parse_config
-
-from aiohttp import web
-
-from feedback.feedback_manager import FeedbackManager, CommunicationState
+from feedback.feedback_manager import FeedbackManager
 
 routes = web.RouteTableDef()
 config = parse_config('config.ini')
@@ -33,7 +31,8 @@ async def show_user(request: Request):
         comm_unread, comm_read, comm_answered = user_manager.get_all_communication()
 
     user = None
-    communication = comm_unread
+    communication = None
+    status = ""
 
     if request.match_info.get("user_id"):
         user_id = int(request.match_info.get("user_id"))
@@ -47,7 +46,6 @@ async def show_user(request: Request):
             raise HTTPNotFound()
 
     else:
-        status = ""
         if 'status' in request.query:
             status = request.query['status']
 
@@ -60,20 +58,27 @@ async def show_user(request: Request):
         else:
             communication = comm_unread + comm_read + comm_answered
 
+    active_tag = None
     if 'tag' in request.query:
         communication = list(filter(lambda x: request.query['tag'] in x.tags, communication))
+        active_tag = request.query['tag']
 
     if communication and not user:
         user = communication[0]
 
     return {'messagelist': communication, 'user': user, 'base_url': base_url, 'num_unread': len(comm_unread),
-            'available_tags': user_manager.get_available_tags()}
+            'available_tags': user_manager.get_available_tags(), 'active_status': status, 'active_tag': active_tag}
 
 
 @routes.post(base_url + r"/user/{user_id:\d+}")
+@routes.post(base_url + "/")
 async def post_user(request: Request):
-    user_id = int(request.match_info["user_id"])
     form = await request.post()
+    user_id = form.get('user_id')
+    if not user_id:
+        raise HTTPBadRequest(reason="You need to set a user_id")
+
+    user_id = int(user_id)
     if form.get('mark_read'):
         user_manager.mark_user_read(user_id)
     elif form.get('mark_unread'):
@@ -85,10 +90,10 @@ async def post_user(request: Request):
         user_manager.remove_user_tag(user_id, form.get('remove_tag'))
     elif form.get('add_tag'):
         user_manager.add_user_tag(user_id, form.get('add_tag'))
-        raise HTTPFound(base_url + f'/user/{request.match_info["user_id"]}?tag={form.get("add_tag")}')
+        user_manager.mark_user_read(user_id)
     else:
         raise HTTPBadRequest(reason="You have to make some action")
-    raise HTTPFound(base_url + f'/user/{request.match_info["user_id"]}')
+    raise HTTPFound(request.path_qs)
 
 
 def run():

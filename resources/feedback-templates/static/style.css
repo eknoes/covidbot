@@ -112,6 +112,10 @@ a {
         height: auto;
     }
 
+    #nav .menu-item-current {
+        background: #414470;
+    }
+
 /*
  * -- EMAIL STYLES --
  * Styles relevant to the email messages, labels, counts, and more.

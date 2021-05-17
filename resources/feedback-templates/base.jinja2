@@ -15,14 +15,14 @@
         <div class="nav-inner">
             <div class="pure-menu">
                 <ul class="pure-menu-list">
-                    <li class="pure-menu-item"><a href="{{ base_url }}/" class="pure-menu-link">Alle</a></li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/" class="pure-menu-link{% if not (active_status or active_tag) %} menu-item-current{% endif %}">Alle</a></li>
                     <li class="pure-menu-heading">Status</li>
-                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=unread" class="pure-menu-link">Neu <span class="email-count">({{ num_unread }})</span></a></li>
-                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=read" class="pure-menu-link">Gelesen</a></li>
-                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=answered" class="pure-menu-link">Beantwortet</a></li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=unread" class="pure-menu-link{% if active_status == "unread" %} menu-item-current{% endif %}">Neu <span class="email-count">({{ num_unread }})</span></a></li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=read" class="pure-menu-link{% if active_status == "read" %} menu-item-current{% endif %}">Gelesen</a></li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=answered" class="pure-menu-link{% if active_status == "answered" %} menu-item-current{% endif %}">Beantwortet</a></li>
                     <li class="pure-menu-heading">Tags</li>
                     {% for t in available_tags %}
-                        <li class="pure-menu-item"><a href="{{ base_url }}/?tag={{ t }}" class="pure-menu-link"><span class="ticket-color-tag ticket-tag-{{ t }}"></span>{{ t | capitalize() }}</a></li>
+                        <li class="pure-menu-item"><a href="{{ base_url }}/?tag={{ t }}" class="pure-menu-link{% if active_tag == t %} menu-item-current{% endif %}"><span class="ticket-color-tag ticket-tag-{{ t }}"></span>{{ t | capitalize() }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
