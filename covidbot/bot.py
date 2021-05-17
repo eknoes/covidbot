@@ -64,7 +64,7 @@ class Bot(object):
         self.handler_list.append(Handler("hilfe", self.helpHandler, False))
         self.handler_list.append(Handler("feedback", self.feedbackHandler, False))
         self.handler_list.append(Handler("info", self.infoHandler, False))
-        self.handler_list.append(Handler("impfungen", self.vaccHandler, False))
+        self.handler_list.append(Handler("impfungen", self.vaccHandler, True))
         self.handler_list.append(Handler("abo", self.subscribeHandler, True))
         self.handler_list.append(Handler("regeln", self.rulesHandler, True))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler, True))
@@ -116,7 +116,7 @@ class Bot(object):
         if user_id and user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
-                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln"]:
+                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln", "impfungen"]:
                     user_input += " " + str(state[1])
                 del self.chat_states[user_id]
             elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
@@ -235,6 +235,7 @@ class Bot(object):
                     'Sendest du "Daten", erhältst Du einmalig Informationen über den zuvor gewählten Ort. Diese '
                     'enthalten eine Grafik die für diesen Ort generiert wurde.\n'
                     'Wenn du "Regeln" sendest, erhältst du die aktuell gültigen Regeln für dein Bundesland. '
+                    'Du kannst auch "Impfungen" senden, um einen Überblick über die Impflage zu bekommen. '
                     'Sende {info_command} um die Erläuterung zu den verschiedenen Daten und Quellen mit weiteren '
                     'Informationen zu erhalten.\n\n'
                     '<b>💬 Feedback</b>\n'
@@ -296,49 +297,62 @@ class Bot(object):
 
     def vaccHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('vaccinations').inc()
-        district_id = 0  # TODO: Use arguments
-        parent_data = self.covid_data.get_district_data(district_id)
-        if not parent_data.vaccinations:
-            return [BotResponse(
-                f"Leider kann für {parent_data.name} keine Impfübersicht generiert werden, da keine Daten vorliegen.")]
 
-        message = f"<b>💉 Impfdaten ({parent_data.name})</b>\n"
+        if user_input:
+            location = self.parseLocationInput(user_input)
+            if location and type(location) != District:
+                return location
+            location = self.covid_data.get_district_data(location.id)
+        else:
+            location = self.covid_data.get_district_data(0)
+
+        if not location.vaccinations and location.parent is not None:
+            location = self.covid_data.get_district_data(location.parent)
+
+        if not location.vaccinations:
+            return [BotResponse(
+                f"Leider kann für {location.name} keine Impfübersicht generiert werden, da keine Daten vorliegen.")]
+
+        message = f"<b>💉 Impfdaten ({location.name})</b>\n"
         message += "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
                    " - Stand {vacc_date} - vollständig geimpft. " \
                    "Bei dem Impftempo der letzten 7 Tage werden {vacc_speed} Dosen pro Tag verabreicht und in " \
                    "{vacc_days_to_finish} Tagen wäre die gesamte Bevölkerung vollständig geschützt.\n\n" \
                    "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
                    "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
-            .format(rate_partial=format_float(parent_data.vaccinations.partial_rate * 100),
-                    rate_full=format_float(parent_data.vaccinations.full_rate * 100),
-                    vacc_partial=format_int(parent_data.vaccinations.vaccinated_partial),
-                    vacc_full=format_int(parent_data.vaccinations.vaccinated_full),
-                    vacc_date=parent_data.vaccinations.date.strftime("%d.%m.%Y"),
-                    vacc_speed=format_int(parent_data.vaccinations.avg_speed),
-                    vacc_days_to_finish=format_int(parent_data.vaccinations.avg_days_to_finish))
+            .format(rate_partial=format_float(location.vaccinations.partial_rate * 100),
+                    rate_full=format_float(location.vaccinations.full_rate * 100),
+                    vacc_partial=format_int(location.vaccinations.vaccinated_partial),
+                    vacc_full=format_int(location.vaccinations.vaccinated_full),
+                    vacc_date=location.vaccinations.date.strftime("%d.%m.%Y"),
+                    vacc_speed=format_int(location.vaccinations.avg_speed),
+                    vacc_days_to_finish=format_int(location.vaccinations.avg_days_to_finish))
 
-        children_data = self.covid_data.get_children_data(district_id)
-        earliest_data = reduce(
-            lambda x, y: x if x.vaccinations.date < y.vaccinations.date else y,
-            children_data)
-        message += "<b>💉 Impfdaten der Länder</b>\n" \
-                   "Angegeben ist der Anteil der Bevölkerung, die mindestens eine Impfung erhalten hat, sowie der " \
-                   "Anteil der Bevölkerung, der einen vollen Impfschutz hat.\n\n"
-        children_data.sort(key=lambda x: x.name)
-        for child in children_data:
-            message += "• {rate_partial}% / {rate_full}% ({district})\n" \
-                .format(district=child.name,
-                        rate_partial=format_float(child.vaccinations.partial_rate * 100),
-                        rate_full=format_float(child.vaccinations.full_rate * 100))
+        if location.id == 0:
+            children_data = self.covid_data.get_children_data(location.id)
+            earliest_data = reduce(
+                lambda x, y: x if x.vaccinations.date < y.vaccinations.date else y,
+                children_data)
+            message += "<b>💉 Impfdaten der Länder</b>\n" \
+                       "Angegeben ist der Anteil der Bevölkerung, die mindestens eine Impfung erhalten hat, sowie der " \
+                       "Anteil der Bevölkerung, der einen vollen Impfschutz hat.\n\n"
+            children_data.sort(key=lambda x: x.name)
+            for child in children_data:
+                message += "• {rate_partial}% / {rate_full}% ({district})\n" \
+                    .format(district=child.name,
+                            rate_partial=format_float(child.vaccinations.partial_rate * 100),
+                            rate_full=format_float(child.vaccinations.full_rate * 100))
+            message += "\n\n"
+        else:
+            earliest_data = location
 
-        message += '\n\n' \
-                   '<i>Stand: {earliest_vacc_date}. Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
+        message += '<i>Stand: {earliest_vacc_date}. Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
                    ' im <a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
                    'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
             .format(info_command=self.command_formatter("Info"),
                     earliest_vacc_date=earliest_data.vaccinations.date.strftime("%d.%m.%Y"))
-        return [BotResponse(message, [self.visualization.vaccination_graph(district_id),
-                                      self.visualization.vaccination_speed_graph(district_id)])]
+        return [BotResponse(message, [self.visualization.vaccination_graph(location.id),
+                                      self.visualization.vaccination_speed_graph(location.id)])]
 
     def subscribeHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
@@ -388,6 +402,8 @@ class Bot(object):
                                       f'Schreibe "Daten {location.id}", um die aktuellen Daten zu erhalten'))
             choices.append(UserChoice("Regeln anzeigen", f'/regeln {location.id}',
                                       f'Schreibe "Regeln {location.id}", um die aktuell gültigen Regeln zu erhalten'))
+            choices.append(UserChoice("Impfbericht anzeigen", f'/Impfungen {location.id}',
+                                      f'Schreibe "Impfungen {location.id}", um den aktuellen Impfbericht zu erhalten'))
             choices.append(UserChoice("Abbrechen", f'/noop',
                                       f'Für mehr Optionen sende "Hilfe" oder einen beliebigen Ort'))
 
@@ -581,10 +597,12 @@ class Bot(object):
             return location
 
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_COMMAND, str(location.id))
-        choices = [UserChoice('Regeln anzeigen', f'/regeln {location.id}',
+        choices = [UserChoice("Daten anzeigen", f'/daten {location.id}',
+                              'Schreibe "Daten", um die aktuellen Daten zu erhalten'),
+                   UserChoice('Regeln anzeigen', f'/regeln {location.id}',
                               'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'),
-                   UserChoice("Daten anzeigen", f'/daten {location.id}',
-                              'Schreibe "Daten", um die aktuellen Daten zu erhalten')]
+                   UserChoice('Impfdaten anzeigen', f'/Impfungen {location.id}',
+                              'Schreibe "Impfungen", um den aktuellen Impfbericht zu erhalten')]
 
         user = self.user_manager.get_user(user_id, with_subscriptions=True)
         if user and location.id in user.subscriptions:

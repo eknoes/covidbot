@@ -155,6 +155,8 @@ class Visualization:
             current_date = None
             district_name = None
             for row in cursor.fetchall():
+                if row['doses_diff'] is None:
+                    row['doses_diff'] = 0
                 y_data.append(row['doses_diff'])
                 x_data.append(row['date'])
                 if not current_date or row['date'] > current_date:
