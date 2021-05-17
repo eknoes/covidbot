@@ -62,6 +62,7 @@ class Bot(object):
         self.user_hints = UserHintService(self.command_formatter)
         self.handler_list.append(Handler("start", self.startHandler, False))
         self.handler_list.append(Handler("hilfe", self.helpHandler, False))
+        self.handler_list.append(Handler("feedback", self.feedbackHandler, False))
         self.handler_list.append(Handler("info", self.infoHandler, False))
         self.handler_list.append(Handler("impfungen", self.vaccHandler, False))
         self.handler_list.append(Handler("abo", self.subscribeHandler, True))
@@ -205,6 +206,11 @@ class Bot(object):
         # Add subscription for Germany on start
         self.user_manager.add_subscription(user_id, 0)
         return [BotResponse(message)]
+
+    @staticmethod
+    def feedbackHandler(user_input: str, user_id: int) -> List[BotResponse]:
+        return [BotResponse('Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
+                            'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!')]
 
     def helpHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('help').inc()
@@ -672,7 +678,8 @@ class Bot(object):
 
                     if user_choice is not None and word:
                         self.user_manager.set_user_setting(user_id, setting, user_choice)
-                        return self.settingsHandler("", user_id) + [BotResponse(f"{BotUserSettings.title(setting)} wurde {word}geschaltet.")]
+                        return self.settingsHandler("", user_id) + [
+                            BotResponse(f"{BotUserSettings.title(setting)} wurde {word}geschaltet.")]
 
                 command_without_args = f'einstellung {BotUserSettings.command_key(setting)}'
 
@@ -684,7 +691,8 @@ class Bot(object):
                     current = "aus"
 
                 choice = [
-                    UserChoice(BotUserSettings.title(setting) + f' {option}schalten', '/' + command_without_args + f' {option}',
+                    UserChoice(BotUserSettings.title(setting) + f' {option}schalten',
+                               '/' + command_without_args + f' {option}',
                                f'Sende zum {option}schalten {self.command_formatter(command_without_args + f" {option}")}')]
 
                 return [BotResponse(f"<b>{BotUserSettings.title(setting)}:</b> {current}"
@@ -714,7 +722,8 @@ class Bot(object):
             return [BotResponse(message, choices=choices)]
 
     def graphicSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
-        return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_GRAPHICS) + ' ' + user_input, user_id)
+        return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_GRAPHICS) + ' ' + user_input,
+                                    user_id)
 
     def betaSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.BETA) + ' ' + user_input, user_id)
@@ -939,7 +948,7 @@ class Bot(object):
                 graphs.append(self.visualization.vaccination_graph(country.id))
                 graphs.append(self.visualization.vaccination_speed_graph(country.id))
 
-        if country.icu_data: #and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
+        if country.icu_data:  # and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
             message += f"<b>🏥 Intensivbetten</b>\n" \
                        f"{format_float(country.icu_data.percent_occupied())}% " \
                        f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
@@ -980,7 +989,8 @@ class Bot(object):
                     new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
 
-    def get_available_user_messages(self) -> Generator[Tuple[MessageType, Union[int, str], List[BotResponse]], None, None]:
+    def get_available_user_messages(self) -> Generator[
+        Tuple[MessageType, Union[int, str], List[BotResponse]], None, None]:
         """
         Needs to be called once in a while to check for new data. Returns a list of messages to be sent, if new data
         arrived
