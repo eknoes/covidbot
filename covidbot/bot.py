@@ -829,8 +829,7 @@ class Bot(object):
                         message += "\n• {no_doses} Neuimpfungen, {vacc_partial}% min. eine, {vacc_full}% beide Impfungen erhalten" \
                             .format(no_doses=format_int(district.vaccinations.doses_diff),
                                     vacc_partial=format_float(district.vaccinations.partial_rate * 100),
-                                    vacc_full=format_float(district.vaccinations.full_rate * 100),
-                                    )
+                                    vacc_full=format_float(district.vaccinations.full_rate * 100))
                     message += "\n\n"
             if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
                 # Generate multi-incidence graph for up to 8 districts
