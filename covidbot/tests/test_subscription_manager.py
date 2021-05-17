@@ -179,11 +179,6 @@ class TestSubscriptionManager(TestCase):
                              "Same Feedback should be added successfully")
         self.assertIsNone(self.test_manager.add_feedback(user_id, ""), "Null Feedback should not be added successfully")
 
-        feedback_id = self.test_manager.add_feedback(user_id, feedback)
-        self.assertTrue(self.test_manager.rm_feedback(feedback_id), "Removing feedback should be successful")
-        self.assertFalse(self.test_manager.rm_feedback(feedback_id),
-                         "Removing non-existent feedback should not be successful")
-
     def test_get_most_subscriptions(self):
         self.assertEqual(0, self.test_manager.get_most_subscriptions(), "Without users 0 should be the number of most "
                                                                         "subscriptions")
