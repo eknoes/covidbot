@@ -60,8 +60,7 @@ class FacebookInterface(SingleCommandInterface):
             except shutil.SameFileError:
                 file_loc = media_file
 
-            filename = self.url + os.path.basename(file_loc)
-            url = self.url + filename
+            url = self.url + os.path.basename(file_loc)
             response = requests.request("POST", f"https://graph.facebook.com/{self.page_id}/photos?"
                                                 f"caption={message}&url={url}&access_token={self.access_token}")
         else:
