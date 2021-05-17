@@ -61,6 +61,9 @@ class CovidDataTest(TestCase):
         self.assertEqual(1, len(self.data.search_district_by_name("Kassel Land")), "Kassel Land should match LK Kassel")
         self.assertEqual(1, len(self.data.search_district_by_name("Bundesland Hessen")), "Exact match should be chosen")
 
+    def test_find_abbr(self):
+        self.assertEqual(1, len(self.data.search_district_by_name("SH")))
+
     def test_get_district_data(self):
         data = self.data.get_district_data(3151)
 

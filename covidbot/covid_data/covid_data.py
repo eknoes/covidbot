@@ -47,10 +47,12 @@ class CovidData(object):
                 results.append(District(row['county_name'], row['rs']))
 
             if not search_str.isdigit():
-                cursor.execute('SELECT district_id, c.county_name FROM county_alt_names '
+                cursor.execute('SELECT district_id, c.county_name, alt_name FROM county_alt_names '
                                'LEFT JOIN counties c on c.rs = county_alt_names.district_id '
                                'WHERE LOWER(alt_name) LIKE %s', [query_str])
                 for row in cursor.fetchall():
+                    if row['alt_name'].lower() == search_str:
+                        exact_matches.append(District(row['county_name'], row['district_id']))
                     results.append(District(row['county_name'], row['district_id']))
 
             if len(exact_matches) == 1:
@@ -366,7 +368,7 @@ class CovidDatabaseCreator:
 
             # Insert common abbreviations
             cursor.execute("INSERT IGNORE INTO county_alt_names (district_id, alt_name) "
-                           "VALUES (5, 'NRW'), (8, 'BaWü'), (7, 'RLP'), (1, 'DE-SH'), (2, 'DE-HH'), (3, 'DE-NI'), (4, 'DE-HB'), (5, 'DE-NW'), (6, 'DE-HE'), (7, 'DE-RP'), (8, 'DE-BW'), (9, 'DE-BY'), (10, 'DE-SL'), (11, 'DE-BE'), (12, 'DE-BB'), (13, 'DE-MV'), (14, 'DE-SN'), (15, 'DE-ST'), (16, 'DE-TH')")
+                           "VALUES (5, 'NRW'), (8, 'BaWü'), (7, 'RLP'), (1, 'DE-SH'), (2, 'DE-HH'), (3, 'DE-NI'), (4, 'DE-HB'), (5, 'DE-NW'), (6, 'DE-HE'), (7, 'DE-RP'), (8, 'DE-BW'), (9, 'DE-BY'), (10, 'DE-SL'), (11, 'DE-BE'), (12, 'DE-BB'), (13, 'DE-MV'), (14, 'DE-SN'), (15, 'DE-ST'), (16, 'DE-TH'), (1, 'SH'), (2, 'HH'), (3, 'NI'), (4, 'HB'), (5, 'NW'), (6, 'HE'), (7, 'RP'), (8, 'BW'), (9, 'BY'), (10, 'SL'), (11, 'BE'), (12, 'BB'), (13, 'MV'), (14, 'SN'), (15, 'ST'), (16, 'TH')")
 
             connection.commit()
             log.debug("Committed Tables")
