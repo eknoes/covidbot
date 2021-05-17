@@ -277,11 +277,6 @@ p.message-meta {
             margin-bottom: 0.3em;
         }
 
-        .email-content-controls div {
-            float: left;
-        }
-
-
     .email-avatar {
         width: 40px;
         height: 40px;
@@ -393,9 +388,6 @@ p.message-meta {
     }
 
     .email-content-header {
-        left: 500px;
-        right: 0;
         width: auto;
-        position: fixed;
     }
 }

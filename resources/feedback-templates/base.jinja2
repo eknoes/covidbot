@@ -36,8 +36,16 @@
     <div id="main" class="pure-u-1">
         <div class="email-content">
             <div class="email-content-header pure-g">
-                {% block messageheader %}
-                {% endblock %}
+                <div class="pure-u-1 pure-u-lg-1-3">
+                    {% block messageheader %}
+                    {% endblock %}
+                </div>
+                <div class="email-content-controls pure-u-1 pure-u-lg-2-3">
+                    <div class="pure-g">
+                    {% block messagecontrols %}
+                    {% endblock %}
+                    </div>
+                </div>
             </div>
 
             <div id="chat-body" class="email-content-body pure-g">
@@ -46,8 +54,14 @@
             </div>
 
             <div id="chat-footer" class="email-content-footer pure-g">
+            <div class="reply-form pure-u-4-5">
+
                 {% block replyform %}
                 {% endblock %}
+                <div class="pure-g">
+                    {{ self.messagecontrols() }}
+                </div>
+            </div>
                 <div class="pure-u-1-1">
                 <h5>Hilfe</h5>
                 <ul>
