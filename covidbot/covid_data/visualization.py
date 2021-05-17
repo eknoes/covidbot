@@ -112,7 +112,7 @@ class Visualization:
         district_name, current_date, x_data, y_data = self._get_covid_data("new_cases", district_id, duration)
 
         filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"infections-{current_date.isoformat()}-{district_id}.jpg"))
+            os.path.join(self.graphics_dir, f"infections-{current_date.isoformat()}-{district_id}-{duration}.jpg"))
 
         # Do not draw new graphic if its cached
         if not self.disable_cache and os.path.isfile(filepath):
@@ -124,20 +124,23 @@ class Visualization:
                                    quadratic=quadratic)
         # Plot data
         plt.xticks(x_data, rotation='30', ha='right')
-
-        # Add a label every 7 days
         bars = plt.bar(x_data, y_data, color="#1fa2de", width=0.8, zorder=3)
         props = dict(boxstyle='round', facecolor='#ffffff', alpha=0.7, edgecolor='#ffffff')
-        for i in range(0, len(bars), 7):
-            rect = bars[i]
-            height = rect.get_height()
-            ax1.annotate(format_int(int(height)),
-                         xy=(rect.get_x() + rect.get_width() / 2., height),
-                         xytext=(0, 30), textcoords='offset points',
-                         arrowprops=dict(arrowstyle="-", facecolor='black'),
-                         horizontalalignment='center', verticalalignment='top', bbox=props)
 
-        self.set_weekday_formatter(ax1, current_date.weekday())
+        # Add a label every 7 days
+        if duration < 70:
+            for i in range(0, len(bars), 7):
+                rect = bars[i]
+                height = rect.get_height()
+                ax1.annotate(format_int(int(height)),
+                             xy=(rect.get_x() + rect.get_width() / 2., height),
+                             xytext=(0, 30), textcoords='offset points',
+                             arrowprops=dict(arrowstyle="-", facecolor='black'),
+                             horizontalalignment='center', verticalalignment='top', bbox=props)
+
+            self.set_weekday_formatter(ax1, current_date.weekday())
+        else:
+            self.set_monthly_formatter(ax1)
 
         # Save to file
         plt.savefig(filepath, format='JPEG')
@@ -164,7 +167,7 @@ class Visualization:
                     district_name = row['name']
 
         filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"vaccination-speed-{current_date.isoformat()}-{district_id}.jpg"))
+            os.path.join(self.graphics_dir, f"vaccination-speed-{current_date.isoformat()}-{district_id}-{duration}.jpg"))
 
         # Do not draw new graphic if its cached
         if not self.disable_cache and os.path.isfile(filepath):
@@ -335,7 +338,7 @@ class Visualization:
         identifier = reduce(lambda x, y: x + y, map(str, district_ids))
 
         filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"multi-incidence-{current_date.isoformat()}-{identifier}.jpg"))
+            os.path.join(self.graphics_dir, f"multi-incidence-{current_date.isoformat()}-duration-{duration}-{identifier}.jpg"))
 
         # Do not draw new graphic if its cached
         if not self.disable_cache and os.path.isfile(filepath):
@@ -374,7 +377,7 @@ class Visualization:
     def incidence_graph(self, district_id: int, duration: int = 49) -> str:
         district_name, current_date, x_data, y_data = self._get_covid_data("incidence", district_id, duration)
         filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"incidence-{current_date.isoformat()}-{district_id}.jpg"))
+            os.path.join(self.graphics_dir, f"incidence-{current_date.isoformat()}-{district_id}-{duration}.jpg"))
 
         # Do not draw new graphic if its cached
         if not self.disable_cache and os.path.isfile(filepath):
@@ -389,7 +392,11 @@ class Visualization:
         # Add a label every 7 days
         plt.plot(x_data, y_data, color="#1fa2de", zorder=3, linewidth=3)
         ax1.set_ylim(bottom=0)
-        self.set_weekday_formatter(ax1, current_date.weekday())
+
+        if duration < 70:
+            self.set_weekday_formatter(ax1, current_date.weekday())
+        else:
+            self.set_monthly_formatter(ax1)
 
         # Draw thresholds
         ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([0, 35, 50, 100, 150, 165, 200, 300, 400, 500]))

@@ -318,9 +318,9 @@ def main():
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
             from covidbot.covid_data import CovidData, VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, \
-                RKIUpdater, ICUGermanyUpdater, \
+                RKIUpdater, ICUGermanyUpdater, RKIHistoryUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater
-            for updater in [RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
+            for updater in [RKIHistoryUpdater(conn), RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyStatesImpfdashboardUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
                             RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
@@ -402,7 +402,7 @@ def main():
                 raise e
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"), disable_cache=True)
-        vis.vaccination_speed_graph(6)
+        vis.infections_graph(6611, 9999)
 
 
 if __name__ == "__main__":

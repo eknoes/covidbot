@@ -154,7 +154,6 @@ class RKIHistoryUpdater(RKIUpdater):
 
         cases_csv = csv.DictReader(cases.splitlines())
 
-        sum_cases = {}
         new_cases = False
         with self.connection.cursor() as cursor:
             for row in cases_csv:
@@ -165,26 +164,15 @@ class RKIHistoryUpdater(RKIUpdater):
                     elif field[:4] == "time":
                         updated = row[field]
                         updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
-                        cursor.execute(
-                            'SELECT * FROM covid_data WHERE date=%s AND rs > 1000 AND total_cases IS NOT NULL',
-                            [updated])
-                        records = cursor.fetchall()
-                        if records:
-                            return new_cases
-                        print(f"Data from {updated}")
                         continue
 
                     district_id = field
                     if district_id == '11000':
                         district_id = '11'
                     cases_num = int(row[field])
-                    if not sum_cases.get(district_id):
-                        sum_cases[district_id] = 0
-
-                    sum_cases[district_id] += cases_num
-                    cursor.execute(
-                        'INSERT INTO covid_data (rs, date, total_cases) VALUE (%s, %s, %s) ON DUPLICATE KEY UPDATE covid_data.total_cases=%s',
-                        [int(district_id), updated, sum_cases[district_id], sum_cases[district_id]])
+                    cursor.execute('INSERT INTO covid_data (rs, date, total_cases) VALUE (%s, %s, %s) '
+                                   'ON DUPLICATE KEY UPDATE covid_data.total_cases=%s',
+                                   [int(district_id), updated, cases_num, cases_num])
                     new_cases = True
                 self.connection.commit()
 
@@ -204,12 +192,6 @@ class RKIHistoryUpdater(RKIUpdater):
                     elif field[:4] == "time":
                         updated = row[field]
                         updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
-                        cursor.execute(
-                            'SELECT * FROM covid_data WHERE date=%s AND rs > 1000 AND incidence IS NOT NULL',
-                            [updated])
-                        records = cursor.fetchall()
-                        if records:
-                            return new_data
                         continue
 
                     district_id = field[:-4]

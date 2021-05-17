@@ -71,6 +71,7 @@ class Bot(object):
         self.handler_list.append(Handler("lösche", self.unsubscribeHandler, True))
         self.handler_list.append(Handler("datenschutz", self.privacyHandler, False))
         self.handler_list.append(Handler("daten", self.currentDataHandler, True))
+        self.handler_list.append(Handler("historie", self.historyHandler, True))
         self.handler_list.append(Handler("bericht", self.reportHandler, False))
         self.handler_list.append(Handler("statistik", self.statHandler, False))
         self.handler_list.append(Handler("loeschmich", self.deleteMeHandler, False))
@@ -299,7 +300,7 @@ class Bot(object):
         BOT_COMMAND_COUNT.labels('vaccinations').inc()
 
         if user_input:
-            location = self.parseLocationInput(user_input)
+            location = self.parseLocationInput(user_input, help_command="Impfungen")
             if location and type(location) != District:
                 return location
             location = self.covid_data.get_district_data(location.id)
@@ -453,6 +454,17 @@ class Bot(object):
                           f"Bundesländer abgerufen werden."
             return [BotResponse(message)]
         return location
+
+    def historyHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
+        BOT_COMMAND_COUNT.labels('history').inc()
+
+        location = self.parseLocationInput(user_input, help_command="Historie")
+        if not type(location) == District:
+            return location
+
+        return [BotResponse(f"<b>Pandemiehistorie von {location.name}</b>", [self.visualization.infections_graph(location.id, 9999),
+                                                                     self.visualization.incidence_graph(location.id, 9999),
+                                                                     self.visualization.icu_graph(location.id)])]
 
     def currentDataHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('district_data').inc()
