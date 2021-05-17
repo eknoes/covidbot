@@ -164,6 +164,7 @@ class RKIHistoryUpdater(RKIUpdater):
                     elif field[:4] == "time":
                         updated = row[field]
                         updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
+                        self.log.info(f"Got historic case data for {updated}")
                         continue
 
                     district_id = field
@@ -193,6 +194,7 @@ class RKIHistoryUpdater(RKIUpdater):
                     elif field[:4] == "time":
                         updated = row[field]
                         updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
+                        self.log.info(f"Got historic incidence data for {updated}")
                         continue
 
                     district_id = field[:-4]
