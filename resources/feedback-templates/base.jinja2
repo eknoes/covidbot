@@ -55,7 +55,7 @@
             </div>
 
             <div id="chat-footer" class="email-content-footer pure-g">
-            <div class="reply-form pure-u-4-5">
+            <div class="reply-form pure-u-1-1 pure-u-md-4-5">
 
                 {% block replyform %}
                 {% endblock %}
@@ -63,13 +63,23 @@
                     {{ self.messagecontrols() }}
                 </div>
             </div>
-                <div class="pure-u-1-1">
-                <h5>Hilfe</h5>
-                <ul>
-                    <li>📤 Nachricht wird versendet</li>
-                    <li>✉️ Nachricht ist gesendet</li>
-                    <li>📃 Nachricht wurde gelesen</li>
-                </ul>
+            <div class="pure-u-1 pure-g">
+                <div class="pure-u-1-1 pure-u-md-1-4">
+                    <h5>Hilfe</h5>
+                    <p>
+                        <i>📤 Nachricht wird versendet</i><br />
+                        <i>✉️ Nachricht ist gesendet</i><br />
+                        <i>📃 Nachricht wurde gelesen</i><br />
+                    </p>
+                </div>
+                <div class="pure-u-1-1 pure-u-md-1-4">
+                    {% block subscriptions %}
+                    {% endblock %}
+                </div>
+                <div class="pure-u-1-1 pure-u-md-1-4">
+                    {% block reports %}
+                    {% endblock %}
+                </div>
                 </div>
             </div>
         </div>

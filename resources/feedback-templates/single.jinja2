@@ -86,3 +86,15 @@
     </form>
     {% endif %}
 {% endblock %}
+{% block subscriptions %}
+    <h5>Abos</h5>
+    {% for s in user_subs %}
+        <p>{{ s }}</p>
+    {% endfor %}
+{% endblock %}
+{% block reports %}
+    <h5>Berichte</h5>
+    {% for s in user_reports %}
+        <p>{{ s | capitalize() }}</p>
+    {% endfor %}
+{% endblock %}

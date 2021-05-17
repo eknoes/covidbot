@@ -69,7 +69,9 @@ async def show_user(request: Request):
         user = communication[0]
 
     return {'messagelist': communication, 'user': user, 'base_url': base_url, 'num_unread': len(comm_unread),
-            'available_tags': user_manager.get_available_tags(), 'active_status': status, 'active_tag': active_tag}
+            'available_tags': user_manager.get_available_tags(), 'active_status': status, 'active_tag': active_tag,
+            'user_subs': user_manager.get_user_subscriptions(user.user_id),
+            'user_reports': user_manager.get_user_report_subscriptions(user.user_id)}
 
 
 @routes.post(base_url + r"/user/{user_id:\d+}")

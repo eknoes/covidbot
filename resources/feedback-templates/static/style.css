@@ -231,7 +231,6 @@ button.remove-ticket-tag-button span.ticket-tag-remove {
 .reply-form {
     text-align: left;
     padding: 1em;
-    margin-left: 5em;
 }
 
 p.message-meta {
@@ -401,5 +400,9 @@ p.message-meta {
 
     .email-content-header {
         width: auto;
+    }
+
+    .reply-form {
+        margin-left: 5em;
     }
 }

@@ -157,6 +157,25 @@ class FeedbackManager(object):
                 tags.append(r[0])
             return tags
 
+    def get_user_subscriptions(self, user_id: int) -> List[str]:
+        with self.connection.cursor() as cursor:
+            results = []
+            cursor.execute("SELECT c.rs, c.county_name, subscriptions.added FROM subscriptions "
+                           "LEFT JOIN counties c on subscriptions.rs = c.rs "
+                           "WHERE user_id=%s", [user_id])
+            for r in cursor.fetchall():
+                results.append(f"{r[1]} (seit {r[2].strftime('%d.%m.%Y')})")
+            return results
+
+    def get_user_report_subscriptions(self, user_id: int) -> List[str]:
+        with self.connection.cursor() as cursor:
+            results = []
+            cursor.execute("SELECT report, added FROM report_subscriptions "
+                           "WHERE user_id=%s", [user_id])
+            for r in cursor.fetchall():
+                results.append(f"{r[0]} (seit {r[1].strftime('%d.%m.%Y')})")
+            return results
+
     @staticmethod
     def get_available_tags() -> List[str]:
         return ["hilfe", "idee", "bug", "sönke", "erik"]
