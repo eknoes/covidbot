@@ -111,3 +111,10 @@ class Test(TestCase):
         expected = "0 Todesfälle"
         actual = format_noun(0, FormattableNoun.DEATHS)
         self.assertEqual(expected, actual)
+
+    def test_get_trend(self):
+        self.assertEqual(TrendValue.SAME, get_trend(99, 100))
+        self.assertEqual(TrendValue.SAME, get_trend(100, 101))
+        self.assertEqual(TrendValue.SAME, get_trend(100, 100))
+        self.assertEqual(TrendValue.UP, get_trend(98, 101))
+        self.assertEqual(TrendValue.DOWN, get_trend(102, 100))

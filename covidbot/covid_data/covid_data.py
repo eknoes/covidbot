@@ -8,6 +8,7 @@ from mysql.connector import MySQLConnection
 from covidbot.covid_data.models import TrendValue, District, VaccinationData, RValueData, DistrictData, ICUData, \
     RuleData
 from covidbot.metrics import LOCATION_DB_LOOKUP
+from covidbot.utils import get_trend
 
 
 class CovidData(object):
@@ -242,41 +243,14 @@ class CovidData(object):
             yesterday = last_week
 
         if last_week:
-            if not last_week.new_cases or not today.new_cases:
-                today.cases_trend = None
-            elif last_week.new_cases < today.new_cases:
-                today.cases_trend = TrendValue.UP
-            elif last_week.new_cases > today.new_cases:
-                today.cases_trend = TrendValue.DOWN
-            else:
-                today.cases_trend = TrendValue.SAME
-
-            if not last_week.new_deaths or not today.new_deaths:
-                today.deaths_trend = None
-            elif last_week.new_deaths < today.new_deaths:
-                today.deaths_trend = TrendValue.UP
-            elif last_week.new_deaths > today.new_deaths:
-                today.deaths_trend = TrendValue.DOWN
-            else:
-                today.deaths_trend = TrendValue.SAME
+            today.cases_trend = get_trend(last_week.new_cases, today.new_cases)
+            today.deaths_trend = get_trend(last_week.new_deaths, today.new_deaths)
 
         if yesterday:
-            if not yesterday.incidence or not today.incidence:
-                today.incidence_trend = None
-            elif yesterday.incidence < today.incidence:
-                today.incidence_trend = TrendValue.UP
-            elif yesterday.incidence > today.incidence:
-                today.incidence_trend = TrendValue.DOWN
-            else:
-                today.incidence_trend = TrendValue.SAME
+            today.incidence_trend = get_trend(yesterday.incidence, today.incidence)
 
             if today.r_value and yesterday.r_value:
-                if yesterday.r_value.r_value_7day < today.r_value.r_value_7day:
-                    today.r_value.r_trend = TrendValue.UP
-                elif yesterday.r_value.r_value_7day == today.r_value.r_value_7day:
-                    today.r_value.r_trend = TrendValue.SAME
-                if yesterday.r_value.r_value_7day > today.r_value.r_value_7day:
-                    today.r_value.r_trend = TrendValue.DOWN
+                today.r_value.r_trend = get_trend(yesterday.r_value.r_value_7day, today.r_value.r_value_7day)
 
         return today
 
@@ -285,23 +259,8 @@ class CovidData(object):
         if not yesterday:
             return today
 
-        if not yesterday.occupied_beds or not today.occupied_beds:
-            today.occupied_beds_trend = None
-        elif yesterday.occupied_beds < today.occupied_beds:
-            today.occupied_beds_trend = TrendValue.UP
-        elif yesterday.occupied_beds > today.occupied_beds:
-            today.occupied_beds_trend = TrendValue.DOWN
-        else:
-            today.occupied_beds_trend = TrendValue.SAME
-
-        if not yesterday.occupied_covid or not today.occupied_covid:
-            today.occupied_covid_trend = None
-        elif yesterday.occupied_covid < today.occupied_covid:
-            today.occupied_covid_trend = TrendValue.UP
-        elif yesterday.occupied_covid > today.occupied_covid:
-            today.occupied_covid_trend = TrendValue.DOWN
-        else:
-            today.occupied_covid_trend = TrendValue.SAME
+        today.occupied_beds_trend = get_trend(yesterday.occupied_beds, today.occupied_beds)
+        today.occupied_beds_trend = get_trend(yesterday.occupied_covid, today.occupied_covid)
 
         return today
 

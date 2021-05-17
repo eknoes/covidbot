@@ -212,3 +212,15 @@ class MessageType(Enum):
     VACCINATION_GERMANY = "vaccinations-germany"
     ICU_GERMANY = "icu-germany"
     USER_MESSAGE = "user-message"
+
+
+def get_trend(prev_value: Optional[Union[int, float]], current_value: Optional[Union[int, float]]) -> Optional[TrendValue]:
+    if not prev_value or not current_value:
+        return None
+    elif prev_value < 0.99 * current_value:
+        return TrendValue.UP
+    elif prev_value > 1.01 * current_value:
+        return TrendValue.DOWN
+    else:
+        return TrendValue.SAME
+
