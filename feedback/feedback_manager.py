@@ -54,7 +54,7 @@ class Communication:
     def get_tags_html(self) -> str:
         result = ""
         for t in self.tags:
-            result += f'<span class="ticket-tag"><span class="ticket-tag-{t}"></span> {t.capitalize()}</span>'
+            result += f'<span class="ticket-tag"><span class="ticket-tag-{t} ticket-color-tag"></span> {t.capitalize()}</span>'
         return result
 
     def state(self) -> CommunicationState:

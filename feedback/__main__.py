@@ -80,6 +80,9 @@ async def post_user(request: Request):
         user_manager.mark_user_unread(user_id)
     elif form.get('reply'):
         user_manager.message_user(user_id, form.get('message'))
+        user_manager.mark_user_read(user_id)
+    elif form.get('remove_tag'):
+        user_manager.remove_user_tag(user_id, form.get('remove_tag'))
     elif form.get('add_tag'):
         user_manager.add_user_tag(user_id, form.get('add_tag'))
         raise HTTPFound(base_url + f'/user/{request.match_info["user_id"]}?tag={form.get("add_tag")}')

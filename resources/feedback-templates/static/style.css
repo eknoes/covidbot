@@ -116,10 +116,7 @@ a {
     color: rgb(75, 113, 151);
 }
 
-.ticket-tag-idee,
-.ticket-tag-bug,
-.ticket-tag-lob,
-.ticket-tag-frage {
+.ticket-color-tag {
     width: 15px;
     height: 15px;
     display: inline-block;
@@ -140,9 +137,20 @@ a {
     background: #FF4090;
 }
 
-button.add-ticket-tag-button {
+button.add-ticket-tag-button, button.remove-ticket-tag-button {
     margin-bottom: 0.2em;
-    min-width: 7em;
+    min-width: 6em;
+    max-width: 100%;
+}
+
+button.remove-ticket-tag-button {
+    background: #EEEEEE;
+    color: #999999;
+}
+
+button.remove-ticket-tag-button span.ticket-tag-remove {
+    color: darkred;
+    font-weight: bold;
 }
 
 /* Email Item Styles */
@@ -234,12 +242,7 @@ p.message-meta {
         border-bottom: 1px solid #ddd;
         border-left: 1px solid #ddd;
         background: white;
-        width: 100%;
-        height: 5em;
-    }
-
-    .email-content-body {
-        padding-top: 8em;
+        right: 0;
     }
 
     .email-content-footer {
@@ -247,7 +250,7 @@ p.message-meta {
     }
 
         .email-content-title {
-            margin: 0.5em 0 0;
+            margin: 0;
         }
         .email-content-subtitle {
             font-size: 1em;
@@ -258,15 +261,45 @@ p.message-meta {
                 color: #999;
             }
 
+            .ticket-tags {
+                margin: 0.5em 0;
+            }
+
+            .ticket-tags span.ticket-tag {
+                margin-right: 1em;
+            }
+
+            .ticket-tags span.ticket-color-tag {
+                margin: 0;
+            }
+
         .email-content-controls .secondary-button {
             margin-bottom: 0.3em;
         }
+
+        .email-content-controls div {
+            float: left;
+        }
+
 
     .email-avatar {
         width: 40px;
         height: 40px;
     }
 
+@media (max-width: 40em) {
+    div#list, div#main {
+        overflow-y: scroll;
+    }
+
+    div#main {
+        background: white;
+    }
+
+    .email-content-header {
+        position: relative;
+    }
+}
 
 /*
  * -- TABLET (AND UP) MEDIA QUERIES --
@@ -315,7 +348,7 @@ p.message-meta {
 
     #main {
         position: fixed;
-        top: 0;
+        top: 33%;
         right: 0;
         bottom: 0;
         left: 150px;
@@ -323,6 +356,15 @@ p.message-meta {
         width: auto; /* so that it's not 100% */
         background: white;
         height: 100%;
+    }
+
+    .email-content-body {
+        padding-top: 8em;
+    }
+
+    .email-content-header {
+        width: 100%;
+        position: relative;
     }
 
 }
@@ -348,5 +390,12 @@ p.message-meta {
         margin: 0;
         padding: 0;
         width: 100%;
+    }
+
+    .email-content-header {
+        left: 500px;
+        right: 0;
+        width: auto;
+        position: fixed;
     }
 }

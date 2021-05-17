@@ -14,14 +14,14 @@
         <div class="nav-inner">
             <div class="pure-menu">
                 <ul class="pure-menu-list">
-                    <li class="pure-menu-item"><a href="{{ base_url }}/" class="pure-menu-link">Eingang</a></li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/" class="pure-menu-link">Alle</a></li>
                     <li class="pure-menu-heading">Status</li>
-                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=unread" class="pure-menu-link">Ungelesen <span class="email-count">({{ num_unread }})</span></a></li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=unread" class="pure-menu-link">Neu <span class="email-count">({{ num_unread }})</span></a></li>
                     <li class="pure-menu-item"><a href="{{ base_url }}/?status=read" class="pure-menu-link">Gelesen</a></li>
                     <li class="pure-menu-item"><a href="{{ base_url }}/?status=answered" class="pure-menu-link">Beantwortet</a></li>
                     <li class="pure-menu-heading">Tags</li>
                     {% for t in available_tags %}
-                        <li class="pure-menu-item"><a href="{{ base_url }}/?tag={{ t }}" class="pure-menu-link"><span class="ticket-tag-{{ t }}"></span>{{ t | capitalize() }}</a></li>
+                        <li class="pure-menu-item"><a href="{{ base_url }}/?tag={{ t }}" class="pure-menu-link"><span class="ticket-color-tag ticket-tag-{{ t }}"></span>{{ t | capitalize() }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -63,10 +63,10 @@
 <!-- Script to make the Menu link work -->
 <!-- Just stripped down version of the js/ui.js script for the side-menu layout -->
 <script>
-    element = document.getElementById('chat-footer')
+    element = document.getElementById('mail-selected')
     element.scrollIntoView()
 
-    element = document.getElementById('mail-selected')
+    element = document.getElementById('chat-footer')
     element.scrollIntoView()
 
     function getElements() {

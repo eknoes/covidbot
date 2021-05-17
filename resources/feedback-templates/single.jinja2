@@ -28,30 +28,34 @@
 {% endblock %}
 {% block messageheader %}
     {% if user %}
-    <div class="pure-u-1-3">
+    <div class="pure-u-1 pure-u-md-1-3">
         <h1 class="email-content-title">Nutzer #{{ user.user_id }}</h1>
         <p class="email-content-subtitle">
-            Via <a>{{ user.platform }}</a> am <span>{{ user.last_communication_str() }} Uhr</span><br/>
-            {{ user.get_tags_html() | safe }}
+            Via <a>{{ user.platform }}</a> am <span>{{ user.last_communication_str() }} Uhr</span>
         </p>
+        <p class="ticket-tags">{{ user.get_tags_html() | safe }}</p>
     </div>
 
-    <div class="email-content-controls pure-u-2-3">
+    <div class="email-content-controls pure-u-1 pure-u-md-2-3">
         <form method="post" class="pure-form-stacked pure-form" action="{{ base_url }}/user/{{ user.user_id }}">
-            <div class="pure-u-1-5">
+            <div class="pure-u-1-2 pure-u-md-1-3">
                 {% for t in available_tags %}
                     {% if not t in user.tags %}
                         <button name="add_tag" value="{{ t }}" class="pure-button add-ticket-tag-button">
-                            <span class="ticket-tag-{{ t }}"></span>{{ t | capitalize() }}
+                            <span class="ticket-color-tag ticket-tag-{{ t }}"></span> {{ t | capitalize() }}
+                        </button>
+                    {% else %}
+                        <button name="remove_tag" value="{{ t }}" class="pure-button remove-ticket-tag-button">
+                            <span class="ticket-tag-remove">X</span> {{ t | capitalize() }}
                         </button>
                     {% endif %}
                 {% endfor %}
             </div>
-            <div class="pure-u-1-5">
+            <div class="pure-u-1-2 pure-u-1-3">
                 {% if user.state().value == "unread" %}
-                    <input type="submit" class="pure-button pure-button-primary" name="mark_read" value="Als Gelesen markieren">
+                    <input type="submit" class="pure-button pure-button-primary" name="mark_read" value="Gelesen">
                 {% else %}
-                    <input type="submit" class="pure-button pure-button-primary" name="mark_unread" value="Als Ungelesen markieren">
+                    <input type="submit" class="pure-button pure-button-primary" name="mark_unread" value="Ungelesen">
                 {% endif %}
             </div>
         </form>
