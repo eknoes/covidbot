@@ -2,6 +2,7 @@ import aiohttp_jinja2
 import jinja2
 from aiohttp.web_exceptions import HTTPNotFound, HTTPFound, HTTPBadRequest
 from aiohttp.web_request import Request
+from mysql.connector import OperationalError
 
 from covidbot.__main__ import get_connection, parse_config
 
@@ -20,7 +21,16 @@ base_url = config.get('FEEDBACK', 'BASE_URL', fallback='')
 @routes.get(base_url + "/")
 @aiohttp_jinja2.template('single.jinja2')
 async def show_user(request: Request):
-    comm_unread, comm_read, comm_answered = user_manager.get_all_communication()
+    try:
+        comm_unread, comm_read, comm_answered = user_manager.get_all_communication()
+    except OperationalError as e:
+        global connection
+        if connection:
+            connection.close()
+
+        connection = get_connection(config, autocommit=True)
+        user_manager.connection = connection
+        comm_unread, comm_read, comm_answered = user_manager.get_all_communication()
 
     user = None
     communication = comm_unread
