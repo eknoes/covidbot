@@ -466,7 +466,7 @@ class Bot(object):
                                 working_days=format_noun(
                                     current_data.incidence_interval_data.lower_threshold_working_days,
                                     FormattableNoun.WORKING_DAYS),
-                                threshold=format_float(current_data.incidence_interval_data.lower_threshold))
+                                threshold=format_int(current_data.incidence_interval_data.lower_threshold))
 
                 if current_data.incidence_interval_data.upper_threshold_days is not None:
                     if current_data.incidence_interval_data.lower_threshold_days is not None:
@@ -480,7 +480,7 @@ class Bot(object):
                                 working_days=format_noun(
                                     current_data.incidence_interval_data.upper_threshold_working_days,
                                     FormattableNoun.WORKING_DAYS),
-                                threshold=format_float(current_data.incidence_interval_data.upper_threshold))
+                                threshold=format_int(current_data.incidence_interval_data.upper_threshold))
 
         if current_data.r_value:
             message += " Der 7-Tage-R-Wert liegt bei {r_value}{r_trend}." \
@@ -793,7 +793,7 @@ class Bot(object):
                                         working_days=format_noun(
                                             district.incidence_interval_data.lower_threshold_working_days,
                                             FormattableNoun.WORKING_DAYS),
-                                        threshold=format_float(district.incidence_interval_data.lower_threshold))
+                                        threshold=format_int(district.incidence_interval_data.lower_threshold))
 
                         if district.incidence_interval_data.upper_threshold_days is not None:
                             if district.incidence_interval_data.lower_threshold_days is None:
@@ -806,7 +806,7 @@ class Bot(object):
                                         working_days=format_noun(
                                             district.incidence_interval_data.upper_threshold_working_days,
                                             FormattableNoun.WORKING_DAYS),
-                                        threshold=format_float(district.incidence_interval_data.upper_threshold))
+                                        threshold=format_int(district.incidence_interval_data.upper_threshold))
 
                     message += "\n• {new_cases}, {new_deaths}" \
                         .format(new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
