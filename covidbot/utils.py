@@ -148,6 +148,7 @@ class FormattableNoun(Enum):
     DAYS = 4
     BEDS = 5
     PERSONS = 6
+    WORKING_DAYS = 7
 
 
 def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
@@ -165,6 +166,9 @@ def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
     elif noun == FormattableNoun.DAYS:
         singular = "Tag"
         plural = "Tagen"
+    elif noun == FormattableNoun.WORKING_DAYS:
+        singular = "Werktag"
+        plural = "Werktagen"
     elif noun == FormattableNoun.BEDS:
         singular = "Bett"
         plural = "Betten"

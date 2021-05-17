@@ -72,12 +72,20 @@ class RuleData:
 
 
 @dataclass
+class IncidenceIntervalData:
+    upper_threshold: Optional[int] = None
+    upper_threshold_days: Optional[int] = None
+    upper_threshold_working_days: Optional[int] = None
+    lower_threshold: Optional[int] = None
+    lower_threshold_days: Optional[int] = None
+    lower_threshold_working_days: Optional[int] = None
+
+
+@dataclass
 class DistrictData(District):
     date: Optional[date] = None
     incidence: Optional[float] = None
     incidence_trend: Optional[TrendValue] = None
-    incidence_interval_since: Optional[date] = None
-    incidence_interval_threshold: Optional[int] = None
     new_cases: Optional[int] = None
     cases_trend: Optional[TrendValue] = None
     new_deaths: Optional[int] = None
@@ -86,6 +94,7 @@ class DistrictData(District):
     total_deaths: Optional[int] = None
     last_update: Optional[datetime] = None
     # Optional, pluggable data
+    incidence_interval_data: Optional[IncidenceIntervalData] = None
     vaccinations: Optional[VaccinationData] = None
     r_value: Optional[RValueData] = None
     icu_data: Optional[ICUData] = None

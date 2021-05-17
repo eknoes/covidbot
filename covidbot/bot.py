@@ -458,18 +458,29 @@ class Bot(object):
         message += "<b>🦠 Infektionsdaten</b>\n"
         if current_data.incidence:
             message += "Die 7-Tage-Inzidenz liegt bei {incidence}{incidence_trend}."
-            if current_data.incidence_interval_since is not None:
-                days = format_noun((current_data.date - current_data.incidence_interval_since).days,
-                                   FormattableNoun.DAYS)
-                interval = current_data.incidence_interval_threshold
+            if current_data.incidence_interval_data:
+                if current_data.incidence_interval_data.lower_threshold_days is not None:
+                    message += " Die Inzidenz ist damit seit {days} ({working_days}) über {threshold}." \
+                        .format(days=format_noun(current_data.incidence_interval_data.lower_threshold_days,
+                                                 FormattableNoun.DAYS),
+                                working_days=format_noun(
+                                    current_data.incidence_interval_data.lower_threshold_working_days,
+                                    FormattableNoun.WORKING_DAYS),
+                                threshold=format_float(current_data.incidence_interval_data.lower_threshold))
 
-                if current_data.incidence < current_data.incidence_interval_threshold:
-                    word = "unter"
-                else:
-                    word = "über"
+                if current_data.incidence_interval_data.upper_threshold_days is not None:
+                    if current_data.incidence_interval_data.lower_threshold_days is not None:
+                        message = message[:-1] + " und "
+                    else:
+                        message += " Die Inzidenz ist damit "
 
-                message += " Die Inzidenz ist damit seit {interval_length} {word} {interval}." \
-                    .format(interval_length=days, interval=interval, word=word)
+                    message += "seit {days} ({working_days}) unter {threshold}." \
+                        .format(days=format_noun(current_data.incidence_interval_data.upper_threshold_days,
+                                                 FormattableNoun.DAYS),
+                                working_days=format_noun(
+                                    current_data.incidence_interval_data.upper_threshold_working_days,
+                                    FormattableNoun.WORKING_DAYS),
+                                threshold=format_float(current_data.incidence_interval_data.upper_threshold))
 
         if current_data.r_value:
             message += " Der 7-Tage-R-Wert liegt bei {r_value}{r_trend}." \
@@ -774,20 +785,28 @@ class Bot(object):
                                 incidence=format_float(district.incidence),
                                 incidence_trend=format_data_trend(district.incidence_trend))
 
-                    if district.incidence_interval_since is not None:
-                        date_interval = district.date - district.incidence_interval_since
-                        if date_interval.days != 0:
-                            days = format_noun(date_interval.days, FormattableNoun.DAYS)
-                        else:
-                            days = "heute"
+                    if district.incidence_interval_data:
+                        if district.incidence_interval_data.lower_threshold_days is not None:
+                            message += "\n• Seit {days} ({working_days}) über {threshold}" \
+                                .format(days=format_noun(district.incidence_interval_data.lower_threshold_days,
+                                                         FormattableNoun.DAYS),
+                                        working_days=format_noun(
+                                            district.incidence_interval_data.lower_threshold_working_days,
+                                            FormattableNoun.WORKING_DAYS),
+                                        threshold=format_float(district.incidence_interval_data.lower_threshold))
 
-                        if district.incidence < district.incidence_interval_threshold:
-                            word = "unter"
-                        else:
-                            word = "über"
-
-                        message += "\n• Seit {interval_length} {word} {interval}" \
-                            .format(interval_length=days, interval=district.incidence_interval_threshold, word=word)
+                        if district.incidence_interval_data.upper_threshold_days is not None:
+                            if district.incidence_interval_data.lower_threshold_days is None:
+                                message += "\n• Seit "
+                            else:
+                                message += ", seit "
+                            message += "{days} ({working_days}) unter {threshold}" \
+                                .format(days=format_noun(district.incidence_interval_data.upper_threshold_days,
+                                                         FormattableNoun.DAYS),
+                                        working_days=format_noun(
+                                            district.incidence_interval_data.upper_threshold_working_days,
+                                            FormattableNoun.WORKING_DAYS),
+                                        threshold=format_float(district.incidence_interval_data.upper_threshold))
 
                     message += "\n• {new_cases}, {new_deaths}" \
                         .format(new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),

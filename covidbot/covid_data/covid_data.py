@@ -5,8 +5,9 @@ from typing import List, Optional, Dict
 
 from mysql.connector import MySQLConnection
 
+from covidbot.covid_data.WorkingDayChecker import WorkingDayChecker
 from covidbot.covid_data.models import District, VaccinationData, RValueData, DistrictData, ICUData, \
-    RuleData
+    RuleData, IncidenceIntervalData
 from covidbot.metrics import LOCATION_DB_LOOKUP
 from covidbot.utils import get_trend
 
@@ -14,6 +15,7 @@ from covidbot.utils import get_trend
 class CovidData(object):
     connection: MySQLConnection
     log = logging.getLogger(__name__)
+    working_day_checker = WorkingDayChecker()
 
     def __init__(self, connection: MySQLConnection) -> None:
         self.connection = connection
@@ -124,27 +126,58 @@ class CovidData(object):
                     result.cases_trend = get_trend(comparison_data.new_cases, result.new_cases)
                     result.deaths_trend = get_trend(comparison_data.new_deaths, result.new_deaths)
 
-            # Check, how long incidence is in certain interval
-            if result.incidence < 100:
-                threshold_values = [25, 50, 100]
-                threshold = 0
-                while result.incidence > threshold_values[threshold] and len(threshold_values) > threshold:
-                    threshold += 1
-                operator = ">"
-                result.incidence_interval_threshold = threshold_values[threshold]
-            else:
-                threshold_values = [200, 165, 150, 100]
-                threshold = 0
-                while result.incidence < threshold_values[threshold] and len(threshold_values) > threshold:
-                    threshold += 1
-                operator = "<="
-                result.incidence_interval_threshold = threshold_values[threshold]
+            cursor.execute('SELECT alt_name FROM county_alt_names WHERE alt_name LIKE \'DE-%\' AND district_id=%s OR district_id=(SELECT parent FROM counties WHERE rs=%s) LIMIT 1', [district_id, district_id])
+            state_name = None
+            record = cursor.fetchone()
+            if record:
+                state_name = record['alt_name']
+                state_name = state_name.split("-")[1]
 
-            cursor.execute(f'SELECT date FROM covid_data_calculated WHERE rs=%s AND incidence {operator} %s '
-                           f'ORDER BY date DESC LIMIT 1', [district_id, result.incidence_interval_threshold])
-            rows = cursor.fetchall()
-            if rows:
-                result.incidence_interval_since = rows[0]['date']
+            # Check, how long incidence is in certain interval
+            threshold_values = [35, 50, 100, 150, 165, 200]
+            interval_data = IncidenceIntervalData()
+
+            # Get lower threshold
+            for i in range(len(threshold_values) - 1, 0, -1):
+                if threshold_values[i] < result.incidence:
+                    interval_data.lower_threshold = threshold_values[i]
+                    break
+
+            if interval_data.lower_threshold:
+                cursor.execute('SELECT date FROM covid_data WHERE incidence < %s AND rs=%s ORDER BY date DESC LIMIT 1',
+                               [interval_data.lower_threshold, district_id])
+                record = cursor.fetchone()
+                if record:
+                    lower_date = record['date']
+                    interval_data.lower_threshold_days = 0
+                    interval_data.lower_threshold_working_days = 0
+                    while lower_date < date.today():
+                        interval_data.lower_threshold_days += 1
+                        if not self.working_day_checker.check_holiday(lower_date, state_name):
+                            interval_data.lower_threshold_working_days += 1
+                        lower_date += timedelta(days=1)
+
+            # Get upper threshold
+            for val in threshold_values:
+                if result.incidence < val:
+                    interval_data.upper_threshold = val
+                    break
+
+            if interval_data.upper_threshold:
+                cursor.execute('SELECT date FROM covid_data WHERE incidence > %s AND rs=%s ORDER BY date DESC LIMIT 1',
+                               [interval_data.upper_threshold, district_id])
+                record = cursor.fetchone()
+                if record:
+                    upper_date = record['date']
+                    interval_data.upper_threshold_days = 0
+                    interval_data.upper_threshold_working_days = 0
+                    while upper_date < date.today():
+                        interval_data.upper_threshold_days += 1
+                        if not self.working_day_checker.check_holiday(upper_date, state_name):
+                            interval_data.upper_threshold_working_days += 1
+                        upper_date += timedelta(days=1)
+
+            result.incidence_interval_data = interval_data
 
             return result
 
