@@ -84,8 +84,9 @@ class DistrictData(District):
     deaths_trend: Optional[TrendValue] = None
     total_cases: Optional[int] = None
     total_deaths: Optional[int] = None
+    last_update: Optional[datetime] = None
+    # Optional, pluggable data
     vaccinations: Optional[VaccinationData] = None
     r_value: Optional[RValueData] = None
     icu_data: Optional[ICUData] = None
     rules: Optional[RuleData] = None
-    last_update: Optional[datetime] = None

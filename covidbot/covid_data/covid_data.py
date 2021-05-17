@@ -5,7 +5,7 @@ from typing import List, Optional, Dict
 
 from mysql.connector import MySQLConnection
 
-from covidbot.covid_data.models import TrendValue, District, VaccinationData, RValueData, DistrictData, ICUData, \
+from covidbot.covid_data.models import District, VaccinationData, RValueData, DistrictData, ICUData, \
     RuleData
 from covidbot.metrics import LOCATION_DB_LOOKUP
 from covidbot.utils import get_trend
@@ -80,6 +80,19 @@ class CovidData(object):
         :param district_id: ID of the district
         :return: DistrictData
         """
+        result = self.get_base_data(district_id)
+
+        if not result:
+            return None
+
+        result.vaccinations = self.get_vaccination_data(district_id)
+        result.icu_data = self.get_icu_data(district_id)
+        result.r_value = self.get_r_value_data(district_id)
+        result.rules = self.get_rules_data(district_id)
+
+        return result
+
+    def get_base_data(self, district_id: int) -> Optional[DistrictData]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT * FROM covid_data_calculated WHERE rs=%s ORDER BY date DESC LIMIT 1',
                            [district_id])
@@ -94,7 +107,49 @@ class CovidData(object):
                                   new_cases=record['new_cases'], new_deaths=record['new_deaths'],
                                   date=record['date'], last_update=record['last_update'])
 
-            # Check if vaccination data is available
+            # Get data for trends
+            cursor.execute(
+                'SELECT * FROM covid_data_calculated WHERE rs=%s AND (date=SUBDATE(Date(%s), 7) OR date=SUBDATE(Date(%s), 1)) LIMIT 2',
+                [district_id, result.date, result.date])
+
+            for record in cursor.fetchall():
+                comparison_data = DistrictData(name=record['county_name'], id=district_id,
+                                               incidence=record['incidence'],
+                                               type=record['type'], total_cases=record['total_cases'],
+                                               total_deaths=record['total_deaths'], new_cases=record['new_cases'],
+                                               new_deaths=record['new_deaths'], date=record['date'])
+                if result.date - comparison_data.date == timedelta(days=1):
+                    result.incidence_trend = get_trend(comparison_data.incidence, result.incidence)
+                else:
+                    result.cases_trend = get_trend(comparison_data.new_cases, result.new_cases)
+                    result.deaths_trend = get_trend(comparison_data.new_deaths, result.new_deaths)
+
+            # Check, how long incidence is in certain interval
+            if result.incidence < 100:
+                threshold_values = [25, 50, 100]
+                threshold = 0
+                while result.incidence > threshold_values[threshold] and len(threshold_values) > threshold:
+                    threshold += 1
+                operator = ">"
+                result.incidence_interval_threshold = threshold_values[threshold]
+            else:
+                threshold_values = [200, 165, 150, 100]
+                threshold = 0
+                while result.incidence < threshold_values[threshold] and len(threshold_values) > threshold:
+                    threshold += 1
+                operator = "<="
+                result.incidence_interval_threshold = threshold_values[threshold]
+
+            cursor.execute(f'SELECT date FROM covid_data_calculated WHERE rs=%s AND incidence {operator} %s '
+                           f'ORDER BY date DESC LIMIT 1', [district_id, result.incidence_interval_threshold])
+            rows = cursor.fetchall()
+            if rows:
+                result.incidence_interval_since = rows[0]['date']
+
+            return result
+
+    def get_vaccination_data(self, district_id: int) -> Optional[VaccinationData]:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT MAX(date) as last_update FROM covid_vaccinations WHERE district_id=%s',
                            [district_id])
             vacc_date = cursor.fetchone()
@@ -127,94 +182,54 @@ class CovidData(object):
                             vaccination_data.avg_days_to_finish = math.ceil(
                                 population_to_be_vaccinated / vaccination_data.avg_speed)
 
-                    result.vaccinations = vaccination_data
-            # Check if ICU data is available
+                    return vaccination_data
+
+    def get_icu_data(self, district_id: int) -> Optional[ICUData]:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated, updated FROM icu_beds '
                            'WHERE district_id=%s ORDER BY date DESC LIMIT 1', [district_id])
             row = cursor.fetchone()
             if row:
-                result.icu_data = ICUData(date=row['date'], clear_beds=row['clear'], occupied_beds=row['occupied'],
-                                          occupied_covid=row['occupied_covid'],
-                                          covid_ventilated=row['covid_ventilated'], last_update=row['updated'])
+                result = ICUData(date=row['date'], clear_beds=row['clear'], occupied_beds=row['occupied'],
+                                 occupied_covid=row['occupied_covid'],
+                                 covid_ventilated=row['covid_ventilated'], last_update=row['updated'])
 
-                cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated, updated FROM icu_beds '
+                cursor.execute('SELECT occupied, occupied_covid FROM icu_beds '
                                'WHERE district_id=%s AND date=SUBDATE(%s, 7) LIMIT 1',
-                               [district_id, result.icu_data.date])
-                row_lastweek = cursor.fetchone()
-                if row_lastweek:
-                    icu_yesterday = ICUData(date=row_lastweek['date'], clear_beds=row_lastweek['clear'],
-                                            occupied_beds=row_lastweek['occupied'],
-                                            occupied_covid=row_lastweek['occupied_covid'],
-                                            covid_ventilated=row_lastweek['covid_ventilated'],
-                                            last_update=row['updated'])
-                    result.icu_data = self.fill_trend_icu(result.icu_data, icu_yesterday)
+                               [district_id, result.date])
+                row = cursor.fetchone()
+                if row:
+                    result.occupied_beds_trend = get_trend(row['occupied'], result.occupied_beds)
+                    result.occupied_covid_trend = get_trend(row['occupied_covid'], result.occupied_covid)
 
-            # Check if R-Value is available
-            if district_id == 0:
-                cursor.execute('SELECT r_date, `7day_r_value` FROM covid_r_value WHERE district_id=%s '
-                               'ORDER BY r_date DESC LIMIT 1', [district_id])
-                data = cursor.fetchone()
-                if data:
-                    r_data = RValueData(data['r_date'], data['7day_r_value'])
-                    result.r_value = r_data
+                return result
 
-            # Check if Rules are available
+    def get_r_value_data(self, district_id: int) -> Optional[RValueData]:
+        if district_id != 0:
+            return None
+
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT r_date, `7day_r_value` FROM covid_r_value WHERE district_id=%s '
+                           'ORDER BY r_date DESC LIMIT 1', [district_id])
+            data = cursor.fetchone()
+            if not data:
+                return None
+
+            r_data = RValueData(data['r_date'], data['7day_r_value'])
+            cursor.execute('SELECT `7day_r_value`, r_date FROM covid_r_value WHERE district_id=%s '
+                           'AND r_date=SUBDATE(%s, 1) LIMIT 1', [district_id, r_data.date])
+            row = cursor.fetchone()
+            if row:
+                r_data.r_trend = get_trend(row['7day_r_value'], r_data.r_value_7day)
+
+            return r_data
+
+    def get_rules_data(self, district_id: int) -> Optional[RuleData]:
+        with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT text, link, updated FROM district_rules WHERE district_id=%s', [district_id])
             data = cursor.fetchone()
             if data:
-                result.rules = RuleData(data['updated'], data['text'], data['link'])
-
-            # Add Trend in comparison to yesterday and last week
-            cursor.execute(
-                'SELECT * FROM covid_data_calculated WHERE rs=%s AND (date=SUBDATE(Date(%s), 7) OR date=SUBDATE(Date(%s), 1)) LIMIT 2',
-                [district_id, result.date, result.date])
-            last_week, yesterday = None, None
-            for record in cursor.fetchall():
-                comparison_data = DistrictData(name=record['county_name'], id=district_id,
-                                               incidence=record['incidence'],
-                                               type=record['type'], total_cases=record['total_cases'],
-                                               total_deaths=record['total_deaths'], new_cases=record['new_cases'],
-                                               new_deaths=record['new_deaths'], date=record['date'])
-                if result.date - comparison_data.date == timedelta(days=1):
-                    yesterday = comparison_data
-                    if result.r_value:
-                        cursor.execute('SELECT `7day_r_value`, r_date FROM covid_r_value WHERE district_id=%s '
-                                       'AND r_date=SUBDATE(%s, 1) LIMIT 1', [district_id, result.r_value.date])
-                        row = cursor.fetchone()
-                        if row:
-                            yesterday.r_value = RValueData(row['r_date'], row['7day_r_value'])
-                else:
-                    last_week = comparison_data
-
-            if not last_week and yesterday:
-                last_week = yesterday
-
-            if last_week:
-                result = self.fill_trend(result, last_week, yesterday)
-
-            # Check, how long incidence is in certain interval
-            if result.incidence < 100:
-                threshold_values = [25, 50, 100]
-                threshold = 0
-                while result.incidence > threshold_values[threshold] and len(threshold_values) > threshold:
-                    threshold += 1
-                operator = ">"
-                result.incidence_interval_threshold = threshold_values[threshold]
-            else:
-                threshold_values = [200, 165, 150, 100]
-                threshold = 0
-                while result.incidence < threshold_values[threshold] and len(threshold_values) > threshold:
-                    threshold += 1
-                operator = "<="
-                result.incidence_interval_threshold = threshold_values[threshold]
-
-            cursor.execute(f'SELECT date FROM covid_data_calculated WHERE rs=%s AND incidence {operator} %s '
-                           f'ORDER BY date DESC LIMIT 1', [district_id, result.incidence_interval_threshold])
-            rows = cursor.fetchall()
-            if rows:
-                result.incidence_interval_since = rows[0]['date']
-
-            return result
+                return RuleData(data['updated'], data['text'], data['link'])
 
     def get_country_data(self) -> DistrictData:
         return self.get_district_data(0)
@@ -226,43 +241,20 @@ class CovidData(object):
 
             result = {'full': None, 'close2full': None}
             # TODO: Use districts table to identify non-aggregated values
-            cursor.execute('SELECT COUNT(*) as num_full FROM icu_beds WHERE date=%s AND clear=0 AND district_id > 16', [current_date])
+            cursor.execute('SELECT COUNT(*) as num_full FROM icu_beds WHERE date=%s AND clear=0 AND district_id > 16',
+                           [current_date])
             record = cursor.fetchone()
             if record:
                 result['full'] = record['num_full']
 
-            cursor.execute('SELECT COUNT(*) as num_close FROM icu_beds WHERE date=%s AND (occupied / (clear + occupied)) > 0.9 AND district_id > 16', [current_date])
+            cursor.execute(
+                'SELECT COUNT(*) as num_close FROM icu_beds WHERE date=%s AND (occupied / (clear + occupied)) > 0.9 AND district_id > 16',
+                [current_date])
             record = cursor.fetchone()
             if record:
                 result['close2full'] = record['num_close']
 
             return result
-    @staticmethod
-    def fill_trend(today: DistrictData, last_week: DistrictData, yesterday: Optional[DistrictData]) -> DistrictData:
-        if not yesterday:
-            yesterday = last_week
-
-        if last_week:
-            today.cases_trend = get_trend(last_week.new_cases, today.new_cases)
-            today.deaths_trend = get_trend(last_week.new_deaths, today.new_deaths)
-
-        if yesterday:
-            today.incidence_trend = get_trend(yesterday.incidence, today.incidence)
-
-            if today.r_value and yesterday.r_value:
-                today.r_value.r_trend = get_trend(yesterday.r_value.r_value_7day, today.r_value.r_value_7day)
-
-        return today
-
-    @staticmethod
-    def fill_trend_icu(today: ICUData, yesterday: ICUData) -> ICUData:
-        if not yesterday:
-            return today
-
-        today.occupied_beds_trend = get_trend(yesterday.occupied_beds, today.occupied_beds)
-        today.occupied_beds_trend = get_trend(yesterday.occupied_covid, today.occupied_covid)
-
-        return today
 
     def get_last_update(self) -> Optional[date]:
         with self.connection.cursor(dictionary=True) as cursor:
