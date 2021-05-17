@@ -8,6 +8,26 @@
     </head>
     <body>
 <div id="layout" class="content pure-g">
+    <div id="nav" class="pure-u">
+        <a href="#" id="menuLink" class="nav-menu-button">Menu</a>
+
+        <div class="nav-inner">
+            <div class="pure-menu">
+                <ul class="pure-menu-list">
+                    <li class="pure-menu-item"><a href="{{ base_url }}/" class="pure-menu-link">Eingang</a></li>
+                    <li class="pure-menu-heading">Status</li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=unread" class="pure-menu-link">Ungelesen <span class="email-count">({{ num_unread }})</span></a></li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=read" class="pure-menu-link">Gelesen</a></li>
+                    <li class="pure-menu-item"><a href="{{ base_url }}/?status=answered" class="pure-menu-link">Beantwortet</a></li>
+                    <li class="pure-menu-heading">Tags</li>
+                    {% for t in available_tags %}
+                        <li class="pure-menu-item"><a href="{{ base_url }}/?tag={{ t }}" class="pure-menu-link"><span class="ticket-tag-{{ t }}"></span>{{ t | capitalize() }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div id="list" class="pure-u-1">
         {% block messagelist %}
         {% endblock %}

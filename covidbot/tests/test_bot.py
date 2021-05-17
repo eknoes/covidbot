@@ -50,6 +50,7 @@ class TestBot(TestCase):
             cursor.execute('TRUNCATE bot_user_sent_reports')
             cursor.execute('TRUNCATE user_feedback')
             cursor.execute('TRUNCATE user_responses')
+            cursor.execute('TRUNCATE user_ticket_tag')
             cursor.execute('DELETE FROM bot_user')
 
     def test_update_with_subscribers(self):

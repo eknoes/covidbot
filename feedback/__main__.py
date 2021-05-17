@@ -7,7 +7,7 @@ from covidbot.__main__ import get_connection, parse_config
 
 from aiohttp import web
 
-from feedback.feedback_manager import FeedbackManager
+from feedback.feedback_manager import FeedbackManager, CommunicationState
 
 routes = web.RouteTableDef()
 config = parse_config('config.ini')
@@ -19,23 +19,45 @@ base_url = config.get('FEEDBACK', 'BASE_URL', fallback='')
 @routes.get(base_url + r"/user/{user_id:\d+}")
 @routes.get(base_url + "/")
 @aiohttp_jinja2.template('single.jinja2')
-async def show_user(request):
-    communication = user_manager.get_all_communication()
-
-    user_id = request.match_info.get("user_id")
-    if not user_id:
-        user_id = str(communication[0].user_id)
+async def show_user(request: Request):
+    comm_unread, comm_read, comm_answered = user_manager.get_all_communication()
 
     user = None
-    for c in communication:
-        if str(c.user_id) == user_id:
-            user = c
-            break
+    communication = comm_unread
 
-    if not user:
-        raise HTTPNotFound()
+    if request.match_info.get("user_id"):
+        user_id = int(request.match_info.get("user_id"))
+        for s, comm in [("unread", comm_unread), ("read", comm_read), ("answered", comm_answered)]:
+            for c in comm:
+                if c.user_id == user_id:
+                    user = c
+                    communication = comm
+                    break
+        if not user:
+            raise HTTPNotFound()
 
-    return {'messagelist': communication, 'user': user, 'base_url': base_url}
+    else:
+        status = ""
+        if 'status' in request.query:
+            status = request.query['status']
+
+        if status == "read":
+            communication = comm_read
+        elif status == "answered":
+            communication = comm_answered
+        elif status == "unread":
+            communication = comm_unread
+        else:
+            communication = comm_unread + comm_read + comm_answered
+
+    if 'tag' in request.query:
+        communication = list(filter(lambda x: request.query['tag'] in x.tags, communication))
+
+    if communication and not user:
+        user = communication[0]
+
+    return {'messagelist': communication, 'user': user, 'base_url': base_url, 'num_unread': len(comm_unread),
+            'available_tags': user_manager.get_available_tags()}
 
 
 @routes.post(base_url + r"/user/{user_id:\d+}")
@@ -48,6 +70,9 @@ async def post_user(request: Request):
         user_manager.mark_user_unread(user_id)
     elif form.get('reply'):
         user_manager.message_user(user_id, form.get('message'))
+    elif form.get('add_tag'):
+        user_manager.add_user_tag(user_id, form.get('add_tag'))
+        raise HTTPFound(base_url + f'/user/{request.match_info["user_id"]}?tag={form.get("add_tag")}')
     else:
         raise HTTPBadRequest(reason="You have to make some action")
     raise HTTPFound(base_url + f'/user/{request.match_info["user_id"]}')

@@ -53,6 +53,10 @@ class UserManager(object):
                            '(id INT AUTO_INCREMENT PRIMARY KEY, receiver_id INT NOT NULL, '
                            'created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), sent DATETIME(6) DEFAULT NULL,'
                            'message TEXT, FOREIGN KEY(receiver_id) REFERENCES bot_user(user_id))')
+            cursor.execute('CREATE TABLE IF NOT EXISTS user_ticket_tag '
+                           '(id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, '
+                           'created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
+                           'tag VARCHAR(100), FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             cursor.execute('CREATE TABLE IF NOT EXISTS answered_messages '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(20), message_id BIGINT, '
                            'UNIQUE(platform, message_id))')

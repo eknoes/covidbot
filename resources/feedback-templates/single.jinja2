@@ -1,5 +1,17 @@
 {% extends "base.jinja2" %}
 {% block messagelist %}
+    {% if not messagelist %}
+        <div id="mail-selected" class="email-item pure-g">
+            <div class="pure-u">
+                <h5 class="email-name"></h5>
+                <h4 class="email-subject"></h4>
+                <p class="email-desc">
+                    <i>Keine Nachrichten vorhanden</i>
+                </p>
+            </div>
+        </div>
+
+    {% endif %}
     {%  for item in messagelist %}
         <div {% if item.user_id == user.user_id %}id="mail-selected"{% endif %} class="email-item email-item{% if item.user_id == user.user_id %}-selected{% elif item.state().value == "unread" %}-unread{% elif item.state().value == "answered" %}-answered{% endif %}  pure-g">
             <a href="{{ base_url }}/user/{{ item.user_id }}">
@@ -15,26 +27,41 @@
     {% endfor %}
 {% endblock %}
 {% block messageheader %}
-<div class="pure-u-1-3">
-    <h1 class="email-content-title">Nutzer #{{ user.user_id }}</h1>
-    <p class="email-content-subtitle">
-        Via <a>{{ user.platform }}</a> am <span>{{ user.last_communication_str() }} Uhr</span>
-    </p>
-</div>
+    {% if user %}
+    <div class="pure-u-1-3">
+        <h1 class="email-content-title">Nutzer #{{ user.user_id }}</h1>
+        <p class="email-content-subtitle">
+            Via <a>{{ user.platform }}</a> am <span>{{ user.last_communication_str() }} Uhr</span><br/>
+            {{ user.get_tags_html() | safe }}
+        </p>
+    </div>
 
-<div class="email-content-controls pure-u-2-3">
-    <form method="post" class="pure-form-aligned pure-form" action="{{ base_url }}/user/{{ user.user_id }}">
-        <div class="pure-u-1-5">
-            {% if user.state().value == "unread" %}
-                <input type="submit" class="pure-button pure-button-primary" name="mark_read" value="Als Gelesen markieren">
-            {% else %}
-                <input type="submit" class="pure-button pure-button-primary" name="mark_unread" value="Als Ungelesen markieren">
-            {% endif %}
-        </div>
-    </form>
-</div>
+    <div class="email-content-controls pure-u-2-3">
+        <form method="post" class="pure-form-stacked pure-form" action="{{ base_url }}/user/{{ user.user_id }}">
+            <div class="pure-u-1-5">
+                {% for t in available_tags %}
+                    {% if not t in user.tags %}
+                        <button name="add_tag" value="{{ t }}" class="pure-button add-ticket-tag-button">
+                            <span class="ticket-tag-{{ t }}"></span>{{ t | capitalize() }}
+                        </button>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="pure-u-1-5">
+                {% if user.state().value == "unread" %}
+                    <input type="submit" class="pure-button pure-button-primary" name="mark_read" value="Als Gelesen markieren">
+                {% else %}
+                    <input type="submit" class="pure-button pure-button-primary" name="mark_unread" value="Als Ungelesen markieren">
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    {% endif %}
 {% endblock %}
 {% block messages %}
+    {% if not user %}
+        <div class="pure-u-1-1"><h4>Keine Nachrichten vorhanden</h4></div>
+    {% endif %}
     {% for message in user.messages %}
         <div class="pure-u-4-5 {% if message.author == 0 %}admin{% else %}user{% endif %}-message chat-message">
             <p class="message">{{ message.message | replace("\n", "<br />") | safe }}</p>
@@ -43,6 +70,7 @@
     {% endfor %}
 {% endblock %}
 {% block replyform %}
+    {% if user %}
 <div class="reply-form pure-u-4-5">
     <form class="pure-form-stacked" method="POST"  action="{{ base_url }}/user/{{ user.user_id }}">
         <div class="pure-u-1-1">
@@ -52,4 +80,5 @@
         </div>
     </form>
 </div>
+    {% endif %}
 {% endblock %}

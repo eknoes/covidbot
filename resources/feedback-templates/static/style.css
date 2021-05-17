@@ -116,25 +116,34 @@ a {
     color: rgb(75, 113, 151);
 }
 
-.email-label-personal,
-.email-label-work,
-.email-label-travel {
+.ticket-tag-idee,
+.ticket-tag-bug,
+.ticket-tag-lob,
+.ticket-tag-frage {
     width: 15px;
     height: 15px;
     display: inline-block;
     margin-right: 0.5em;
     border-radius: 3px;
 }
-.email-label-personal {
+
+.ticket-tag-frage {
     background: #ffc94c;
 }
-.email-label-work {
-    background: #41ccb4;
+.ticket-tag-lob {
+    background: #47A1B3;
 }
-.email-label-travel {
+.ticket-tag-idee {
     background: #40c365;
 }
+.ticket-tag-bug {
+    background: #FF4090;
+}
 
+button.add-ticket-tag-button {
+    margin-bottom: 0.2em;
+    min-width: 7em;
+}
 
 /* Email Item Styles */
 .email-item {
@@ -223,6 +232,7 @@ p.message-meta {
     .email-content-header {
         position: fixed;
         border-bottom: 1px solid #ddd;
+        border-left: 1px solid #ddd;
         background: white;
         width: 100%;
         height: 5em;
@@ -247,9 +257,7 @@ p.message-meta {
             .email-content-subtitle span {
                 color: #999;
             }
-    .email-content-controls {
-        padding-top: 2em;
-    }
+
         .email-content-controls .secondary-button {
             margin-bottom: 0.3em;
         }
@@ -339,5 +347,6 @@ p.message-meta {
         position: static;
         margin: 0;
         padding: 0;
+        width: 100%;
     }
 }

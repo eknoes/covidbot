@@ -29,6 +29,7 @@ class TestSubscriptionManager(TestCase):
             cursor.execute("DROP TABLE IF EXISTS bot_user_sent_reports;")
             cursor.execute("DROP TABLE IF EXISTS report_subscriptions;")
             cursor.execute("DROP TABLE IF EXISTS user_responses;")
+            cursor.execute("DROP TABLE IF EXISTS user_ticket_tag;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
 
         self.test_manager = UserManager("unittest", self.conn)
