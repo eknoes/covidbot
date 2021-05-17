@@ -32,7 +32,10 @@ async def show_user(request: Request):
 
     user = None
     communication = None
-    status = ""
+
+    status = None
+    if 'status' in request.query:
+        status = request.query['status']
 
     if request.match_info.get("user_id"):
         user_id = int(request.match_info.get("user_id"))
@@ -41,14 +44,13 @@ async def show_user(request: Request):
                 if c.user_id == user_id:
                     user = c
                     communication = comm
+
+                    if status:
+                        status = s
                     break
         if not user:
             raise HTTPNotFound()
-
     else:
-        if 'status' in request.query:
-            status = request.query['status']
-
         if status == "read":
             communication = comm_read
         elif status == "answered":
@@ -93,6 +95,9 @@ async def post_user(request: Request):
         user_manager.mark_user_read(user_id)
     else:
         raise HTTPBadRequest(reason="You have to make some action")
+
+    if request.query:
+        raise HTTPFound(base_url + "/?" + request.query_string)
     raise HTTPFound(request.path_qs)
 
 
