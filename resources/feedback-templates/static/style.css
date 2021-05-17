@@ -359,10 +359,6 @@ p.message-meta {
         height: 100%;
     }
 
-    .email-content-body {
-        padding-top: 8em;
-    }
-
     .email-content-header {
         width: 100%;
         position: relative;
