@@ -68,7 +68,7 @@ async def show_user(request: Request):
     if communication and not user:
         user = communication[0]
 
-    subs, reports = None, None
+    subs, reports = [], []
     if user:
         subs = user_manager.get_user_subscriptions(user.user_id)
         reports = user_manager.get_user_report_subscriptions(user.user_id)
