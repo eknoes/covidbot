@@ -98,6 +98,9 @@ class Visualization:
         ax1.patch.set_facecolor("#eeeeee")
         fig.subplots_adjust(bottom=0.2)
 
+        # Ticks also on right side
+        ax1.tick_params(axis="y", labelleft=True, labelright=True)
+
         return fig, ax1
 
     @staticmethod
@@ -358,6 +361,8 @@ class Visualization:
         # Add a label every 7 days
         self.set_weekday_formatter(ax1, current_date.weekday())
 
+        # Draw thresholds
+        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([0, 35, 50, 100, 150, 165, 200, 300, 400, 500]))
         # Save to file
         # plt.show()
         plt.savefig(filepath, format='JPEG')
@@ -383,6 +388,9 @@ class Visualization:
         plt.plot(x_data, y_data, color="#1fa2de", zorder=3, linewidth=3)
         ax1.set_ylim(bottom=0)
         self.set_weekday_formatter(ax1, current_date.weekday())
+
+        # Draw thresholds
+        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([0, 35, 50, 100, 150, 165, 200, 300, 400, 500]))
 
         # Save to file
         plt.savefig(filepath, format='JPEG')
