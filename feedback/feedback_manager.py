@@ -35,7 +35,7 @@ class SingleTicket:
         elif self.state == TicketState.READ:
             state_str = "📃"
 
-        return self.date.strftime("%d.%m.%Y %H:%m") + f' Uhr {state_str}'
+        return self.date.strftime("%d.%m.%Y %H:%M") + f' Uhr {state_str}'
 
 
 @dataclass
@@ -49,7 +49,7 @@ class Communication:
         return self.messages[-1].date
 
     def last_communication_str(self) -> str:
-        return self.messages[-1].date.strftime("%d.%m.%Y %H:%m")
+        return self.messages[-1].date.strftime("%d.%m.%Y %H:%M")
 
     def get_tags_html(self) -> str:
         result = ""
