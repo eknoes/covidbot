@@ -362,7 +362,7 @@ class Bot(object):
                             responses.append(BotResponse(f"Du erhältst nun keine Berichte mehr zu {message_type_name(item)}."))
 
         user = self.user_manager.get_user(user_id, True)
-        response = BotResponse("Du hast {report_count} Berichte abonniert. Jeder Bericht enthält individuelle "
+        response = BotResponse("Du hast {report_count} abonniert. Jeder Bericht enthält individuelle "
                                "Grafiken und ist an deine abonnierten Orte angepasst."
                                .format(report_count=format_noun(len(user.subscribed_reports), FormattableNoun.REPORT)))
 
@@ -370,17 +370,15 @@ class Bot(object):
         for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
             if item in user.subscribed_reports:
                 cmd = "/berichte"
-                verb_label = "abbestellen"
-                verb = "abzubestellen"
+                verb = "abbestellen"
                 status = "✅"
             else:
                 cmd = "/berichte"
                 verb = "abonnieren"
-                verb_label = 'zu ' + verb
                 status = "❎"
             response.message += f"\n\n<b>{message_type_name(item)}:</b> <i>{status}</i>\n{message_type_desc(item)}"
 
-            choices.append(UserChoice(f'{message_type_name(item)} {verb_label}',
+            choices.append(UserChoice(f'{message_type_name(item)} {verb}',
                                       f'{cmd} {message_type_name(item)}',
                                       f'Schreibe {self.command_formatter(f"{cmd[1:].capitalize()} {message_type_name(item)}")} um '
                                       f'den Bericht zu {message_type_name(item)} {verb}'))
