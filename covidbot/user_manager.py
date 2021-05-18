@@ -52,7 +52,7 @@ class UserManager(object):
             cursor.execute('CREATE TABLE IF NOT EXISTS user_responses '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, receiver_id INT NOT NULL, '
                            'created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), sent DATETIME(6) DEFAULT NULL,'
-                           'message TEXT, FOREIGN KEY(receiver_id) REFERENCES bot_user(user_id))')
+                           'message TEXT, hidden TINYINT(1) DEFAULT 0, FOREIGN KEY(receiver_id) REFERENCES bot_user(user_id))')
             cursor.execute('CREATE TABLE IF NOT EXISTS user_ticket_tag '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, '
                            'created DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),'
@@ -353,7 +353,7 @@ class UserManager(object):
 
     def add_user_message(self, recipient_id: int, message: str):
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('INSERT INTO user_responses (receiver_id, message) VALUE (%s, %s)', [recipient_id, message])
+            cursor.execute('INSERT INTO user_responses (receiver_id, message, hidden) VALUE (%s, %s, 1)', [recipient_id, message])
         self.connection.commit()
 
     def get_user_messages(self, user_id: int) -> List[str]:

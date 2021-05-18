@@ -1,6 +1,6 @@
 import csv
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Optional, Dict
 
 import ujson as json
@@ -89,24 +89,30 @@ class RKIUpdater(Updater):
                 self.connection.commit()
         self.log.debug("Finished inserting new data")
 
-    def calculate_aggregated_values(self, new_updated: date):
+    def calculate_aggregated_values(self, new_updated: Optional[date] = None):
         self.log.debug("Calculating aggregated values")
         with self.connection.cursor(dictionary=True) as cursor:
             # Calculate all parents, must be executed for every depth
             for i in range(2):
                 # Calculate Covid Data
-                cursor.execute('''INSERT INTO covid_data (rs, date, total_cases, total_deaths)
+                args = []
+                where_query = ""
+                if new_updated:
+                    where_query = "AND date = DATE(%s) "
+                    args = [new_updated]
+
+                cursor.execute(f'''INSERT INTO covid_data (rs, date, total_cases, total_deaths)
                                     SELECT new.parent, new_date, new_cases, new_deaths
                                     FROM
                                     (SELECT c.parent as parent, date as new_date, SUM(total_cases) as new_cases,
                                      SUM(total_deaths) as new_deaths FROM covid_data_calculated 
                                      LEFT JOIN counties c on covid_data_calculated.rs = c.rs
-                                     WHERE c.parent IS NOT NULL AND date = DATE(%s)
+                                     WHERE c.parent IS NOT NULL {where_query}
                                      GROUP BY c.parent, date)
                                     as new
                                   ON DUPLICATE KEY UPDATE 
                                   date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths''',
-                               [new_updated])
+                               args)
                 # Calculate Population
                 cursor.execute(
                     'UPDATE counties, (SELECT ncounties.rs as id, SUM(counties.population) as pop FROM counties\n'
@@ -164,23 +170,26 @@ class RKIHistoryUpdater(RKIUpdater):
                     elif field[:4] == "time":
                         updated = row[field]
                         updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
+                        # To keep it in sync with fresh RKI data
+                        updated = updated + timedelta(days=1)
                         self.log.info(f"Got historic case data for {updated}")
                         continue
 
                     # Do not overwrite current data
-                    if (date.today() - updated).days <= 7:
-                        continue
+                    # if (date.today() - updated).days <= 7:
+                    #    continue
 
                     district_id = field
                     if district_id == '11000':
                         district_id = '11'
                     cases_num = int(row[field])
                     cursor.execute('INSERT INTO covid_data (rs, date, total_cases) VALUE (%s, %s, %s) '
-                                   'ON DUPLICATE KEY UPDATE covid_data.total_cases=%s',
+                                   'ON DUPLICATE KEY UPDATE covid_data.total_cases=%s, covid_data.last_update=CURRENT_TIMESTAMP()',
                                    [int(district_id), updated, cases_num, cases_num])
                     new_cases = True
-                self.calculate_aggregated_values(updated)
                 self.connection.commit()
+            self.calculate_aggregated_values()
+        self.connection.commit()
 
         return new_cases
 
@@ -198,6 +207,9 @@ class RKIHistoryUpdater(RKIUpdater):
                     elif field[:4] == "time":
                         updated = row[field]
                         updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
+                        # To keep it in sync with fresh RKI data
+                        updated = updated + timedelta(days=1)
+
                         self.log.info(f"Got historic incidence data for {updated}")
                         continue
 
@@ -211,7 +223,8 @@ class RKIHistoryUpdater(RKIUpdater):
                     incidence = float(row[field])
 
                     cursor.execute(
-                        'INSERT INTO covid_data (rs, date, incidence) VALUE (%s, %s, %s) ON DUPLICATE KEY UPDATE covid_data.incidence=%s',
+                        'INSERT INTO covid_data (rs, date, incidence) VALUE (%s, %s, %s) '
+                        'ON DUPLICATE KEY UPDATE covid_data.incidence=%s, covid_data.last_update=CURRENT_TIMESTAMP()',
                         [int(district_id), updated, incidence, incidence])
                     new_data = True
                 self.connection.commit()

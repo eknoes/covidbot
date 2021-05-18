@@ -92,7 +92,7 @@ class FeedbackManager(object):
                 "LEFT JOIN bot_user b on b.user_id = user_feedback.user_id) "
                 "UNION "
                 "(SELECT receiver_id, bu.platform, message, user_responses.created, sent, 0 FROM user_responses "
-                "LEFT JOIN bot_user bu on bu.user_id = user_responses.receiver_id)")
+                "LEFT JOIN bot_user bu on bu.user_id = user_responses.receiver_id WHERE hidden=0)")
             for row in cursor.fetchall():
                 if not results.get(row['user_id']):
                     results[row['user_id']] = Communication(row['user_id'], row['platform'], [], [])
