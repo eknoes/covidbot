@@ -236,6 +236,20 @@ def message_type_name(item: MessageType) -> str:
     return ""
 
 
+def message_type_desc(item: MessageType) -> str:
+    if item == MessageType.CASES_GERMANY:
+        return "Der Bericht zu Neuinfektionen liefert dir einen Überblick über die allgemeine Coronalage in den von " \
+               "dir abonnierten Orten. Er erscheint jeden Morgen, direkt nachdem das RKI die neuesten Zahlen " \
+               "veröffentlicht hat."
+    elif item == MessageType.ICU_GERMANY:
+        return "Der Intensivbericht liefert dir die Zahlen zur Intensivbettenauslastung in den von dir abonnierten " \
+               "Orten."
+    elif item == MessageType.VACCINATION_GERMANY:
+        return "Der Impfbericht gibt dir einen Überblick über die Impflage in den von dir abonnierten Ländern und " \
+               "den zu deinen Abos zugehörigen Bundesländern."
+    return ""
+
+
 def get_trend(prev_value: Optional[Union[int, float]], current_value: Optional[Union[int, float]]) -> Optional[TrendValue]:
     if not prev_value or not current_value:
         return None

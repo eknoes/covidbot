@@ -41,7 +41,7 @@ class ICUGermanyUpdater(Updater):
             with self.connection.cursor() as cursor:
                 for row in results:
                     cursor.execute("INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
-                                   " covid_ventilated, updated) VALUES (%s, %s, %s, %s, %s, %s, %s)", row)
+                                   " covid_ventilated) VALUES (%s, %s, %s, %s, %s, %s)", row)
 
                 # Calculate aggregated values for states
                 for i in range(2):
@@ -134,7 +134,7 @@ class ICUGermanyHistoryUpdater(Updater):
 
                     cursor.executemany(
                         "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
-                        " covid_ventilated, updated) VALUES (%s, %s, %s, %s, %s, %s, %s)", results)
+                        " covid_ventilated) VALUES (%s, %s, %s, %s, %s, %s)", results)
 
                     # Calculate aggregated values for states
                     for i in range(2):

@@ -16,7 +16,7 @@ from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
 from covidbot.settings import BotUserSettings
 from covidbot.utils import adapt_text, format_float, format_int, format_noun, FormattableNoun, \
-    format_data_trend, MessageType, message_type_name
+    format_data_trend, MessageType, message_type_name, message_type_desc
 from covidbot.interfaces.bot_response import UserChoice, BotResponse
 
 
@@ -65,8 +65,6 @@ class Bot(object):
         self.handler_list.append(Handler("info", self.infoHandler, False))
         self.handler_list.append(Handler("impfungen", self.vaccHandler, True))
         self.handler_list.append(Handler("abo", self.subscribeHandler, True))
-        self.handler_list.append(Handler("abmelden", self.unsubscribeReportHandler, True))
-        self.handler_list.append(Handler("anmelden", self.subscribeReportHandler, True))
         self.handler_list.append(Handler("berichte", self.subscribeReportHandler, True))
         self.handler_list.append(Handler("regeln", self.rulesHandler, True))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler, True))
@@ -349,53 +347,46 @@ class Bot(object):
                                       self.visualization.vaccination_speed_graph(location.id)])]
 
     def subscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
-        BOT_COMMAND_COUNT.labels('subscribe-report').inc()
+        BOT_COMMAND_COUNT.labels('report-types').inc()
+        responses = []
         if user_input:
+            user = self.user_manager.get_user(user_id, with_subscriptions=True)
             for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
                 if user_input.capitalize() == message_type_name(item)[:len(user_input)]:
-                    if self.user_manager.add_report_subscription(user_id, item):
-                        return [BotResponse(f"Du erhältst nun Berichte für {message_type_name(item)}.")]
+                    if item not in user.subscribed_reports:
+                        if self.user_manager.add_report_subscription(user_id, item):
+                            self.user_manager.add_sent_report(user_id, item)
+                            responses.append(BotResponse(f"Du erhältst nun Berichte für {message_type_name(item)}."))
                     else:
-                        return [BotResponse(f"Du hast Berichte zu {message_type_name(item)} bereits abonniert.")]
-            user_input = None
+                        if self.user_manager.rm_report_subscription(user_id, item):
+                            responses.append(BotResponse(f"Du erhältst nun keine Berichte mehr zu {message_type_name(item)}."))
 
-        if not user_input:
-            user = self.user_manager.get_user(user_id, True)
-            response = BotResponse("Du hast {report_count} Berichte abonniert."
-                                   .format(
-                report_count=format_noun(len(user.subscribed_reports), FormattableNoun.REPORT)))
+        user = self.user_manager.get_user(user_id, True)
+        response = BotResponse("Du hast {report_count} Berichte abonniert. Jeder Bericht enthält individuelle "
+                               "Grafiken und ist an deine abonnierten Orte angepasst."
+                               .format(report_count=format_noun(len(user.subscribed_reports), FormattableNoun.REPORT)))
 
-            choices = []
-            for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
-                cmd = ""
-                verb = ""
-                if item in user.subscribed_reports:
-                    cmd = "/abmelden"
-                    verb_label = "abbestellen"
-                    verb = "abzubestellen"
-                else:
-                    cmd = "/anmelden"
-                    verb = "abonnieren"
-                    verb_label = 'zu ' + verb
-
-                choices.append(UserChoice(f'Bericht zu {message_type_name(item)} {verb_label}',
-                                          f'{cmd} {message_type_name(item)}',
-                                          f'Schreibe {self.command_formatter(f"{cmd[1:].capitalize()} {message_type_name(item)}")} um '
-                                          f'den Bericht zu {message_type_name(item)} {verb}'))
-            response.choices = choices
-            return [response]
-
-    def unsubscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
-        BOT_COMMAND_COUNT.labels('unsubscribe-report').inc()
-        if not user_input:
-            return self.subscribeReportHandler(user_input, user_id)
-
+        choices = []
         for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
-            if user_input.capitalize() == message_type_name(item)[:len(user_input)]:
-                if self.user_manager.rm_report_subscription(user_id, item):
-                    return [BotResponse(f"Du erhältst nun keine Berichte mehr zu {message_type_name(item)}.")]
-                else:
-                    return [BotResponse(f"Du hast Berichte zu {message_type_name(item)} bereits abbestellt.")]
+            if item in user.subscribed_reports:
+                cmd = "/berichte"
+                verb_label = "abbestellen"
+                verb = "abzubestellen"
+                status = "✅"
+            else:
+                cmd = "/berichte"
+                verb = "abonnieren"
+                verb_label = 'zu ' + verb
+                status = "❎"
+            response.message += f"\n\n<b>{message_type_name(item)}:</b> <i>{status}</i>\n{message_type_desc(item)}"
+
+            choices.append(UserChoice(f'{message_type_name(item)} {verb_label}',
+                                      f'{cmd} {message_type_name(item)}',
+                                      f'Schreibe {self.command_formatter(f"{cmd[1:].capitalize()} {message_type_name(item)}")} um '
+                                      f'den Bericht zu {message_type_name(item)} {verb}'))
+        response.choices = choices
+        responses.append(response)
+        return responses
 
     def subscribeHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
@@ -920,30 +911,23 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         :rtype: Optional[list[Tuple[str, str]]]
         :return: List of (userid, message)
         """
-        users = []
         for user in self.user_manager.get_all_user(with_subscriptions=True):
             for t in self.report_generator.get_available_reports(user):
-                users.append((user, t))
-
-            if self.user_manager.get_user_messages(user.id):
-                users.append((user, MessageType.USER_MESSAGE))
-
-        for user, report in users:
-            if report == MessageType.CASES_GERMANY:
-                if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA):
-                    yield MessageType.CASES_GERMANY, user.platform_id, self.report_generator.generate_infection_report(
-                        user)
+                if t == MessageType.CASES_GERMANY:
+                    if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA):
+                        yield MessageType.CASES_GERMANY, user.platform_id, self.report_generator.generate_infection_report(
+                            user)
+                    else:
+                        yield MessageType.CASES_GERMANY, user.platform_id, self._get_report(user.subscriptions, user.id)
                 else:
-                    yield MessageType.CASES_GERMANY, user.platform_id, self._get_report(user.subscriptions, user.id)
-            elif report == MessageType.USER_MESSAGE:
-                messages = self.user_manager.get_user_messages(user.id)
-                if messages:
-                    responses = []
-                    for m in messages:
-                        responses.append(BotResponse(m))
-                    yield MessageType.USER_MESSAGE, user.platform_id, responses
-            else:
-                yield report, user.platform_id, self.report_generator.generate_report(user, report)
+                    yield t, user.platform_id, self.report_generator.generate_report(user, t)
+
+            messages = self.user_manager.get_user_messages(user.id)
+            if messages:
+                responses = []
+                for m in messages:
+                    responses.append(BotResponse(UserHintService.format_commands(m, self.command_formatter)))
+                yield MessageType.USER_MESSAGE, user.platform_id, responses
 
     def confirm_message_send(self, report_type: MessageType, user_id: Union[str, int]):
         user_id = self.user_manager.get_user_id(user_id)
