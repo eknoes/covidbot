@@ -150,6 +150,7 @@ class FormattableNoun(Enum):
     PERSONS = 6
     WORKING_DAYS = 7
     INFECTIONS = 8
+    REPORT = 9
 
 
 def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
@@ -176,6 +177,9 @@ def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
     elif noun == FormattableNoun.BEDS:
         singular = "Bett"
         plural = "Betten"
+    elif noun == FormattableNoun.REPORT:
+        singular = "Bericht"
+        plural = "Berichte"
     elif noun == FormattableNoun.PERSONS:
         singular = "Person"
         plural = "Personen"
@@ -220,6 +224,16 @@ class MessageType(Enum):
     VACCINATION_GERMANY = "vaccinations-germany"
     ICU_GERMANY = "icu-germany"
     USER_MESSAGE = "user-message"
+
+
+def message_type_name(item: MessageType) -> str:
+    if item == MessageType.CASES_GERMANY:
+        return "Infektionen"
+    elif item == MessageType.ICU_GERMANY:
+        return "Intensivbetten"
+    elif item == MessageType.VACCINATION_GERMANY:
+        return "Impfungen"
+    return ""
 
 
 def get_trend(prev_value: Optional[Union[int, float]], current_value: Optional[Union[int, float]]) -> Optional[TrendValue]:

@@ -15,15 +15,8 @@ from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
 from covidbot.settings import BotUserSettings
 from covidbot.utils import adapt_text, format_float, format_int, format_noun, FormattableNoun, \
-    format_data_trend, MessageType
+    format_data_trend, MessageType, message_type_name
 from covidbot.interfaces.bot_response import UserChoice, BotResponse
-
-
-class UserDistrictActions(Enum):
-    SUBSCRIBE = 0
-    UNSUBSCRIBE = 1
-    REPORT = 2
-    RULES = 3
 
 
 @dataclass
@@ -66,6 +59,9 @@ class Bot(object):
         self.handler_list.append(Handler("info", self.infoHandler, False))
         self.handler_list.append(Handler("impfungen", self.vaccHandler, True))
         self.handler_list.append(Handler("abo", self.subscribeHandler, True))
+        self.handler_list.append(Handler("abmelden", self.unsubscribeReportHandler, True))
+        self.handler_list.append(Handler("anmelden", self.subscribeReportHandler, True))
+        self.handler_list.append(Handler("berichte", self.subscribeReportHandler, True))
         self.handler_list.append(Handler("regeln", self.rulesHandler, True))
         self.handler_list.append(Handler("beende", self.unsubscribeHandler, True))
         self.handler_list.append(Handler("lösche", self.unsubscribeHandler, True))
@@ -355,6 +351,55 @@ class Bot(object):
         return [BotResponse(message, [self.visualization.vaccination_graph(location.id),
                                       self.visualization.vaccination_speed_graph(location.id)])]
 
+    def subscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
+        BOT_COMMAND_COUNT.labels('subscribe-report').inc()
+        if user_input:
+            for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
+                if user_input.capitalize() == message_type_name(item)[:len(user_input)]:
+                    if self.user_manager.add_report_subscription(user_id, item):
+                        return [BotResponse(f"Du erhältst nun Berichte für {message_type_name(item)}.")]
+                    else:
+                        return [BotResponse(f"Du hast Berichte zu {message_type_name(item)} bereits abonniert.")]
+            user_input = None
+
+        if not user_input:
+            user = self.user_manager.get_user(user_id, True)
+            response = BotResponse("Du hast {report_count} Berichte abonniert." \
+                .format(
+                report_count=format_noun(len(user.subscribed_reports), FormattableNoun.REPORT)))
+
+            choices = []
+            for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
+                cmd = ""
+                verb = ""
+                if item in user.subscribed_reports:
+                    cmd = "/abmelden"
+                    verb_label = "abbestellen"
+                    verb = "abzubestellen"
+                else:
+                    cmd = "/anmelden"
+                    verb = "abonnieren"
+                    verb_label = 'zu ' + verb
+
+                choices.append(UserChoice(f'Bericht zu {message_type_name(item)} {verb_label}',
+                                          f'{cmd} {message_type_name(item)}',
+                                          f'Schreibe {self.command_formatter(f"{cmd[1:].capitalize()} {message_type_name(item)}")} um '
+                                          f'den Bericht zu {message_type_name(item)} {verb}'))
+            response.choices = choices
+            return [response]
+
+    def unsubscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
+        BOT_COMMAND_COUNT.labels('unsubscribe-report').inc()
+        if not user_input:
+            return self.subscribeReportHandler(user_input, user_id)
+
+        for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
+            if user_input.capitalize() == message_type_name(item)[:len(user_input)]:
+                if self.user_manager.rm_report_subscription(user_id, item):
+                    return [BotResponse(f"Du erhältst nun keine Berichte mehr zu {message_type_name(item)}.")]
+                else:
+                    return [BotResponse(f"Du hast Berichte zu {message_type_name(item)} bereits abbestellt.")]
+
     def subscribeHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
 
@@ -368,7 +413,7 @@ class Bot(object):
                 districts = None
             else:
                 districts = list(map(self.covid_data.get_district, user.subscriptions))
-                message = "Du hast aktuell {abo_count} abonniert." \
+                message = "Du hast aktuell {abo_count}." \
                     .format(abo_count=format_noun(len(user.subscriptions), FormattableNoun.DISTRICT))
 
             response = BotResponse(message)
@@ -413,7 +458,6 @@ class Bot(object):
 
     def unsubscribeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('unsubscribe').inc()
-
         location = self.parseLocationInput(user_input, help_command='Beende')
         if type(location) == District:
             if self.user_manager.rm_subscription(user_id, location.id):
@@ -789,7 +833,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_DELETE_ME, None)
         choices = [UserChoice("Ja", "Ja", "Sende \"Ja\", um alle deine bei uns gespeicherten Daten von dir zu "
                                           "löschen"),
-                   UserChoice("Abbrechen", "Nein", "Sende eine andere Nachricht, um keine Daten von dir zu löschen")]
+                   UserChoice("Abbrechen", "/noop", "Sende eine andere Nachricht, um keine Daten von dir zu löschen")]
         return [BotResponse("Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten"
                             " löschen?", choices=choices)]
 
@@ -1135,7 +1179,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                     "kannst du diese Nachricht an die Entwickler weiterleiten."
                 response.choices = [UserChoice("Feedback weiterleiten", "Ja", "Sende \"Ja\", um deine Nachricht als "
                                                                               "Feedback weiterzuleiten"),
-                                    UserChoice("Abbrechen", "Nein", "Sende \"Nein\", um abzubrechen")]
+                                    UserChoice("Abbrechen", "/noop", "Sende \"Nein\", um abzubrechen")]
             return [response]
 
         elif len(locations) == 1:

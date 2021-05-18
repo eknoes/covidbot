@@ -139,7 +139,7 @@ class UserManager(object):
 
     def rm_report_subscription(self, user_id: int, report: MessageType) -> bool:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('DELETE FROM report_subscriptions WHERE user_id=%s AND report=%s', [user_id, report])
+            cursor.execute('DELETE FROM report_subscriptions WHERE user_id=%s AND report=%s', [user_id, report.value])
             self.connection.commit()
             if cursor.rowcount == 0:
                 return False
@@ -197,7 +197,7 @@ class UserManager(object):
                     if not current_user.subscribed_reports:
                         current_user.subscribed_reports = []
 
-                    if row['report'] is not None and row['report'] not in current_user.subscribed_reports:
+                    if row['report'] is not None and MessageType(row['report']) not in current_user.subscribed_reports:
                         current_user.subscribed_reports.append(MessageType(row['report']))
 
             if current_user:
