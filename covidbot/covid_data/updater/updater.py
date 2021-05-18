@@ -19,14 +19,10 @@ class Updater(ABC):
         self.log = logging.getLogger(str(self.__class__.__name__))
         CovidDatabaseCreator(self.connection)
 
-    def get_resource(self, url: str, chance: Optional[float] = 1.0) -> Optional[str]:
-        # Just fetch for a certain chance, 100% by default
-        if random.uniform(0.0, 1.0) > chance:
-            return None
-
+    def get_resource(self, url: str, force = False) -> Optional[str]:
         header = {"User-Agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
         last_update = self.get_last_update()
-        if last_update:
+        if not force and last_update:
             # need to use our own day/month, as locale can't be changed on the fly and we have to ensure not asking for
             # Mär in March
             day = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][last_update.weekday()]

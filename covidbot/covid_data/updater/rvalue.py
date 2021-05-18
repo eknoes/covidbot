@@ -26,7 +26,7 @@ class RValueGermanyUpdater(Updater):
             return False
 
         new_data = False
-        response = self.get_resource(self.URL, 1)
+        response = self.get_resource(self.URL)
 
         if response:
             self.log.debug("Got R-Value Data")
