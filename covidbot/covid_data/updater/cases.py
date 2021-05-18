@@ -143,7 +143,8 @@ class RKIHistoryUpdater(RKIUpdater):
                 return row[0]
 
     def update(self) -> bool:
-        if self.get_last_update() == date(2020, 3, 3):
+        # TODO: Usual mechanism
+        if self.get_last_update() == date(2020, 3, 4):
             return False
         updated = False
         if self.update_cases():
