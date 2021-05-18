@@ -55,7 +55,7 @@ class MessengerBotSetup:
             logging.getLogger().addHandler(stream_log_handler)
 
         if name not in ["signal", "threema", "telegram", "interactive", "twitter", "mastodon", "instagram",
-                        "messenger", "facebook"]:
+                        "messenger", "facebook", "feedback"]:
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
@@ -157,6 +157,12 @@ class MessengerBotSetup:
         if self.name == "interactive":
             from covidbot.bot import InteractiveInterface
             return InteractiveInterface(bot)
+
+        if self.name == "feedback":
+            from covidbot.feedback_notifier import FeedbackNotifier
+            return FeedbackNotifier(api_key=self.config['TELEGRAM'].get('API_KEY'),
+                                    dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"),
+                                    user_manager=user_manager)
 
         if self.name == "twitter":
             if not self.config.has_section("TWITTER"):
@@ -341,7 +347,7 @@ def main():
                                                                    [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Check Tweets & Co
-        platforms = []
+        platforms = ["feedback"]
         if config.has_section("TWITTER"):
             platforms.append("twitter")
         if config.has_section("MASTODON"):

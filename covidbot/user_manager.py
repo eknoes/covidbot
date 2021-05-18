@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Generator
 
 from mysql.connector import MySQLConnection, IntegrityError, OperationalError
 
@@ -47,7 +47,8 @@ class UserManager(object):
             cursor.execute('CREATE TABLE IF NOT EXISTS user_feedback '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, user_id INTEGER,'
                            'added DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6), feedback TEXT NOT NULL, is_read'
-                           ' TINYINT(1) NOT NULL DEFAULT 0, is_tagged TINYINT(1) NOT NULL DEFAULT 0, '
+                           ' TINYINT(1) NOT NULL DEFAULT 0, is_tagged TINYINT(1) NOT NULL DEFAULT 0,'
+                           'notification_sent TINYINT(1) NOT NULL DEFAULT 0, '
                            'FOREIGN KEY(user_id) REFERENCES bot_user(user_id))')
             cursor.execute('CREATE TABLE IF NOT EXISTS user_responses '
                            '(id INT AUTO_INCREMENT PRIMARY KEY, receiver_id INT NOT NULL, '
@@ -380,6 +381,17 @@ class UserManager(object):
                 self.connection.commit()
                 return new_id
             return None
+
+    def get_feedback_notifications(self) -> Generator[str, None, None]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT id, user_id, feedback FROM user_feedback WHERE notification_sent=0 and is_read=0 '
+                           'ORDER BY added')
+            for row in cursor.fetchall():
+                yield f"<b>Neues Feedback von {row['user_id']}</b>\n" \
+                      f"{row['feedback']}\n\n" \
+                      f"<a href='https://covidbot.d-64.org/feedback/user/{row['user_id']}'>Antworten</a>"
+                cursor.execute('UPDATE user_feedback SET notification_sent=1 WHERE id=%s', [row['id']])
+        self.connection.commit()
 
     def is_message_answered(self, message_id: int) -> bool:
         with self.connection.cursor() as cursor:
