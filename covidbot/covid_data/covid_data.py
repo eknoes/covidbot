@@ -1,13 +1,13 @@
 import logging
 import math
 from datetime import date, timedelta
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 
 from mysql.connector import MySQLConnection
 
 from covidbot.covid_data.WorkingDayChecker import WorkingDayChecker
 from covidbot.covid_data.models import District, VaccinationData, RValueData, DistrictData, ICUData, \
-    RuleData, IncidenceIntervalData
+    RuleData, IncidenceIntervalData, DistrictFacts
 from covidbot.metrics import LOCATION_DB_LOOKUP
 from covidbot.utils import get_trend
 
@@ -77,6 +77,36 @@ class CovidData(object):
                 children_data.append((self.get_district_data(child)))
             return children_data
 
+    def get_district_facts(self, district_id: int) -> Optional[DistrictFacts]:
+        with self.connection.cursor() as cursor:
+            cursor.execute('''SELECT 'cases', new_cases, date FROM covid_data_calculated WHERE rs=%s AND new_cases = (SELECT MAX(new_cases) FROM covid_data_calculated WHERE rs=%s)
+UNION
+SELECT 'deaths', new_deaths, date FROM covid_data_calculated WHERE rs=%s AND new_deaths = (SELECT MAX(new_deaths) FROM covid_data_calculated WHERE rs=%s)
+UNION
+SELECT 'incidence', incidence, date FROM covid_data_calculated WHERE rs=%s AND incidence = (SELECT MAX(incidence) FROM covid_data_calculated WHERE rs=%s)
+UNION 
+(SELECT 'first-death', total_deaths, date FROM covid_data WHERE rs=%s AND total_deaths > 0 ORDER BY date LIMIT 1)
+UNION 
+(SELECT 'first-case', total_cases, date FROM covid_data WHERE rs=%s AND total_cases > 0 ORDER BY date LIMIT 1)
+''',
+                           [district_id] * 8)
+            facts = DistrictFacts()
+            for record in cursor.fetchall():
+                if record[0] == 'cases':
+                    facts.highest_cases = int(record[1])
+                    facts.highest_cases_date = record[2]
+                elif record[0] == 'deaths':
+                    facts.highest_deaths = int(record[1])
+                    facts.highest_deaths_date = record[2]
+                elif record[0] == 'incidence':
+                    facts.highest_incidence = record[1]
+                    facts.highest_incidence_date = record[2]
+                elif record[0] == 'first-death':
+                    facts.first_death_date = record[2]
+                elif record[0] == 'first-case':
+                    facts.first_case_date = record[2]
+            return facts
+
     def get_district_data(self, district_id: int) \
             -> Optional[DistrictData]:
         """
@@ -93,7 +123,6 @@ class CovidData(object):
         result.icu_data = self.get_icu_data(district_id)
         result.r_value = self.get_r_value_data(district_id)
         result.rules = self.get_rules_data(district_id)
-
         return result
 
     def get_base_data(self, district_id: int) -> Optional[DistrictData]:
@@ -128,7 +157,9 @@ class CovidData(object):
                     result.cases_trend = get_trend(comparison_data.new_cases, result.new_cases)
                     result.deaths_trend = get_trend(comparison_data.new_deaths, result.new_deaths)
 
-            cursor.execute('SELECT alt_name FROM county_alt_names WHERE alt_name LIKE \'DE-%\' AND (district_id=%s OR district_id=(SELECT parent FROM counties WHERE rs=%s)) LIMIT 1', [district_id, district_id])
+            cursor.execute(
+                'SELECT alt_name FROM county_alt_names WHERE alt_name LIKE \'DE-%\' AND (district_id=%s OR district_id=(SELECT parent FROM counties WHERE rs=%s)) LIMIT 1',
+                [district_id, district_id])
             state_name = None
             record = cursor.fetchone()
             if record:

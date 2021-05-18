@@ -111,7 +111,8 @@ class RKIUpdater(Updater):
                                      GROUP BY c.parent, date)
                                     as new
                                   ON DUPLICATE KEY UPDATE 
-                                  date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths''',
+                                  date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths, 
+                                  last_update=CURRENT_TIMESTAMP()''',
                                args)
                 # Calculate Population
                 cursor.execute(
@@ -132,23 +133,27 @@ class RKIUpdater(Updater):
 
 
 class RKIHistoryUpdater(RKIUpdater):
+    DEATHS_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/deaths-rki-by-ags.csv"
     CASES_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/cases-rki-by-ags.csv"
     INCIDENCE_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/more-data/7di-rki-by-ags.csv"
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
-            cursor.execute("SELECT MIN(date) FROM covid_data WHERE total_cases IS NOT NULL and incidence IS NOT NULL")
+            cursor.execute("SELECT last_update FROM covid_data WHERE date = SUBDATE(CURRENT_DATE, 7) AND rs=0 LIMIT 1")
             row = cursor.fetchone()
             if row:
                 return row[0]
 
     def update(self) -> bool:
-        # TODO: Usual mechanism
-        if self.get_last_update() == date(2020, 3, 4):
+        if self.get_last_update().date() == date.today():
             return False
         updated = False
         if self.update_cases():
             self.log.info("New case data available")
+            updated = True
+
+        if self.update_deaths():
+            self.log.info("New deaths data available")
             updated = True
 
         if self.update_incidences():
@@ -177,8 +182,8 @@ class RKIHistoryUpdater(RKIUpdater):
                         continue
 
                     # Do not overwrite current data
-                    # if (date.today() - updated).days <= 7:
-                    #    continue
+                    if (date.today() - updated).days <= 7:
+                        continue
 
                     district_id = field
                     if district_id == '11000':
@@ -193,6 +198,42 @@ class RKIHistoryUpdater(RKIUpdater):
         self.connection.commit()
 
         return new_cases
+
+    def update_deaths(self) -> bool:
+        deaths = self.get_resource(self.DEATHS_URL)
+        deaths_csv = csv.DictReader(deaths.splitlines())
+        new_deaths = False
+        with self.connection.cursor() as cursor:
+            for row in deaths_csv:
+                updated = None
+                for field in deaths_csv.fieldnames:
+                    if field[:3] == "sum":
+                        continue
+                    elif field[:4] == "time":
+                        updated = row[field]
+                        updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
+                        # To keep it in sync with fresh RKI data
+                        updated = updated + timedelta(days=1)
+                        self.log.info(f"Got historic deaths data for {updated}")
+                        continue
+
+                    # Do not overwrite current data
+                    if (date.today() - updated).days <= 7:
+                        continue
+
+                    district_id = field
+                    if district_id == '11000':
+                        district_id = '11'
+                    deaths_num = int(row[field])
+                    cursor.execute('INSERT INTO covid_data (rs, date, total_deaths) VALUE (%s, %s, %s) '
+                                   'ON DUPLICATE KEY UPDATE covid_data.total_deaths=%s, covid_data.last_update=CURRENT_TIMESTAMP()',
+                                   [int(district_id), updated, deaths_num, deaths_num])
+                    new_deaths = True
+                self.connection.commit()
+            self.calculate_aggregated_values()
+        self.connection.commit()
+
+        return new_deaths
 
     def update_incidences(self) -> bool:
         incidences = self.get_resource(self.INCIDENCE_URL)

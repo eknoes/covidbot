@@ -89,15 +89,15 @@ class Test(TestCase):
 
     def test_format_noun(self):
         expected = "1 Neuinfektion"
-        actual = format_noun(1, FormattableNoun.INFECTIONS)
+        actual = format_noun(1, FormattableNoun.NEW_INFECTIONS)
         self.assertEqual(expected, actual)
 
         expected = "2 Neuinfektionen"
-        actual = format_noun(2, FormattableNoun.INFECTIONS)
+        actual = format_noun(2, FormattableNoun.NEW_INFECTIONS)
         self.assertEqual(expected, actual)
 
         expected = "0 Neuinfektionen"
-        actual = format_noun(0, FormattableNoun.INFECTIONS)
+        actual = format_noun(0, FormattableNoun.NEW_INFECTIONS)
         self.assertEqual(expected, actual)
 
         expected = "1 Todesfall"

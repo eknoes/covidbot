@@ -142,21 +142,25 @@ def format_float(incidence: float) -> str:
 
 
 class FormattableNoun(Enum):
-    INFECTIONS = 1
+    NEW_INFECTIONS = 1
     DEATHS = 2
     DISTRICT = 3
     DAYS = 4
     BEDS = 5
     PERSONS = 6
     WORKING_DAYS = 7
+    INFECTIONS = 8
 
 
 def format_noun(number: int, noun: FormattableNoun, hashtag: str = "") -> str:
     singular: Optional[str] = None
     plural: Optional[str] = None
-    if noun == FormattableNoun.INFECTIONS:
+    if noun == FormattableNoun.NEW_INFECTIONS:
         singular = "Neuinfektion"
         plural = "Neuinfektionen"
+    elif noun == FormattableNoun.INFECTIONS:
+        singular = "Infektion"
+        plural = "Infektionen"
     elif noun == FormattableNoun.DEATHS:
         singular = "Todesfall"
         plural = "Todesfälle"

@@ -76,9 +76,9 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
         # Infections
         last_update = self.user_manager.get_last_updates(self.user_id, MessageType.CASES_GERMANY)
-        if not last_update or last_update < germany.last_update:
+        if not last_update or last_update.date() < germany.date:
             tweet_text = f"🦠 Das {self.rki_name} hat für den {germany.date.strftime('%d. %B %Y')} neue Infektionszahlen veröffentlicht.\n\n" \
-                         f"Es wurden {format_noun(germany.new_cases, FormattableNoun.INFECTIONS, hashtag='#')} " \
+                         f"Es wurden {format_noun(germany.new_cases, FormattableNoun.NEW_INFECTIONS, hashtag='#')} " \
                          f"{format_data_trend(germany.cases_trend)} und " \
                          f"{format_noun(germany.new_deaths, FormattableNoun.DEATHS)} " \
                          f"{format_data_trend(germany.deaths_trend)} in Deutschland gemeldet. Die bundesweite #Inzidenz liegt " \
@@ -163,15 +163,13 @@ class SingleCommandInterface(MessengerInterface, ABC):
         if district.date == datetime.date.today() - datetime.timedelta(days=1):
             date_str = "Heute sind leider noch keine Daten verfügbar. Gestern"
         tweet_text = f"🦠 {date_str} wurden " \
-                     f"{format_noun(district.new_cases, FormattableNoun.INFECTIONS, hashtag='#')} " \
+                     f"{format_noun(district.new_cases, FormattableNoun.NEW_INFECTIONS, hashtag='#')} " \
                      f"{format_data_trend(district.cases_trend)} und " \
                      f"{format_noun(district.new_deaths, FormattableNoun.DEATHS)} " \
                      f"{format_data_trend(district.deaths_trend)} in {district.name} gemeldet. Die #Inzidenz liegt " \
                      f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
         if district.vaccinations:
-            pass
-            # TODO: Daten fehlen für ne Woche
-            # graphs.append(self.viz.vaccination_graph(district_id))
+            graphs.append(self.viz.vaccination_graph(district_id))
 
         if district.icu_data:
             graphs.append(self.viz.icu_graph(district_id))

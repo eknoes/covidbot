@@ -462,9 +462,24 @@ class Bot(object):
         if not type(location) == District:
             return location
 
-        return [BotResponse(f"<b>Pandemiehistorie von {location.name}</b>", [self.visualization.infections_graph(location.id, 9999),
-                                                                     self.visualization.incidence_graph(location.id, 9999),
-                                                                     self.visualization.icu_graph(location.id)])]
+        data = self.covid_data.get_base_data(location.id)
+        facts = self.covid_data.get_district_facts(location.id)
+
+        message = f'''<b>Pandemieverlauf in {location.name}</b>
+Am {facts.first_case_date.strftime("%d.%m.%Y")} wurde der erste Covid-19 Fall in {location.name} gemeldet, am {facts.first_death_date.strftime("%d.%m.%Y")} gab es den ersten Todesfall im Zusammenhang mit Covid-19. 
+Seitdem wurden {format_noun(data.total_cases, FormattableNoun.INFECTIONS)} und {format_noun(data.total_deaths, FormattableNoun.DEATHS)} gemeldet.
+
+• Höchste Inzidenz: {format_float(facts.highest_incidence)} am {facts.highest_incidence_date.strftime("%d.%m.%Y")}
+• Höchste Anzahl Neuinfektionen: {format_int(facts.highest_cases)} am {facts.highest_cases_date.strftime("%d.%m.%Y")}
+• Höchste Anzahl Todesfälle: {format_int(facts.highest_deaths)} am {facts.highest_deaths_date.strftime("%d.%m.%Y")}
+
+Stand: {data.date.strftime("%d.%m.%Y")}
+Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0.
+Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a>'''
+
+        return [BotResponse(message, [self.visualization.infections_graph(location.id, 9999),
+                                      self.visualization.incidence_graph(location.id, 9999),
+                                      self.visualization.icu_graph(location.id)])]
 
     def currentDataHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('district_data').inc()
@@ -796,7 +811,7 @@ class Bot(object):
                         r_trend=format_data_trend(country.r_value.r_trend))
         message += "\n\n"
         message = message.format(date=self.covid_data.get_last_update().strftime("%d.%m.%Y"),
-                                 new_cases=format_noun(country.new_cases, FormattableNoun.INFECTIONS),
+                                 new_cases=format_noun(country.new_cases, FormattableNoun.NEW_INFECTIONS),
                                  new_cases_trend=format_data_trend(country.cases_trend),
                                  new_deaths=format_noun(country.new_deaths, FormattableNoun.DEATHS),
                                  new_deaths_trend=format_data_trend(country.deaths_trend),
@@ -839,7 +854,7 @@ class Bot(object):
                                         threshold=format_int(district.incidence_interval_data.upper_threshold))
 
                     message += "\n• {new_cases}, {new_deaths}" \
-                        .format(new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
+                        .format(new_cases=format_noun(district.new_cases, FormattableNoun.NEW_INFECTIONS),
                                 new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
                     if (district.new_cases and district.new_cases < 0) or (
                             district.new_deaths and district.new_deaths < 0):
@@ -947,7 +962,7 @@ class Bot(object):
                         r_trend=format_data_trend(country.r_value.r_trend))
         message += "\n\n"
         message = message.format(date=self.covid_data.get_last_update().strftime("%d.%m.%Y"),
-                                 new_cases=format_noun(country.new_cases, FormattableNoun.INFECTIONS),
+                                 new_cases=format_noun(country.new_cases, FormattableNoun.NEW_INFECTIONS),
                                  new_cases_trend=format_data_trend(country.cases_trend),
                                  new_deaths=format_noun(country.new_deaths, FormattableNoun.DEATHS),
                                  new_deaths_trend=format_data_trend(country.deaths_trend),
@@ -1034,7 +1049,7 @@ class Bot(object):
             .format(name=district.name,
                     incidence=format_float(district.incidence),
                     incidence_trend=format_data_trend(district.incidence_trend),
-                    new_cases=format_noun(district.new_cases, FormattableNoun.INFECTIONS),
+                    new_cases=format_noun(district.new_cases, FormattableNoun.NEW_INFECTIONS),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
 
     def get_available_user_messages(self) -> Generator[
