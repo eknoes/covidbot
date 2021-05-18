@@ -163,6 +163,8 @@ class RKIHistoryUpdater(RKIUpdater):
 
     def update_cases(self) -> bool:
         cases = self.get_resource(self.CASES_URL)
+        if not cases:
+            return False
 
         cases_csv = csv.DictReader(cases.splitlines())
 
@@ -201,6 +203,8 @@ class RKIHistoryUpdater(RKIUpdater):
 
     def update_deaths(self) -> bool:
         deaths = self.get_resource(self.DEATHS_URL)
+        if not deaths:
+            return False
         deaths_csv = csv.DictReader(deaths.splitlines())
         new_deaths = False
         with self.connection.cursor() as cursor:
@@ -237,6 +241,8 @@ class RKIHistoryUpdater(RKIUpdater):
 
     def update_incidences(self) -> bool:
         incidences = self.get_resource(self.INCIDENCE_URL)
+        if not incidences:
+            return False
         incidences_csv = csv.DictReader(incidences.splitlines())
 
         new_data = False
