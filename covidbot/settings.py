@@ -8,6 +8,7 @@ class BotUserSettings(Enum):
     REPORT_INCLUDE_ICU = "report_include_icu"
     REPORT_INCLUDE_VACCINATION = "report_include_vaccination"
     REPORT_EXTENSIVE_GRAPHICS = "report_extensive_graphics"
+    REPORT_ALL_INFECTION_GRAPHS = "report_all_infection_graphics"
     FORMATTING = "disable_fake_format"
 
     @staticmethod
@@ -24,6 +25,8 @@ class BotUserSettings(Enum):
             return False
         elif setting == BotUserSettings.FORMATTING:
             return True
+        elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
+            return False
 
     @staticmethod
     def title(setting: BotUserSettings) -> str:
@@ -39,6 +42,8 @@ class BotUserSettings(Enum):
             return "Zusätzliche Grafiken"
         elif setting == BotUserSettings.FORMATTING:
             return "Formatierung"
+        elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
+            return "Neuinfektionsgrafiken im Bericht"
 
     @staticmethod
     def description(setting: BotUserSettings) -> str:
@@ -58,6 +63,9 @@ class BotUserSettings(Enum):
             return "Signal und Facebook Messenger Nutzer:innen können mit dieser Option die Formatierung der " \
                    "Nachrichten (de)aktivieren. Diese ist auf manchen Geräten bei Signal und Facebook " \
                    "Messenger nicht lesbar."
+        elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
+            return "Wenn du diese Einstellung aktivierst, bekommst du im Bericht eine Neuinfektionsgrafik für jeden " \
+                   "abonnierten Ort."
 
     @staticmethod
     def command_key(setting: BotUserSettings) -> str:
@@ -73,3 +81,5 @@ class BotUserSettings(Enum):
             return "plus-grafik"
         elif setting == BotUserSettings.FORMATTING:
             return "formatierung"
+        elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
+            return "neuinfektion-grafik"

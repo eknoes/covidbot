@@ -125,6 +125,8 @@ class SignalInterface(MessengerInterface):
                     if not success:
                         break
 
+                    if len(elem.images) > 2:
+                        backoff_time += len(elem.images) - 2
                     backoff_time = self.backoff_timer(backoff_time, not success, userid)
 
                 if success:

@@ -719,7 +719,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             user_input = user_input.split()
             for setting in [BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
                             BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS]:
+                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS]:
                 if BotUserSettings.command_key(setting).lower() != user_input[0].lower():
                     continue
 
@@ -761,7 +761,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
             for setting in [BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
                             BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS]:
+                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS]:
                 if self.user_manager.get_user_setting(user_id, setting):
                     choice = "aus"
                     current = "ein"
@@ -824,7 +824,11 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             cities = list(filter(lambda d: d.type != "Bundesland" and d.type != "Staat", districts))
             districts = self.sort_districts(states) + self.sort_districts(cities)
             if len(districts) > 0:
+                every_graph = self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS)
+
                 for district in districts:
+                    if every_graph:
+                        graphs.append(self.visualization.infections_graph(district.id))
                     message += "<b>{name}</b>: {incidence}{incidence_trend}" \
                         .format(name=district.name,
                                 incidence=format_float(district.incidence),
