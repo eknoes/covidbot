@@ -11,6 +11,7 @@ from covidbot.covid_data.models import District, DistrictData
 from covidbot.location_service import LocationService
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import BOT_COMMAND_COUNT
+from covidbot.report_generator import ReportGenerator
 from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
 from covidbot.settings import BotUserSettings
@@ -44,6 +45,7 @@ class Bot(object):
     handler_list: List[Handler] = []
     chat_states: Dict[int, Tuple[ChatBotState, Optional[str]]] = {}
     log = logging.getLogger(__name__)
+    report_generator: ReportGenerator
 
     def __init__(self, user_manager: UserManager, covid_data: CovidData, visualization: Visualization,
                  command_formatter: Callable[[str], str], has_location_feature: bool = False):
@@ -53,6 +55,10 @@ class Bot(object):
         self.has_location_feature = has_location_feature
         self.command_formatter = command_formatter
         self.user_hints = UserHintService(self.command_formatter)
+
+        self.report_generator = ReportGenerator(user_manager, covid_data, visualization, self.user_hints,
+                                                command_formatter)
+
         self.handler_list.append(Handler("start", self.startHandler, False))
         self.handler_list.append(Handler("hilfe", self.helpHandler, False))
         self.handler_list.append(Handler("feedback", self.feedbackHandler, False))
@@ -68,7 +74,7 @@ class Bot(object):
         self.handler_list.append(Handler("datenschutz", self.privacyHandler, False))
         self.handler_list.append(Handler("daten", self.currentDataHandler, True))
         self.handler_list.append(Handler("historie", self.historyHandler, True))
-        self.handler_list.append(Handler("bericht", self.reportHandler, False))
+        self.handler_list.append(Handler("bericht", self.reportHandler, True))
         self.handler_list.append(Handler("statistik", self.statHandler, False))
         self.handler_list.append(Handler("loeschmich", self.deleteMeHandler, False))
         self.handler_list.append(Handler("löschmich", self.deleteMeHandler, False))
@@ -310,20 +316,11 @@ class Bot(object):
             return [BotResponse(
                 f"Leider kann für {location.name} keine Impfübersicht generiert werden, da keine Daten vorliegen.")]
 
-        message = f"<b>💉 Impfdaten ({location.name})</b>\n"
-        message += "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
-                   " - Stand {vacc_date} - vollständig geimpft. " \
-                   "Bei dem Impftempo der letzten 7 Tage werden {vacc_speed} Dosen pro Tag verabreicht und in " \
-                   "{vacc_days_to_finish} Tagen wäre die gesamte Bevölkerung vollständig geschützt.\n\n" \
-                   "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
+        message = self.report_generator.get_vacc_text(location, show_name=True)
+        message += "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
                    "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
-            .format(rate_partial=format_float(location.vaccinations.partial_rate * 100),
-                    rate_full=format_float(location.vaccinations.full_rate * 100),
-                    vacc_partial=format_int(location.vaccinations.vaccinated_partial),
-                    vacc_full=format_int(location.vaccinations.vaccinated_full),
-                    vacc_date=location.vaccinations.date.strftime("%d.%m.%Y"),
-                    vacc_speed=format_int(location.vaccinations.avg_speed),
-                    vacc_days_to_finish=format_int(location.vaccinations.avg_days_to_finish))
+            .format(vacc_partial=format_int(location.vaccinations.vaccinated_partial),
+                    vacc_full=format_int(location.vaccinations.vaccinated_full))
 
         if location.id == 0:
             children_data = self.covid_data.get_children_data(location.id)
@@ -364,8 +361,8 @@ class Bot(object):
 
         if not user_input:
             user = self.user_manager.get_user(user_id, True)
-            response = BotResponse("Du hast {report_count} Berichte abonniert." \
-                .format(
+            response = BotResponse("Du hast {report_count} Berichte abonniert."
+                                   .format(
                 report_count=format_noun(len(user.subscribed_reports), FormattableNoun.REPORT)))
 
             choices = []
@@ -590,18 +587,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                  total_deaths=format_int(current_data.total_deaths))
 
         if current_data.icu_data:
-            message += f"<b>🏥 Intensivbetten</b>\n" \
-                       f"{format_float(current_data.icu_data.percent_occupied())}% " \
-                       f"({format_noun(current_data.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
-                       f"{format_data_trend(current_data.icu_data.occupied_beds_trend)} " \
-                       f"der Intensivbetten sind aktuell belegt. " \
-                       f"In {format_noun(current_data.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
-                       f"({format_float(current_data.icu_data.percent_covid())}%)" \
-                       f"{format_data_trend(current_data.icu_data.occupied_covid_trend)} " \
-                       f" liegen Patient:innen" \
-                       f" mit COVID-19, davon müssen {format_noun(current_data.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
-                       f" ({format_float(current_data.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
-                       f"Insgesamt gibt es {format_noun(current_data.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
+            message += self.report_generator.get_icu_text(current_data)
             sources.append(f'Intensivbettenauslastung vom {current_data.icu_data.date.strftime("%d.%m.%Y")}. '
                            f'Daten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.')
             graphics.append(self.visualization.icu_graph(current_data.id))
@@ -658,8 +644,14 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         if not user:
             return self._get_report([])
 
+        if user_input:
+            if user_input.lower() == message_type_name(MessageType.ICU_GERMANY)[:len(user_input)].lower():
+                return self.report_generator.generate_icu_report(user)
+            elif user_input.lower() == message_type_name(MessageType.VACCINATION_GERMANY)[:len(user_input)].lower():
+                return self.report_generator.generate_vaccination_report(user)
+
         if self.user_manager.get_user_setting(user_id, BotUserSettings.BETA):
-            return self._get_new_report(user.subscriptions, user_id)
+            return self.report_generator.generate_infection_report(user)
         return self._get_report(user.subscriptions, user.id)
 
     def directHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
@@ -837,161 +829,6 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         return [BotResponse("Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten"
                             " löschen?", choices=choices)]
 
-    def _get_new_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
-        # Visualization
-        graphs = []
-        if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
-            graphs.append(self.visualization.infections_graph(0))
-
-        country = self.covid_data.get_country_data()
-        message = "<b>Corona-Bericht vom {date}</b>\n\n"
-        message += "<b>🦠 Infektionszahlen</b>\n" \
-                   "Insgesamt wurden bundesweit {new_cases}{new_cases_trend} und " \
-                   "{new_deaths}{new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence}" \
-                   "{incidence_trend}."
-        if country.r_value:
-            message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value}{r_trend}." \
-                .format(r_value=format_float(country.r_value.r_value_7day),
-                        r_trend=format_data_trend(country.r_value.r_trend))
-        message += "\n\n"
-        message = message.format(date=self.covid_data.get_last_update().strftime("%d.%m.%Y"),
-                                 new_cases=format_noun(country.new_cases, FormattableNoun.NEW_INFECTIONS),
-                                 new_cases_trend=format_data_trend(country.cases_trend),
-                                 new_deaths=format_noun(country.new_deaths, FormattableNoun.DEATHS),
-                                 new_deaths_trend=format_data_trend(country.deaths_trend),
-                                 incidence=format_float(country.incidence),
-                                 incidence_trend=format_data_trend(country.incidence_trend))
-        if subscriptions and len(subscriptions) > 0:
-            # Split Bundeslaender from other
-            districts = list(map(lambda rs: self.covid_data.get_district_data(rs), subscriptions))
-            states = list(filter(lambda d: d.type == "Bundesland", districts))
-            cities = list(filter(lambda d: d.type != "Bundesland" and d.type != "Staat", districts))
-            districts = self.sort_districts(states) + self.sort_districts(cities)
-            if len(districts) > 0:
-                every_graph = self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS)
-
-                for district in districts:
-                    if every_graph:
-                        graphs.append(self.visualization.infections_graph(district.id))
-                    message += "<b>{name}</b>: {incidence}{incidence_trend}" \
-                        .format(name=district.name,
-                                incidence=format_float(district.incidence),
-                                incidence_trend=format_data_trend(district.incidence_trend))
-
-                    if district.incidence_interval_data:
-                        if district.incidence_interval_data.lower_threshold_days is not None:
-                            message += "\n• Seit {days} ({working_days}) über {threshold}" \
-                                .format(days=format_noun(district.incidence_interval_data.lower_threshold_days,
-                                                         FormattableNoun.DAYS),
-                                        working_days=format_noun(
-                                            district.incidence_interval_data.lower_threshold_working_days,
-                                            FormattableNoun.WORKING_DAYS),
-                                        threshold=format_int(district.incidence_interval_data.lower_threshold))
-
-                        if district.incidence_interval_data.upper_threshold_days is not None:
-                            if district.incidence_interval_data.lower_threshold_days is None:
-                                message += "\n• Seit "
-                            else:
-                                message += ", seit "
-                            message += "{days} ({working_days}) unter {threshold}" \
-                                .format(days=format_noun(district.incidence_interval_data.upper_threshold_days,
-                                                         FormattableNoun.DAYS),
-                                        working_days=format_noun(
-                                            district.incidence_interval_data.upper_threshold_working_days,
-                                            FormattableNoun.WORKING_DAYS),
-                                        threshold=format_int(district.incidence_interval_data.upper_threshold))
-
-                    message += "\n• {new_cases}, {new_deaths}" \
-                        .format(new_cases=format_noun(district.new_cases, FormattableNoun.NEW_INFECTIONS),
-                                new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
-                    if (district.new_cases and district.new_cases < 0) or (
-                            district.new_deaths and district.new_deaths < 0):
-                        message += "\n• <i>Eine negative Differenz zum Vortag ist idR. auf eine Korrektur der Daten " \
-                                   "durch das Gesundheitsamt zurückzuführen</i>"
-                    if district.icu_data:
-                        message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in {percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen, {clear_beds} frei" \
-                            .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
-                                    percent_occupied=format_float(district.icu_data.percent_occupied()),
-                                    occupied_trend=format_data_trend(district.icu_data.occupied_beds_trend),
-                                    beds_covid=format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS),
-                                    clear_beds=format_noun(district.icu_data.clear_beds, FormattableNoun.BEDS),
-                                    percent_covid=format_float(district.icu_data.percent_covid()),
-                                    covid_trend=format_data_trend(district.icu_data.occupied_covid_trend))
-
-                    if district.vaccinations:
-                        message += "\n• {no_doses} Neuimpfungen, {vacc_partial}% min. eine, {vacc_full}% beide Impfungen erhalten" \
-                            .format(no_doses=format_int(district.vaccinations.doses_diff),
-                                    vacc_partial=format_float(district.vaccinations.partial_rate * 100),
-                                    vacc_full=format_float(district.vaccinations.full_rate * 100))
-                    message += "\n\n"
-            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
-                # Generate multi-incidence graph for up to 8 districts
-                districts = subscriptions[-8:]
-                if 0 in subscriptions and 0 not in districts:
-                    districts[0] = 0
-                graphs.append(self.visualization.multi_incidence_graph(districts))
-
-        if country.vaccinations and self.user_manager.get_user_setting(user_id,
-                                                                       BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                                                                       ):
-            message += "<b>💉 Impfdaten</b>\n" \
-                       "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft. " \
-                       "Bei dem Impftempo der letzten 7 Tage werden {vacc_speed} Dosen pro Tag verabreicht und in " \
-                       "{vacc_days_to_finish} Tagen wäre die gesamte Bevölkerung vollständig geschützt." \
-                       "\n\n" \
-                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
-                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
-                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
-                        vacc_full=format_int(country.vaccinations.vaccinated_full),
-                        date=country.vaccinations.date.strftime("%d.%m.%Y"),
-                        doses=format_int(country.vaccinations.doses_diff),
-                        vacc_speed=format_int(country.vaccinations.avg_speed),
-                        vacc_days_to_finish=format_int(country.vaccinations.avg_days_to_finish))
-            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
-                graphs.append(self.visualization.vaccination_graph(country.id))
-                graphs.append(self.visualization.vaccination_speed_graph(country.id))
-
-        if country.icu_data and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
-            message += f"<b>🏥 Intensivbetten</b>\n" \
-                       f"{format_float(country.icu_data.percent_occupied())}% " \
-                       f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
-                       f"{format_data_trend(country.icu_data.occupied_beds_trend)} " \
-                       f"der Intensivbetten sind aktuell belegt. " \
-                       f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
-                       f"({format_float(country.icu_data.percent_covid())}%)" \
-                       f"{format_data_trend(country.icu_data.occupied_covid_trend)} " \
-                       f" liegen Patient:innen" \
-                       f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
-                       f" ({format_float(country.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
-                       f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
-            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
-                graphs.append(self.visualization.icu_graph(country.id))
-
-        user_hint = self.user_hints.get_hint_of_today()
-        if user_hint:
-            message += f"{user_hint}\n\n"
-
-        message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
-                   ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
-                   '<a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
-                   'Intensivbettendaten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.</i>' \
-                   '\n\n' \
-                   '<i>Sende {info_command} um eine Erläuterung ' \
-                   'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
-                   'Fortschritt</a>.</i>'.format(info_command=self.command_formatter("Info"))
-
-        message += '\n\n🧒🏽👦🏻 Sharing is caring 👩🏾🧑🏼 <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a>'
-
-        message += "\n\n<b>Danke für das bisherige Feedback! Wir haben den Bericht jetzt auch konfigurierbar gemacht, " \
-                   "so kann man bspw. einstellen, ob man den Impfüberblick oder die Intensivbettenlage sehen möchte. " \
-                   f"Sende einfach {self.command_formatter('Einstellungen')} um einen Überblick über die Optionen zu " \
-                   f"erhalten. Wir würden uns sehr über Feedback " \
-                   "freuen, sende uns einfach eine Nachricht. Danke 🙏</b>"
-
-        reports = [BotResponse(message, graphs)]
-        return reports
-
     def _get_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
         # Visualization
         graphs = []
@@ -1000,22 +837,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         country = self.covid_data.get_country_data()
         message = "<b>Corona-Bericht vom {date}</b>\n\n"
-        message += "<b>🦠 Infektionszahlen</b>\n" \
-                   "Insgesamt wurden bundesweit {new_cases}{new_cases_trend} und " \
-                   "{new_deaths}{new_deaths_trend} gemeldet. Die 7-Tage-Inzidenz liegt bei {incidence}" \
-                   "{incidence_trend}."
-        if country.r_value:
-            message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value}{r_trend}." \
-                .format(r_value=format_float(country.r_value.r_value_7day),
-                        r_trend=format_data_trend(country.r_value.r_trend))
-        message += "\n\n"
-        message = message.format(date=self.covid_data.get_last_update().strftime("%d.%m.%Y"),
-                                 new_cases=format_noun(country.new_cases, FormattableNoun.NEW_INFECTIONS),
-                                 new_cases_trend=format_data_trend(country.cases_trend),
-                                 new_deaths=format_noun(country.new_deaths, FormattableNoun.DEATHS),
-                                 new_deaths_trend=format_data_trend(country.deaths_trend),
-                                 incidence=format_float(country.incidence),
-                                 incidence_trend=format_data_trend(country.incidence_trend))
+        message += self.report_generator.get_infection_text(country)
+
         if subscriptions and len(subscriptions) > 0:
             message += "Die 7-Tage-Inzidenz sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von " \
                        "dir abonnierten Orte wie folgt aus:\n\n"
@@ -1060,18 +883,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                 graphs.append(self.visualization.vaccination_speed_graph(country.id))
 
         if country.icu_data:  # and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
-            message += f"<b>🏥 Intensivbetten</b>\n" \
-                       f"{format_float(country.icu_data.percent_occupied())}% " \
-                       f"({format_noun(country.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
-                       f"{format_data_trend(country.icu_data.occupied_beds_trend)} " \
-                       f"der Intensivbetten sind aktuell belegt. " \
-                       f"In {format_noun(country.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
-                       f"({format_float(country.icu_data.percent_covid())}%)" \
-                       f"{format_data_trend(country.icu_data.occupied_covid_trend)} " \
-                       f" liegen Patient:innen" \
-                       f" mit COVID-19, davon müssen {format_noun(country.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
-                       f" ({format_float(country.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
-                       f"Insgesamt gibt es {format_noun(country.icu_data.total_beds(), FormattableNoun.BEDS)}.\n\n"
+            message += self.report_generator.get_icu_text(country)
 
         user_hint = self.user_hints.get_hint_of_today()
         if user_hint:
@@ -1109,15 +921,9 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         :return: List of (userid, message)
         """
         users = []
-        data_update = self.covid_data.get_last_update()
         for user in self.user_manager.get_all_user(with_subscriptions=True):
-            if not user.activated:
-                continue
-
-            if MessageType.CASES_GERMANY in user.subscribed_reports and user.subscriptions and user.created.date() != date.today():
-                last_update = self.user_manager.get_last_updates(user.id, MessageType.CASES_GERMANY)
-                if not last_update or last_update.date() < data_update:
-                    users.append((user, MessageType.CASES_GERMANY))
+            for t in self.report_generator.get_available_reports(user):
+                users.append((user, t))
 
             if self.user_manager.get_user_messages(user.id):
                 users.append((user, MessageType.USER_MESSAGE))
@@ -1125,7 +931,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         for user, report in users:
             if report == MessageType.CASES_GERMANY:
                 if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA):
-                    yield MessageType.CASES_GERMANY, user.platform_id, self._get_new_report(user.subscriptions, user.id)
+                    yield MessageType.CASES_GERMANY, user.platform_id, self.report_generator.generate_infection_report(
+                        user)
                 else:
                     yield MessageType.CASES_GERMANY, user.platform_id, self._get_report(user.subscriptions, user.id)
             elif report == MessageType.USER_MESSAGE:
@@ -1136,7 +943,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                         responses.append(BotResponse(m))
                     yield MessageType.USER_MESSAGE, user.platform_id, responses
             else:
-                self.log.error(f"Unknown report type for user {user.id}: {report}")
+                yield report, user.platform_id, self.report_generator.generate_report(user, report)
 
     def confirm_message_send(self, report_type: MessageType, user_id: Union[str, int]):
         user_id = self.user_manager.get_user_id(user_id)
@@ -1151,15 +958,9 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         :rtype: bool
         :return: True if messages are available
         """
-        data_update = self.covid_data.get_last_update()
         for user in self.user_manager.get_all_user(with_subscriptions=True):
-            if not user.activated:
-                continue
-
-            if MessageType.CASES_GERMANY in user.subscribed_reports and user.subscriptions and user.created.date() != date.today():
-                last_update = self.user_manager.get_last_updates(user.id, MessageType.CASES_GERMANY)
-                if not last_update or last_update.date() < data_update:
-                    return True
+            for t in self.report_generator.get_available_reports(user):
+                return True
 
             if self.user_manager.get_user_messages(user.id):
                 return True

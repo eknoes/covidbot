@@ -92,6 +92,7 @@ class DistrictFacts:
     highest_deaths_date: Optional[date] = None
     first_death_date: Optional[date] = None
 
+
 @dataclass
 class DistrictData(District):
     date: Optional[date] = None

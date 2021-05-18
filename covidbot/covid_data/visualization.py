@@ -167,7 +167,8 @@ class Visualization:
                     district_name = row['name']
 
         filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"vaccination-speed-{current_date.isoformat()}-{district_id}-{duration}.jpg"))
+            os.path.join(self.graphics_dir,
+                         f"vaccination-speed-{current_date.isoformat()}-{district_id}-{duration}.jpg"))
 
         # Do not draw new graphic if its cached
         if not self.disable_cache and os.path.isfile(filepath):
@@ -338,7 +339,8 @@ class Visualization:
         identifier = reduce(lambda x, y: x + y, map(str, district_ids))
 
         filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"multi-incidence-{current_date.isoformat()}-duration-{duration}-{identifier}.jpg"))
+            os.path.join(self.graphics_dir,
+                         f"multi-incidence-{current_date.isoformat()}-duration-{duration}-{identifier}.jpg"))
 
         # Do not draw new graphic if its cached
         if not self.disable_cache and os.path.isfile(filepath):

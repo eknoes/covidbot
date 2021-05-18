@@ -322,9 +322,21 @@ UNION
 
             return result
 
-    def get_last_update(self) -> Optional[date]:
+    def get_last_update_cases(self) -> Optional[date]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data')
+            result = cursor.fetchone()
+            return result['last_updated']
+
+    def get_last_update_vaccination(self) -> Optional[date]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_vaccinations')
+            result = cursor.fetchone()
+            return result['last_updated']
+
+    def get_last_update_icu(self) -> Optional[date]:
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT MAX(date) as "last_updated" FROM icu_beds')
             result = cursor.fetchone()
             return result['last_updated']
 

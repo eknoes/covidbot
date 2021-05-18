@@ -19,7 +19,7 @@ class Updater(ABC):
         self.log = logging.getLogger(str(self.__class__.__name__))
         CovidDatabaseCreator(self.connection)
 
-    def get_resource(self, url: str, force = False) -> Optional[str]:
+    def get_resource(self, url: str, force=False) -> Optional[str]:
         header = {"User-Agent": "CovidBot (https://github.com/eknoes/covid-bot | https://covidbot.d-64.org)"}
         last_update = self.get_last_update()
         if not force and last_update:
@@ -61,7 +61,8 @@ class Updater(ABC):
                     if row[1] == district_name:
                         return row[0]
 
-            cursor.execute('SELECT district_id, alt_name FROM county_alt_names WHERE alt_name LIKE %s', [f'%{district_name}%'])
+            cursor.execute('SELECT district_id, alt_name FROM county_alt_names WHERE alt_name LIKE %s',
+                           [f'%{district_name}%'])
             rows = cursor.fetchall()
             if rows:
                 if len(rows) == 1:

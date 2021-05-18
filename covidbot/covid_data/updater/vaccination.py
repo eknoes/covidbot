@@ -99,7 +99,6 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
         if last_update and data_date <= last_update:
             return False
 
-
         new_data = False
         response = self.get_resource(self.URL)
         if response:
