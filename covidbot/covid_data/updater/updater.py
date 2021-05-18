@@ -36,7 +36,7 @@ class Updater(ABC):
         if response.status_code == 200:
             return response.text
         elif response.status_code == 304:
-            self.log.info("No new data available")
+            self.log.info("HTTP304: No new data available")
         else:
             raise ValueError(f"Updater Response Status Code is {response.status_code}: {response.reason}\n{url}")
 

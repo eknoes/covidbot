@@ -89,7 +89,7 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
         if last_update and datetime.now() - last_update < timedelta(hours=12):
             return False
 
-        metadata_response = self.get_resource("https://impfdashboard.de/static/data/metadata.json")
+        metadata_response = self.get_resource("https://impfdashboard.de/static/data/metadata.json", force=True)
         if not metadata_response:
             return False
 
