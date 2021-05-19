@@ -261,6 +261,8 @@ class UserManager(object):
                     user_id = cursor.lastrowid
                     cursor.execute("INSERT INTO report_subscriptions (user_id, report) VALUE (%s, %s)",
                                    [user_id, MessageType.CASES_GERMANY.value])
+                    cursor.execute("INSERT INTO bot_user_sent_reports (user_id, report) VALUE (%s, %s)",
+                                   [user_id, MessageType.CASES_GERMANY.value])
                     return user_id
             except IntegrityError:
                 return False
