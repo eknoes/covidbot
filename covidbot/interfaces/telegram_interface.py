@@ -150,6 +150,10 @@ class TelegramInterface(MessengerInterface):
                             continue
                     else:
                         files = []
+                        if len(response.images) > 10:
+                            self.log.warning(f"Can't send {len(response.images)} on Telegram")
+                            response.images = response.images[:10]
+
                         for photo in response.images:
                             files.append(self.get_input_media_photo(photo))
 
@@ -179,6 +183,10 @@ class TelegramInterface(MessengerInterface):
             self.log.warning(f"Bad Request on sending Telegram message to {chat_id}: {e.message}", exc_info=e)
             success = False
             BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='bad-request').inc()
+            if e.message == "Have no rights to send a message":
+                self.bot.disable_user(chat_id)
+            else:
+                self.message_developer(f"Unhandled error while sending Telegram Reports: {e.message}")
         except Unauthorized:
             self.bot.delete_user(chat_id)
             logging.warning(f"Deleted user {chat_id} as he blocked us")
@@ -289,9 +297,9 @@ class TelegramInterface(MessengerInterface):
             if sent_msg:
                 self.bot.confirm_message_send(report_type, userid)
                 sliding_flood_window.append(time.perf_counter())
-
-            self.log.warning(f"Sent report to {userid}!")
-
+                self.log.warning(f"Sent report to {userid}!")
+            else:
+                self.log.error(f"Error sending report to {userid}")
     async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         if not users:
             users = map(lambda x: x.platform_id, self.bot.get_all_users())
