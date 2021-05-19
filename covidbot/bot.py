@@ -825,7 +825,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             graphs.append(self.visualization.infections_graph(0))
 
         country = self.covid_data.get_country_data()
-        message = "<b>Corona-Bericht vom {date}</b>\n\n"
+        message = "<b>Corona-Bericht vom {date}</b>\n\n".format(date=country.date.strftime("%d.%m.%Y"))
         message += self.report_generator.get_infection_text(country)
 
         if subscriptions and len(subscriptions) > 0:
