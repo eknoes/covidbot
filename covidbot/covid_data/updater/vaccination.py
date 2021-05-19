@@ -95,7 +95,6 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
 
         metadata = json.loads(metadata_response)
         data_date = datetime.fromisoformat(metadata["vaccinationsLastUpdated"])
-        data_date -= timedelta(days=1)
         if last_update and data_date <= last_update:
             return False
 
@@ -111,7 +110,7 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
                     district_id = self.get_district_id(row['code'])
                     if not district_id:
                         raise ValueError(f"No district_id found for {row['code']}")
-                    updated = data_date
+                    updated = data_date - timedelta(days=1)
                     cursor.execute("SELECT id FROM covid_vaccinations WHERE date = %s AND district_id=%s",
                                    [updated, district_id])
                     if cursor.fetchone():
@@ -131,9 +130,17 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
                     if row['peopleFullTotal']:
                         rate_full = int(row['peopleFullTotal']) / population
 
+                    # Calculate diff
+                    cursor.execute('SELECT vaccinated_full, vaccinated_partial FROM covid_vaccinations '
+                                   'WHERE district_id=%s AND date=SUBDATE(DATE(%s), 1)', [district_id, updated])
+                    record = cursor.fetchone()
+                    doses_diff = None
+                    if record:
+                        doses_diff = int(row['peopleFirstTotal']) + int(row['peopleFullTotal']) - record[0] - record[1]
+
                     cursor.execute('INSERT INTO covid_vaccinations (district_id, date, vaccinated_partial, '
-                                   'vaccinated_full, rate_partial, rate_full) VALUE (%s, %s, %s, %s, %s, %s)',
+                                   'vaccinated_full, rate_partial, rate_full, doses_diff) VALUE (%s, %s, %s, %s, %s, %s, %s)',
                                    [district_id, updated, row['peopleFirstTotal'],
-                                    row['peopleFullTotal'], rate_partial, rate_full])
+                                    row['peopleFullTotal'], rate_partial, rate_full, doses_diff])
             self.connection.commit()
         return new_data

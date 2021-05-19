@@ -326,8 +326,7 @@ def main():
             from covidbot.covid_data import CovidData, VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, \
                 RKIUpdater, ICUGermanyUpdater, RKIHistoryUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater
-            for updater in [RKIHistoryUpdater(conn), RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
-                            VaccinationGermanyStatesImpfdashboardUpdater(conn),
+            for updater in [VaccinationGermanyStatesImpfdashboardUpdater(conn), RKIHistoryUpdater(conn), RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
                             RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:
