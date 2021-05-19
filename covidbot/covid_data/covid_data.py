@@ -1,6 +1,6 @@
 import logging
 import math
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from typing import List, Optional, Dict, Union
 
 from mysql.connector import MySQLConnection
@@ -322,23 +322,23 @@ UNION
 
             return result
 
-    def get_last_update_cases(self) -> Optional[date]:
+    def get_last_update_cases(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_data')
+            cursor.execute('SELECT last_update FROM covid_data WHERE date=(SELECT MAX(date) FROM covid_data) LIMIT 1')
             result = cursor.fetchone()
-            return result['last_updated']
+            return result['last_update']
 
-    def get_last_update_vaccination(self) -> Optional[date]:
+    def get_last_update_vaccination(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT MAX(date) as "last_updated" FROM covid_vaccinations')
+            cursor.execute('SELECT last_update FROM covid_vaccinations WHERE date=(SELECT MAX(date) FROM covid_vaccinations) LIMIT 1')
             result = cursor.fetchone()
-            return result['last_updated']
+            return result['last_update']
 
-    def get_last_update_icu(self) -> Optional[date]:
+    def get_last_update_icu(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT MAX(date) as "last_updated" FROM icu_beds')
+            cursor.execute('SELECT updated FROM icu_beds WHERE date=(SELECT MAX(date) FROM icu_beds) LIMIT 1')
             result = cursor.fetchone()
-            return result['last_updated']
+            return result['updated']
 
 
 class CovidDatabaseCreator:

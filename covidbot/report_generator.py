@@ -40,7 +40,7 @@ class ReportGenerator:
         for report_type in user.subscribed_reports:
             last_user_update = self.user_manager.get_last_updates(user.id, report_type)
             last_data_update = self.get_report_last_update(report_type)
-            if not last_user_update or last_user_update.date() < last_data_update:
+            if not last_user_update or last_user_update < last_data_update:
                 available_types.append(report_type)
         return available_types
 
