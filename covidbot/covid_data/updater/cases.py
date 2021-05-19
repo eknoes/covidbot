@@ -261,6 +261,10 @@ class RKIHistoryUpdater(RKIUpdater):
                         self.log.info(f"Got historic incidence data for {updated}")
                         continue
 
+                    # Do not overwrite current data
+                    if (date.today() - updated).days <= 7:
+                        continue
+
                     district_id = field[:-4]
                     if district_id == '11000':
                         district_id = '11'
