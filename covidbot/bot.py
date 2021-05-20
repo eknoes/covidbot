@@ -427,13 +427,15 @@ class Bot(object):
                 if len(user.subscriptions) <= 2:
                     message += " "
                     message += (
-                        f"Du kannst beliebig viele weitere Orte abonnieren oder Daten einsehen, sende dafür einfach "
+                        f"Du kannst <b>beliebig viele weitere Orte</b> abonnieren oder Daten einsehen, sende dafür einfach "
                         f"einen weiteren Ort!\n\n"
                         f"Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
-                        f"erfährst du über den {self.command_formatter('Hilfe')} Befehl. "
+                        f"erfährst du über den {self.command_formatter('Hilfe')} Befehl.\n"
                         f"Danke, dass du unseren Bot benutzt!")
-                    choices.append(UserChoice("Hilfe anzeigen", '/hilfe', f'Schreibe "Hilfe", um Informationen zur '
+                    choices.append(UserChoice("Hilfe anzeigen", '/hilfe', f'Schreibe "Hilfe", um mehr Informationen zur '
                                                                           f'Benutzung zu bekommen'))
+                    choices.append(UserChoice("Berichte verwalten", '/berichte', f'Schreibe "Berichte", deine '
+                                                                                 f'täglichen Berichte zu verwalten'))
             else:
                 message = "Du hast {name} bereits abonniert."
 

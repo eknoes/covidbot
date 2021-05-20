@@ -128,11 +128,8 @@ class ReportGenerator:
 
         message += '\n\n🧒🏽👦🏻 Sharing is caring 👩🏾🧑🏼 <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a>'
 
-        message += "\n\n<b>Danke für das bisherige Feedback! Wir haben den Bericht jetzt auch konfigurierbar gemacht, " \
-                   "so kann man bspw. einstellen, ob man den Impfüberblick oder die Intensivbettenlage sehen möchte. " \
-                   f"Sende einfach {self.command_formatter('Einstellungen')} um einen Überblick über die Optionen zu " \
-                   f"erhalten. Wir würden uns sehr über weiteres Feedback freuen, sende uns einfach eine Nachricht. " \
-                   f"Danke 🙏</b>"
+        message += "\n\n<b>Danke für das bisherige Feedback: Ab Samstag geht dieser Beta-Bericht für alle " \
+                   "Nutzer:innen live. Vielen Dank für deine Unterstützung 🙏!</b>"
 
         reports = [BotResponse(message, graphs)]
         return reports
