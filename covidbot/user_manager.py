@@ -80,7 +80,7 @@ class UserManager(object):
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("UPDATE bot_user SET activated=%s WHERE user_id=%s", [activated, user_id])
             if cursor.rowcount != 1:
-                self.log.warning("Activate user did not update exactly one user")
+                self.log.warning(f"Activate user did not update exactly one user but {cursor.rowcount}")
             self.connection.commit()
 
     def get_user_id(self, identifier: str, create_if_not_exists=True) -> Optional[int]:

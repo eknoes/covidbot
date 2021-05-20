@@ -180,7 +180,6 @@ class TelegramInterface(MessengerInterface):
                     else:
                         success = False
         except BadRequest as e:
-            self.log.warning(f"Bad Request on sending Telegram message to {chat_id}: {e.message}", exc_info=e)
             success = False
             BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='bad-request').inc()
             if e.message == "Have no rights to send a message":
@@ -188,6 +187,7 @@ class TelegramInterface(MessengerInterface):
             elif e.message == "Chat not found":
                 self.bot.delete_user(chat_id)
             else:
+                self.log.warning(f"Bad Request on sending Telegram message to {chat_id}: {e.message}", exc_info=e)
                 self.message_developer(f"Unhandled error while sending Telegram Reports: {e.message}")
         except Unauthorized:
             success = False
@@ -200,7 +200,7 @@ class TelegramInterface(MessengerInterface):
                 return self.send_message(e.new_chat_id, responses, disable_web_page_preview)
             else:
                 self.log.warning(f"Could not migrate {chat_id} to {e.new_chat_id}")
-                self.bot.disable_user(chat_id)
+                self.bot.delete_user(chat_id)
                 success = False
         return success
 
