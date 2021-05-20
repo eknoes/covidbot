@@ -185,6 +185,8 @@ class TelegramInterface(MessengerInterface):
             BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='bad-request').inc()
             if e.message == "Have no rights to send a message":
                 self.bot.disable_user(chat_id)
+            elif e.message == "Chat not found":
+                self.bot.delete_user(chat_id)
             else:
                 self.message_developer(f"Unhandled error while sending Telegram Reports: {e.message}")
         except Unauthorized:
