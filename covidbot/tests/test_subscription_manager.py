@@ -54,11 +54,11 @@ class TestSubscriptionManager(TestCase):
 
     def test_activated(self):
         user_id = self.test_manager.get_user_id("testuser")
-        self.assertFalse(self.test_manager.get_user(user_id).activated)
+        self.assertTrue(self.test_manager.get_user(user_id).activated)
 
-        test_manager = UserManager("unittest2", self.conn, activated_default=True)
+        test_manager = UserManager("unittest2", self.conn, activated_default=False)
         user_id = test_manager.get_user_id("testuser")
-        self.assertTrue(test_manager.get_user(user_id).activated)
+        self.assertFalse(test_manager.get_user(user_id).activated)
 
     def test_get_user(self):
         uid1 = self.test_manager.get_user_id("testuser1")
