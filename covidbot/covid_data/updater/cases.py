@@ -64,6 +64,9 @@ class RKIUpdater(Updater):
             rs_data.append((int(row['RS']), clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
                             row['BEZ'], int(row['EWZ']), int(row['BL_ID'])))
 
+        if not covid_data or not rs_data:
+            return
+
         self.log.debug("Insert new data into counties and covid_data")
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.executemany('INSERT INTO counties (rs, county_name, type, population, parent) '
@@ -72,7 +75,10 @@ class RKIUpdater(Updater):
                                rs_data)
             cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
              VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
-        self.calculate_aggregated_values(new_updated)
+
+        if not last_update or last_update < self.get_last_update():
+            # Only update aggregated data if new data is available
+            self.calculate_aggregated_values(new_updated)
 
         # Check for Plausibility, as Dataset has been wrong sometimes
         with self.connection.cursor(dictionary=True) as cursor:
@@ -101,18 +107,18 @@ class RKIUpdater(Updater):
                     where_query = "AND date = DATE(%s) "
                     args = [new_updated]
 
-                cursor.execute(f'''INSERT INTO covid_data (rs, date, total_cases, total_deaths)
-                                    SELECT new.parent, new_date, new_cases, new_deaths
+                cursor.execute(f'''INSERT INTO covid_data (rs, date, total_cases, total_deaths, last_update)
+                                    SELECT new.parent, new_date, new_cases, new_deaths, last_update
                                     FROM
                                     (SELECT c.parent as parent, date as new_date, SUM(total_cases) as new_cases,
-                                     SUM(total_deaths) as new_deaths FROM covid_data_calculated 
-                                     LEFT JOIN counties c on covid_data_calculated.rs = c.rs
+                                     SUM(total_deaths) as new_deaths, last_update FROM covid_data 
+                                     LEFT JOIN counties c on covid_data.rs = c.rs
                                      WHERE c.parent IS NOT NULL {where_query}
                                      GROUP BY c.parent, date)
                                     as new
                                   ON DUPLICATE KEY UPDATE 
                                   date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths, 
-                                  last_update=CURRENT_TIMESTAMP()''',
+                                  last_update=new.last_update''',
                                args)
                 # Calculate Population
                 cursor.execute(
