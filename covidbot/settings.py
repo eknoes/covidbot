@@ -18,7 +18,7 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.REPORT_GRAPHICS:
             return True
         elif setting == BotUserSettings.REPORT_INCLUDE_ICU:
-            return False
+            return True
         elif setting == BotUserSettings.REPORT_INCLUDE_VACCINATION:
             return True
         elif setting == BotUserSettings.REPORT_EXTENSIVE_GRAPHICS:

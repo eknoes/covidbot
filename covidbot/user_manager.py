@@ -445,6 +445,13 @@ class UserManager(object):
             cursor.execute('SELECT value FROM bot_user_settings WHERE user_id=%s AND setting=%s', [user_id, setting.value])
             rows = cursor.fetchall()
             if not rows:
+                # Change default if corresponding subscriptions exist
+                if setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION]:
+                    user = self.get_user(user_id, with_subscriptions=True)
+                    if setting == BotUserSettings.REPORT_INCLUDE_ICU and MessageType.ICU_GERMANY in user.subscribed_reports:
+                        return False
+                    elif setting == BotUserSettings.REPORT_INCLUDE_VACCINATION and MessageType.VACCINATION_GERMANY in user.subscribed_reports:
+                        return False
                 return default
 
             value = rows[0]['value']
