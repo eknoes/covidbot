@@ -33,7 +33,7 @@ class ReportGenerator:
             return self.covid_data.get_last_update_cases()
 
     def get_available_reports(self, user: BotUser) -> List[MessageType]:
-        if not user.activated or not user.subscriptions or user.created.date() == datetime.date.today():
+        if not user.activated or not user.subscriptions:
             return []
 
         available_types = []
