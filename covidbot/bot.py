@@ -920,6 +920,9 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                 else:
                     yield t, user.platform_id, self.report_generator.generate_report(user, t)
 
+            if not user.activated:
+                continue
+
             messages = self.user_manager.get_user_messages(user.id)
             if messages:
                 responses = []

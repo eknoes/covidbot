@@ -244,7 +244,7 @@ async def send_all(message: str, recipients: List[int], config_dict):
 
     user_manager = UserManager("message-sender", get_connection(config_dict))
     if not recipients:
-        recipients = map(lambda x: x.id, user_manager.get_all_user(all_platforms=True))
+        recipients = map(lambda x: x.id, filter(lambda x: x.activated == 1 , user_manager.get_all_user(all_platforms=True)))
 
     for r in recipients:
         user_manager.add_user_message(r, message)
