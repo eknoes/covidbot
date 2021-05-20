@@ -145,7 +145,7 @@ class RKIHistoryUpdater(RKIUpdater):
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
-            cursor.execute("SELECT last_update FROM covid_data WHERE date = SUBDATE(CURRENT_DATE, 7) AND rs=0 LIMIT 1")
+            cursor.execute("SELECT last_update FROM covid_data WHERE date = SUBDATE(CURRENT_DATE, 8) AND rs=0 LIMIT 1")
             row = cursor.fetchone()
             if row:
                 return row[0]
