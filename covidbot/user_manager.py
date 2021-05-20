@@ -26,7 +26,7 @@ class UserManager(object):
     log = logging.getLogger(__name__)
     activated_default: bool
 
-    def __init__(self, platform: str, db_connection: MySQLConnection, activated_default=False):
+    def __init__(self, platform: str, db_connection: MySQLConnection, activated_default=True):
         self.connection = db_connection
         self._create_db()
         self.platform = platform
