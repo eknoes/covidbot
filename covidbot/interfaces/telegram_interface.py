@@ -188,7 +188,7 @@ class TelegramInterface(MessengerInterface):
                 self.bot.delete_user(chat_id)
             else:
                 self.log.warning(f"Bad Request on sending Telegram message to {chat_id}: {e.message}", exc_info=e)
-                self.message_developer(f"Unhandled error while sending Telegram Reports: {e.message}")
+                self.message_developer(f"Unhandled error while sending Telegram message: {e.message}")
         except Unauthorized:
             success = False
             self.bot.delete_user(chat_id)
