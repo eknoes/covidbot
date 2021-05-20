@@ -145,8 +145,8 @@ class RKIHistoryUpdater(RKIUpdater):
                 return row[0]
 
     def update(self) -> bool:
-        if self.get_last_update().date() == date.today():
-            return False
+        #if self.get_last_update().date() == date.today():
+        #    return False
         updated = False
         if self.update_cases():
             self.log.info("New case data available")
@@ -181,10 +181,10 @@ class RKIHistoryUpdater(RKIUpdater):
                         # To keep it in sync with fresh RKI data
                         updated = updated + timedelta(days=1)
                         self.log.info(f"Got historic case data for {updated}")
-                        continue
-
-                    # Do not overwrite current data
-                    if (date.today() - updated).days <= 7:
+                        delta = (date.today() - updated)
+                        if delta.days <= 7:
+                            self.log.info(f"Skip {updated}")
+                            break
                         continue
 
                     district_id = field
@@ -219,10 +219,10 @@ class RKIHistoryUpdater(RKIUpdater):
                         # To keep it in sync with fresh RKI data
                         updated = updated + timedelta(days=1)
                         self.log.info(f"Got historic deaths data for {updated}")
-                        continue
-
-                    # Do not overwrite current data
-                    if (date.today() - updated).days <= 7:
+                        delta = (date.today() - updated)
+                        if delta.days <= 7:
+                            self.log.info(f"Skip {updated}")
+                            break
                         continue
 
                     district_id = field
@@ -257,12 +257,12 @@ class RKIHistoryUpdater(RKIUpdater):
                         updated = date(int(updated[:4]), int(updated[5:7]), int(updated[8:10]))
                         # To keep it in sync with fresh RKI data
                         updated = updated + timedelta(days=1)
-
                         self.log.info(f"Got historic incidence data for {updated}")
-                        continue
 
-                    # Do not overwrite current data
-                    if (date.today() - updated).days <= 7:
+                        delta = (date.today() - updated)
+                        if delta.days <= 7:
+                            self.log.info(f"Skip {updated}")
+                            break
                         continue
 
                     district_id = field[:-4]
