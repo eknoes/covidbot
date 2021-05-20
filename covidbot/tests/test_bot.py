@@ -129,4 +129,3 @@ class TestBot(TestCase):
         self.assertIsNotNone(self.interface.handle_input("Regeln Berlin", uid))
         self.assertIsNotNone(self.interface.handle_input("Loeschmich", uid))
         self.assertEqual("Deine Daten wurden erfolgreich gelöscht.", self.interface.handle_input("Ja", uid)[0].message)
-        self.assertEqual("Deine Daten wurden erfolgreich gelöscht.", self.interface.handle_input("Debug", uid)[0].message)
