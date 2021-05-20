@@ -395,7 +395,7 @@ class UserManager(object):
             for row in cursor.fetchall():
                 yield f"<b>Neues Feedback von {row['user_id']}</b>\n" \
                       f"{row['feedback']}\n\n" \
-                      f"<a href='https://covidbot.d-64.org/feedback/user/{row['user_id']}'>Antworten</a>"
+                      f"Antworten: https://covidbot.d-64.org/feedback/user/{row['user_id']}"
                 cursor.execute('UPDATE user_feedback SET notification_sent=1 WHERE id=%s', [row['id']])
         self.connection.commit()
 
