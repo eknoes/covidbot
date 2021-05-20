@@ -145,8 +145,8 @@ class RKIHistoryUpdater(RKIUpdater):
                 return row[0]
 
     def update(self) -> bool:
-        #if self.get_last_update().date() == date.today():
-        #    return False
+        if self.get_last_update().date() == date.today():
+            return False
         updated = False
         if self.update_cases():
             self.log.info("New case data available")
