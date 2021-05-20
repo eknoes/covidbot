@@ -273,7 +273,8 @@ class UserManager(object):
     def get_messenger_user_number(self) -> int:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user "
-                           "WHERE platform NOT IN ('interactive', 'twitter', 'mastodon', 'instagram', 'facebook')")
+                           "WHERE platform NOT IN ('interactive', 'twitter', 'mastodon', 'instagram', 'facebook') "
+                           "AND activated=1")
             row = cursor.fetchone()
             if row and 'user_num' in row and row['user_num']:
                 return row['user_num']
@@ -290,7 +291,7 @@ class UserManager(object):
     def get_user_number(self, platform: str) -> int:
         try:
             with self.connection.cursor(dictionary=True) as cursor:
-                cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user WHERE platform=%s", [platform])
+                cursor.execute("SELECT COUNT(user_id) as user_num FROM bot_user WHERE platform=%s AND activated=1", [platform])
                 row = cursor.fetchone()
                 if row and 'user_num' in row and row['user_num']:
                     return row['user_num']
@@ -341,7 +342,8 @@ class UserManager(object):
     def get_users_per_messenger(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(user_id) as c, platform FROM bot_user "
-                           "WHERE platform NOT IN ('interactive', 'twitter', 'mastodon', 'instagram', 'facebook')"
+                           "WHERE platform NOT IN ('interactive', 'twitter', 'mastodon', 'instagram', 'facebook') "
+                           "AND activated=1 "
                            "GROUP BY platform ORDER BY c DESC")
             results = []
             for row in cursor.fetchall():
