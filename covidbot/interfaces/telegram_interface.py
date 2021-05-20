@@ -190,6 +190,7 @@ class TelegramInterface(MessengerInterface):
             else:
                 self.message_developer(f"Unhandled error while sending Telegram Reports: {e.message}")
         except Unauthorized:
+            success = False
             self.bot.delete_user(chat_id)
             logging.warning(f"Deleted user {chat_id} as he blocked us")
             BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='unauthorized').inc()
@@ -296,12 +297,13 @@ class TelegramInterface(MessengerInterface):
                     time.sleep(1.05 - flood_window_diff)
 
             sent_msg = self.send_message(userid, message, disable_web_page_preview=True)
-            if sent_msg:
+            if sent_msg is True:
                 self.bot.confirm_message_send(report_type, userid)
                 sliding_flood_window.append(time.perf_counter())
                 self.log.warning(f"Sent report to {userid}!")
             else:
                 self.log.error(f"Error sending report to {userid}")
+
     async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         if not users:
             users = map(lambda x: x.platform_id, self.bot.get_all_users())
