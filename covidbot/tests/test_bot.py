@@ -66,10 +66,14 @@ class TestBot(TestCase):
         self.user_manager.add_subscription(uid1, hessen_id)
         self.user_manager.add_subscription(uid2, bayern_id)
 
+        self.assertEqual([], [1 for _ in self.interface.get_available_user_messages()],
+                         "New users should not get a report")
+
         with self.conn.cursor() as cursor:
             for uid in [uid1, uid2]:
                 cursor.execute('UPDATE bot_user SET created=%s WHERE user_id=%s',
                                [datetime.now() - timedelta(days=2), uid])
+                cursor.execute('TRUNCATE bot_user_sent_reports')
 
         update = self.interface.get_available_user_messages()
         i = 0
@@ -111,7 +115,7 @@ class TestBot(TestCase):
         self.assertEqual("B", actual_names[1], "Districts should be sorted alphabetically")
         self.assertEqual("C", actual_names[2], "Districts should be sorted alphabetically")
 
-    def sample_session(self):
+    def test_sample_session(self):
         # Sample Session, should be improved a lot
         uid = "1"
         self.assertIsNotNone(self.interface.handle_input("Start", uid))
@@ -124,4 +128,5 @@ class TestBot(TestCase):
         self.assertIsNotNone(self.interface.handle_input("Statistik", uid))
         self.assertIsNotNone(self.interface.handle_input("Regeln Berlin", uid))
         self.assertIsNotNone(self.interface.handle_input("Loeschmich", uid))
-        self.assertIsNotNone(self.interface.handle_input("Ja", uid))
+        self.assertEqual("Deine Daten wurden erfolgreich gelöscht.", self.interface.handle_input("Ja", uid)[0].message)
+        self.assertEqual("Deine Daten wurden erfolgreich gelöscht.", self.interface.handle_input("Debug", uid)[0].message)

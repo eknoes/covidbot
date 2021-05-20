@@ -217,6 +217,8 @@ class UserManager(object):
             cursor.execute('DELETE FROM user_feedback WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM bot_user_settings WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM bot_user_sent_reports WHERE user_id=%s', [user_id])
+            cursor.execute('DELETE FROM user_responses WHERE receiver_id=%s', [user_id])
+            cursor.execute('DELETE FROM user_ticket_tag WHERE user_id=%s', [user_id])
             cursor.execute('DELETE FROM bot_user WHERE user_id=%s', [user_id])
             self.connection.commit()
             if cursor.rowcount > 0:
@@ -281,7 +283,7 @@ class UserManager(object):
         with self.connection.cursor() as cursor:
             cursor.execute('SELECT SUM(followers) FROM platform_statistics')
             row = cursor.fetchone()
-            if not row:
+            if not row or not row[0]:
                 return 0 + self.get_messenger_user_number()
             return row[0] + self.get_messenger_user_number()
 
