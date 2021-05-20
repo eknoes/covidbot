@@ -39,7 +39,7 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.REPORT_INCLUDE_VACCINATION:
             return "Impfüberblick im Bericht"
         elif setting == BotUserSettings.REPORT_EXTENSIVE_GRAPHICS:
-            return "Zusätzliche Grafiken"
+            return "Mehr Grafiken im Bericht"
         elif setting == BotUserSettings.FORMATTING:
             return "Formatierung"
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:

@@ -365,7 +365,8 @@ class Bot(object):
                             responses.append(BotResponse(f"Du erhältst nun Berichte für {message_type_name(item)}."))
                     else:
                         if self.user_manager.rm_report_subscription(user_id, item):
-                            responses.append(BotResponse(f"Du erhältst nun keine Berichte mehr zu {message_type_name(item)}."))
+                            responses.append(
+                                BotResponse(f"Du erhältst nun keine Berichte mehr zu {message_type_name(item)}."))
 
         user = self.user_manager.get_user(user_id, True)
         response = BotResponse("Du hast {report_count} abonniert. Jeder Bericht enthält individuelle "
@@ -748,9 +749,9 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         if user_input:
             user_input = user_input.split()
-            for setting in [BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
-                            BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS]:
+            for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
+                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
+                            BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING]:
                 if BotUserSettings.command_key(setting).lower() != user_input[0].lower():
                     continue
 
@@ -788,17 +789,22 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             return [BotResponse("Ich verstehe deine Eingabe leider nicht.")] + self.settingsHandler("", user_id)
         else:
             message = "<b>Einstellungen</b>\n"
+            message += "Mit den folgenden Einstellungen kannst du deinen täglichen Bericht konfigurieren: " \
+                       "Beispielsweise kannst du den Absatz zu Intensivbetten oder zu Impfungen ein- und " \
+                       "ausschalten.\n\nDu kannst auch separate Intensiv- und Impfberichte abonnieren: " \
+                       f"Informationen dazu erhältst du, wenn du {self.command_formatter('Berichte')} sendest.\n\n"
+
             choices = []
 
-            for setting in [BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
-                            BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS]:
+            for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
+                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
+                            BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING]:
                 if self.user_manager.get_user_setting(user_id, setting):
                     choice = "aus"
-                    current = "ein"
+                    current = "✅"
                 else:
                     choice = "ein"
-                    current = "aus"
+                    current = "❎"
 
                 command = f"einstellung {BotUserSettings.command_key(setting)} {choice}"
                 choices.append(UserChoice(f"{BotUserSettings.title(setting)} {choice}schalten", '/' + command,
