@@ -136,18 +136,20 @@ a {
     background: #47A1B3;
 }
 .ticket-tag-idee {
-    background: #40c365;
+    background: yellow;
 }
 .ticket-tag-bug {
     background: red;
 }
-
+.ticket-tag-lob {
+    background: green;
+}
 .ticket-tag-sönke {
     background: palevioletred;
 }
 
 .ticket-tag-erik {
-    background: yellow;
+    background: brown;
 }
 
 button.add-ticket-tag-button, button.remove-ticket-tag-button {
