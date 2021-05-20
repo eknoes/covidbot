@@ -109,7 +109,13 @@ class Bot(object):
         return self.user_manager.get_all_user()
 
     def handle_input(self, user_input: str, platform_id: str) -> List[BotResponse]:
-        user_id = self.user_manager.get_user_id(platform_id, create_if_not_exists=True)
+        user_id = self.user_manager.get_user_id(platform_id, create_if_not_exists=False)
+        if not user_id:
+            user_id = self.user_manager.get_user_id(platform_id, create_if_not_exists=True)
+            if user_input.lower().find("start") == -1:
+                # TODO: Real onboarding experience
+                user_input = "start"
+
         # Strip / on /command
         if user_input[0] == "/":
             user_input = user_input[1:]
