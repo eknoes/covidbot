@@ -33,13 +33,13 @@ class BotUserSettings(Enum):
         if setting == BotUserSettings.BETA:
             return "Beta-Modus"
         elif setting == BotUserSettings.REPORT_GRAPHICS:
-            return "Bericht-Grafiken"
+            return "Grafiken im Bericht"
         elif setting == BotUserSettings.REPORT_INCLUDE_ICU:
-            return "Intensivüberblick im Bericht"
+            return "Absatz zu Intensivbetten im Bericht"
         elif setting == BotUserSettings.REPORT_INCLUDE_VACCINATION:
-            return "Impfüberblick im Bericht"
+            return "Absatz zu Impfungen im Bericht"
         elif setting == BotUserSettings.REPORT_EXTENSIVE_GRAPHICS:
-            return "Mehr Grafiken im Bericht"
+            return "Weitere Grafiken im Bericht"
         elif setting == BotUserSettings.FORMATTING:
             return "Formatierung"
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:

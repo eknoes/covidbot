@@ -845,14 +845,15 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             message = "<b>Einstellungen</b>\n"
             message += "Mit den folgenden Einstellungen kannst du deinen täglichen Bericht konfigurieren: " \
                        "Beispielsweise kannst du den Absatz zu Intensivbetten oder zu Impfungen ein- und " \
-                       "ausschalten.\n\nDu kannst auch separate Intensiv- und Impfberichte abonnieren: " \
+                       "ausschalten. Du kannst auch alle Grafiken abschalten, oder dir mehr Grafiken zusenden lassen." \
+                       "\n\nAußerdem kannst du nun separate Intensiv- und Impfberichte abonnieren: " \
                        f"Informationen dazu erhältst du, wenn du {self.command_formatter('Berichte')} sendest.\n\n"
 
             choices = []
 
             for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
                             BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
-                            BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING]:
+                            BotUserSettings.REPORT_GRAPHICS, BotUserSettings.BETA, BotUserSettings.FORMATTING]:
                 if self.user_manager.get_user_setting(user_id, setting):
                     choice = "aus"
                     current = "✅"
