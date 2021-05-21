@@ -58,7 +58,7 @@ class Bot(object):
         self.report_generator = ReportGenerator(user_manager, covid_data, visualization, self.user_hints,
                                                 command_formatter)
 
-        self.handler_list.append(Handler("start", self.startHandler, False))
+        self.handler_list.append(Handler("start", self.startHandler, True))
         self.handler_list.append(Handler("hilfe", self.helpHandler, True))
         self.handler_list.append(Handler("feedback", self.feedbackHandler, False))
         self.handler_list.append(Handler("info", self.infoHandler, False))
@@ -195,23 +195,27 @@ class Bot(object):
 
     def startHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('start').inc()
+        if user_input == "los":
+            return [BotResponse("Du kannst mir jederzeit einen Ortsnamen zusenden: Danach kannst du dich entscheiden, "
+                                "ob du diesen abonnieren willst, oder nur einmalig aktuelle Daten oder Regeln angezeigt"
+                                " bekommen möchtest."),
+                    BotResponse("Für welchen Ort interessierst du dich?")]
         message = (f'Hallo,\n'
                    f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                   f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. '
-                   f'Einen Überblick über alle Befehle erhältst du über {self.command_formatter("Hilfe")}.\n\n'
-                   f'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
-                   f'möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. ')
-        if self.has_location_feature:
-            message += f'Du kannst auch einen Standort senden! '
+                   f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. Du erhältst dann jeden '
+                   f'Morgen eine Zusammenfassung der Lage in deinen abonnierten Orten!')
 
-        message += (
-            f'Wenn die Daten des Ortes nur gesammelt für eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese '
-            f'vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen '
-            f' auch die aktuellen Zahlen für andere Orte ansehen.')
-
+        choices = [UserChoice("Loslegen", "/start los", "Sende einfach den Namen eines Ortes, den du abonnieren "
+                                                        "möchtest oder zu dem du Informationen suchst",
+                              alt_help="Ich funktioniere über Befehle, die du mir als Nachricht zusendest. "
+                                       "Du kannst mir jederzeit einen Ort oder bspw. \"Hilfe\" zusenden. Weitere "
+                                       "Aktionen werden dir unter den jeweiligen Nachrichten angezeigt."),
+                   UserChoice("Infos zur Benutzung", "/hilfe", "Du kannst jederzeit \"Hilfe\" an den Bot senden, um "
+                                                               "Informationen zur Benutzung angezeigt zu bekommen")]
         # Add subscription for Germany on start
         self.user_manager.add_subscription(user_id, 0)
-        return [BotResponse(message)]
+        self.user_manager.add_report_subscription(user_id, MessageType.CASES_GERMANY)
+        return [BotResponse(message, choices=choices)]
 
     @staticmethod
     def feedbackHandler(user_input: str, user_id: int) -> List[BotResponse]:
@@ -251,9 +255,7 @@ class Bot(object):
                        'Website teilen: https://covidbot.d-64.org\n\n' \
                        'Diesen Text erhältst du immer, wenn du "Hilfe" als Nachricht an den Bot schickst.'
             choices = [UserChoice('Weitere Informationen', '/hilfe lang', 'Schreibe "Hilfe Lang", um alle Informationen'
-                                                                          ' zur Benutzung zu erhalten',
-                                  alt_help='Du kannst auch einen Ort oder einen anderen Befehl senden um '
-                                           'fortzufahren.')]
+                                                                          ' zur Benutzung zu erhalten')]
         else:
             message += ('<b>🔎 Orte finden</b>\n'
                         'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
@@ -310,9 +312,7 @@ class Bot(object):
                         beende_example=self.command_formatter('Beende ORT'),
                         berichte_command=self.command_formatter('Berichte'))
             choices = [UserChoice('Weniger Informationen', '/hilfe', 'Schreibe "Hilfe", um den Kurzüberblick über die '
-                                                                     'Funktionen zu erhalten',
-                                  alt_help='Du kannst auch einen Ort oder einen anderen Befehl senden um '
-                                           'fortzufahren.')]
+                                                                     'Funktionen zu erhalten')]
 
         choices.append(UserChoice('Berichte', '/berichte', 'Schreibe "Berichte", um deine verschiedenen Berichte zu '
                                                            'verwalten'))
@@ -455,7 +455,7 @@ class Bot(object):
                 districts = None
             else:
                 districts = list(map(self.covid_data.get_district, user.subscriptions))
-                message = "Du hast aktuell {abo_count}." \
+                message = "Du hast aktuell {abo_count} abonniert." \
                     .format(abo_count=format_noun(len(user.subscriptions), FormattableNoun.DISTRICT))
 
             response = BotResponse(message)
@@ -477,7 +477,8 @@ class Bot(object):
                     message += " "
                     message += (
                         f"Du kannst <b>beliebig viele weitere Orte</b> abonnieren oder Daten einsehen, sende dafür einfach "
-                        f"einen weiteren Ort!\n\n"
+                        f"einen weiteren Ort! Außerdem kannst du verschiedene Arten von Berichten abonnieren, bspw. "
+                        f"zur den Intensivbetten und den Impfungen in von dir abonnierten Orten.\n\n"
                         f"Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
                         f"erfährst du über den {self.command_formatter('Hilfe')} Befehl.\n"
                         f"Danke, dass du unseren Bot benutzt!")
@@ -486,6 +487,7 @@ class Bot(object):
                                                                f'Benutzung zu bekommen'))
                     choices.append(UserChoice("Berichte verwalten", '/berichte', f'Schreibe "Berichte", deine '
                                                                                  f'täglichen Berichte zu verwalten'))
+                    return [BotResponse(message.format(name=location.name), choices=choices)]
             else:
                 message = "Du hast {name} bereits abonniert."
 
@@ -495,8 +497,7 @@ class Bot(object):
                                       f'Schreibe "Regeln {location.id}", um die aktuell gültigen Regeln zu erhalten'))
             choices.append(UserChoice("Impfbericht anzeigen", f'/Impfungen {location.id}',
                                       f'Schreibe "Impfungen {location.id}", um den aktuellen Impfbericht zu erhalten'))
-            choices.append(UserChoice("Abbrechen", f'/noop',
-                                      f'Für mehr Optionen sende "Hilfe" oder einen beliebigen Ort'))
+            choices.append(UserChoice("Abbrechen", f'/noop'))
 
             return [BotResponse(message.format(name=location.name), choices=choices)]
         return location
@@ -708,12 +709,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             return location
 
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_COMMAND, str(location.id))
-        choices = [UserChoice("Daten anzeigen", f'/daten {location.id}',
-                              'Schreibe "Daten", um die aktuellen Daten zu erhalten'),
-                   UserChoice('Regeln anzeigen', f'/regeln {location.id}',
-                              'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'),
-                   UserChoice('Impfdaten anzeigen', f'/Impfungen {location.id}',
-                              'Schreibe "Impfungen", um den aktuellen Impfbericht zu erhalten')]
+        choices = []
 
         user = self.user_manager.get_user(user_id, with_subscriptions=True)
         if user and location.id in user.subscriptions:
@@ -725,6 +721,12 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                       'Schreibe "Abo", um den Ort zu abonnieren'))
             verb = "starten"
 
+        choices.append(UserChoice("Daten anzeigen", f'/daten {location.id}',
+                                  'Schreibe "Daten", um die aktuellen Daten zu erhalten'))
+        choices.append(UserChoice('Regeln anzeigen', f'/regeln {location.id}',
+                                  'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'))
+        choices.append(UserChoice('Impfdaten anzeigen', f'/Impfungen {location.id}',
+                                  'Schreibe "Impfungen", um den aktuellen Impfbericht zu erhalten'))
         message = "Möchtest du dein Abo von {name} {verb}, die aktuellen Daten oder geltende Regeln erhalten?" \
             .format(name=location.name, verb=verb)
         return [BotResponse(message, choices=choices)]
@@ -1043,7 +1045,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         choices = []
         for location in districts:
             choices.append(UserChoice(location.name, str(location.id), f'{location.name}\t{location.id}',
-                                      alt_help=f"Anstatt des kompletten Namens kannst du auch die zugeordnete Nummer nutzen, also "
+                                      alt_help=f"Anstatt des kompletten Namens kannst du auch die Nummer hinter dem jeweiligen Ort schreiben, also "
                                                f"bspw. {location.id} für {location.name}."))
         return choices
 
@@ -1076,7 +1078,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                           "Du kannst stattdessen die Zahlen des dazugehörigen Landkreises abrufen" \
                     .format(district=district_query)
             else:
-                message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden"
+                message = "Es wurden mehrere Orte mit diesem oder ähnlichen Namen gefunden, bitte sende uns eine " \
+                          "genauere Ortsangabe:"
             return BotResponse(message), possible_district
         else:
             message = "Mit deinem Suchbegriff wurden mehr als 15 Orte gefunden, bitte versuche spezifischer zu sein."
