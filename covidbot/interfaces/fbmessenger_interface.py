@@ -73,7 +73,10 @@ class FBMessengerInterface(MessengerInterface):
         if response.message:
             images = response.images
             disable_unicode = not self.bot.get_user_setting(user, BotUserSettings.FORMATTING)
-            messages = split_message(adapt_text(str(response), just_strip=disable_unicode), max_chars=2000)
+            max_chars = 2000
+            if response.choices:
+                max_chars = 640
+            messages = split_message(adapt_text(str(response), just_strip=disable_unicode), max_chars=max_chars)
             for i in range(0, len(messages)):
                 buttons = None
                 if response.choices and i == len(messages) - 1:
