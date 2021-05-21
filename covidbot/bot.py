@@ -404,8 +404,12 @@ class Bot(object):
                    'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
             .format(info_command=self.command_formatter("Info"),
                     earliest_vacc_date=earliest_data.vaccinations.date.strftime("%d.%m.%Y"))
-        return [BotResponse(message, [self.visualization.vaccination_graph(location.id),
-                                      self.visualization.vaccination_speed_graph(location.id)])]
+        graphs = [self.visualization.vaccination_graph(location.id)]
+
+        if location.id == 0:
+            graphs.append(self.visualization.vaccination_speed_graph(location.id))
+
+        return [BotResponse(message, graphs)]
 
     def subscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('report-types').inc()
