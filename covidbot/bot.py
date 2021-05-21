@@ -82,6 +82,7 @@ class Bot(object):
         self.handler_list.append(Handler("einstellung", self.settingsHandler, True))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
         self.handler_list.append(Handler("beta", self.betaSettingsHandler, True))
+        self.handler_list.append(Handler("daswaralles", self.thatsItHandler, False))
         self.handler_list.append(Handler("noop", lambda x, y: None, False))
         self.handler_list.append(Handler("", self.directHandler, True))
 
@@ -189,6 +190,7 @@ class Bot(object):
 
         if len(districts) > 1:
             choices = self.generate_districts_choices(districts)
+            choices.append(self.get_abort_userchoice())
             return [BotResponse("Die Daten für die folgenden Orte und Regionen sind für deinen Standort verfügbar",
                                 choices=choices)]
         return self.handle_input(str(districts[0].id), user_id)
@@ -221,6 +223,11 @@ class Bot(object):
     def feedbackHandler(user_input: str, user_id: int) -> List[BotResponse]:
         return [BotResponse('Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
                             'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!')]
+
+    @staticmethod
+    def thatsItHandler(user_input: str, user_id: int) -> List[BotResponse]:
+        return [BotResponse('Alles klar! Wenn du weitere Informationen brauchst kannst du mir jederzeit einen Ort '
+                            'oder "Hilfe" senden. Bis später 👋')]
 
     def helpHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('help').inc()
@@ -318,6 +325,7 @@ class Bot(object):
                                                            'verwalten'))
         choices.append(UserChoice('Einstellungen', '/einstellungen', 'Schreibe "Einstellungen", um deine '
                                                                      'Einstellungen zu ändern'))
+        choices.append(self.get_default_userchoice())
         return [BotResponse(message, choices=choices)]
 
     @staticmethod
@@ -438,6 +446,7 @@ class Bot(object):
                                       f'{cmd} {message_type_name(item)}',
                                       f'Schreibe {self.command_formatter(f"{cmd[1:].capitalize()} {message_type_name(item)}")} um '
                                       f'den Bericht zu {message_type_name(item)} {verb}'))
+        choices.append(self.get_default_userchoice())
         response.choices = choices
         responses.append(response)
         return responses
@@ -462,6 +471,7 @@ class Bot(object):
 
             if districts:
                 choices = self.generate_districts_choices(districts)
+                choices.append(self.get_abort_userchoice())
                 response.choices = choices
             return response
 
@@ -487,6 +497,7 @@ class Bot(object):
                                                                f'Benutzung zu bekommen'))
                     choices.append(UserChoice("Berichte verwalten", '/berichte', f'Schreibe "Berichte", deine '
                                                                                  f'täglichen Berichte zu verwalten'))
+                    choices.append(self.get_default_userchoice())
                     return [BotResponse(message.format(name=location.name), choices=choices)]
             else:
                 message = "Du hast {name} bereits abonniert."
@@ -497,7 +508,7 @@ class Bot(object):
                                       f'Schreibe "Regeln {location.id}", um die aktuell gültigen Regeln zu erhalten'))
             choices.append(UserChoice("Impfbericht anzeigen", f'/Impfungen {location.id}',
                                       f'Schreibe "Impfungen {location.id}", um den aktuellen Impfbericht zu erhalten'))
-            choices.append(UserChoice("Abbrechen", f'/noop'))
+            choices.append(self.get_default_userchoice())
 
             return [BotResponse(message.format(name=location.name), choices=choices)]
         return location
@@ -727,6 +738,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                   'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'))
         choices.append(UserChoice('Impfdaten anzeigen', f'/Impfungen {location.id}',
                                   'Schreibe "Impfungen", um den aktuellen Impfbericht zu erhalten'))
+        choices.append(UserChoice('Abbrechen', f'/noop'))
         message = "Möchtest du dein Abo von {name} {verb}, die aktuellen Daten oder geltende Regeln erhalten?" \
             .format(name=location.name, verb=verb)
         return [BotResponse(message, choices=choices)]
@@ -867,6 +879,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                           f"{choice}zuschalten"))
                 message += f"<b>{BotUserSettings.title(setting)}: {current}</b>\n" \
                            f"{BotUserSettings.description(setting)}\n\n"
+            choices.append(self.get_default_userchoice())
             return [BotResponse(message, choices=choices)]
 
     def graphicSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
@@ -1039,6 +1052,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             return locations[0]
         else:
             choices = self.generate_districts_choices(locations)
+            choices.append(self.get_abort_userchoice())
             return [BotResponse(response.message, choices=choices)]
 
     @staticmethod
@@ -1120,6 +1134,14 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                     result[0].append(d)
 
         return result
+
+    @staticmethod
+    def get_default_userchoice() -> UserChoice:
+        return UserChoice("Das war alles, danke!", "/daswaralles")
+
+    @staticmethod
+    def get_abort_userchoice() -> UserChoice:
+        return UserChoice("Abbrechen", "/noop")
 
 
 class InteractiveInterface(MessengerInterface):
