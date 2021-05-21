@@ -43,7 +43,7 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.FORMATTING:
             return "Formatierung"
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
-            return "Neuinfektionsgrafiken im Bericht"
+            return "Alle Infektionsgrafiken im Bericht"
 
     @staticmethod
     def description(setting: BotUserSettings) -> str:
@@ -64,7 +64,7 @@ class BotUserSettings(Enum):
                    "Nachrichten (de)aktivieren. Diese ist auf manchen Geräten bei Signal und Facebook " \
                    "Messenger nicht lesbar."
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
-            return "Wenn du diese Einstellung aktivierst, bekommst du im Bericht eine Neuinfektionsgrafik für jeden " \
+            return "Mit dieser Option bekommst du im Bericht eine Neuinfektionsgrafik für jeden " \
                    "abonnierten Ort."
 
     @staticmethod
