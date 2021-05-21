@@ -557,11 +557,11 @@ class Bot(object):
 
         message = f'''<b>Pandemieverlauf in {location.name}</b>
 Am {facts.first_case_date.strftime("%d.%m.%Y")} wurde der erste Covid-19 Fall in {location.name} gemeldet, am {facts.first_death_date.strftime("%d.%m.%Y")} gab es den ersten Todesfall im Zusammenhang mit Covid-19. 
-Seitdem wurden {format_noun(data.total_cases, FormattableNoun.INFECTIONS)} und {format_noun(data.total_deaths, FormattableNoun.DEATHS)} gemeldet.
+Insgesamt wurden bisher {format_noun(data.total_cases, FormattableNoun.INFECTIONS)} und {format_noun(data.total_deaths, FormattableNoun.DEATHS)} in {location.name} gemeldet.
 
-• Höchste Inzidenz: {format_float(facts.highest_incidence)} am {facts.highest_incidence_date.strftime("%d.%m.%Y")}
-• Höchste Anzahl Neuinfektionen: {format_int(facts.highest_cases)} am {facts.highest_cases_date.strftime("%d.%m.%Y")}
-• Höchste Anzahl Todesfälle: {format_int(facts.highest_deaths)} am {facts.highest_deaths_date.strftime("%d.%m.%Y")}
+• Höchste 7-Tage-Inzidenz: {format_float(facts.highest_incidence)} am {facts.highest_incidence_date.strftime("%d.%m.%Y")}
+• Höchste Anzahl von Neuinfektionen an einem Tag: {format_int(facts.highest_cases)} am {facts.highest_cases_date.strftime("%d.%m.%Y")}
+• Höchste Anzahl von Todesfällen an einem Tag: {format_int(facts.highest_deaths)} am {facts.highest_deaths_date.strftime("%d.%m.%Y")}
 
 Stand: {data.date.strftime("%d.%m.%Y")}
 Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0.

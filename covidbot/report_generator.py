@@ -288,7 +288,7 @@ class ReportGenerator:
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
         if (district.new_cases and district.new_cases < 0) or (
                 district.new_deaths and district.new_deaths < 0):
-            message += "\n• <i>Eine negative Differenz zum Vortag ist idR. auf eine Korrektur der Daten " \
+            message += "\n• <i>Eine negative Differenz zum Vortag ist in der Regel auf eine Korrektur der Daten " \
                        "durch das Gesundheitsamt zurückzuführen</i>"
         if district.icu_data:
             message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in " \
