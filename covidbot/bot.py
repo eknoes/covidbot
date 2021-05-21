@@ -581,9 +581,12 @@ Stand: {data.date.strftime("%d.%m.%Y")}
 Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0.
 Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard des RKI</a>'''
 
-        return [BotResponse(message, [self.visualization.infections_graph(location.id, 9999),
-                                      self.visualization.incidence_graph(location.id, 9999),
-                                      self.visualization.icu_graph(location.id)])]
+        graphs = [self.visualization.infections_graph(location.id, 9999),
+                  self.visualization.incidence_graph(location.id, 9999)]
+
+        if self.covid_data.get_icu_data(location.id):
+            graphs.append(self.visualization.icu_graph(location.id))
+        return [BotResponse(message, images=graphs)]
 
     def currentDataHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('district_data').inc()
