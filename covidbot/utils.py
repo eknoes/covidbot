@@ -239,8 +239,7 @@ def message_type_name(item: MessageType) -> str:
 def message_type_desc(item: MessageType) -> str:
     if item == MessageType.CASES_GERMANY:
         return "Der Bericht zu Neuinfektionen liefert dir einen Überblick über die allgemeine Coronalage in den von " \
-               "dir abonnierten Orten. Er erscheint jeden Morgen, direkt nachdem das RKI die neuesten Zahlen " \
-               "veröffentlicht hat."
+               "dir abonnierten Orten."
     elif item == MessageType.ICU_GERMANY:
         return "Der Intensivbericht liefert dir die Zahlen zur Intensivbettenauslastung in den von dir abonnierten " \
                "Orten."

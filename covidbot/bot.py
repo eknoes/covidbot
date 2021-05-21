@@ -1,23 +1,22 @@
 import logging
 import re
 from dataclasses import dataclass
-from datetime import date
 from enum import Enum
 from functools import reduce
 from typing import Callable, Dict, List, Union, Optional, Tuple, Generator
 
 from covidbot.covid_data import CovidData, Visualization
 from covidbot.covid_data.models import District, DistrictData
-from covidbot.location_service import LocationService
+from covidbot.interfaces.bot_response import UserChoice, BotResponse
 from covidbot.interfaces.messenger_interface import MessengerInterface
+from covidbot.location_service import LocationService
 from covidbot.metrics import BOT_COMMAND_COUNT
 from covidbot.report_generator import ReportGenerator
+from covidbot.settings import BotUserSettings
 from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
-from covidbot.settings import BotUserSettings
 from covidbot.utils import adapt_text, format_float, format_int, format_noun, FormattableNoun, \
     format_data_trend, MessageType, message_type_name, message_type_desc
-from covidbot.interfaces.bot_response import UserChoice, BotResponse
 
 
 @dataclass
@@ -60,7 +59,7 @@ class Bot(object):
                                                 command_formatter)
 
         self.handler_list.append(Handler("start", self.startHandler, False))
-        self.handler_list.append(Handler("hilfe", self.helpHandler, False))
+        self.handler_list.append(Handler("hilfe", self.helpHandler, True))
         self.handler_list.append(Handler("feedback", self.feedbackHandler, False))
         self.handler_list.append(Handler("info", self.infoHandler, False))
         self.handler_list.append(Handler("impfungen", self.vaccHandler, True))
@@ -221,56 +220,105 @@ class Bot(object):
 
     def helpHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('help').inc()
-        message = ('Hallo,\n'
-                   'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                   'COVID19-Daten anzeigen lassen und sie dauerhaft abonnieren.\n\n'
-                   '<b>🔎 Orte finden</b>\n'
-                   'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
-                   'möchtest. So kannst du nach einer Stadt, Adresse oder auch dem Namen deiner '
-                   'Lieblingskneipe suchen.')
-        if self.has_location_feature:
-            message += ' Du kannst auch einen Standort senden.'
+        short_help = True
 
-        message += ('\n\n'
-                    '<b>🔔 Täglicher Bericht</b>\n'
-                    'Sendest du "Starte Abo", wird der von gewählte Ort in deinem '
-                    'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
-                    'stattdessen angeboten, das Abo wieder zu beenden. Alternativ kannst du auch {abo_example} oder '
-                    '{beende_example} senden.\n'
-                    'Du kannst beliebig viele Orte abonnieren!\n\n'
-                    '<b>📈 Einmalig Informationen erhalten</b>\n'
-                    'Sendest du "Daten", erhältst Du einmalig Informationen über den zuvor gewählten Ort. Diese '
-                    'enthalten eine Grafik die für diesen Ort generiert wurde.\n'
-                    'Wenn du "Regeln" sendest, erhältst du die aktuell gültigen Regeln für dein Bundesland. '
-                    'Du kannst auch "Impfungen" senden, um einen Überblick über die Impflage zu bekommen. '
-                    'Sende {info_command} um die Erläuterung zu den verschiedenen Daten und Quellen mit weiteren '
-                    'Informationen zu erhalten.\n\n'
-                    '<b>💬 Feedback</b>\n'
-                    'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
-                    'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
-                    '<b>👋 Abmelden</b>\n'
-                    'Wenn du von unserem Bot keine Nachrichten mehr empfangen möchtest, kannst du alle deine Daten '
-                    'bei uns löschen indem du {deleteme_command} sendest.\n\n'
-                    '<b>🤓 Statistik</b>\n'
-                    'Wenn du {stat_command} sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
-                    'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
-                    '<b>Weiteres</b>\n'
-                    '• Sende {vacc_command} für eine Übersicht der Impfsituation\n'
-                    '• Sende {report_command} für deinen Tagesbericht\n'
-                    '• Sende {abo_command} um deine abonnierten Orte einzusehen\n'
-                    '• Sende {privacy_command} erhältst du mehr Informationen zum Datenschutz und die '
-                    'Möglichkeit, alle deine Daten bei uns zu löschen\n'
-                    '• Unter https://github.com/eknoes/covid-bot findest du den Quelltext des Bots\n'
-                    '\n\n'
-                    'Auf https://covidbot.d-64.org/ gibt es mehr Informationen zum Bot und die Links für alle '
-                    'anderen verfügbaren Messenger. Diesen Hilfetext erhältst du über {help_command}') \
-            .format(stat_command=self.command_formatter('Statistik'), report_command=self.command_formatter('Bericht'),
-                    abo_command=self.command_formatter('Abo'), privacy_command=self.command_formatter('Datenschutz'),
-                    help_command=self.command_formatter('Hilfe'), info_command=self.command_formatter('Info'),
-                    vacc_command=self.command_formatter('Impfungen'),
-                    deleteme_command=self.command_formatter('Loeschmich'),
-                    abo_example=self.command_formatter('Abo ORT'), beende_example=self.command_formatter('Beende ORT'))
-        return [BotResponse(message)]
+        if user_input and re.match("plus|mehr|lang|erweitert[e]?", user_input.lower()):
+            short_help = False
+
+        message = 'Hallo,\n' \
+                  'über diesen Bot kannst Du Dir relevante Daten zur COVID19-Pandemie anzeigen lassen ' \
+                  'und sie dauerhaft abonnieren.\n\n'
+
+        if short_help:
+            message += 'Schicke mir einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten ' \
+                       'möchtest. '
+            if self.has_location_feature:
+                message += 'Du kannst auch einen Standort senden. '
+
+            message += 'Die möglichen Aktionen werden dir dann angezeigt: Sei es den Ort zu abonnieren, dir die ' \
+                       'aktuellen Daten anzuzeigen oder gültige Regeln abzurufen.\n\n'
+            message += '<b>🔔 Berichte</b>\n' \
+                       'Wenn du Orte abonnierst erhältst du am Morgen einen täglichen Bericht mit den ' \
+                       'aktuellen Infektionsdaten in all deinen Orten. Zusätzlich kannst du auch Berichte zu ' \
+                       'Impfungen und zur Intensivbettenlage abonnieren.\n\n' \
+                       '<b>💬 Feedback</b>\n' \
+                       'Wenn du Ideen, Kritik oder Probleme hast kannst du dich gerne bei uns melden: Sende einfach ' \
+                       'eine Nachricht an den Covidbot, die keinen Ort enthält - du wirst dann gefragt, ob diese an ' \
+                       'unser Team weitergeleitet werden darf.\n\n' \
+                       '<b>📖 Mehr Informationen</b>\n' \
+                       'Es gibt eine Vielzahl an weiteren Funktionen und Möglichkeiten: Lass dir dafür die erweiterte' \
+                       ' Hilfe anzeigen. Wenn du uns weiterempfehlen möchtest, kannst du einfach den Link unserer ' \
+                       'Website teilen: https://covidbot.d-64.org\n\n' \
+                       'Diesen Text erhältst du immer, wenn du "Hilfe" als Nachricht an den Bot schickst.'
+            choices = [UserChoice('Weitere Informationen', '/hilfe lang', 'Schreibe "Hilfe Lang", um alle Informationen'
+                                                                          ' zur Benutzung zu erhalten',
+                                  alt_help='Du kannst auch einen Ort oder einen anderen Befehl senden um '
+                                           'fortzufahren.')]
+        else:
+            message += ('<b>🔎 Orte finden</b>\n'
+                        'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
+                        'möchtest. So kannst du nach einer Stadt, Adresse oder auch dem Namen deiner '
+                        'Lieblingskneipe suchen.')
+            if self.has_location_feature:
+                message += ' Du kannst auch einen Standort senden.'
+
+            message += ('\n\n'
+                        '<b>🔔 Täglicher Bericht</b>\n'
+                        'Sendest du "Starte Abo", wird der von gewählte Ort in deinem '
+                        'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
+                        'stattdessen angeboten, das Abo wieder zu beenden. Alternativ kannst du auch {abo_example} oder '
+                        '{beende_example} senden.\n'
+                        'Du kannst beliebig viele Orte abonnieren!\n\n'
+                        '<b>📖 Weitere Berichte</b>\n'
+                        'Du kannst separat auch die Intensivbettenlage oder Impflage abonnieren. Du bekommst dann einen'
+                        'zusätzlichen Bericht, wenn diese Daten erscheinen. Sende {berichte_command} um diese zu '
+                        'verwalten.\n\n'
+                        '<b>📈 Einmalig Informationen erhalten</b>\n'
+                        'Sendest du "Daten", erhältst Du einmalig Informationen über den zuvor gewählten Ort. Diese '
+                        'enthalten eine Grafik die für diesen Ort generiert wurde.\n'
+                        'Wenn du "Regeln" sendest, erhältst du die aktuell gültigen Regeln für dein Bundesland. '
+                        'Du kannst auch "Impfungen" senden, um einen Überblick über die Impflage zu bekommen. '
+                        'Sende {info_command} um die Erläuterung zu den verschiedenen Daten und Quellen mit weiteren '
+                        'Informationen zu erhalten.\n\n'
+                        '<b>💬 Feedback</b>\n'
+                        'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
+                        'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!\n\n'
+                        '<b>👋 Abmelden</b>\n'
+                        'Wenn du von unserem Bot keine Nachrichten mehr empfangen möchtest, kannst du alle deine Daten '
+                        'bei uns löschen indem du {deleteme_command} sendest.\n\n'
+                        '<b>🤓 Statistik</b>\n'
+                        'Wenn du {stat_command} sendest, erhältst du ein Beliebtheitsranking der Orte und ein '
+                        'paar andere Daten zu den aktuellen Nutzungszahlen des Bots.\n\n'
+                        '<b>Weiteres</b>\n'
+                        '• Sende {vacc_command} für eine Übersicht der Impfsituation\n'
+                        '• Sende {report_command} für deinen Tagesbericht\n'
+                        '• Sende {abo_command} um deine abonnierten Orte einzusehen\n'
+                        '• Sende {privacy_command} erhältst du mehr Informationen zum Datenschutz und die '
+                        'Möglichkeit, alle deine Daten bei uns zu löschen\n'
+                        '• Unter https://github.com/eknoes/covid-bot findest du den Quelltext des Bots\n'
+                        '\n\n'
+                        'Auf https://covidbot.d-64.org/ gibt es mehr Informationen zum Bot und die Links für alle '
+                        'anderen verfügbaren Messenger. Diesen Hilfetext erhältst du über {help_command}') \
+                .format(stat_command=self.command_formatter('Statistik'),
+                        report_command=self.command_formatter('Bericht'),
+                        abo_command=self.command_formatter('Abo'),
+                        privacy_command=self.command_formatter('Datenschutz'),
+                        help_command=self.command_formatter('Hilfe'), info_command=self.command_formatter('Info'),
+                        vacc_command=self.command_formatter('Impfungen'),
+                        deleteme_command=self.command_formatter('Loeschmich'),
+                        abo_example=self.command_formatter('Abo ORT'),
+                        beende_example=self.command_formatter('Beende ORT'),
+                        berichte_command=self.command_formatter('Berichte'))
+            choices = [UserChoice('Weniger Informationen', '/hilfe', 'Schreibe "Hilfe", um den Kurzüberblick über die '
+                                                                     'Funktionen zu erhalten',
+                                  alt_help='Du kannst auch einen Ort oder einen anderen Befehl senden um '
+                                           'fortzufahren.')]
+
+        choices.append(UserChoice('Berichte', '/berichte', 'Schreibe "Berichte", um deine verschiedenen Berichte zu '
+                                                           'verwalten'))
+        choices.append(UserChoice('Einstellungen', '/einstellungen', 'Schreibe "Einstellungen", um deine '
+                                                                     'Einstellungen zu ändern'))
+        return [BotResponse(message, choices=choices)]
 
     @staticmethod
     def infoHandler(user_input: str, user_id: int) -> List[BotResponse]:
@@ -370,7 +418,8 @@ class Bot(object):
 
         user = self.user_manager.get_user(user_id, True)
         response = BotResponse("Du hast {report_count} abonniert. Jeder Bericht enthält individuelle "
-                               "Grafiken und ist an deine abonnierten Orte angepasst."
+                               "Grafiken und ist an deine abonnierten Orte angepasst. Du erhältst deine "
+                               "personalisierten Berichte einmal am Tag: Direkt, wenn neue Daten verfügbar sind."
                                .format(report_count=format_noun(len(user.subscribed_reports), FormattableNoun.REPORT)))
 
         choices = []
@@ -432,8 +481,9 @@ class Bot(object):
                         f"Wie du uns Feedback zusenden kannst, Statistiken einsehen oder weitere Aktionen ausführst "
                         f"erfährst du über den {self.command_formatter('Hilfe')} Befehl.\n"
                         f"Danke, dass du unseren Bot benutzt!")
-                    choices.append(UserChoice("Hilfe anzeigen", '/hilfe', f'Schreibe "Hilfe", um mehr Informationen zur '
-                                                                          f'Benutzung zu bekommen'))
+                    choices.append(
+                        UserChoice("Hilfe anzeigen", '/hilfe', f'Schreibe "Hilfe", um mehr Informationen zur '
+                                                               f'Benutzung zu bekommen'))
                     choices.append(UserChoice("Berichte verwalten", '/berichte', f'Schreibe "Berichte", deine '
                                                                                  f'täglichen Berichte zu verwalten'))
             else:
@@ -1085,5 +1135,5 @@ class InteractiveInterface(MessengerInterface):
         while user_input != "":
             responses = self.bot.handle_input(user_input, '1')
             for response in responses:
-                print(f"{adapt_text(response)}")
+                print(f"{adapt_text(str(response))}")
             user_input = input("> ")

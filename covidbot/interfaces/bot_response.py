@@ -21,6 +21,8 @@ class BotResponse:
             return self.message
 
         message = self.message + '\n\n'
+        if self.choices:
+            message += "<b>🙋 Aktionen:</b>\n"
         for choice in self.choices:
             message += f'• {choice.alt_text}\n'
 

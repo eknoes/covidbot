@@ -76,7 +76,7 @@ class SignalInterface(MessengerInterface):
             replies = self.bot.handle_input(text, platform_id)
             disable_unicode = not self.bot.get_user_setting(platform_id, BotUserSettings.FORMATTING)
             for reply in replies:
-                reply.message = str(adapt_text(reply, just_strip=disable_unicode))
+                reply.message = adapt_text(str(reply), just_strip=disable_unicode)
 
                 await self.send_reply(ctx, reply)
             await ctx.message.typing_stopped()
@@ -161,7 +161,7 @@ class SignalInterface(MessengerInterface):
             backoff_time = random.uniform(0.5, 2)
             for user in users:
                 disable_unicode = not self.bot.get_user_setting(user, BotUserSettings.FORMATTING)
-                success = await bot.send_message(user, adapt_text(message, just_strip=disable_unicode))
+                success = await bot.send_message(user, adapt_text(str(message), just_strip=disable_unicode))
                 backoff_time = self.backoff_timer(backoff_time, not success, user)
 
     def backoff_timer(self, current_backoff: float, failed: bool, user_id: str) -> float:
