@@ -112,7 +112,6 @@ class Bot(object):
         if not user_id:
             user_id = self.user_manager.get_user_id(platform_id, create_if_not_exists=True)
             if user_input.lower().find("start") == -1:
-                # TODO: Real onboarding experience
                 user_input = "start"
 
         # Strip / on /command
@@ -122,7 +121,7 @@ class Bot(object):
         if user_id and user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
-                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln", "impfungen"]:
+                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln", "impfungen", "historie"]:
                     user_input += " " + str(state[1])
                 del self.chat_states[user_id]
             elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
@@ -742,6 +741,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                   'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'))
         choices.append(UserChoice('Impfdaten anzeigen', f'/Impfungen {location.id}',
                                   'Schreibe "Impfungen", um den aktuellen Impfbericht zu erhalten'))
+        choices.append(UserChoice("Historie anzeigen", f'/historie {location.id}',
+                                  'Schreibe "Historie", um einen Rückblick zu erhalten'))
         choices.append(UserChoice('Abbrechen', f'/noop'))
         message = "Möchtest du dein Abo von {name} {verb}, die aktuellen Daten oder geltende Regeln erhalten?" \
             .format(name=location.name, verb=verb)
