@@ -99,7 +99,7 @@ class Visualization:
         fig.subplots_adjust(bottom=0.2)
 
         # Ticks also on right side
-        ax1.tick_params(axis="y", labelleft=True, labelright=True)
+        ax1.tick_params(axis="y", labelleft=True, labelright=True, grid_color="#666666")
 
         return fig, ax1
 
@@ -370,8 +370,11 @@ class Visualization:
 
         # Draw thresholds
         ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([0, 35, 50, 100, 150, 165, 200, 300, 400, 500]))
+        minor_ticks_base = 10
+        ax1.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(base=minor_ticks_base))
+        plt.grid(which="minor", linestyle="--", color="#cccccc")
+
         # Save to file
-        # plt.show()
         plt.savefig(filepath, format='JPEG')
         self.teardown_plt(fig)
         return filepath
@@ -402,6 +405,10 @@ class Visualization:
 
         # Draw thresholds
         ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([0, 35, 50, 100, 150, 165, 200, 300, 400, 500]))
+
+        minor_ticks_base = 10
+        ax1.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(base=minor_ticks_base))
+        plt.grid(which="minor", linestyle="--", color="#cccccc")
 
         # Save to file
         plt.savefig(filepath, format='JPEG')
