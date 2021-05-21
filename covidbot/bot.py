@@ -81,7 +81,6 @@ class Bot(object):
         self.handler_list.append(Handler("einstellungen", self.settingsHandler, True))
         self.handler_list.append(Handler("einstellung", self.settingsHandler, True))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
-        self.handler_list.append(Handler("beta", self.betaSettingsHandler, True))
         self.handler_list.append(Handler("daswaralles", self.thatsItHandler, False))
         self.handler_list.append(Handler("noop", lambda x, y: None, False))
         self.handler_list.append(Handler("", self.directHandler, True))
@@ -710,9 +709,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             elif user_input.lower() == message_type_name(MessageType.VACCINATION_GERMANY)[:len(user_input)].lower():
                 return self.report_generator.generate_vaccination_report(user)
 
-        if self.user_manager.get_user_setting(user_id, BotUserSettings.BETA):
-            return self.report_generator.generate_infection_report(user)
-        return self._get_report(user.subscriptions, user.id)
+        return self.report_generator.generate_infection_report(user)
 
     def directHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         location = self.parseLocationInput(user_input, set_feedback=user_id)
@@ -817,7 +814,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             user_input = user_input.split()
             for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
                             BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
-                            BotUserSettings.BETA, BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING]:
+                            BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING]:
                 if BotUserSettings.command_key(setting).lower() != user_input[0].lower():
                     continue
 
@@ -865,7 +862,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
             for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
                             BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
-                            BotUserSettings.REPORT_GRAPHICS, BotUserSettings.BETA, BotUserSettings.FORMATTING]:
+                            BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING]:
                 if self.user_manager.get_user_setting(user_id, setting):
                     choice = "aus"
                     current = "✅"
@@ -885,9 +882,6 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
     def graphicSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_GRAPHICS) + ' ' + user_input,
                                     user_id)
-
-    def betaSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
-        return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.BETA) + ' ' + user_input, user_id)
 
     def deleteMeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('delete_me').inc()
@@ -991,14 +985,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         """
         for user in self.user_manager.get_all_user(with_subscriptions=True):
             for t in self.report_generator.get_available_reports(user):
-                if t == MessageType.CASES_GERMANY:
-                    if self.user_manager.get_user_setting(user.id, BotUserSettings.BETA):
-                        yield MessageType.CASES_GERMANY, user.platform_id, self.report_generator.generate_infection_report(
-                            user)
-                    else:
-                        yield MessageType.CASES_GERMANY, user.platform_id, self._get_report(user.subscriptions, user.id)
-                else:
-                    yield t, user.platform_id, self.report_generator.generate_report(user, t)
+                yield t, user.platform_id, self.report_generator.generate_report(user, t)
 
             if not user.activated:
                 continue

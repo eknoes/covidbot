@@ -84,7 +84,9 @@ class ReportGenerator:
             every_graph = self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS)
 
             for district in subscriptions:
-                message += self.get_district_summary(district)
+                message += self.get_district_summary(district,
+                                                     self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_INCLUDE_ICU),
+                                                     self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_INCLUDE_VACCINATION))
                 if every_graph:
                     graphs.append(self.visualization.infections_graph(district.id))
                 message += "\n\n"
@@ -127,9 +129,6 @@ class ReportGenerator:
                    'Fortschritt</a>.</i>'.format(info_command=self.command_formatter("Info"))
 
         message += '\n\n🧒🏽👦🏻 Sharing is caring 👩🏾🧑🏼 <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a>'
-
-        message += "\n\n<b>Danke für das bisherige Feedback: Ab Samstag geht dieser Beta-Bericht für alle " \
-                   "Nutzer:innen live. Vielen Dank für deine Unterstützung 🙏!</b>"
 
         reports = [BotResponse(message, graphs)]
         return reports
@@ -254,7 +253,7 @@ class ReportGenerator:
                                                 f"die Funktionsweise zu bekommen.")])]
 
     @staticmethod
-    def get_district_summary(district: DistrictData) -> str:
+    def get_district_summary(district: DistrictData, show_icu: bool, show_vaccinations: bool) -> str:
         message = "<b>{name}</b>: {incidence}{incidence_trend}" \
             .format(name=district.name,
                     incidence=format_float(district.incidence),
@@ -290,7 +289,7 @@ class ReportGenerator:
                 district.new_deaths and district.new_deaths < 0):
             message += "\n• <i>Eine negative Differenz zum Vortag ist in der Regel auf eine Korrektur der Daten " \
                        "durch das Gesundheitsamt zurückzuführen</i>"
-        if district.icu_data:
+        if show_icu and district.icu_data:
             message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in " \
                        "{percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen, {clear_beds} frei" \
                 .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
@@ -301,7 +300,7 @@ class ReportGenerator:
                         percent_covid=format_float(district.icu_data.percent_covid()),
                         covid_trend=format_data_trend(district.icu_data.occupied_covid_trend))
 
-        if district.vaccinations:
+        if show_vaccinations and district.vaccinations:
             message += "\n• {no_doses} Neuimpfungen, {vacc_partial}% min. eine, {vacc_full}% beide Impfungen erhalten" \
                 .format(no_doses=format_int(district.vaccinations.doses_diff),
                         vacc_partial=format_float(district.vaccinations.partial_rate * 100),

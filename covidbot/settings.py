@@ -3,7 +3,6 @@ from enum import Enum
 
 
 class BotUserSettings(Enum):
-    BETA = "beta"
     REPORT_GRAPHICS = "report_graphics"
     REPORT_INCLUDE_ICU = "report_include_icu"
     REPORT_INCLUDE_VACCINATION = "report_include_vaccination"
@@ -13,9 +12,7 @@ class BotUserSettings(Enum):
 
     @staticmethod
     def default(setting: BotUserSettings) -> bool:
-        if setting == BotUserSettings.BETA:
-            return False
-        elif setting == BotUserSettings.REPORT_GRAPHICS:
+        if setting == BotUserSettings.REPORT_GRAPHICS:
             return True
         elif setting == BotUserSettings.REPORT_INCLUDE_ICU:
             return True
@@ -30,14 +27,12 @@ class BotUserSettings(Enum):
 
     @staticmethod
     def title(setting: BotUserSettings) -> str:
-        if setting == BotUserSettings.BETA:
-            return "Beta-Modus"
-        elif setting == BotUserSettings.REPORT_GRAPHICS:
+        if setting == BotUserSettings.REPORT_GRAPHICS:
             return "Grafiken im Bericht"
         elif setting == BotUserSettings.REPORT_INCLUDE_ICU:
-            return "Absatz zu Intensivbetten im Bericht"
+            return "Intensivbetten im Bericht"
         elif setting == BotUserSettings.REPORT_INCLUDE_VACCINATION:
-            return "Absatz zu Impfungen im Bericht"
+            return "Impfungen im Bericht"
         elif setting == BotUserSettings.REPORT_EXTENSIVE_GRAPHICS:
             return "Weitere Grafiken im Bericht"
         elif setting == BotUserSettings.FORMATTING:
@@ -47,9 +42,7 @@ class BotUserSettings(Enum):
 
     @staticmethod
     def description(setting: BotUserSettings) -> str:
-        if setting == BotUserSettings.BETA:
-            return "In der Beta Version testen wir aktuell einen verbesserten Bericht."
-        elif setting == BotUserSettings.REPORT_GRAPHICS:
+        if setting == BotUserSettings.REPORT_GRAPHICS:
             return "(De)aktiviert die Grafiken im täglichen Bericht."
         elif setting == BotUserSettings.REPORT_INCLUDE_ICU:
             return "Diese Option zeigt im Bericht einen Überblick über die " \
@@ -69,9 +62,7 @@ class BotUserSettings(Enum):
 
     @staticmethod
     def command_key(setting: BotUserSettings) -> str:
-        if setting == BotUserSettings.BETA:
-            return "beta"
-        elif setting == BotUserSettings.REPORT_GRAPHICS:
+        if setting == BotUserSettings.REPORT_GRAPHICS:
             return "grafik"
         elif setting == BotUserSettings.REPORT_INCLUDE_ICU:
             return "intensiv"
