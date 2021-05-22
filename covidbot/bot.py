@@ -436,18 +436,20 @@ class Bot(object):
         for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
             if item in user.subscribed_reports:
                 cmd = "/berichte"
-                verb = "abbestellen"
+                label_verb = "abbestellen"
+                text_verb = "abzubestellen"
                 status = "✅"
             else:
                 cmd = "/berichte"
-                verb = "abonnieren"
+                label_verb = "abonnieren"
+                text_verb = "zu abonnieren"
                 status = "❎"
             response.message += f"\n\n<b>{message_type_name(item)}:</b> <i>{status}</i>\n{message_type_desc(item)}"
 
-            choices.append(UserChoice(f'{message_type_name(item)} {verb}',
+            choices.append(UserChoice(f'{message_type_name(item)} {label_verb}',
                                       f'{cmd} {message_type_name(item)}',
                                       f'Schreibe {self.command_formatter(f"{cmd[1:].capitalize()} {message_type_name(item)}")} um '
-                                      f'den Bericht zu {message_type_name(item)} {verb}'))
+                                      f'den Bericht zu {message_type_name(item)} {text_verb}'))
         choices.append(self.get_default_userchoice())
         response.choices = choices
         responses.append(response)
