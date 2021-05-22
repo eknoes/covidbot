@@ -429,7 +429,10 @@ class Bot(object):
         user = self.user_manager.get_user(user_id, True)
         response = BotResponse("Du hast {report_count} abonniert. Jeder Bericht enthält individuelle "
                                "Grafiken und ist an deine abonnierten Orte angepasst. Du erhältst deine "
-                               "personalisierten Berichte einmal am Tag: Direkt, wenn neue Daten verfügbar sind."
+                               "personalisierten Berichte einmal am Tag: Direkt, wenn neue Daten verfügbar sind. "
+                               "Sobald du den Impf- oder Intensivbericht aktiviert hast, werden dir diese Daten nicht "
+                               "mehr im Infektionsbericht angezeigt. Dies kannst du danach aber in den Einstellungen "
+                               "ändern!"
                                .format(report_count=format_noun(len(user.subscribed_reports), FormattableNoun.REPORT)))
 
         choices = []
@@ -450,6 +453,8 @@ class Bot(object):
                                       f'{cmd} {message_type_name(item)}',
                                       f'Schreibe {self.command_formatter(f"{cmd[1:].capitalize()} {message_type_name(item)}")} um '
                                       f'den Bericht zu {message_type_name(item)} {text_verb}'))
+        choices.append(UserChoice('Einstellungen', '/einstellungen', 'Schreibe "Einstellungen", um deine '
+                                                                     'Einstellungen zu ändern'))
         choices.append(self.get_default_userchoice())
         response.choices = choices
         responses.append(response)
