@@ -867,7 +867,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             return [BotResponse("Ich verstehe deine Eingabe leider nicht.")] + self.settingsHandler("", user_id)
         else:
             message = "<b>Einstellungen</b>\n"
-            message += "Mit den folgenden Einstellungen kannst du deinen täglichen Bericht konfigurieren: " \
+            message += "Mit den folgenden Einstellungen kannst du deinen Bericht konfigurieren: " \
                        "Beispielsweise kannst du den Absatz zu Intensivbetten oder zu Impfungen ein- und " \
                        "ausschalten. Du kannst auch alle Grafiken abschalten, oder dir mehr Grafiken zusenden lassen." \
                        "\n\nAußerdem kannst du nun separate Intensiv- und Impfberichte abonnieren: " \
@@ -891,6 +891,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                           f"{choice}zuschalten"))
                 message += f"<b>{BotUserSettings.title(setting)}: {current}</b>\n" \
                            f"{BotUserSettings.description(setting)}\n\n"
+            choices.append(UserChoice("Berichte verwalten", '/berichte', f'Schreibe "Berichte", deine '
+                                                                         f'täglichen Berichte zu verwalten'))
             choices.append(self.get_default_userchoice())
             return [BotResponse(message, choices=choices)]
 
