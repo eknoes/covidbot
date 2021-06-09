@@ -324,7 +324,7 @@ def main():
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
             from covidbot.covid_data import CovidData, VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, \
-                RKIUpdater, ICUGermanyUpdater, \ # RKIHistoryUpdater, \
+                RKIUpdater, ICUGermanyUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater
             for updater in [VaccinationGermanyStatesImpfdashboardUpdater(conn), RKIHistoryUpdater(conn), RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
