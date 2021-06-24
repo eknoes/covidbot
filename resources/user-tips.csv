@@ -24,4 +24,4 @@ date;message
 2021-07-01;<b>😴 Bot pausieren!</b> Sende "Pause ein" an den Bot und du bekommst erst wieder einen Infektionsbericht, sobald die 7-Tage-Inzidenz in einem deiner Orte auf 10 steigt
 2021-07-03;<b>📜 Neu: Historie!</b> Du kannst ganz einfach einen Überblick über den bisherigen Verlauf der Pandemie bekommen: Sende einfach einen Ort, und wähle "Historie"
 2021-07-07;<b>🧐 Wusstest du schon,</b> dass du mit dem {Statistik} Befehl ganz einfach einen Überblick über die Anzahl unserer Nutzer:innen und den beliebtesten Orten bekommst?
-2021-07-12;<b>😴 Bot pausieren!</b> Sende "Pause ein" an den Bot und du bekommst erst wieder einen Infektionsbericht, sobald die 7-Tage-Inzidenz in einem deiner Orte auf 10 steigt
+2021-07-12;<b>😴 Bot pausieren!</b> Sende {Pause ein} an den Bot und du bekommst erst wieder einen Infektionsbericht, sobald die 7-Tage-Inzidenz in einem deiner Orte auf 10 steigt!
