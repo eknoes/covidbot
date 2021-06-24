@@ -81,6 +81,7 @@ class Bot(object):
         self.handler_list.append(Handler("einstellungen", self.settingsHandler, True))
         self.handler_list.append(Handler("einstellung", self.settingsHandler, True))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
+        self.handler_list.append(Handler("pause", self.sleepModeHandler, True))
         self.handler_list.append(Handler("daswaralles", self.thatsItHandler, False))
         self.handler_list.append(Handler("noop", lambda x, y: None, False))
         self.handler_list.append(Handler("", self.directHandler, True))
@@ -121,7 +122,8 @@ class Bot(object):
         if user_id and user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
-                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln", "impfungen", "historie"]:
+                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln", "impfungen",
+                                                  "historie"]:
                     user_input += " " + str(state[1])
                 del self.chat_states[user_id]
             elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
@@ -829,7 +831,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             user_input = user_input.split()
             for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
                             BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
-                            BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING]:
+                            BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
+                            BotUserSettings.REPORT_SLEEP_MODE]:
                 if BotUserSettings.command_key(setting).lower() != user_input[0].lower():
                     continue
 
@@ -877,7 +880,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
             for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
                             BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
-                            BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING]:
+                            BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
+                            BotUserSettings.REPORT_SLEEP_MODE]:
                 if self.user_manager.get_user_setting(user_id, setting):
                     choice = "aus"
                     current = "✅"
@@ -898,6 +902,10 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
     def graphicSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_GRAPHICS) + ' ' + user_input,
+                                    user_id)
+
+    def sleepModeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
+        return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_SLEEP_MODE) + ' ' + user_input,
                                     user_id)
 
     def deleteMeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:

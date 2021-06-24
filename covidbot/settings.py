@@ -9,6 +9,7 @@ class BotUserSettings(Enum):
     REPORT_EXTENSIVE_GRAPHICS = "report_extensive_graphics"
     REPORT_ALL_INFECTION_GRAPHS = "report_all_infection_graphics"
     FORMATTING = "disable_fake_format"
+    REPORT_SLEEP_MODE = "report_sleep_mode"
 
     @staticmethod
     def default(setting: BotUserSettings) -> bool:
@@ -23,6 +24,8 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.FORMATTING:
             return True
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
+            return False
+        elif setting == BotUserSettings.REPORT_SLEEP_MODE:
             return False
 
     @staticmethod
@@ -39,6 +42,8 @@ class BotUserSettings(Enum):
             return "Formatierung"
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
             return "Alle Infektionsgrafiken im Bericht"
+        elif setting == BotUserSettings.REPORT_SLEEP_MODE:
+            return "Bericht Pausieren"
 
     @staticmethod
     def description(setting: BotUserSettings) -> str:
@@ -59,6 +64,8 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
             return "Mit dieser Option bekommst du im Bericht eine Neuinfektionsgrafik für jeden " \
                    "abonnierten Ort."
+        elif setting == BotUserSettings.REPORT_SLEEP_MODE:
+            return "Pausiere den Bericht, solange die 7-Tage-Inzidenz in keinem deiner abonnierten Orte über 10 liegt."
 
     @staticmethod
     def command_key(setting: BotUserSettings) -> str:
@@ -74,3 +81,5 @@ class BotUserSettings(Enum):
             return "formatierung"
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
             return "neuinfektion-grafik"
+        elif setting == BotUserSettings.REPORT_SLEEP_MODE:
+            return "pause"
