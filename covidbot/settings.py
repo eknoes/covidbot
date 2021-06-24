@@ -65,7 +65,7 @@ class BotUserSettings(Enum):
             return "Mit dieser Option bekommst du im Bericht eine Neuinfektionsgrafik für jeden " \
                    "abonnierten Ort."
         elif setting == BotUserSettings.REPORT_SLEEP_MODE:
-            return "Pausiere den Bericht, solange die 7-Tage-Inzidenz in keinem deiner abonnierten Orte über 10 liegt."
+            return "Pausiere den Bericht, solange die 7-Tage-Inzidenz in allen von dir abonnierten Orte unter 10 liegt."
 
     @staticmethod
     def command_key(setting: BotUserSettings) -> str:
