@@ -81,7 +81,7 @@ class Bot(object):
         self.handler_list.append(Handler("einstellungen", self.settingsHandler, True))
         self.handler_list.append(Handler("einstellung", self.settingsHandler, True))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
-        self.handler_list.append(Handler("pause", self.sleepModeHandler, True))
+        self.handler_list.append(Handler("sleep", self.sleepModeHandler, False))
         self.handler_list.append(Handler("daswaralles", self.thatsItHandler, False))
         self.handler_list.append(Handler("noop", lambda x, y: None, False))
         self.handler_list.append(Handler("", self.directHandler, True))
@@ -905,8 +905,16 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                     user_id)
 
     def sleepModeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
-        return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_SLEEP_MODE) + ' ' + user_input,
-                                    user_id)
+        new_status = not self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_SLEEP_MODE)
+        self.user_manager.set_user_setting(user_id, BotUserSettings.REPORT_SLEEP_MODE, new_status)
+
+        if new_status:
+            verb = "eingeschaltet"
+        else:
+            verb = "ausgeschaltet"
+
+        return [BotResponse(f"Der Sleep-Modus wurde {verb}. Im Sleep Modus wird dein Bericht pausiert, solange die "
+                            f"Inzidenz in allen deinen Orten unter 10 liegt.")]
 
     def deleteMeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('delete_me').inc()
