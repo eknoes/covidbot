@@ -252,6 +252,9 @@ class Bot(object):
                        'Wenn du Orte abonnierst erhältst du am Morgen einen täglichen Bericht mit den ' \
                        'aktuellen Infektionsdaten in all deinen Orten. Zusätzlich kannst du auch Berichte zu ' \
                        'Impfungen und zur Intensivbettenlage abonnieren.\n\n' \
+                        '<b>😴 Pausieren</b>\n' \
+                       f'Sende {self.command_formatter("sleep")} an den Bot, um deine Berichte zu pausieren, solange ' \
+                       f'die Inzidenz in deinen Orten unter 10 liegt.\n\n' \
                        '<b>💬 Feedback</b>\n' \
                        'Wenn du Ideen, Kritik oder Probleme hast kannst du dich gerne bei uns melden: Sende einfach ' \
                        'eine Nachricht an den Covidbot, die keinen Ort enthält - du wirst dann gefragt, ob diese an ' \
