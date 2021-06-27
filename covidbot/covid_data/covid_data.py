@@ -167,7 +167,7 @@ UNION
                 state_name = state_name.split("-")[1]
 
             # Check, how long incidence is in certain interval
-            threshold_values = [35, 50, 100, 150, 165, 200]
+            threshold_values = [10, 35, 50, 100, 150, 165, 200]
             interval_data = IncidenceIntervalData()
 
             # Get lower threshold
