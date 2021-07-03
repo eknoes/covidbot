@@ -8,9 +8,9 @@ from covidbot.covid_data.updater.updater import Updater
 
 class RValueGermanyUpdater(Updater):
     log = logging.getLogger(__name__)
-    URL = "https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv?__blob" \
-          "=publicationFile"
-    R_VALUE_7DAY_CSV_KEY = "Schätzer_7_Tage_R_Wert"
+    URL = "https://raw.githubusercontent.com/robert-koch-institut/SARS-CoV-2-Nowcasting_und_-R-Schaetzung/main/" \
+          "Nowcast_R_aktuell.csv"
+    R_VALUE_7DAY_CSV_KEY = "PS_7_Tage_R_Wert"
     R_VALUE_7DAY_CSV_KEY_ALT = "Sch�tzer_7_Tage_R_Wert"
 
     def get_last_update(self) -> Optional[datetime]:
@@ -32,7 +32,7 @@ class RValueGermanyUpdater(Updater):
             self.log.debug("Got R-Value Data")
 
             rki_data = response.splitlines()
-            reader = csv.DictReader(rki_data, delimiter=';', )
+            reader = csv.DictReader(rki_data, delimiter=',', )
             district_id = self.get_district_id("Deutschland")
             if district_id is None:
                 raise ValueError("No district_id for Deutschland")
@@ -53,13 +53,13 @@ class RValueGermanyUpdater(Updater):
                     else:
                         r_value = row[self.R_VALUE_7DAY_CSV_KEY]
 
-                    if r_value == '.':
+                    if not r_value:
                         continue
                     else:
-                        r_value = float(r_value.replace(",", "."))
+                        r_value = float(r_value)
 
                     try:
-                        r_date = datetime.strptime(row['Datum'], "%d.%m.%Y").date()
+                        r_date = datetime.strptime(row['Datum'], "%Y-%m-%d").date()
                     except ValueError as e:
                         self.log.error(f"Could not get date of string {row['Datum']}", exc_info=e)
                         continue
