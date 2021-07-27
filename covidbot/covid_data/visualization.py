@@ -304,9 +304,12 @@ class Visualization:
             ax1.legend(loc="upper left")
 
             # One tick every 7 days for easier comparison
-            formatter = mdates.DateFormatter("%a, %d.%m.")
-            ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=x_data[-1].weekday()))
-            ax1.xaxis.set_major_formatter(formatter)
+            if len(x_data) < 120:
+                formatter = mdates.DateFormatter("%a, %d.%m.")
+                ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=x_data[-1].weekday()))
+                ax1.xaxis.set_major_formatter(formatter)
+            else:
+                self.set_monthly_formatter(ax1)
             ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 
             # Save to file
