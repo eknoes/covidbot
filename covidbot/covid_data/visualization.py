@@ -328,12 +328,17 @@ class Visualization:
         line_colors = ['#393991', '#916047', '#6D6DDF', '#45291B', '#539140']
 
         i = 0
+        max_y = None
         for district in district_ids:
             district_name, current_date, x_data, y_data = self._get_covid_data("incidence", district, duration)
             data.append({'name': district_name, 'x': x_data, 'y': y_data, 'date': current_date,
                          'linestyle': line_styles[i % len(line_styles)],
                          'linecolor': line_colors[i % len(line_colors)]})
             i += 1
+            if max_y is None:
+                max_y = max(y_data)
+            else:
+                max_y = max(y_data + [max_y])
 
         current_date = data[0].get('date')
         identifier = reduce(lambda x, y: x + y, map(str, district_ids))
@@ -369,7 +374,11 @@ class Visualization:
         self.set_weekday_formatter(ax1, current_date.weekday())
 
         # Draw thresholds
-        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([0, 35, 50, 100, 150, 165, 200, 300, 400, 500]))
+        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500]
+        if max_y < 100:
+            y_locations.append(10)
+        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(y_locations))
+
         minor_ticks_base = 10
         ax1.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(base=minor_ticks_base))
         plt.grid(which="minor", linestyle="--", color="#cccccc")
@@ -404,7 +413,10 @@ class Visualization:
             self.set_monthly_formatter(ax1)
 
         # Draw thresholds
-        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([0, 35, 50, 100, 150, 165, 200, 300, 400, 500]))
+        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500]
+        if max(y_data) < 100:
+            y_locations.append(10)
+        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(y_locations))
 
         minor_ticks_base = 10
         ax1.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(base=minor_ticks_base))
