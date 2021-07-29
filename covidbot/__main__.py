@@ -12,7 +12,7 @@ import prometheus_client
 from mysql.connector import connect, MySQLConnection
 from prometheus_client import Info
 
-from covidbot.covid_data import CovidData, Visualization
+from covidbot.covid_data import CovidData, Visualization, RKIHistoryUpdater
 from covidbot.interfaces.facebook_interface import FacebookInterface
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
@@ -328,7 +328,7 @@ def main():
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater
             for updater in [VaccinationGermanyStatesImpfdashboardUpdater(conn), RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
-                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
+                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn), RKIHistoryUpdater(conn)]:
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")

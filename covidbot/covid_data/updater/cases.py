@@ -188,9 +188,9 @@ class RKIHistoryUpdater(RKIUpdater):
                         updated = updated + timedelta(days=1)
                         self.log.info(f"Got historic case data for {updated}")
                         delta = (date.today() - updated)
-                        if delta.days <= 7:
-                            self.log.info(f"Skip {updated}")
-                            break
+                        #if delta.days <= 7:
+                        #    self.log.info(f"Skip {updated}")
+                        #    break
                         continue
 
                     district_id = field
