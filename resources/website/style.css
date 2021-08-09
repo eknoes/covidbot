@@ -1,7 +1,13 @@
 body {
-   font-family: 'Lato', sans-serif;
+	font-family: 'Lato', sans-serif;
 	background: #fff;
 	margin: 0;
+	color: #999;
+}
+
+
+#sommerpause {
+	color: #000;
 }
 
 h1, h2, h3 {
