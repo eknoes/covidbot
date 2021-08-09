@@ -328,7 +328,7 @@ def main():
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater
             for updater in [VaccinationGermanyStatesImpfdashboardUpdater(conn), RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
-                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn), RKIHistoryUpdater(conn)]:
+                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
