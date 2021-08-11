@@ -63,6 +63,7 @@ class Bot(object):
         self.handler_list.append(Handler("feedback", self.feedbackHandler, False))
         self.handler_list.append(Handler("info", self.infoHandler, False))
         self.handler_list.append(Handler("impfungen", self.vaccHandler, True))
+        self.handler_list.append(Handler("impfung", self.vaccHandler, True))
         self.handler_list.append(Handler("abo", self.subscribeHandler, True))
         self.handler_list.append(Handler("berichte", self.subscribeReportHandler, True))
         self.handler_list.append(Handler("regeln", self.rulesHandler, True))
