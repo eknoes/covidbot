@@ -356,9 +356,9 @@ def main():
         if config.has_section("FACEBOOK"):
             platforms.append("facebook")
 
-        #for platform in platforms:
-        #    with MessengerBotSetup(platform, config, setup_logs=False, monitoring=False) as iface:
-        #        asyncio.run(iface.send_unconfirmed_reports())
+        for platform in platforms:
+            with MessengerBotSetup(platform, config, setup_logs=False, monitoring=False) as iface:
+                asyncio.run(iface.send_unconfirmed_reports())
 
     elif args.daily_report:
         # Setup Logging
