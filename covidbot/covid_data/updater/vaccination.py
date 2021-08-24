@@ -82,9 +82,6 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
 
     def update(self) -> bool:
         last_update = self.get_last_update()
-        district_id = self.get_district_id("Hessen")
-        if district_id is None:
-            raise ValueError("No district_id for Hessen")
 
         if last_update and datetime.now() - last_update < timedelta(hours=12):
             return False
@@ -111,7 +108,7 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
                     if not district_id:
                         raise ValueError(f"No district_id found for {row['code']}")
                     updated = data_date - timedelta(days=1)
-                    cursor.execute("SELECT id FROM covid_vaccinations WHERE date = %s AND district_id=%s",
+                    cursor.execute("SELECT id FROM covid_vaccinations WHERE date=DATE(%s) AND district_id=%s",
                                    [updated, district_id])
                     if cursor.fetchone():
                         continue
