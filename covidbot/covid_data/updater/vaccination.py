@@ -105,7 +105,7 @@ class VaccinationGermanyStatesImpfdashboardUpdater(Updater):
             with self.connection.cursor() as cursor:
                 for row in reader:
                     district_id = self.get_district_id(row['code'])
-                    if not district_id:
+                    if district_id is None:
                         raise ValueError(f"No district_id found for {row['code']}")
                     updated = data_date - timedelta(days=1)
                     cursor.execute("SELECT id FROM covid_vaccinations WHERE date=DATE(%s) AND district_id=%s",
