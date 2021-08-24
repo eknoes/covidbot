@@ -241,7 +241,7 @@ class Visualization:
             plt.xticks(x_data, rotation='30', ha='right')
             ax1.fill_between(x_data, y_data, color="#1fa2de", zorder=3)
 
-            self.set_weekday_formatter(ax1, now.weekday())
+            self.set_monthly_formatter(ax1)
 
             # Save to file
             plt.savefig(filepath, format='JPEG')
