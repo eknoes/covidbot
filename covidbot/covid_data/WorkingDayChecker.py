@@ -20,7 +20,7 @@ class WorkingDayChecker:
         return state.upper() in self.holidays
 
     def check_holiday(self, for_day: datetime.date, state: Optional[str] = "NATIONAL") -> bool:
-        if not state:
+        if not state or state == "BUND":
             state = "NATIONAL"
         state = state.upper()
 
