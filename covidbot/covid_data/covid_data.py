@@ -184,7 +184,7 @@ UNION
                     lower_date = record['date']
                     interval_data.lower_threshold_days = 0
                     interval_data.lower_threshold_working_days = 0
-                    while lower_date <= date.today():
+                    while lower_date < date.today():
                         interval_data.lower_threshold_days += 1
                         if not self.working_day_checker.check_holiday(lower_date, state_name):
                             interval_data.lower_threshold_working_days += 1
@@ -204,7 +204,7 @@ UNION
                     upper_date = record['date']
                     interval_data.upper_threshold_days = 0
                     interval_data.upper_threshold_working_days = 0
-                    while upper_date <= date.today():
+                    while upper_date < date.today():
                         interval_data.upper_threshold_days += 1
                         if not self.working_day_checker.check_holiday(upper_date, state_name):
                             interval_data.upper_threshold_working_days += 1
