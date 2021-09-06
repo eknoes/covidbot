@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 signald() {
-            echo "$1" | nc -U /var/run/signald/signald.sock | jq 'select(.type != "version")'
+            echo "$1" | timeout 3 nc -U /var/run/signald/signald.sock | jq 'select(.type != "version")'
 }
 
 if [ -z "$1" ]
