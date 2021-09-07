@@ -8,7 +8,7 @@ signald() {
 }
 
 signald '{"type": "list_accounts"}' | jq -r 'select(.type == "account_list") | .data.accounts[].username' | while read username; do
-        signald "{\"type\": \"get_identities\", \"username\": \"$username\"}" | jq -rc ".data.identities[] | select(.trust_level == \"UNTRUSTED\") | \"{\\\"type\\\": \\\"trust\\\", \\\"fingerprint\\\": \\\"\(.fingerprint)\\\", \\\"recipientAddress\\\": \(.address), \\\"username\\\": \\\"$username\\\"}\"" | while read trustcmd; do
+        signald "{\"type\": \"get_identities\", \"username\": \"$username\"}" | jq -rc ".data.identities[] | select(.trust_level == \"UNTRUSTED\") | \"{\\\"type\\\": \\\"trust\\\", \\\"safety_number\\\": \\\"\(.safety_number)\\\", \\\"address\\\": {\\\"number\\\": \(.address.number), \\\"account\\\": \\\"$username\\\", \\\"trust_level\\\": \\\"TRUSTED_UNVERIFIED\\\"}\"" | while read trustcmd; do
                 signald "$trustcmd"
                 signald "{\"type\": \"send\", \"version\": \"v1\", \"recipientAddress\": {\"number\": \"$SIGNAL_ADMIN_PHONE\"}, \"username\": \"$username\", \"messageBody\": \"$(echo $trustcmd | jq -r .recipientAddress.number) ($(echo $trustcmd | jq -r .recipientAddress.uuid)) new fingerprint is $(echo $trustcmd | jq -r .fingerprint)\"}"
         done
