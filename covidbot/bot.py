@@ -82,6 +82,8 @@ class Bot(object):
         self.handler_list.append(Handler("einstellungen", self.settingsHandler, True))
         self.handler_list.append(Handler("einstellung", self.settingsHandler, True))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
+        self.handler_list.append(Handler("hospitalisierungen", self.hospitalRateHandler, True))
+        self.handler_list.append(Handler("hospitalisierung", self.hospitalRateHandler, True))
         self.handler_list.append(Handler("sleep", self.sleepModeHandler, False))
         self.handler_list.append(Handler("daswaralles", self.thatsItHandler, False))
         self.handler_list.append(Handler("noop", lambda x, y: None, False))
@@ -305,6 +307,7 @@ class Bot(object):
                         '<b>Weiteres</b>\n'
                         '• Sende {vacc_command} für eine Übersicht der Impfsituation\n'
                         '• Sende {report_command} für deinen Tagesbericht\n'
+                        '• Sende {hospital_command} für die Hospitalisierungsinformationen\n'
                         '• Sende {abo_command} um deine abonnierten Orte einzusehen\n'
                         '• Sende {privacy_command} erhältst du mehr Informationen zum Datenschutz und die '
                         'Möglichkeit, alle deine Daten bei uns zu löschen\n'
@@ -315,6 +318,7 @@ class Bot(object):
                 .format(stat_command=self.command_formatter('Statistik'),
                         report_command=self.command_formatter('Bericht'),
                         abo_command=self.command_formatter('Abo'),
+                        hospital_command=self.command_formatter('Hospitalisierung'),
                         privacy_command=self.command_formatter('Datenschutz'),
                         help_command=self.command_formatter('Hilfe'), info_command=self.command_formatter('Info'),
                         vacc_command=self.command_formatter('Impfungen'),
@@ -351,11 +355,12 @@ class Bot(object):
                             "Dieser Wert ist eine Schätzung und wird aus den geschätzten Infektionszahlen der letzten Tage berechnet."
                             "\n\nMehr Informationen zum R-Wert stellt bspw. die <a href='https://www.tagesschau.de/faktenfinder/r-wert-101.html'>Tagesschau</a> zur Verfügung.\n"
                             "\n\n<b>Woher kommen die Daten?</b>\n"
-                            "Unsere Quellen sind die maschinenlesbaren Daten des RKI zu den Impfungen, Neuinfektionen und "
+                            "Unsere Quellen sind die maschinenlesbaren Daten des RKI zu den Impfungen, Neuinfektionen, Hospitalisierungen und "
                             "dem R-Wert. Die Daten über die Intensivbetten kommen DIVI-Intensivregister, die aktuellen Regeln "
                             "werden vom Kompetenzzentrum Tourismus des Bundes bezogen.\n"
                             "Diese laden wir automatisiert an den folgenden Stellen herunter:\n"
                             "• <a href='https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv'>Neuinfektionen</a>\n"
+                            "• <a href='https://github.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland'>Hospitalisierungen</a>\n"
                             "• <a href='https://services.arcgis.com/OLiydejKCZTGhvWg/ArcGIS/rest/services/Impftabelle_mit_Zweitimpfungen/FeatureServer/0'>Impfdaten für Deutschland und die Bundesländer</a>\n"
                             "• <a href='https://impfdashboard.de'>Impfdaten für Deutschland</a>\n"
                             "• <a href='https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv'>R-Wert</a>\n"
@@ -415,6 +420,31 @@ class Bot(object):
             graphs.append(self.visualization.vaccination_speed_graph(location.id))
 
         return [BotResponse(message, graphs)]
+
+    def hospitalRateHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
+        BOT_COMMAND_COUNT.labels('hospital-rate').inc()
+
+        if user_input:
+            location = self.parseLocationInput(user_input, help_command="Hospitalisierungen")
+            if location and type(location) != District:
+                return location
+            location = self.covid_data.get_district_data(location.id)
+        else:
+            location = self.covid_data.get_district_data(0)
+
+        if not location.hospitalisation and location.parent is not None:
+            location = self.covid_data.get_district_data(location.parent)
+
+        if not location.hospitalisation:
+            return [BotResponse(
+                f"Leider kann für {location.name} keine Hospitalisierungsübersicht generiert werden, da keine Daten vorliegen.")]
+
+        message = self.report_generator.get_hospital_text(location)
+        message += '\n\n<i>Daten vom Robert Koch-Institut (RKI), Lizenz: CC BY 4.0. ' \
+                   'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
+            .format(info_command=self.command_formatter("Info"))
+
+        return [BotResponse(message)]
 
     def subscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('report-types').inc()
@@ -750,6 +780,9 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         choices.append(UserChoice("Daten anzeigen", f'/daten {location.id}',
                                   'Schreibe "Daten", um die aktuellen Daten zu erhalten'))
+        choices.append(UserChoice("Hospitalisierungen anzeigen", f'/hospitalisierungen {location.id}',
+                                  'Schreibe "Hospitalisierungen", um einen Überblick über die Krankenhauseinweisungen '
+                                  'zu erhalten'))
         choices.append(UserChoice('Regeln anzeigen', f'/regeln {location.id}',
                                   'Schreibe "Regeln", um die aktuell gültigen Regeln zu erhalten'))
         choices.append(UserChoice('Impfdaten anzeigen', f'/Impfungen {location.id}',

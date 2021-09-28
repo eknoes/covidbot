@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 
 class TrendValue(Enum):
@@ -82,10 +82,17 @@ class IncidenceIntervalData:
 
 
 @dataclass
+class HospitalizationAgeGroup:
+    cases: int
+    incidence: float
+    age_group: str
+
+
+@dataclass
 class Hospitalization:
     cases: int
     incidence: float
-
+    groups: Optional[List[HospitalizationAgeGroup]] = None
 
 @dataclass
 class DistrictFacts:

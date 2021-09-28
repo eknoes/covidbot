@@ -7,7 +7,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot.covid_data.WorkingDayChecker import WorkingDayChecker
 from covidbot.covid_data.models import District, VaccinationData, RValueData, DistrictData, ICUData, \
-    RuleData, IncidenceIntervalData, DistrictFacts, Hospitalization
+    RuleData, IncidenceIntervalData, DistrictFacts, Hospitalization, HospitalizationAgeGroup
 from covidbot.metrics import LOCATION_DB_LOOKUP
 from covidbot.utils import get_trend
 
@@ -300,10 +300,16 @@ UNION
 
     def get_hospitalisation_data(self, district_id: int) -> Optional[Hospitalization]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT number, incidence FROM hospitalisation WHERE district_id=%s AND age LIKE \'00+\' ORDER BY date DESC LIMIT 1', [district_id])
+            cursor.execute('SELECT number, incidence, date FROM hospitalisation WHERE district_id=%s AND age LIKE \'00+\' ORDER BY date DESC LIMIT 1', [district_id])
             data = cursor.fetchone()
             if data:
-                return Hospitalization(data['number'], data['incidence'])
+                result = Hospitalization(data['number'], data['incidence'])
+                groups = []
+                cursor.execute('SELECT number, incidence, age FROM hospitalisation WHERE district_id=%s AND age NOT LIKE \'00+\' AND date=%s ORDER BY age', [district_id, data['date']])
+                for row in cursor.fetchall():
+                    groups.append(HospitalizationAgeGroup(row['number'], row['incidence'], row['age']))
+                result.groups = groups
+                return result
 
     def get_country_data(self) -> DistrictData:
         return self.get_district_data(0)
@@ -391,7 +397,7 @@ class CovidDatabaseCreator:
             # Hospitalisation information
             cursor.execute('CREATE TABLE IF NOT EXISTS hospitalisation (id INTEGER PRIMARY KEY AUTO_INCREMENT,'
                            'district_id INTEGER, date DATE, age VARCHAR(5), number INTEGER,'
-                           'incidence INTEGER, updated DATETIME DEFAULT NOW(),'
+                           'incidence DECIMAL(5,2) UNSIGNED, updated DATETIME DEFAULT NOW(),'
                            'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, date, age))')
 
             # Rule Data

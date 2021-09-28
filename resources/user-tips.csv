@@ -25,3 +25,6 @@ date;message
 2021-07-03;<b>📜 Neu: Historie!</b> Du kannst ganz einfach einen Überblick über den bisherigen Verlauf der Pandemie bekommen: Sende einfach einen Ort, und wähle "Historie"
 2021-07-07;<b>🧐 Wusstest du schon,</b> dass du mit dem {Statistik} Befehl ganz einfach einen Überblick über die Anzahl unserer Nutzer:innen und den beliebtesten Orten bekommst?
 2021-07-01;<b>😴 Bot pausieren!</b> Sende {Sleep} an den Bot und du bekommst keine Infektionsberichte, solange die 7-Tage-Inzidenz in deinen Orte unter 10 liegt
+2021-10-02;<b>🚑 Neu: Hospitalisierungen!</b> Du kannst ganz einfach einen Überblick über die Anzahl der Krankenhausaufnahmen nach Altersgruppe bekommen: Sende einfach einen Ort, und wähle "Hospitalisierung"
+2021-09-30;<b>🚑 Im Bericht: Hospitalisierungen!</b> Um diese auch im Bericht angezeigt zu bekommen musst du ein Bundesland abonniert haben, da diese Daten nur auf Länder- und Bundesebene verfügbar sind!
+2021-10-02;<b>🚑 Neu: Hospitalisierungen!</b> Du kannst ganz einfach einen Überblick über die Anzahl der Krankenhausaufnahmen nach Altersgruppe bekommen: Sende einfach einen Ort, und wähle "Hospitalisierung"

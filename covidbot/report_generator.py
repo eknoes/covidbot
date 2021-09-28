@@ -301,7 +301,7 @@ class ReportGenerator:
             message += "\n• <i>Eine negative Differenz zum Vortag ist in der Regel auf eine Korrektur der Daten " \
                        "durch das Gesundheitsamt zurückzuführen</i>"
         if district.hospitalisation:
-            message += "\n• Hospitalisierungsinzidenz {incidence}, {cases} Krankenhausfälle insgesamt".format(incidence=district.hospitalisation.incidence, cases=district.hospitalisation.cases)
+            message += "\n• Hospitalisierungsinzidenz {incidence}, {cases} Krankenhauseinweisungen in den letzten 7 Tagen".format(incidence=district.hospitalisation.incidence, cases=district.hospitalisation.cases)
         if show_icu and district.icu_data:
             message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in " \
                        "{percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen, {clear_beds} frei" \
@@ -361,6 +361,9 @@ class ReportGenerator:
             message += " Der zuletzt gemeldete 7-Tage-R-Wert beträgt {r_value}{r_trend}." \
                 .format(r_value=format_float(district.r_value.r_value_7day),
                         r_trend=format_data_trend(district.r_value.r_trend))
+
+        if district.hospitalisation:
+            message += "Die Hospitalisierungsinzidenz liegt bei {incidence}, insgesamt wurden in den letzten 7 Tagen {cases} in Verbindung mit Covid-19 ins Krankenhaus eingewiesen.".format(incidence=format_float(district.hospitalisation.incidence), cases=format_noun(district.hospitalisation.cases, FormattableNoun.PERSONS))
         message += "\n\n"
         message = message.format(name=district.name,
                                  new_cases=format_noun(district.new_cases, FormattableNoun.NEW_INFECTIONS),
@@ -385,6 +388,21 @@ class ReportGenerator:
                f" mit COVID-19, davon müssen {format_noun(district.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
                f" ({format_float(district.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
                f"Insgesamt gibt es {format_noun(district.icu_data.total_beds(), FormattableNoun.BEDS)} in {district.name}.\n\n"
+
+    @staticmethod
+    def get_hospital_text(district: DistrictData) -> str:
+        text = "<b>🤒 Hospitalisierungen ({name})</b>\n" \
+               "In den letzten 7 Tagen gab es {count} Einweisungen ins Krankenhaus in Verbindung zu COVID-19. Die " \
+               "Hospitalisierungsinzidenz, also die Krankenhauseinweisungen der letzten 7 Tage je 100.000 Einwohner:innen " \
+               "beträgt somit {incidence}.\n\n".format(name=district.name, count=format_int(district.hospitalisation.cases),
+                                                       incidence=format_float(district.hospitalisation.incidence))
+
+        if district.hospitalisation.groups:
+            text += "<b>Altersgruppen:</b>\n"
+        for group in district.hospitalisation.groups:
+            text += "• {age} Jahre: {incidence} ({number} Einweisungen)\n".format(age=group.age_group, incidence=format_float(group.incidence), number=format_int(group.cases))
+
+        return text
 
     @staticmethod
     def get_vacc_text(district: DistrictData, show_name: bool = False) -> str:
