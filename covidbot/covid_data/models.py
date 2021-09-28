@@ -82,6 +82,12 @@ class IncidenceIntervalData:
 
 
 @dataclass
+class Hospitalization:
+    cases: int
+    incidence: float
+
+
+@dataclass
 class DistrictFacts:
     highest_incidence: Optional[float] = None
     highest_incidence_date: Optional[date] = None
@@ -112,3 +118,4 @@ class DistrictData(District):
     icu_data: Optional[ICUData] = None
     rules: Optional[RuleData] = None
     facts: Optional[DistrictFacts] = None
+    hospitalisation: Optional[Hospitalization] = None

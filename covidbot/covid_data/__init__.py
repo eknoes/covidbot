@@ -6,4 +6,5 @@ from .updater.rules import RulesGermanyUpdater
 from .updater.rvalue import RValueGermanyUpdater
 from .updater.utils import clean_district_name
 from .updater.vaccination import VaccinationGermanyImpfdashboardUpdater, VaccinationGermanyStatesImpfdashboardUpdater
+from .updater.hospital import HospitalisationRKIUpdater
 from .visualization import Visualization

@@ -325,10 +325,10 @@ def main():
         with get_connection(config, autocommit=False) as conn:
             from covidbot.covid_data import CovidData, VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, \
                 RKIUpdater, ICUGermanyUpdater, \
-                RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater
+                RulesGermanyUpdater, ICUGermanyHistoryUpdater, VaccinationGermanyStatesImpfdashboardUpdater, HospitalisationRKIUpdater
             for updater in [VaccinationGermanyStatesImpfdashboardUpdater(conn), RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
-                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn)]:
+                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn), HospitalisationRKIUpdater(conn)]:
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
