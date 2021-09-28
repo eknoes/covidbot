@@ -301,7 +301,7 @@ class ReportGenerator:
             message += "\n• <i>Eine negative Differenz zum Vortag ist in der Regel auf eine Korrektur der Daten " \
                        "durch das Gesundheitsamt zurückzuführen</i>"
         if district.hospitalisation:
-            message += "\n• Hospitalisierungsinzidenz {incidence}, {cases} Krankenhauseinweisungen in den letzten 7 Tagen".format(incidence=district.hospitalisation.incidence, cases=district.hospitalisation.cases)
+            message += "\n• Hospitalisierungsinzidenz {incidence}, {cases} Krankenhauseinweisungen in den letzten 7 Tagen".format(incidence=format_float(district.hospitalisation.incidence), cases=format_int(district.hospitalisation.cases))
         if show_icu and district.icu_data:
             message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in " \
                        "{percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen, {clear_beds} frei" \
