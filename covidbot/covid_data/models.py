@@ -27,7 +27,6 @@ class VaccinationData:
     date: date
     last_update: datetime
     avg_speed: Optional[int] = None
-    avg_days_to_finish: Optional[int] = None
     doses_diff: Optional[int] = None
 
 

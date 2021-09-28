@@ -413,8 +413,7 @@ class ReportGenerator:
                "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in " \
                "{name} mindestens eine Impfdosis erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits " \
                "vollständig geimpft. " \
-               "Bei dem Impftempo der letzten 7 Tage werden {vacc_speed} Dosen pro Tag verabreicht und in " \
-               "{vacc_days_to_finish} Tagen wäre die gesamte Bevölkerung vollständig geschützt." \
+               "Bei dem Impftempo der letzten 7 Tage werden {vacc_speed} Dosen pro Tag verabreicht." \
                "\n\n" \
             .format(name=district.name, rate_full=format_float(district.vaccinations.full_rate * 100),
                     rate_partial=format_float(district.vaccinations.partial_rate * 100),
@@ -422,8 +421,7 @@ class ReportGenerator:
                     vacc_full=format_int(district.vaccinations.vaccinated_full),
                     date=district.vaccinations.date.strftime("%d.%m.%Y"),
                     doses=format_int(district.vaccinations.doses_diff),
-                    vacc_speed=format_int(district.vaccinations.avg_speed),
-                    vacc_days_to_finish=format_int(district.vaccinations.avg_days_to_finish))
+                    vacc_speed=format_int(district.vaccinations.avg_speed))
 
     @staticmethod
     def sort_districts(districts: List[DistrictData]) -> List[DistrictData]:

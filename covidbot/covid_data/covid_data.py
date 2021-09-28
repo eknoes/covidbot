@@ -243,12 +243,6 @@ UNION
                     record = cursor.fetchone()
                     if record:
                         vaccination_data.avg_speed = int(record['avg_7day'])
-                        population_to_be_vaccinated = 2 * record['population'] - (
-                                vaccination_data.vaccinated_full + vaccination_data.vaccinated_partial)
-                        if vaccination_data.avg_speed > 0:
-                            vaccination_data.avg_days_to_finish = math.ceil(
-                                population_to_be_vaccinated / vaccination_data.avg_speed)
-
                     return vaccination_data
 
     def get_icu_data(self, district_id: int) -> Optional[ICUData]:

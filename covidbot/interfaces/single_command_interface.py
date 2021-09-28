@@ -126,8 +126,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
             [self.viz.vaccination_graph(0)]),
             BotResponse(f"Es wurden {format_int(vacc.doses_diff)} Impfdosen verimpft. In den letzten 7 Tagen wurden "
                         f"durchschnittlich täglich {format_int(vacc.avg_speed)} "
-                        f"Dosen verabreicht, bei diesem Tempo wäre die gesamte Bevölkerung in Deutschland "
-                        f"in {format_int(vacc.avg_days_to_finish)} Tagen komplett geimpft.",
+                        f"Dosen verabreicht.",
                         [self.viz.vaccination_speed_graph(0)])]
         return responses
 
