@@ -490,7 +490,50 @@ class Visualization:
         self.teardown_plt(fig)
         return filepath
 
-    def hospitalization_incidence_graph(self, district_id: int, duration: int = 60) -> str:
+    def hospitalization_graph(self, district_id: int, duration: int, x_data, y_data, title, ax_name, prefix, current_date, quadratic):
+        filepath = os.path.abspath(
+            os.path.join(self.graphics_dir, f"{prefix}-{current_date.isoformat()}-{district_id}-{duration}-{quadratic}.jpg"))
+
+        # Do not draw new graphic if its cached
+        if not self.disable_cache and os.path.isfile(filepath):
+            CACHED_GRAPHS.labels(type=prefix).inc()
+            return filepath
+        CREATED_GRAPHS.labels(type=prefix).inc()
+        fig, ax1 = self.setup_plot(current_date, title, ax_name, quadratic)
+        # Plot data
+        plt.xticks(x_data, rotation='30', ha='right')
+
+        # Add a label every 7 days
+        plt.plot(x_data, y_data, color="#1fa2de", zorder=3, linewidth=3)
+        ax1.set_ylim(bottom=0)
+        ax1.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
+        if duration < 70:
+            self.set_weekday_formatter(ax1, current_date.weekday())
+        else:
+            self.set_monthly_formatter(ax1)
+
+        # Save to file
+        plt.savefig(filepath, format='JPEG')
+        self.teardown_plt(fig)
+        return filepath
+
+    def hospitalization_cases_graph(self, district_id: int, duration: int = 60, quadratic: bool = False) -> str:
+        x_data, y_data, current_date = [], [], None
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT date, number, updated FROM hospitalisation WHERE age=\'00+\' AND district_id=%s ORDER BY date DESC LIMIT %s', [district_id, duration])
+            for row in cursor.fetchall():
+                x_data.append(row['date'])
+                y_data.append(row['number'])
+
+                if current_date is None or current_date < row['updated']:
+                    current_date = row['updated']
+
+            cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [district_id])
+            district_name = cursor.fetchone()['county_name']
+
+            return self.hospitalization_graph(district_id, duration, x_data, y_data, f"Hospitalisierungsinzidenz {district_name}", "7-Tage-Hospitalisierungsinzidenz", "hospital-incidence", current_date, quadratic)
+
+    def hospitalization_incidence_graph(self, district_id: int, duration: int = 60, quadratic: bool = False) -> str:
         x_data, y_data, current_date = [], [], None
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT date, incidence, updated FROM hospitalisation WHERE age=\'00+\' AND district_id=%s ORDER BY date DESC LIMIT %s', [district_id, duration])
@@ -504,42 +547,9 @@ class Visualization:
             cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [district_id])
             district_name = cursor.fetchone()['county_name']
 
-        filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"hospital-incidence-{current_date.isoformat()}-{district_id}-{duration}.jpg"))
-
-        # Do not draw new graphic if its cached
-        if not self.disable_cache and os.path.isfile(filepath):
-            CACHED_GRAPHS.labels(type='hospital-incidence').inc()
-            return filepath
-        CREATED_GRAPHS.labels(type='hospital-incidence').inc()
-
-        fig, ax1 = self.setup_plot(current_date, f"Hospitalisierungs-Inzidenz {district_name}", "7-Tage-Hospitalisierungs-Inzidenz")
-        # Plot data
-        plt.xticks(x_data, rotation='30', ha='right')
-
-        # Add a label every 7 days
-        plt.plot(x_data, y_data, color="#1fa2de", zorder=3, linewidth=3)
-        ax1.set_ylim(bottom=0)
-
-        if duration < 70:
-            self.set_weekday_formatter(ax1, current_date.weekday())
-        else:
-            self.set_monthly_formatter(ax1)
-
-        # Draw thresholds
-        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500]
-        if max(y_data) < 100:
-            y_locations.append(10)
-        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(y_locations))
-
-        minor_ticks_base = 10
-        ax1.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(base=minor_ticks_base))
-        plt.grid(which="minor", linestyle="--", color="#cccccc")
-
-        # Save to file
-        plt.savefig(filepath, format='JPEG')
-        self.teardown_plt(fig)
-        return filepath
+        return self.hospitalization_graph(district_id, duration, x_data, y_data,
+                                          f"Krankenhauseinweisungen der letzten 7 Tage in {district_name}",
+                                          "7-Tage-Hospitalisierungen", "hospital-cases", current_date, quadratic)
 
     def _get_covid_data(self, field: str, district_id: int, duration: int) -> Tuple[
         str, datetime.date, List[datetime.date], List[int]]:

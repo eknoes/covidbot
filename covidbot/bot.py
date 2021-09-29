@@ -444,7 +444,8 @@ class Bot(object):
                    'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
             .format(info_command=self.command_formatter("Info"))
 
-        return [BotResponse(message, [self.visualization.hospitalization_incidence_graph(location.id)])]
+        return [BotResponse(message, [self.visualization.hospitalization_incidence_graph(location.id),
+                                      self.visualization.hospitalization_cases_graph(location.id)])]
 
     def subscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('report-types').inc()

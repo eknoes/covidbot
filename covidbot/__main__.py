@@ -410,7 +410,7 @@ def main():
                 raise e
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"), disable_cache=True)
-        vis.hospitalization_incidence_graph(0)
+        vis.hospitalization_cases_graph(0)
 
 
 if __name__ == "__main__":
