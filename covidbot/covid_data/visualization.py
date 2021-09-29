@@ -532,7 +532,7 @@ class Visualization:
             district_name = cursor.fetchone()['county_name']
 
             return self.hospitalization_graph(district_id, duration, x_data, y_data,
-                                              f"Krankenhauseinweisungen der letzten 7 Tage in {district_name}",
+                                              f"Summe der Krankenhauseinweisungen der letzten 7 Tage {district_name}",
                                               "7-Tage-Hospitalisierungen", "hospital-cases", current_date, quadratic)
 
     def hospitalization_incidence_graph(self, district_id: int, duration: int = 60, quadratic: bool = False) -> str:
