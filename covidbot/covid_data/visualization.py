@@ -531,7 +531,9 @@ class Visualization:
             cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [district_id])
             district_name = cursor.fetchone()['county_name']
 
-            return self.hospitalization_graph(district_id, duration, x_data, y_data, f"Hospitalisierungsinzidenz {district_name}", "7-Tage-Hospitalisierungsinzidenz", "hospital-incidence", current_date, quadratic)
+            return self.hospitalization_graph(district_id, duration, x_data, y_data,
+                                              f"Krankenhauseinweisungen der letzten 7 Tage in {district_name}",
+                                              "7-Tage-Hospitalisierungen", "hospital-cases", current_date, quadratic)
 
     def hospitalization_incidence_graph(self, district_id: int, duration: int = 60, quadratic: bool = False) -> str:
         x_data, y_data, current_date = [], [], None
@@ -546,10 +548,8 @@ class Visualization:
 
             cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [district_id])
             district_name = cursor.fetchone()['county_name']
+            return self.hospitalization_graph(district_id, duration, x_data, y_data, f"Hospitalisierungsinzidenz {district_name}", "7-Tage-Hospitalisierungsinzidenz", "hospital-incidence", current_date, quadratic)
 
-        return self.hospitalization_graph(district_id, duration, x_data, y_data,
-                                          f"Krankenhauseinweisungen der letzten 7 Tage in {district_name}",
-                                          "7-Tage-Hospitalisierungen", "hospital-cases", current_date, quadratic)
 
     def _get_covid_data(self, field: str, district_id: int, duration: int) -> Tuple[
         str, datetime.date, List[datetime.date], List[int]]:
