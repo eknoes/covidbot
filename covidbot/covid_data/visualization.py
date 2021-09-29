@@ -499,7 +499,7 @@ class Visualization:
             CACHED_GRAPHS.labels(type=prefix).inc()
             return filepath
         CREATED_GRAPHS.labels(type=prefix).inc()
-        fig, ax1 = self.setup_plot(current_date, title, ax_name, quadratic)
+        fig, ax1 = self.setup_plot(current_date, title, ax_name, "Robert-Koch-Institut", quadratic)
         # Plot data
         plt.xticks(x_data, rotation='30', ha='right')
 
