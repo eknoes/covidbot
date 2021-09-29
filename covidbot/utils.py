@@ -223,6 +223,7 @@ class MessageType(Enum):
     CASES_GERMANY = "cases-germany"
     VACCINATION_GERMANY = "vaccinations-germany"
     ICU_GERMANY = "icu-germany"
+    HOSPITALIZATION_GERMANY = "hospitalization-germany"
     USER_MESSAGE = "user-message"
 
 

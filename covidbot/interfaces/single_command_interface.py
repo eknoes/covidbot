@@ -9,7 +9,7 @@ from typing import List, Union, Optional, Iterable
 import pytz
 
 from covidbot.covid_data import CovidData, Visualization
-from covidbot.covid_data.models import ICUData, VaccinationData
+from covidbot.covid_data.models import ICUData, VaccinationData, Hospitalization
 from covidbot.location_service import LocationService
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, DISCARDED_MESSAGE_COUNT, SINGLE_COMMAND_RESPONSE_TIME
@@ -116,6 +116,18 @@ class SingleCommandInterface(MessengerInterface, ABC):
                 self.log.info("Tweet was successfully sent")
                 self.user_manager.add_sent_report(self.user_id, MessageType.ICU_GERMANY)
 
+        # Hospitalization
+        last_update = self.user_manager.get_last_updates(self.user_id, MessageType.HOSPITALIZATION_GERMANY)
+        if not last_update or last_update.date() < germany.hospitalisation.date:
+            posts = self.get_hospitalization_shortpost(germany.hospitalisation)
+
+            if self.no_write:
+                print(f"Sent message: {posts[0].message}")
+                self.user_manager.add_sent_report(self.user_id, MessageType.HOSPITALIZATION_GERMANY)
+            elif self.write_message(posts):
+                self.log.info("Tweet was successfully sent")
+                self.user_manager.add_sent_report(self.user_id, MessageType.HOSPITALIZATION_GERMANY)
+
     def get_vaccination_shortpost(self, vacc: VaccinationData) -> List[BotResponse]:
         responses = [BotResponse(
             f"💉 Das {self.bmg_name} hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht.\n\n"
@@ -128,6 +140,15 @@ class SingleCommandInterface(MessengerInterface, ABC):
                         f"durchschnittlich täglich {format_int(vacc.avg_speed)} "
                         f"Dosen verabreicht.",
                         [self.viz.vaccination_speed_graph(0)])]
+        return responses
+
+    def get_hospitalization_shortpost(self, hospitalization: Hospitalization) -> List[BotResponse]:
+        responses = [BotResponse(
+            f"🤒 Das {self.rki_name} hat die Hospitalisierungsdaten für den {hospitalization.date.strftime('%d. %B %Y')} veröffentlicht:\n\n"
+            f"Die 7-Tage-Hospitalisierungsinzidenz liegt bei {format_float(hospitalization.incidence)} und in den "
+            f"letzten 7 Tagen wurden {format_noun(hospitalization.cases, FormattableNoun.PERSONS)} ins Krankenhaus "
+            f"aufgenommen. #COVID19",
+            [self.viz.hospitalization_incidence_graph(0), self.viz.hospitalization_cases_graph(0)])]
         return responses
 
     def get_icu_shortpost(self, icu: ICUData) -> List[BotResponse]:
@@ -172,6 +193,9 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
         if district.icu_data:
             graphs.append(self.viz.icu_graph(district_id))
+
+        if district.hospitalisation:
+            graphs.append(self.viz.hospitalization_incidence_graph(district_id))
 
         return [BotResponse(tweet_text, graphs)]
 

@@ -91,6 +91,7 @@ class HospitalizationAgeGroup:
 class Hospitalization:
     cases: int
     incidence: float
+    date: datetime
     groups: Optional[List[HospitalizationAgeGroup]] = None
 
 @dataclass

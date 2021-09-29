@@ -297,7 +297,7 @@ UNION
             cursor.execute('SELECT number, incidence, date FROM hospitalisation WHERE district_id=%s AND age LIKE \'00+\' ORDER BY date DESC LIMIT 1', [district_id])
             data = cursor.fetchone()
             if data:
-                result = Hospitalization(data['number'], data['incidence'])
+                result = Hospitalization(data['number'], data['incidence'], data['date'])
                 groups = []
                 cursor.execute('SELECT number, incidence, age FROM hospitalisation WHERE district_id=%s AND age NOT LIKE \'00+\' AND date=%s ORDER BY age', [district_id, data['date']])
                 for row in cursor.fetchall():
