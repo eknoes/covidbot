@@ -255,7 +255,7 @@ class Bot(object):
                        'Wenn du Orte abonnierst erhältst du am Morgen einen täglichen Bericht mit den ' \
                        'aktuellen Infektionsdaten in all deinen Orten. Zusätzlich kannst du auch Berichte zu ' \
                        'Impfungen und zur Intensivbettenlage abonnieren.\n\n' \
-                        '<b>😴 Pausieren</b>\n' \
+                       '<b>😴 Pausieren</b>\n' \
                        f'Sende {self.command_formatter("sleep")} an den Bot, um deine Berichte zu pausieren, solange ' \
                        f'die Inzidenz in deinen Orten unter 10 liegt.\n\n' \
                        '<b>💬 Feedback</b>\n' \
@@ -693,6 +693,14 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                  new_deaths=format_int(current_data.new_deaths),
                                  new_deaths_trend=format_data_trend(current_data.deaths_trend),
                                  total_deaths=format_int(current_data.total_deaths))
+
+        hospitalization = current_data.hospitalisation
+        if not hospitalization and current_data.parent:
+            hospitalization = self.covid_data.get_district_data(current_data.parent)
+
+        if hospitalization:
+            message += self.report_generator.get_hospital_text(hospitalization)
+            message += "\n\n"
 
         if current_data.icu_data:
             message += self.report_generator.get_icu_text(current_data)
