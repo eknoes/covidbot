@@ -17,7 +17,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot import utils
 from covidbot.metrics import CACHED_GRAPHS, CREATED_GRAPHS
-from covidbot.utils import format_int
+from covidbot.utils import format_int, format_float
 
 
 class Visualization:
@@ -506,11 +506,14 @@ class Visualization:
         # Add a label every 7 days
         plt.plot(x_data, y_data, color="#1fa2de", zorder=3, linewidth=3)
         ax1.set_ylim(bottom=0)
-        ax1.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
         if duration < 70:
             self.set_weekday_formatter(ax1, current_date.weekday())
         else:
             self.set_monthly_formatter(ax1)
+
+        ax1.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=5, steps=[1, 2, 4, 5, 10]))
+        if(max(y_data) <= 20):
+            ax1.yaxis.set_major_formatter(lambda x, _: format_float(x))
 
         # Save to file
         plt.savefig(filepath, format='JPEG')
