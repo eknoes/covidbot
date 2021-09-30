@@ -241,7 +241,8 @@ class SingleCommandInterface(MessengerInterface, ABC):
                         self.user_manager.set_message_answered(chat_id)
                     elif self.write_message(response, reply_obj=mention.reply_obj):
                         self.user_manager.set_message_answered(chat_id)
-
+                    else:
+                        continue
                     if mention.sent:
                         if type(mention.sent) == datetime.datetime:
                             try:
