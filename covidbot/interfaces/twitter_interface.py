@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Iterable
 
 from TwitterAPI import TwitterAPI, TwitterResponse, TwitterConnectionError
@@ -62,15 +62,15 @@ class TwitterInterface(SingleCommandInterface):
                         upload_resp = self.twitter.request('media/upload', None, {'media': f.read()})
                         if upload_resp.status_code != 200:
                             if upload_resp.status_code == 429: # Rate Limit exceed
-                                sleep_time = upload_resp.headers.get("Retry-After", 30)
-                                self.log.warning(upload_resp.headers)
-                                self.log.warning(f"Rate Limit exceed: Wait for {sleep_time}s")
-                                time.sleep(sleep_time)
-                                return False
-                            else:
-                                raise ValueError(
-                                    f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
-                                    f"{upload_resp.text}")
+                                reset_time = upload_resp.headers.get("x-rate-limit-reset")
+                                if reset_time:
+                                    sleep_time = (datetime.now() - datetime.fromtimestamp(reset_time, timezone.utc)).seconds
+                                    self.log.warning(f"Rate Limit exceed: Wait for reset in {sleep_time}s")
+                                    time.sleep(sleep_time)
+                                    return False
+                            raise ValueError(
+                                f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
+                                f"{upload_resp.text}")
 
                         media_ids.append(upload_resp.json()['media_id'])
 
@@ -88,15 +88,16 @@ class TwitterInterface(SingleCommandInterface):
                 SENT_MESSAGE_COUNT.inc()
                 self.update_twitter_metrics(response)
                 reply_obj = response.json()['id']
-                return True
             else:
                 if upload_resp.status_code == 429:  # Rate Limit exceed
-                    sleep_time = upload_resp.headers.get("Retry-After", 30)
-                    self.log.warning(f"Rate Limit exceed: Wait for {sleep_time}s")
-                    time.sleep(sleep_time)
-                    return False
+                    reset_time = upload_resp.headers.get("x-rate-limit-reset")
+                    if reset_time:
+                        sleep_time = (datetime.now() - datetime.fromtimestamp(reset_time, timezone.utc)).seconds
+                        self.log.warning(f"Rate Limit exceed: Wait for reset in {sleep_time}s")
+                        time.sleep(sleep_time)
+                        return False
                 raise ValueError(f"Could not send tweet: API Code {response.status_code}: {response.text}")
-        return False
+        return True
 
     @staticmethod
     def update_twitter_metrics(response: TwitterResponse):
