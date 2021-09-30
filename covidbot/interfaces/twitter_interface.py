@@ -64,7 +64,8 @@ class TwitterInterface(SingleCommandInterface):
                             if upload_resp.status_code == 429: # Rate Limit exceed
                                 reset_time = int(upload_resp.headers.get("x-rate-limit-reset", 0))
                                 if reset_time:
-                                    sleep_time = (datetime.now(tz=timezone.utc) - datetime.fromtimestamp(reset_time, timezone.utc)).seconds
+                                    sleep_time = (datetime.fromtimestamp(reset_time, timezone.utc) - datetime.now(
+                                        tz=timezone.utc)).seconds
                                     self.log.warning(f"Rate Limit exceed: Wait for reset in {sleep_time}s")
                                     time.sleep(sleep_time)
                                     return False
@@ -92,8 +93,7 @@ class TwitterInterface(SingleCommandInterface):
                 if upload_resp.status_code == 429:  # Rate Limit exceed
                     reset_time = int(upload_resp.headers.get("x-rate-limit-reset", 0))
                     if reset_time:
-                        sleep_time = (datetime.now(tz=timezone.utc) - datetime.fromtimestamp(reset_time,
-                                                                                             timezone.utc)).seconds
+                        sleep_time = (datetime.fromtimestamp(reset_time, timezone.utc) - datetime.now(tz=timezone.utc)).seconds
                         self.log.warning(f"Rate Limit exceed: Wait for reset in {sleep_time}s")
                         time.sleep(sleep_time)
                         return False
