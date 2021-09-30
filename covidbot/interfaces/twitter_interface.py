@@ -63,8 +63,10 @@ class TwitterInterface(SingleCommandInterface):
                         if upload_resp.status_code != 200:
                             if upload_resp.status_code == 429: # Rate Limit exceed
                                 sleep_time = upload_resp.headers.get("Retry-After", 30)
+                                self.log.warning(upload_resp.headers)
                                 self.log.warning(f"Rate Limit exceed: Wait for {sleep_time}s")
                                 time.sleep(sleep_time)
+                                return False
                             else:
                                 raise ValueError(
                                     f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
@@ -86,13 +88,15 @@ class TwitterInterface(SingleCommandInterface):
                 SENT_MESSAGE_COUNT.inc()
                 self.update_twitter_metrics(response)
                 reply_obj = response.json()['id']
+                return True
             else:
                 if upload_resp.status_code == 429:  # Rate Limit exceed
                     sleep_time = upload_resp.headers.get("Retry-After", 30)
                     self.log.warning(f"Rate Limit exceed: Wait for {sleep_time}s")
                     time.sleep(sleep_time)
+                    return False
                 raise ValueError(f"Could not send tweet: API Code {response.status_code}: {response.text}")
-        return True
+        return False
 
     @staticmethod
     def update_twitter_metrics(response: TwitterResponse):

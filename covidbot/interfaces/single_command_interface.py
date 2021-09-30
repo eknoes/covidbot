@@ -238,8 +238,10 @@ class SingleCommandInterface(MessengerInterface, ABC):
                     if self.no_write:
                         print(mention.message)
                         print(f"Reply to {chat_id}: {response[0].message}")
-                    else:
-                        self.write_message(response, reply_obj=mention.reply_obj)
+                        self.user_manager.set_message_answered(chat_id)
+                    elif self.write_message(response, reply_obj=mention.reply_obj):
+                        self.user_manager.set_message_answered(chat_id)
+
                     if mention.sent:
                         if type(mention.sent) == datetime.datetime:
                             try:
@@ -251,7 +253,6 @@ class SingleCommandInterface(MessengerInterface, ABC):
                             self.log.warning(f"mention.sent has the wrong type {type(mention.sent)}: {mention.sent}")
                 else:
                     DISCARDED_MESSAGE_COUNT.inc()
-                self.user_manager.set_message_answered(chat_id)
             time.sleep(self.sleep_sec)
 
     def find_district(self, query: str) -> Optional[int]:
