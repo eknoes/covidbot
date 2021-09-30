@@ -188,8 +188,9 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"{format_noun(district.new_deaths, FormattableNoun.DEATHS)} " \
                      f"{format_data_trend(district.deaths_trend)} in {district.name} gemeldet. Die #Inzidenz liegt " \
                      f"bei {format_float(district.incidence)} {format_data_trend(district.incidence_trend)}. #COVID19"
-        if district.vaccinations:
-            graphs.append(self.viz.vaccination_graph(district_id))
+        # Maximum of 4 graphs allowed
+        #if district.vaccinations:
+        #    graphs.append(self.viz.vaccination_graph(district_id))
 
         if district.icu_data:
             graphs.append(self.viz.icu_graph(district_id))

@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 from datetime import datetime
 from typing import List, Optional, Iterable
 
@@ -60,9 +61,14 @@ class TwitterInterface(SingleCommandInterface):
                     with open(file, "rb") as f:
                         upload_resp = self.twitter.request('media/upload', None, {'media': f.read()})
                         if upload_resp.status_code != 200:
-                            raise ValueError(
-                                f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
-                                f"{upload_resp.text}")
+                            if upload_resp.status_code == 429: # Rate Limit exceed
+                                sleep_time = upload_resp.headers.get("Retry-After", 30)
+                                self.log.warning(f"Rate Limit exceed: Wait for {sleep_time}s")
+                                time.sleep(sleep_time)
+                            else:
+                                raise ValueError(
+                                    f"Could not upload graph to twitter. API response {upload_resp.status_code}: "
+                                    f"{upload_resp.text}")
 
                         media_ids.append(upload_resp.json()['media_id'])
 
@@ -81,6 +87,10 @@ class TwitterInterface(SingleCommandInterface):
                 self.update_twitter_metrics(response)
                 reply_obj = response.json()['id']
             else:
+                if upload_resp.status_code == 429:  # Rate Limit exceed
+                    sleep_time = upload_resp.headers.get("Retry-After", 30)
+                    self.log.warning(f"Rate Limit exceed: Wait for {sleep_time}s")
+                    time.sleep(sleep_time)
                 raise ValueError(f"Could not send tweet: API Code {response.status_code}: {response.text}")
         return True
 
