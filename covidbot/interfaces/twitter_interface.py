@@ -113,7 +113,9 @@ class TwitterInterface(SingleCommandInterface):
     def get_mentions(self) -> Iterable[SingleArgumentRequest]:
         try:
             with API_RESPONSE_TIME.labels(platform='twitter').time():
-                response = self.twitter.request(f"statuses/mentions_timeline", params={'tweet_mode': 'extended'})
+                response = self.twitter.request(f"statuses/mentions_timeline", params={'tweet_mode': 'extended',
+                                                                                       'count': 200,
+                                                                                       'trim_user': 1})
         except TwitterConnectionError as e:
             self.log.warning(f"TwitterConnectionError while fetching mentions: {e}", exc_info=e)
             API_ERROR.inc()
