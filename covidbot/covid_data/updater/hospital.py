@@ -39,6 +39,9 @@ class HospitalisationRKIUpdater(Updater):
                     if district_id is None:
                         raise ValueError(f"No district_id for {row['Bundesland']}")
 
+                    if row['7T_Hospitalisierung_Faelle'] == "NA" or row['7T_Hospitalisierung_Inzidenz'] == "NA":
+                        continue
+
                     updated = datetime.fromisoformat(row['Datum'])
                     cursor.execute("SELECT id FROM hospitalisation WHERE date = %s AND district_id=%s AND age=%s",
                                    [updated, district_id, row['Altersgruppe']])

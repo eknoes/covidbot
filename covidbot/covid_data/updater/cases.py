@@ -46,7 +46,13 @@ class RKIUpdater(Updater):
         new_updated = None
         for feature in json_data:
             row = feature['attributes']
-            new_updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr").date()
+
+            # RKI sometimes has empty date strings
+            if row['last_update'] != "":
+                new_updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr").date()
+            elif new_updated is None:
+                continue
+
             if last_update and new_updated <= last_update or now < new_updated:
                 # Do not take data from future, important for testing
                 continue
