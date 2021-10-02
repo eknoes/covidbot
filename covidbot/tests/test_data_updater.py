@@ -4,7 +4,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import RKIUpdater, RValueGermanyUpdater, \
-    VaccinationGermanyImpfdashboardUpdater, VaccinationGermanyStatesImpfdashboardUpdater
+    VaccinationGermanyImpfdashboardUpdater, VaccinationGermanyStatesImpfdashboardUpdater, HospitalisationRKIUpdater
 from covidbot.covid_data import clean_district_name, ICUGermanyUpdater, RulesGermanyUpdater
 
 
@@ -25,6 +25,7 @@ class TestUpdater(TestCase):
             c.execute("DROP TABLE covid_data")
             c.execute("DROP TABLE covid_vaccinations")
             c.execute("DROP TABLE covid_r_value")
+            c.execute("DROP TABLE hospitalisation")
             c.execute("DROP TABLE district_rules")
             c.execute("DROP TABLE icu_beds")
 
@@ -40,6 +41,8 @@ class TestUpdater(TestCase):
         self.assertTrue(updater.update(), "ICUGermanyUpdater should update")
         updater = RulesGermanyUpdater(self.conn)
         self.assertTrue(updater.update(), "RulesGermanyUpdater should update")
+        updater = HospitalisationRKIUpdater(self.conn)
+        self.assertTrue(updater.update(), "HospitalisationRKIUpdater should update")
 
     def test_clean_district_name(self):
         expected = [("Region Hannover", "Hannover"), ("LK Kassel", "Kassel"),

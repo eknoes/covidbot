@@ -4,8 +4,9 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyStatesImpfdashboardUpdater, RValueGermanyUpdater, \
-    Visualization, DistrictData
+from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyStatesImpfdashboardUpdater, \
+    RValueGermanyUpdater, \
+    Visualization, DistrictData, HospitalisationRKIUpdater
 from covidbot.bot import Bot
 from covidbot.user_manager import UserManager
 
@@ -22,6 +23,7 @@ class TestBot(TestCase):
             cursor.execute("DROP TABLE IF EXISTS covid_data;")
             cursor.execute("DROP TABLE IF EXISTS covid_vaccinations;")
             cursor.execute("DROP TABLE IF EXISTS covid_r_value;")
+            cursor.execute("DROP TABLE IF EXISTS hospitalisation;")
             cursor.execute("DROP TABLE IF EXISTS icu_beds;")
             cursor.execute("DROP TABLE IF EXISTS district_rules;")
             cursor.execute("DROP TABLE IF EXISTS county_alt_names;")
@@ -31,6 +33,7 @@ class TestBot(TestCase):
         RKIUpdater(cls.conn).update()
         VaccinationGermanyStatesImpfdashboardUpdater(cls.conn).update()
         RValueGermanyUpdater(cls.conn).update()
+        HospitalisationRKIUpdater(cls.conn).update()
 
         cls.user_manager = UserManager("unittest", cls.conn, activated_default=True)
         cls.data = CovidData(connection=cls.conn)

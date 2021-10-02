@@ -26,6 +26,7 @@ class CovidDataTest(TestCase):
             cursor.execute("TRUNCATE TABLE covid_data;")
             cursor.execute("TRUNCATE TABLE covid_vaccinations;")
             cursor.execute("TRUNCATE TABLE covid_r_value;")
+            cursor.execute("TRUNCATE TABLE hospitalisation;")
             cursor.execute("TRUNCATE TABLE icu_beds;")
             cursor.execute("TRUNCATE TABLE district_rules;")
             cursor.execute("TRUNCATE TABLE county_alt_names;")
