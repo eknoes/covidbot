@@ -284,8 +284,10 @@ class Visualization:
                 return filepath
             CREATED_GRAPHS.labels(type='vaccinations').inc()
 
-            cursor.execute("SELECT county_name FROM counties WHERE rs=%s", [district_id])
-            district_name = cursor.fetchone()['county_name']
+            cursor.execute("SELECT county_name, population FROM counties WHERE rs=%s", [district_id])
+            row = cursor.fetchone()
+            district_name = row['county_name']
+            population = row['population']
 
             if district_id == 0:
                 source = "impfdashboard.de"
@@ -311,6 +313,14 @@ class Visualization:
             else:
                 self.set_monthly_formatter(ax1)
             ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
+
+            secaxy = ax1.secondary_yaxis('right', functions=(lambda x: x / population * 100, lambda x: x * population / 100))
+            secaxy.set_ylabel('Anteil der Bevölkerung')
+            for direction in ["left", "right", "bottom", "top"]:
+                secaxy.spines[direction].set_visible(False)
+            secaxy.yaxis.set_major_formatter(lambda x, y: f'{int(x)}%')
+
+            ax1.tick_params(axis="y", labelright=False)
 
             # Save to file
             plt.savefig(filepath, format='JPEG')
@@ -537,7 +547,6 @@ class Visualization:
         secaxy.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 
         ax1.tick_params(axis="y", labelright=False)
-
         # Save to file
         plt.savefig(filepath, format='JPEG')
         self.teardown_plt(fig)
