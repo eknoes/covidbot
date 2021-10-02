@@ -148,7 +148,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
             f"Die 7-Tage-Hospitalisierungsinzidenz liegt bei {format_float(hospitalization.incidence)} und in den "
             f"letzten 7 Tagen wurden {format_noun(hospitalization.cases, FormattableNoun.PERSONS)} ins Krankenhaus "
             f"aufgenommen. #COVID19",
-            [self.viz.hospitalization_incidence_graph(0)])]
+            [self.viz.hospitalization_graph(0)])]
         return responses
 
     def get_icu_shortpost(self, icu: ICUData) -> List[BotResponse]:

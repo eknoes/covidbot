@@ -83,6 +83,7 @@ class ReportGenerator:
         for c in countries:
             if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_GRAPHICS):
                 graphs.append(self.visualization.infections_graph(c.id))
+                graphs.append(self.visualization.hospitalization_graph(c.id))
 
         country = None
         if countries:

@@ -444,8 +444,7 @@ class Bot(object):
                    'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
             .format(info_command=self.command_formatter("Info"))
 
-        return [BotResponse(message, [self.visualization.hospitalization_incidence_graph(location.id),
-                                      self.visualization.hospitalization_cases_graph(location.id)])]
+        return [BotResponse(message, [self.visualization.hospitalization_graph(location.id)])]
 
     def subscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('report-types').inc()
@@ -702,7 +701,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         if hospitalization_district.hospitalisation:
             message += self.report_generator.get_hospital_text(hospitalization_district)
             message += "\n\n"
-            graphics.append(self.visualization.hospitalization_incidence_graph(hospitalization_district.id))
+            graphics.append(self.visualization.hospitalization_graph(hospitalization_district.id))
 
         if current_data.icu_data:
             message += self.report_generator.get_icu_text(current_data)

@@ -490,16 +490,32 @@ class Visualization:
         self.teardown_plt(fig)
         return filepath
 
-    def hospitalization_graph(self, district_id: int, duration: int, x_data, y_data, title, ax_name, prefix, current_date, quadratic):
+    def hospitalization_graph(self, district_id: int, duration: int = 60, quadratic: bool = False) -> str:
+        x_data, y_data, current_date = [], [], None
+        with self.connection.cursor(dictionary=True) as cursor:
+            cursor.execute('SELECT date, incidence, updated FROM hospitalisation WHERE age=\'00+\' AND district_id=%s ORDER BY date DESC LIMIT %s', [district_id, duration])
+            for row in cursor.fetchall():
+                x_data.append(row['date'])
+                y_data.append(row['incidence'])
+
+                if current_date is None or current_date < row['updated']:
+                    current_date = row['updated']
+
+            cursor.execute('SELECT county_name, population FROM counties WHERE rs=%s', [district_id])
+            row = cursor.fetchone()
+            district_name = row['county_name']
+            population = row['population']
+
         filepath = os.path.abspath(
-            os.path.join(self.graphics_dir, f"{prefix}-{current_date.isoformat()}-{district_id}-{duration}-{quadratic}.jpg"))
+            os.path.join(self.graphics_dir, f"hospitalization-{current_date.isoformat()}-{district_id}-{duration}-{quadratic}.jpg"))
 
         # Do not draw new graphic if its cached
         if not self.disable_cache and os.path.isfile(filepath):
-            CACHED_GRAPHS.labels(type=prefix).inc()
+            CACHED_GRAPHS.labels(type="hospitalization").inc()
             return filepath
-        CREATED_GRAPHS.labels(type=prefix).inc()
-        fig, ax1 = self.setup_plot(current_date, title, ax_name, "Robert-Koch-Institut", quadratic)
+        CREATED_GRAPHS.labels(type="hospitalization").inc()
+
+        fig, ax1 = self.setup_plot(current_date, f"Hospitalisierung {district_name}", "7-Tage-Hospitalisierungsinzidenz", "Robert-Koch-Institut", quadratic)
         # Plot data
         plt.xticks(x_data, rotation='30', ha='right')
 
@@ -512,47 +528,20 @@ class Visualization:
             self.set_monthly_formatter(ax1)
 
         ax1.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=5, steps=[1, 2, 4, 5, 10]))
-        if(max(y_data) <= 20):
-            ax1.yaxis.set_major_formatter(lambda x, _: format_float(x))
+        ax1.yaxis.set_major_formatter(lambda x, _: format_float(x))
+
+        secaxy = ax1.secondary_yaxis('right', functions=(lambda x: population * x / 100000, lambda x: x / population * 100000))
+        secaxy.set_ylabel('7-Tage-Hospitalisierungen')
+        for direction in ["left", "right", "bottom", "top"]:
+            secaxy.spines[direction].set_visible(False)
+        secaxy.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
+
+        ax1.tick_params(axis="y", labelright=False)
 
         # Save to file
         plt.savefig(filepath, format='JPEG')
         self.teardown_plt(fig)
         return filepath
-
-    def hospitalization_cases_graph(self, district_id: int, duration: int = 60, quadratic: bool = False) -> str:
-        x_data, y_data, current_date = [], [], None
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT date, number, updated FROM hospitalisation WHERE age=\'00+\' AND district_id=%s ORDER BY date DESC LIMIT %s', [district_id, duration])
-            for row in cursor.fetchall():
-                x_data.append(row['date'])
-                y_data.append(row['number'])
-
-                if current_date is None or current_date < row['updated']:
-                    current_date = row['updated']
-
-            cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [district_id])
-            district_name = cursor.fetchone()['county_name']
-
-            return self.hospitalization_graph(district_id, duration, x_data, y_data,
-                                              f"Summe der Krankenhauseinweisungen der letzten 7 Tage {district_name}",
-                                              "7-Tage-Hospitalisierungen", "hospital-cases", current_date, quadratic)
-
-    def hospitalization_incidence_graph(self, district_id: int, duration: int = 60, quadratic: bool = False) -> str:
-        x_data, y_data, current_date = [], [], None
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT date, incidence, updated FROM hospitalisation WHERE age=\'00+\' AND district_id=%s ORDER BY date DESC LIMIT %s', [district_id, duration])
-            for row in cursor.fetchall():
-                x_data.append(row['date'])
-                y_data.append(row['incidence'])
-
-                if current_date is None or current_date < row['updated']:
-                    current_date = row['updated']
-
-            cursor.execute('SELECT county_name FROM counties WHERE rs=%s', [district_id])
-            district_name = cursor.fetchone()['county_name']
-            return self.hospitalization_graph(district_id, duration, x_data, y_data, f"Hospitalisierungsinzidenz {district_name}", "7-Tage-Hospitalisierungsinzidenz", "hospital-incidence", current_date, quadratic)
-
 
     def _get_covid_data(self, field: str, district_id: int, duration: int) -> Tuple[
         str, datetime.date, List[datetime.date], List[int]]:
