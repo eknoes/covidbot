@@ -28,6 +28,7 @@ class TestSubscriptionManager(TestCase):
             cursor.execute("DROP TABLE IF EXISTS user_feedback;")
             cursor.execute("DROP TABLE IF EXISTS bot_user_sent_reports;")
             cursor.execute("DROP TABLE IF EXISTS report_subscriptions;")
+            cursor.execute("DROP TABLE IF EXISTS hospitalisation;")
             cursor.execute("DROP TABLE IF EXISTS user_responses;")
             cursor.execute("DROP TABLE IF EXISTS user_ticket_tag;")
             cursor.execute("DROP TABLE IF EXISTS bot_user;")
@@ -155,6 +156,7 @@ class TestSubscriptionManager(TestCase):
             cursor.execute("TRUNCATE TABLE covid_r_value;")
             cursor.execute("TRUNCATE TABLE icu_beds;")
             cursor.execute("TRUNCATE TABLE district_rules;")
+            cursor.execute("TRUNCATE TABLE hospitalisation;")
             # noinspection SqlWithoutWhere
             cursor.execute("DELETE FROM county_alt_names")
             # noinspection SqlWithoutWhere
