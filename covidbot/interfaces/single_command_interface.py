@@ -196,7 +196,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
             graphs.append(self.viz.icu_graph(district_id))
 
         if district.hospitalisation:
-            graphs.append(self.viz.hospitalization_incidence_graph(district_id))
+            graphs.append(self.viz.hospitalization_graph(district_id))
 
         return [BotResponse(tweet_text, graphs)]
 
