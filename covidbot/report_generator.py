@@ -368,7 +368,7 @@ class ReportGenerator:
                         r_trend=format_data_trend(district.r_value.r_trend))
 
         if district.hospitalisation:
-            message += " Die Hospitalisierungsinzidenz liegt bei {incidence}. In den letzten 7 Tagen wurden {cases} wegen Covid19 ins Krankenhaus eingewiesen.".format(incidence=format_float(district.hospitalisation.incidence), cases=format_noun(district.hospitalisation.cases, FormattableNoun.PERSONS))
+            message += " Die Hospitalisierungsinzidenz liegt bei {incidence}. In den letzten 7 Tagen wurden {cases} mit Covid19 ins Krankenhaus eingewiesen.".format(incidence=format_float(district.hospitalisation.incidence), cases=format_noun(district.hospitalisation.cases, FormattableNoun.PERSONS))
         message += "\n\n"
         message = message.format(name=district.name,
                                  new_cases=format_noun(district.new_cases, FormattableNoun.NEW_INFECTIONS),
@@ -397,7 +397,7 @@ class ReportGenerator:
     @staticmethod
     def get_hospital_text(district: DistrictData) -> str:
         text = "<b>🤒 Hospitalisierungen in {name}</b>\n" \
-               "In den letzten 7 Tagen wurden {count} Personen wegen Covid19 ins Krankenhaus eingewiesen. Die " \
+               "In den letzten 7 Tagen wurden {count} Personen mit Covid19 ins Krankenhaus eingewiesen. Die " \
                "Hospitalisierungsinzidenz, also die Krankenhauseinweisungen pro 100.000 Einwohner:innen in den letzten 7 Tagen" \
                "beträgt somit {incidence}.\n\n".format(name=district.name, count=format_int(district.hospitalisation.cases),
                                                        incidence=format_float(district.hospitalisation.incidence))
