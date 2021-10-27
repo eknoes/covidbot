@@ -148,6 +148,8 @@ class RKIHistoryUpdater(RKIUpdater):
     DEATHS_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/deaths-rki-by-ags.csv"
     CASES_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/cases-rki-by-ags.csv"
     INCIDENCE_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/more-data/7di-rki-by-ags.csv"
+    max_delta = 1
+    min_delta = 10
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
@@ -157,8 +159,6 @@ class RKIHistoryUpdater(RKIUpdater):
                 return row[0]
 
     def update(self) -> bool:
-        if self.get_last_update() is not None and self.get_last_update().date() == date.today():
-            return False
         updated = False
         if self.update_cases():
             self.log.info("New case data available")
@@ -194,7 +194,7 @@ class RKIHistoryUpdater(RKIUpdater):
                         updated = updated + timedelta(days=1)
                         self.log.info(f"Got historic case data for {updated}")
                         delta = (date.today() - updated)
-                        if delta.days <= 0:
+                        if not (self.max_delta <= delta.days <= self.min_delta):
                             self.log.info(f"Skip {updated}")
                             break
                         continue
@@ -232,7 +232,7 @@ class RKIHistoryUpdater(RKIUpdater):
                         updated = updated + timedelta(days=1)
                         self.log.info(f"Got historic deaths data for {updated}")
                         delta = (date.today() - updated)
-                        if delta.days <= 0:
+                        if not (self.max_delta <= delta.days <= self.min_delta):
                             self.log.info(f"Skip {updated}")
                             break
                         continue
@@ -272,7 +272,7 @@ class RKIHistoryUpdater(RKIUpdater):
                         self.log.info(f"Got historic incidence data for {updated}")
 
                         delta = (date.today() - updated)
-                        if delta.days <= 0:
+                        if not (self.max_delta <= delta.days <= self.min_delta):
                             self.log.info(f"Skip {updated}")
                             break
                         continue

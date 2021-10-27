@@ -271,6 +271,8 @@ def main():
                         help='Platform that should be used', type=str, action='store')
     parser.add_argument('--check-updates', help='Run platform independent jobs, such as checking for new data',
                         action='store_true')
+    parser.add_argument('--archive-update', help='Fetch all covid data',
+                        action='store_true')
     parser.add_argument('--daily-report', help='Send daily reports if available, requires --platform',
                         action='store_true')
     parser.add_argument('--message-user', help='Send a message to users', action='store_true')
@@ -292,7 +294,7 @@ def main():
     else:
         logging_level = logging.INFO
 
-    if not args.platform and not (args.check_updates or args.message_user or args.graphic_test):
+    if not args.platform and not (args.check_updates or args.message_user or args.graphic_test or args.archive_update):
         print("Exactly one platform has to be set, e.g. --platform telegram")
         exit(1)
 
@@ -411,6 +413,36 @@ def main():
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"), disable_cache=True)
         vis.vaccination_graph(0)
+    elif args.archive_update:
+        # Setup Logging
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, "updater.log"))
+
+        # Log also to stdout
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
+        if not args.verbose:
+            stream_handler.setLevel(logging.ERROR)
+        logging.getLogger().addHandler(stream_handler)
+
+        logging.info("### Start Archive Update ###")
+        with get_connection(config, autocommit=False) as conn:
+            from covidbot.covid_data import RKIHistoryUpdater
+
+            try:
+                if RKIHistoryUpdater(conn).update():
+                    logging.warning(f"Got new data from {RKIHistoryUpdater.__class__.__name__}")
+                    with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
+                        asyncio.run(
+                            telegram.send_message_to_users(f"Got new data from {RKIHistoryUpdater.__class__.__name__}",
+                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
+            except Exception as error:
+                # Data did not make it through plausibility check
+                logging.exception(f"Exception happened on Data Update with {RKIHistoryUpdater.__class__.__name__}: {error}",
+                                  exc_info=error)
+                with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
+                    asyncio.run(telegram.send_message_to_users(f"Exception happened on Data Update with "
+                                                               f"{RKIHistoryUpdater.__class__.__name__}: {error}",
+                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
 
 
 if __name__ == "__main__":
