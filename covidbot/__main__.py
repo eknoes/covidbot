@@ -222,7 +222,7 @@ async def sendUpdates(messenger_iface: str, config: configparser):
     except Exception as e:
         logging.error(f"Got exception while sending daily reports for {messenger_iface}:\n{e}", exc_info=e)
         with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-            asyncio.run(telegram.send_message_to_users(f"Exception happened while sending reports via {messenger_iface}:"
+            asyncio.run(await telegram.send_message_to_users(f"Exception happened while sending reports via {messenger_iface}:"
                                                        f"{e}", [config["TELEGRAM"].get("DEV_CHAT")]))
 
 

@@ -41,6 +41,9 @@ class ReportGenerator:
             last_user_update = self.user_manager.get_last_updates(user.id, report_type)
             last_data_update = self.get_report_last_update(report_type)
             if not last_user_update or last_user_update < last_data_update:
+                if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_WEEKLY) and datetime.date.today().weekday() != 0:
+                    continue
+
                 if report_type == MessageType.CASES_GERMANY and self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_SLEEP_MODE):
                     send_report = False
                     for district in user.subscriptions:

@@ -878,7 +878,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
                             BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
                             BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
-                            BotUserSettings.REPORT_SLEEP_MODE]:
+                            BotUserSettings.REPORT_SLEEP_MODE, BotUserSettings.REPORT_WEEKLY]:
                 if BotUserSettings.command_key(setting).lower() != user_input[0].lower():
                     continue
 
@@ -927,7 +927,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
                             BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
                             BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
-                            BotUserSettings.REPORT_SLEEP_MODE]:
+                            BotUserSettings.REPORT_SLEEP_MODE, BotUserSettings.REPORT_WEEKLY]:
                 if self.user_manager.get_user_setting(user_id, setting):
                     choice = "aus"
                     current = "✅"

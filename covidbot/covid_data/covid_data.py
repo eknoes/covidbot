@@ -158,6 +158,10 @@ UNION
                     result.cases_trend = get_trend(comparison_data.new_cases, result.new_cases)
                     result.deaths_trend = get_trend(comparison_data.new_deaths, result.new_deaths)
 
+            if not result.incidence:
+                return result
+
+            # Check, how long incidence is in certain interval
             cursor.execute(
                 'SELECT alt_name FROM county_alt_names WHERE alt_name LIKE \'DE-%\' AND (district_id=%s OR district_id=(SELECT parent FROM counties WHERE rs=%s)) LIMIT 1',
                 [district_id, district_id])
@@ -167,7 +171,6 @@ UNION
                 state_name = record['alt_name']
                 state_name = state_name.split("-")[1]
 
-            # Check, how long incidence is in certain interval
             threshold_values = [10, 35, 50, 100, 150, 165, 200]
             interval_data = IncidenceIntervalData()
 

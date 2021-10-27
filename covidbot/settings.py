@@ -10,6 +10,7 @@ class BotUserSettings(Enum):
     REPORT_ALL_INFECTION_GRAPHS = "report_all_infection_graphics"
     FORMATTING = "disable_fake_format"
     REPORT_SLEEP_MODE = "report_sleep_mode"
+    REPORT_WEEKLY = "report_weekly"
 
     @staticmethod
     def default(setting: BotUserSettings) -> bool:
@@ -26,6 +27,8 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
             return False
         elif setting == BotUserSettings.REPORT_SLEEP_MODE:
+            return False
+        elif setting == BotUserSettings.REPORT_WEEKLY:
             return False
 
     @staticmethod
@@ -44,6 +47,8 @@ class BotUserSettings(Enum):
             return "Alle Infektionsgrafiken im Bericht"
         elif setting == BotUserSettings.REPORT_SLEEP_MODE:
             return "Bericht Pausieren"
+        elif setting == BotUserSettings.REPORT_WEEKLY:
+            return "Wöchentlicher Bericht"
 
     @staticmethod
     def description(setting: BotUserSettings) -> str:
@@ -66,6 +71,8 @@ class BotUserSettings(Enum):
                    "abonnierten Ort."
         elif setting == BotUserSettings.REPORT_SLEEP_MODE:
             return "Pausiere den Bericht, solange die 7-Tage-Inzidenz in allen von dir abonnierten Orte unter 10 liegt."
+        elif setting == BotUserSettings.REPORT_WEEKLY:
+            return "Mit dieser Option bekommst du deinen persönlichen Bericht nur montags"
 
     @staticmethod
     def command_key(setting: BotUserSettings) -> str:
@@ -83,3 +90,5 @@ class BotUserSettings(Enum):
             return "neuinfektion-grafik"
         elif setting == BotUserSettings.REPORT_SLEEP_MODE:
             return "pause"
+        elif setting == BotUserSettings.REPORT_WEEKLY:
+            return "woechentlich"
