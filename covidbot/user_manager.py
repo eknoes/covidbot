@@ -448,10 +448,11 @@ class UserManager(object):
                 # Change default if corresponding subscriptions exist
                 if setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION]:
                     user = self.get_user(user_id, with_subscriptions=True)
-                    if setting == BotUserSettings.REPORT_INCLUDE_ICU and MessageType.ICU_GERMANY in user.subscribed_reports:
-                        return False
-                    elif setting == BotUserSettings.REPORT_INCLUDE_VACCINATION and MessageType.VACCINATION_GERMANY in user.subscribed_reports:
-                        return False
+                    if user:
+                        if setting == BotUserSettings.REPORT_INCLUDE_ICU and MessageType.ICU_GERMANY in user.subscribed_reports:
+                            return False
+                        elif setting == BotUserSettings.REPORT_INCLUDE_VACCINATION and MessageType.VACCINATION_GERMANY in user.subscribed_reports:
+                            return False
                 return default
 
             value = rows[0]['value']
