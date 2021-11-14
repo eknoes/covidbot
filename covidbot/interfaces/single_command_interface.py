@@ -147,8 +147,8 @@ class SingleCommandInterface(MessengerInterface, ABC):
             f"🤒 Das {self.rki_name} hat die Hospitalisierungsdaten für den {hospitalization.date.strftime('%d. %B %Y')} veröffentlicht:\n\n"
             f"Die 7-Tage-Hospitalisierungsinzidenz liegt bei {format_float(hospitalization.incidence)} und in den "
             f"letzten 7 Tagen wurden {format_noun(hospitalization.cases, FormattableNoun.PERSONS)} ins Krankenhaus "
-            f"aufgenommen. #COVID19",
-            [self.viz.hospitalization_graph(0)])]
+            f"aufgenommen. #COVID19")]
+        # Remove graphic, as it is misleading
         return responses
 
     def get_icu_shortpost(self, icu: ICUData) -> List[BotResponse]:
@@ -194,9 +194,6 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
         if district.icu_data:
             graphs.append(self.viz.icu_graph(district_id))
-
-        if district.hospitalisation:
-            graphs.append(self.viz.hospitalization_graph(district_id))
 
         return [BotResponse(tweet_text, graphs)]
 
