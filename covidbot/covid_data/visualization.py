@@ -302,7 +302,7 @@ class Visualization:
             while y_data_full[i] == 0:
                 i += 1
 
-            ax1.fill_between(x_data[i:], y_data_full[i:], color="#384955", zorder=3, label="Vollständige Impfungen")
+            ax1.fill_between(x_data[i:], y_data_full[i:], color="#384955", zorder=3, label="Vollständige Erstimmunisierung")
             ax1.legend(loc="upper left")
 
             # One tick every 7 days for easier comparison
