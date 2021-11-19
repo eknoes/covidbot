@@ -348,7 +348,7 @@ class Bot(object):
                             "\n\nMehr Informationen zur Bedeutung der Infektionszahlen findest du im <a href='https://www.rki.de/SharedDocs/FAQ/NCOV2019/gesamt.html'>Informationsportal des RKI</a>.\n"
                             "\n\n<b>Was bedeuten die Impfzahlen?</b>\n"
                             "Je nach Impfstoff werden für eine vollständige Immunisierung ein oder zwei Impfungen benötigt. "
-                            "Wir unterscheiden daher zwischen Erstimpfungen und vollständig Immunisierten. Wer einen Impfstoff erhalten hat, der nur einmal verabreicht werden muss, gilt unmittelbar auch als vollständig immunisiert. Andere erst nach Erhalt der zweiten Impfung."
+                            "Wir unterscheiden daher zwischen Erstimpfungen und vollständig Erstimmunisierten. Wer einen Impfstoff erhalten hat, der nur einmal verabreicht werden muss, gilt unmittelbar auch als vollständig erstimmunisiert. Andere erst nach Erhalt der zweiten Impfung."
                             "\n\nMehr Informationen zu den Impfungen findest du im <a href='https://www.zusammengegencorona.de/impfen/'>Informationsportal der Bundesregierung</a>.\n"
                             "\n\n<b>Was bedeutet der R-Wert?</b>\n"
                             "Wir verwenden den 7-Tage-R-Wert des RKI. Dieser beschreibt die Anzahl an Menschen, die von einer infizierten Person angesteckt werden. "
