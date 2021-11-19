@@ -725,7 +725,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         if related_vaccinations:
             message += "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
-                       " - Stand {vacc_date} - vollständig geimpft.\n\n" \
+                       " - Stand {vacc_date} - vollständig erstimmunisiert.\n\n" \
                        "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
                        "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
                 .format(rate_partial=format_float(related_vaccinations.partial_rate * 100),
