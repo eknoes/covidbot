@@ -132,7 +132,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         responses = [BotResponse(
             f"💉 Das {self.bmg_name} hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht.\n\n"
             f"{format_float(vacc.partial_rate * 100)}% der Bevölkerung haben mindestens eine #Impfung erhalten, "
-            f"{format_float(vacc.full_rate * 100)}% sind vollständig geimpft. Insgesamt wurden "
+            f"{format_float(vacc.full_rate * 100)}% sind vollständig erstimmunisiert. Insgesamt wurden "
             f"{format_int(vacc.vaccinated_partial)} Erstimpfungen und {format_int(vacc.vaccinated_full)} Zweitimpfungen"
             f" durchgeführt. #COVID19",
             [self.viz.vaccination_graph(0)]),
