@@ -354,7 +354,7 @@ class ReportGenerator:
             .format(name=district.name,
                     percent_partial=format_float(district.vaccinations.partial_rate * 100))
 
-        message += "\n• {percent_full}% vollständig geimpft" \
+        message += "\n• {percent_full}% vollständig erstimmunisiert" \
                    "\n• Ø {vacc_per_day} Impfungen am Tag" \
             .format(percent_full=format_float(district.vaccinations.full_rate * 100),
                     vacc_per_day=format_int(district.vaccinations.avg_speed))
