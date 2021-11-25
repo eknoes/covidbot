@@ -387,7 +387,7 @@ class Visualization:
         self.set_weekday_formatter(ax1, current_date.weekday())
 
         # Draw thresholds
-        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500]
+        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000]
         if max_y < 100:
             y_locations.append(10)
         ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(y_locations))
@@ -426,7 +426,7 @@ class Visualization:
             self.set_monthly_formatter(ax1)
 
         # Draw thresholds
-        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500]
+        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000]
         if max(y_data) < 100:
             y_locations.append(10)
         ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(y_locations))
