@@ -207,7 +207,7 @@ class Bot(object):
                     BotResponse("Für welchen Ort interessierst du dich?")]
         message = (f'Hallo,\n'
                    f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
-                   f'COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. Du erhältst dann jeden '
+                   f'COVID-19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. Du erhältst dann jeden '
                    f'Morgen eine Zusammenfassung der Lage in deinen abonnierten Orten!')
 
         choices = [UserChoice("Loslegen", "/start los", "Sende einfach den Namen eines Ortes, den du abonnieren "
@@ -240,7 +240,7 @@ class Bot(object):
             short_help = False
 
         message = 'Hallo,\n' \
-                  'über diesen Bot kannst Du Dir relevante Daten zur COVID19-Pandemie anzeigen lassen ' \
+                  'über diesen Bot kannst Du Dir relevante Daten zur COVID-19-Pandemie anzeigen lassen ' \
                   'und sie dauerhaft abonnieren.\n\n'
 
         if short_help:
@@ -340,7 +340,7 @@ class Bot(object):
     def infoHandler(user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('info').inc()
         return [BotResponse("<b>Was bedeuten die Infektionszahlen?</b>\n"
-                            "Die 7-Tage Inzidenz ist die Anzahl der Covid19-Infektionen in den vergangenen 7 Tagen je 100.000 Einwohner:innen. "
+                            "Die 7-Tage Inzidenz ist die Anzahl der COVID-19-Infektionen in den vergangenen 7 Tagen je 100.000 Einwohner:innen. "
                             "Im Gegensatz zu den Neuinfektionszahlen und Todesfällen lässt sich dieser Wert gut täglich vergleichen. "
                             "Das liegt daran, dass es ein Wert ist, der sich auf die letzten 7 Tage bezieht und so nicht den tagesabhängigen Schwankungen unterliegt. "
                             "Die Neuinfektionszahlen und die Todesfälle lassen sich dahingegen am besten mit den Zahlen von vor einer Woche vergleichen, da diese auf Grund des "
@@ -613,7 +613,7 @@ class Bot(object):
         facts = self.covid_data.get_district_facts(location.id)
 
         message = f'''<b>Pandemieverlauf in {location.name}</b>
-Am {facts.first_case_date.strftime("%d.%m.%Y")} wurde der erste Covid-19 Fall in {location.name} gemeldet, am {facts.first_death_date.strftime("%d.%m.%Y")} gab es den ersten Todesfall im Zusammenhang mit Covid-19. 
+Am {facts.first_case_date.strftime("%d.%m.%Y")} wurde der erste COVID-19 Fall in {location.name} gemeldet, am {facts.first_death_date.strftime("%d.%m.%Y")} gab es den ersten Todesfall im Zusammenhang mit COVID-19. 
 Insgesamt wurden bisher {format_noun(data.total_cases, FormattableNoun.INFECTIONS)} und {format_noun(data.total_deaths, FormattableNoun.DEATHS)} in {location.name} gemeldet.
 
 • Höchste 7-Tage-Inzidenz: {format_float(facts.highest_incidence)} am {facts.highest_incidence_date.strftime("%d.%m.%Y")}

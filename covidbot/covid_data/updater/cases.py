@@ -96,7 +96,7 @@ class RKIUpdater(Updater):
                 self.log.error("Data is looking weird! Rolling back data update!")
                 self.connection.rollback()
                 raise ValueError(
-                    f"COVID19 {germany['new_cases']} new cases and {germany['new_deaths']} deaths are not plausible. Aborting!")
+                    f"COVID-19 {germany['new_cases']} new cases and {germany['new_deaths']} deaths are not plausible. Aborting!")
             else:
                 self.connection.commit()
         self.log.debug("Finished inserting new data")
@@ -106,7 +106,7 @@ class RKIUpdater(Updater):
         with self.connection.cursor(dictionary=True) as cursor:
             # Calculate all parents, must be executed for every depth
             for i in range(2):
-                # Calculate Covid Data
+                # Calculate COVID-19 Data
                 args = []
                 where_query = ""
                 if new_updated:
