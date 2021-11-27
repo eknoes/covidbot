@@ -52,7 +52,7 @@ $ python -m covidbot --platform shell
 Please enter input:
 > Start
 Hallo,
-über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten COVID19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. Einen Überblick über alle Befehle erhältst du über "Hilfe".
+über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten COVID-19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. Einen Überblick über alle Befehle erhältst du über "Hilfe".
 
 Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten möchtest. Der Ort kann entweder ein Bundesland oder ein Stadt-/ Landkreis sein. Du kannst auch einen Standort senden! Wenn die Daten des Ortes nur gesammelt für eine übergeordneten Landkreis oder eine Region vorliegen, werden dir diese vorgeschlagen. Du kannst beliebig viele Orte abonnieren und unabhängig von diesen  auch die aktuellen Zahlen für andere Orte ansehen.
 > Daten Berlin

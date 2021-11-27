@@ -110,7 +110,7 @@ UNION
     def get_district_data(self, district_id: int) \
             -> Optional[DistrictData]:
         """
-        Fetches the Covid19 data for a certain district for today.
+        Fetches the COVID-19 data for a certain district for today.
         :param district_id: ID of the district
         :return: DistrictData
         """
