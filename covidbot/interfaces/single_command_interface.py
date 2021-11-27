@@ -253,6 +253,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
                         else:
                             self.log.warning(f"mention.sent has the wrong type {type(mention.sent)}: {mention.sent}")
                 else:
+                    self.user_manager.set_message_answered(chat_id)
                     DISCARDED_MESSAGE_COUNT.inc()
             time.sleep(self.sleep_sec)
 
