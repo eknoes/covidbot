@@ -39,6 +39,7 @@ class FacebookInterface(SingleCommandInterface):
         else:
             self.log.error(f"Instagram API returned {response.status_code}: {response.text}")
             self.log.error(response.content)
+            raise ValueError(response.content)
 
     def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
         message_text = ""

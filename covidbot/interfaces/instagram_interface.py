@@ -49,7 +49,8 @@ class InstagramInterface(SingleCommandInterface):
                 media_file = response.images[0]
 
         if not media_file:
-            raise ValueError("Instagram Interface can just post a single media file with caption")
+            self.log.warning("Instagram Interface can just post a single media file with caption, skipping")
+            return True
 
         try:
             file_loc = shutil.copy2(media_file, self.web_dir)
