@@ -388,8 +388,10 @@ class Bot(object):
         message = self.report_generator.get_vacc_text(location, show_name=True)
         message += "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
                    "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
+                   "Verabreichte Auffrischungsimpfungen: {vacc_booster}\n\n" \
             .format(vacc_partial=format_int(location.vaccinations.vaccinated_partial),
-                    vacc_full=format_int(location.vaccinations.vaccinated_full))
+                    vacc_full=format_int(location.vaccinations.vaccinated_full),
+                    vacc_booster=format_int(location.vaccinations.vaccinated_booster))
 
         if location.id == 0:
             children_data = self.covid_data.get_children_data(location.id)
@@ -397,13 +399,15 @@ class Bot(object):
                 lambda x, y: x if x.vaccinations.date < y.vaccinations.date else y,
                 children_data)
             message += "<b>💉 Impfdaten der Länder</b>\n" \
-                       "Angegeben ist der Anteil der Bevölkerung, die mindestens eine Impfung erhalten hat, sowie der " \
-                       "Anteil der Bevölkerung, der einen vollen Impfschutz hat.\n\n"
+                       "Angegeben ist der Anteil der Bevölkerung, die mindestens eine Impfung erhalten hat, der " \
+                       "Anteil der Bevölkerung, der einen vollen Impfschutz hat, sowie der Anteil der Bevölkerung, der " \
+                       "eine Auffrischungsimpfung erhalten hat.\n\n"
             children_data.sort(key=lambda x: x.name)
             for child in children_data:
-                message += "• {rate_partial}% / {rate_full}% ({district})\n" \
+                message += "• {rate_partial}% / {rate_full}% / {rate_booster}% ({district})\n" \
                     .format(district=child.name,
                             rate_partial=format_float(child.vaccinations.partial_rate * 100),
+                            rate_booster=format_float(child.vaccinations.booster_rate * 100),
                             rate_full=format_float(child.vaccinations.full_rate * 100))
             message += "\n\n"
         else:
@@ -715,8 +719,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         if current_data.vaccinations:
             related_vaccinations = current_data.vaccinations
             message += "<b>💉 Impfdaten</b>\n"
-            # TODO: Daten fehlen
-            # graphics.append(self.data_visualization.vaccination_graph(district_id))
+            graphics.append(self.visualization.vaccination_graph(location.id))
         else:
             if current_data.parent:
                 parent_district = self.covid_data.get_district_data(current_data.parent)
@@ -725,13 +728,17 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         if related_vaccinations:
             message += "{rate_partial}% der Bevölkerung haben mindestens eine Impfung erhalten, {rate_full}% sind " \
-                       " - Stand {vacc_date} - vollständig erstimmunisiert.\n\n" \
+                       "vollständig erstimmunisiert und - Stand {vacc_date} - {rate_booster}% haben eine " \
+                       "Auffrischungsimpfung erhalten.\n\n" \
                        "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
-                       "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
+                       "Verabreichte Zweitimpfdosen: {vacc_full}\n" \
+                       "Verabreichte Auffrischungsimpfungen: {vacc_booster}\n\n" \
                 .format(rate_partial=format_float(related_vaccinations.partial_rate * 100),
                         rate_full=format_float(related_vaccinations.full_rate * 100),
+                        rate_booster=format_float(related_vaccinations.booster_rate * 100),
                         vacc_partial=format_int(related_vaccinations.vaccinated_partial),
                         vacc_full=format_int(related_vaccinations.vaccinated_full),
+                        vacc_booster=format_int(related_vaccinations.vaccinated_booster),
                         vacc_date=related_vaccinations.date.strftime("%d.%m.%Y"))
             sources.append(f'Impfdaten vom {related_vaccinations.date.strftime("%d.%m.%Y")}. '
                            f'Daten vom Bundesministerium für Gesundheit, mehr Informationen im '
@@ -760,8 +767,6 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
     def reportHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('report').inc()
         user = self.user_manager.get_user(user_id, with_subscriptions=True)
-        if not user:
-            return self._get_report([])
 
         if user_input:
             if user_input.lower() == message_type_name(MessageType.ICU_GERMANY)[:len(user_input)].lower():
@@ -972,80 +977,6 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                    UserChoice("Abbrechen", "/noop", "Sende eine andere Nachricht, um keine Daten von dir zu löschen")]
         return [BotResponse("Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten"
                             " löschen?", choices=choices)]
-
-    def _get_report(self, subscriptions: List[int], user_id: Optional[int] = None) -> List[BotResponse]:
-        # Visualization
-        graphs = []
-        if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
-            graphs.append(self.visualization.infections_graph(0))
-
-        country = self.covid_data.get_country_data()
-        message = "<b>Corona-Bericht vom {date}</b>\n\n".format(date=country.date.strftime("%d.%m.%Y"))
-        message += self.report_generator.get_infection_text(country)
-
-        if subscriptions and len(subscriptions) > 0:
-            message += "Die 7-Tage-Inzidenz sowie die Neuinfektionen und Todesfälle seit gestern fallen für die von " \
-                       "dir abonnierten Orte wie folgt aus:\n\n"
-
-            # Split Bundeslaender from other
-            subscription_data = list(map(lambda rs: self.covid_data.get_district_data(rs), subscriptions))
-            subscribed_bls = list(filter(lambda d: d.type == "Bundesland", subscription_data))
-            subscribed_cities = list(filter(lambda d: d.type != "Bundesland" and d.type != "Staat", subscription_data))
-            if len(subscribed_bls) > 0:
-                message += "<b>Bundesländer</b>\n"
-                data = map(lambda district: "• " + self.format_district_data(district),
-                           self.sort_districts(subscribed_bls))
-                message += "\n".join(data) + "\n\n"
-
-            grouped_districts = self.group_districts(subscribed_cities)
-            for key in grouped_districts:
-                message += "<b>Städte und Landkreise mit Inzidenz >" + str(key) + ":</b>\n"
-                data = map(lambda district: "• " + self.format_district_data(district),
-                           self.sort_districts(grouped_districts[key]))
-                message += "\n".join(data) + "\n\n"
-
-            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_GRAPHICS):
-                # Generate multi-incidence graph for up to 8 districts
-                districts = subscriptions[-8:]
-                if 0 in subscriptions and 0 not in districts:
-                    districts[0] = 0
-                graphs.append(self.visualization.multi_incidence_graph(districts))
-
-        if country.vaccinations and self.user_manager.get_user_setting(user_id,
-                                                                       BotUserSettings.REPORT_INCLUDE_VACCINATION):
-            message += "<b>💉 Impfdaten</b>\n" \
-                       "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in Deutschland mindestens eine Impfdosis " \
-                       "erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits vollständig geimpft.\n\n" \
-                .format(rate_full=format_float(country.vaccinations.full_rate * 100),
-                        rate_partial=format_float(country.vaccinations.partial_rate * 100),
-                        vacc_partial=format_int(country.vaccinations.vaccinated_partial),
-                        vacc_full=format_int(country.vaccinations.vaccinated_full),
-                        date=country.vaccinations.date.strftime("%d.%m.%Y"),
-                        doses=format_int(country.vaccinations.doses_diff))
-            if self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
-                graphs.append(self.visualization.vaccination_graph(country.id))
-                graphs.append(self.visualization.vaccination_speed_graph(country.id))
-
-        if country.icu_data:  # and self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_INCLUDE_ICU):
-            message += self.report_generator.get_icu_text(country)
-
-        user_hint = self.user_hints.get_hint_of_today()
-        if user_hint:
-            message += f"{user_hint}\n\n"
-
-        message += '<i>Daten vom Robert Koch-Institut (RKI), Lizenz: dl-de/by-2-0, weitere Informationen findest Du' \
-                   ' im <a href="https://corona.rki.de/">Dashboard des RKI</a> und dem ' \
-                   '<a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
-                   'Intensivbettendaten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.</i>' \
-                   '\n\n' \
-                   '<i>Sende {info_command} um eine Erläuterung ' \
-                   'der Daten zu erhalten. Ein Service von <a href="https://d-64.org">D64 - Zentrum für Digitalen ' \
-                   'Fortschritt</a>.</i>'.format(info_command=self.command_formatter("Info"))
-
-        message += '\n\n🧒🏽👦🏻 Sharing is caring 👩🏾🧑🏼 <a href="https://covidbot.d-64.org">www.covidbot.d-64.org</a>'
-
-        reports = [BotResponse(message, graphs)]
-        return reports
 
     @staticmethod
     def format_district_data(district: DistrictData) -> str:

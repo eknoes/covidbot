@@ -323,10 +323,12 @@ class ReportGenerator:
                         covid_trend=format_data_trend(district.icu_data.occupied_covid_trend))
 
         if show_vaccinations and district.vaccinations:
-            message += "\n• {no_doses} Neuimpfungen, {vacc_partial}% min. eine, {vacc_full}% beide Impfungen erhalten" \
+            message += "\n• {no_doses} Neuimpfungen, {vacc_partial}% min. eine, {vacc_full}% beide Impfungen und " \
+                       "{vacc_booster}% Auffrischungsimpfungen erhalten erhalten" \
                 .format(no_doses=format_int(district.vaccinations.doses_diff),
                         vacc_partial=format_float(district.vaccinations.partial_rate * 100),
-                        vacc_full=format_float(district.vaccinations.full_rate * 100))
+                        vacc_full=format_float(district.vaccinations.full_rate * 100),
+                        vacc_booster=format_float(district.vaccinations.booster_rate * 100))
         return message
 
     @staticmethod
@@ -355,6 +357,7 @@ class ReportGenerator:
                     percent_partial=format_float(district.vaccinations.partial_rate * 100))
 
         message += "\n• {percent_full}% vollständig erstimmunisiert" \
+                   "\n• {percent_full}% Auffrischungsimpfung erhalten" \
                    "\n• Ø {vacc_per_day} Impfungen am Tag" \
             .format(percent_full=format_float(district.vaccinations.full_rate * 100),
                     vacc_per_day=format_int(district.vaccinations.avg_speed))
@@ -421,12 +424,14 @@ class ReportGenerator:
         return f"<b>💉 Impfdaten{name}</b>\n" \
                "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in " \
                "{name} mindestens eine Impfdosis erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits " \
-               "vollständig geimpft. " \
+               "vollständig geimpft, {vacc_booster} ({rate_booster}%) Menschen haben eine Auffrischungsimpfung erhalten. " \
                "Bei dem Impftempo der letzten 7 Tage werden {vacc_speed} Dosen pro Tag verabreicht." \
                "\n\n" \
             .format(name=district.name, rate_full=format_float(district.vaccinations.full_rate * 100),
                     rate_partial=format_float(district.vaccinations.partial_rate * 100),
                     vacc_partial=format_int(district.vaccinations.vaccinated_partial),
+                    rate_booster=format_float(district.vaccinations.booster_rate * 100),
+                    vacc_booster=format_int(district.vaccinations.vaccinated_booster),
                     vacc_full=format_int(district.vaccinations.vaccinated_full),
                     date=district.vaccinations.date.strftime("%d.%m.%Y"),
                     doses=format_int(district.vaccinations.doses_diff),
