@@ -149,7 +149,7 @@ class RKIHistoryUpdater(RKIUpdater):
     CASES_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/cases-rki-by-ags.csv"
     INCIDENCE_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/more-data/7di-rki-by-ags.csv"
     max_delta = 1
-    min_delta = 10
+    min_delta = 60
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:

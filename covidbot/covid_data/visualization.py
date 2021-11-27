@@ -386,16 +386,6 @@ class Visualization:
         # Add a label every 7 days
         self.set_weekday_formatter(ax1, current_date.weekday())
 
-        # Draw thresholds
-        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500]
-        if max_y < 100:
-            y_locations.append(10)
-        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(y_locations))
-
-        minor_ticks_base = 10
-        ax1.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(base=minor_ticks_base))
-        plt.grid(which="minor", linestyle="--", color="#cccccc")
-
         # Save to file
         plt.savefig(filepath, format='JPEG')
         self.teardown_plt(fig)
@@ -424,16 +414,6 @@ class Visualization:
             self.set_weekday_formatter(ax1, current_date.weekday())
         else:
             self.set_monthly_formatter(ax1)
-
-        # Draw thresholds
-        y_locations = [0, 35, 50, 100, 150, 165, 200, 300, 400, 500]
-        if max(y_data) < 100:
-            y_locations.append(10)
-        ax1.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(y_locations))
-
-        minor_ticks_base = 10
-        ax1.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(base=minor_ticks_base))
-        plt.grid(which="minor", linestyle="--", color="#cccccc")
 
         # Save to file
         plt.savefig(filepath, format='JPEG')
