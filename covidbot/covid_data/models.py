@@ -20,8 +20,10 @@ class District:
 
 @dataclass
 class VaccinationData:
+    vaccinated_booster: int
     vaccinated_full: int
     vaccinated_partial: int
+    booster_rate: float
     full_rate: float
     partial_rate: float
     date: date

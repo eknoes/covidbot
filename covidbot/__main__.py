@@ -412,7 +412,7 @@ def main():
                 raise e
     elif args.graphic_test:
         vis = Visualization(get_connection(config), abspath("graphics/"), disable_cache=True)
-        vis.incidence_graph(6)
+        vis.vaccination_graph(0)
     elif args.archive_update:
         # Setup Logging
         logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, "updater.log"))

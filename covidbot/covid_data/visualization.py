@@ -251,9 +251,10 @@ class Visualization:
     def vaccination_graph(self, district_id: int) -> str:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute(
-                "SELECT vaccinated_partial, vaccinated_full, date FROM covid_vaccinations WHERE district_id=%s ORDER BY date",
+                "SELECT vaccinated_partial, vaccinated_full, vaccinated_booster, date FROM covid_vaccinations WHERE district_id=%s ORDER BY date",
                 [district_id])
 
+            y_data_booster = []
             y_data_full = []
             y_data_partial = []
             x_data = []
@@ -264,14 +265,21 @@ class Visualization:
                 if not row['vaccinated_full']:
                     row['vaccinated_full'] = 0
 
+                if not row['vaccinated_booster']:
+                    row['vaccinated_booster'] = 0
+
                 if len(y_data_partial) > 1 and y_data_partial[-1] > row['vaccinated_partial']:
                     row['vaccinated_partial'] = y_data_partial[-1]
 
                 if len(y_data_full) > 1 and y_data_full[-1] > row['vaccinated_full']:
                     row['vaccinated_full'] = y_data_full[-1]
 
+                if len(y_data_booster) > 1 and y_data_booster[-1] > row['vaccinated_booster']:
+                    row['vaccinated_booster'] = y_data_booster[-1]
+
                 y_data_partial.append(row['vaccinated_partial'])
                 y_data_full.append(row['vaccinated_full'])
+                y_data_booster.append(row['vaccinated_booster'])
 
                 x_data.append(row['date'])
 
@@ -289,10 +297,7 @@ class Visualization:
             district_name = row['county_name']
             population = row['population']
 
-            if district_id == 0:
-                source = "impfdashboard.de"
-            else:
-                source = "Robert-Koch-Institut"
+            source = "Robert-Koch-Institut"
             fig, ax1 = self.setup_plot(x_data[-1], f"Impfungen {district_name}", "Anzahl Impfungen", source=source)
             # Plot data
             plt.xticks(x_data, rotation='30', ha='right')
@@ -301,8 +306,13 @@ class Visualization:
             i = 0
             while y_data_full[i] == 0:
                 i += 1
-
             ax1.fill_between(x_data[i:], y_data_full[i:], color="#384955", zorder=3, label="Vollständige Erstimmunisierung")
+
+            i = 0
+            while y_data_booster[i] == 0:
+                i += 1
+            ax1.fill_between(x_data[i:], y_data_booster[i:], color="#9DCCED", zorder=3, label="Auffrischungsimpfungen")
+
             ax1.legend(loc="upper left")
 
             # One tick every 7 days for easier comparison
