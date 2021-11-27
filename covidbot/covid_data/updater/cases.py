@@ -91,7 +91,7 @@ class RKIUpdater(Updater):
             cursor.execute('SELECT new_cases, new_deaths FROM covid_data_calculated '
                            'WHERE rs=%s ORDER BY date DESC LIMIT 1', [self.get_district_id("Deutschland")])
             germany = cursor.fetchone()
-            if germany['new_cases'] and (germany['new_cases'] <= 0 or germany['new_cases'] >= 100000) \
+            if germany['new_cases'] and (germany['new_cases'] <= 0 or germany['new_cases'] >= 1000000) \
                     or germany['new_deaths'] and germany['new_deaths'] <= 0:
                 self.log.error("Data is looking weird! Rolling back data update!")
                 self.connection.rollback()

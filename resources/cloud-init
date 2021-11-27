@@ -1,0 +1,39 @@
+#cloud-config
+users:
+  - name: bot
+    primary_group: bot
+    groups: users, sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvpSt2mS1aocFOqEW/zOO7cD1ZTg0FTAe9IiVv/r6exkw2uKRtdu/W/AWfvmVWB2wdAdFUoOGZteeUv3PeDCRUDHdNF1akLvlLrwWpVsFvxjIIzAdpDYFxFFcpUmLpWV/XQIXCtFnfVCXsb0pk6cmuspBP28K3TuvlUagm7TMSXBqbWrvVoc3y7UtJU4+ry+MOTNuIgDxfMP+PuBw3rxq7cCsSFVmchL6IYvLuX/TeAnCrAx5n/LjFp+xsCjamQImPYsDKs7HT5mhOPUErOclMll0XQ/XKibKHb6FX7vga0kaptbpMmBdw0MsEJQ4rdsHevvTbQpAYUParS2r5ddnj me@eknoes.de
+package_update: true
+package_upgrade: true
+packages:
+  - mariadb-server
+  - nginx
+  - php-fpm
+  - php-mysql
+  - python3-venv
+  - git
+  - ufw
+  - default-jre
+  - make
+
+runcmd:
+  - ufw allow OpenSSH
+  - ufw allow "Nginx Full"
+  - ufw enable
+  - sed -i -e '/^\(#\|\)PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)PasswordAuthentication/s/^.*$/PasswordAuthentication no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)X11Forwarding/s/^.*$/X11Forwarding no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)AllowTcpForwarding/s/^.*$/AllowTcpForwarding no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)AllowAgentForwarding/s/^.*$/AllowAgentForwarding no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)AuthorizedKeysFile/s/^.*$/AuthorizedKeysFile .ssh\/authorized_keys/' /etc/ssh/sshd_config
+  - sed -i '$a AllowUsers bot root' /etc/ssh/sshd_config
+  - locale-gen de_DE
+  - locale-gen de_DE.UTF-8
+  - update-locale
+  - sudo -u bot git clone https://gitlab.com/signald/signald.git /home/bot/signald
+  - sudo -u bot git clone https://github.com/eknoes/covidbot.git /home/bot/covidbot
+  - reboot now

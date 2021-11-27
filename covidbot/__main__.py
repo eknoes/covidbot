@@ -328,11 +328,11 @@ def main():
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
-            from covidbot.covid_data import CovidData, VaccinationGermanyImpfdashboardUpdater, RValueGermanyUpdater, \
+            from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, RValueGermanyUpdater, \
                 RKIUpdater, ICUGermanyUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, HospitalisationRKIUpdater
             for updater in [RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
-                            VaccinationGermanyImpfdashboardUpdater(conn), RulesGermanyUpdater(conn),
+                            VaccinationGermanyUpdater(conn), RulesGermanyUpdater(conn),
                             RValueGermanyUpdater(conn), ICUGermanyUpdater(conn), HospitalisationRKIUpdater(conn)]:
                 try:
                     if updater.update():

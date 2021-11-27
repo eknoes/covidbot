@@ -4,7 +4,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import RKIUpdater, RValueGermanyUpdater, \
-    VaccinationGermanyImpfdashboardUpdater, VaccinationGermanyStatesImpfdashboardUpdater, HospitalisationRKIUpdater
+    VaccinationGermanyUpdater, HospitalisationRKIUpdater
 from covidbot.covid_data import clean_district_name, ICUGermanyUpdater, RulesGermanyUpdater
 
 
@@ -31,10 +31,8 @@ class TestUpdater(TestCase):
 
         rki = RKIUpdater(self.conn)
         rki.update()
-        updater = VaccinationGermanyImpfdashboardUpdater(self.conn)
-        self.assertTrue(updater.update(), "VaccinationGermanyImpfdashboardUpdater should update")
-        updater = VaccinationGermanyStatesImpfdashboardUpdater(self.conn)
-        self.assertTrue(updater.update(), "VaccinationGermanyStatesImpfdashboardUpdater should update")
+        updater = VaccinationGermanyUpdater(self.conn)
+        self.assertTrue(updater.update(), "VaccinationGermanyUpdater should update")
         updater = RValueGermanyUpdater(self.conn)
         self.assertTrue(updater.update(), "RValueGermanyUpdater should update")
         updater = ICUGermanyUpdater(self.conn)

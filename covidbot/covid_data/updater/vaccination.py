@@ -10,7 +10,7 @@ from covidbot.covid_data.updater.updater import Updater
 from covidbot.utils import date_range
 
 
-class VaccinationGermanyImpfdashboardUpdater(Updater):
+class VaccinationGermanyUpdater(Updater):
     log = logging.getLogger(__name__)
     URL = "https://raw.githubusercontent.com/robert-koch-institut/COVID-19-Impfungen_in_Deutschland/master/Aktuell_Deutschland_Bundeslaender_COVID-19-Impfungen.csv"
 
