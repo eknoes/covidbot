@@ -387,7 +387,7 @@ class Bot(object):
 
         message = self.report_generator.get_vacc_text(location, show_name=True)
         message += "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
-                   "Verabreichte Zweitimpfdosen: {vacc_full}\n\n" \
+                   "Verabreichte Zweitimpfdosen: {vacc_full}\n" \
                    "Verabreichte Auffrischungsimpfungen: {vacc_booster}\n\n" \
             .format(vacc_partial=format_int(location.vaccinations.vaccinated_partial),
                     vacc_full=format_int(location.vaccinations.vaccinated_full),
