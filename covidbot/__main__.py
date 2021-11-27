@@ -200,7 +200,7 @@ class MessengerBotSetup:
         if self.name == "facebook":
             if not self.config.has_section("FACEBOOK"):
                 raise ValueError("FACEBOOK is not configured")
-            from covidbot.interfaces.instagram_interface import InstagramInterface
+            from covidbot.interfaces.facebook_interface import FacebookInterface
             return FacebookInterface(self.config['FACEBOOK'].get('PAGE_ID'),
                                      self.config['FACEBOOK'].get('PAGE_ACCESS_TOKEN'),
                                      self.config['FACEBOOK'].get('WEB_DIR'),

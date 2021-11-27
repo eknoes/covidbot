@@ -37,9 +37,7 @@ class FacebookInterface(SingleCommandInterface):
             number = response.json()['followers_count']
             self.user_manager.set_social_network_user_number(number)
         else:
-            self.log.error(f"Instagram API returned {response.status_code}: {response.text}")
-            self.log.error(response.content)
-            raise ValueError(response.content)
+            self.log.error(f"Facebook API returned {response.status_code}: {response.text}")
 
     def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
         message_text = ""
@@ -69,8 +67,7 @@ class FacebookInterface(SingleCommandInterface):
                                                 f"message={message}&access_token={self.access_token}")
         if response.status_code != 200:
             self.log.error(f"Facebook API returned {response.status_code}: {response.text}")
-            self.log.error(response.json())
-            return False
+            raise ValueError(response.json())
 
         self.log.debug(response)
         post_id = response.json()['id']
