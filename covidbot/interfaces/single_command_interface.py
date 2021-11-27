@@ -94,7 +94,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
         # Vaccinations
         last_update = self.user_manager.get_last_updates(self.user_id, MessageType.VACCINATION_GERMANY)
-        if not last_update or last_update < germany.vaccinations.last_update:
+        if not last_update or (germany.vaccinations and last_update < germany.vaccinations.last_update):
             posts = self.get_vaccination_shortpost(germany.vaccinations)
 
             if self.no_write:
