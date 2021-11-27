@@ -158,7 +158,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
         tweet_text = f"🏥 Die {self.divi_name} hat Daten über die #Intensivbetten in Deutschland für den " \
                      f"{icu.date.strftime('%d. %B %Y')} gemeldet.\n\n{format_float(icu.percent_occupied())}% " \
                      f"({format_noun(icu.occupied_beds, FormattableNoun.BEDS)}) der " \
-                     f"Intensivbetten sind aktuell belegt. " \
+                     f"Betten sind aktuell belegt. " \
                      f"In {format_noun(icu.occupied_covid, FormattableNoun.BEDS)} " \
                      f"({format_float(icu.percent_covid())}%) liegen Patient:innen" \
                      f" mit #COVID19, davon werden {format_int(icu.covid_ventilated)} beatmet. " \
