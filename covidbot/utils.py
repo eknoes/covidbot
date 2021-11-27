@@ -1,5 +1,6 @@
 import re
 import string
+from datetime import timedelta
 from enum import Enum
 from typing import List, Optional, Union, Callable
 
@@ -260,3 +261,8 @@ def get_trend(prev_value: Optional[Union[int, float]], current_value: Optional[U
     else:
         return TrendValue.SAME
 
+
+# Source: https://stackoverflow.com/a/1060330/1692478
+def date_range(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)
