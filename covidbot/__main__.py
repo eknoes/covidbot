@@ -363,7 +363,16 @@ def main():
 
         for platform in platforms:
             with MessengerBotSetup(platform, config, setup_logs=False, monitoring=False) as iface:
-                asyncio.run(iface.send_unconfirmed_reports())
+                try:
+                    asyncio.run(iface.send_unconfirmed_reports())
+                except Exception as error:
+                    logging.exception(f"Exception happened on sending reports to social media with {iface.__class__.__name__}: {error}",
+                                      exc_info=error)
+                    with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
+                        asyncio.run(telegram.send_message_to_users(f"Exception happened on on sending reports to social "
+                                                                   f"media with "
+                                                                   f"{iface.__class__.__name__}: {error}",
+                                                                   [config["TELEGRAM"].get("DEV_CHAT")]))
 
     elif args.daily_report:
         # Setup Logging
