@@ -25,6 +25,8 @@ class VaccinationGermanyUpdater(Updater):
     def update(self) -> bool:
         last_update = self.get_last_update()
         district_id = self.get_district_id("Deutschland")
+        new_data = False
+
         if district_id is None:
             raise ValueError("No district_id for Deutschland")
 
@@ -36,71 +38,70 @@ class VaccinationGermanyUpdater(Updater):
             self.log.debug("Got Vaccination Data from RKI")
             data = pd.read_csv(io.StringIO(response), parse_dates=["Impfdatum"])
 
-            vaccinations = {d_id: {'partial': numpy.int64(0), 'full': numpy.int64(0), 'booster': numpy.int64(0), 'population': None} for d_id in range(1, 17)}
-
+            population = {d_id: None for d_id in range(1, 17)}
             with self.connection.cursor() as cursor:
-                max_date = data['Impfdatum'].max()
-                cursor.execute("SELECT * FROM covid_vaccinations WHERE date=%s LIMIT 1", [max_date])
-                if cursor.fetchone():
-                    return False
+                max_date = data['Impfdatum'].max().date()
+                cursor.execute("SELECT MAX(date) FROM covid_vaccinations")
+                row = cursor.fetchone()
+                if row[0] is None:
+                    min_date = data['Impfdatum'].min().date()
+                else:
+                    min_date = row[0]
 
                 cursor.execute("SELECT population FROM counties WHERE rs=0")
                 fed_population = cursor.fetchone()[0]
 
                 cursor.execute("TRUNCATE covid_vaccinations")
 
-                for date in date_range(start_date=datetime.fromisoformat("2020-12-27").date(), end_date=(datetime.today() + timedelta(days=1)).date()):
-                    d = data.query("Impfdatum == @date").groupby(['BundeslandId_Impfort', 'Impfserie']).sum()
-                    if d.empty:
+                for date in date_range(start_date=min_date + timedelta(days=1), end_date=max_date + timedelta(days=1)):
+                    current_data = data.query("Impfdatum <= @date").groupby(['BundeslandId_Impfort', 'Impfserie', 'Impfstoff']).sum()
+                    if current_data.empty:
                         continue
 
+                    new_data = True
+                    self.log.info(f"Got new vaccination data for {date}")
                     for district_id in range(1, 17):
-                        if not vaccinations[district_id]['population']:
+                        doses_diff = int(data.query("Impfdatum == @date and BundeslandId_Impfort == @district_id")[['Anzahl']].sum())
+
+                        district_data = current_data.query(f"BundeslandId_Impfort == @district_id")
+
+                        if not population[district_id]:
                             cursor.execute('SELECT population FROM counties WHERE rs=%s', [district_id])
-                            vaccinations[district_id]['population'] = cursor.fetchone()[0]
-                            if not vaccinations[district_id]['population']:
+                            population[district_id] = cursor.fetchone()[0]
+                            if not population[district_id]:
                                 self.log.warning(f"Can't fetch population for {district_id}")
                                 continue
 
-                        doses_diff = numpy.int64(0)
-                        if (district_id, 1) in d.index:
-                            vaccinations[district_id]['partial'] += d.at[(district_id, 1), 'Anzahl']
-                            doses_diff += d.at[(district_id, 1), 'Anzahl']
+                        district_partial = int(district_data.query("Impfserie == 1").sum())
+                        district_full = int(district_data.query("Impfserie == 2").sum() + district_data.query("Impfserie == 1 and Impfstoff == 'Janssen'").sum())
+                        district_booster = int(district_data.query("Impfserie == 3").sum())
 
-                        if (district_id, 2) in d.index:
-                            vaccinations[district_id]['full'] += d.at[(district_id, 2), 'Anzahl']
-                            doses_diff += d.at[(district_id, 2), 'Anzahl']
-
-                        if (district_id, 3) in d.index:
-                            vaccinations[district_id]['booster'] += d.at[(district_id, 3), 'Anzahl']
-                            doses_diff += d.at[(district_id, 3), 'Anzahl']
-
-                        rate_partial = vaccinations[district_id]['partial'] / vaccinations[district_id]['population']
-                        rate_full = vaccinations[district_id]['full'] / vaccinations[district_id]['population']
-                        rate_booster = vaccinations[district_id]['booster'] / vaccinations[district_id]['population']
+                        rate_partial = district_partial / population[district_id]
+                        rate_full = district_full / population[district_id]
+                        rate_booster = district_booster / population[district_id]
 
                         cursor.execute('INSERT INTO covid_vaccinations (district_id, date, vaccinated_partial, '
                                        'vaccinated_full, vaccinated_booster, rate_partial, rate_full, rate_booster, '
                                        'doses_diff) VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
                                        [district_id, date,
-                                        int(vaccinations[district_id]['partial']),
-                                        int(vaccinations[district_id]['full']),
-                                        int(vaccinations[district_id]['booster']),
-                                        rate_partial.astype(float), rate_full.astype(float), rate_booster.astype(float),
+                                        district_partial, district_full, district_booster,
+                                        rate_partial, rate_full, rate_booster,
                                         int(doses_diff)])
 
                     # Federal data
-                    fed_data = data.query("Impfdatum <= @date").groupby(['Impfserie']).sum()
+                    fed_data = current_data.groupby(['Impfserie']).sum()
 
                     fed_partial, fed_full, fed_booster = 0, 0, 0
                     if 1 in fed_data.index:
                         fed_partial = int(fed_data.at[1, 'Anzahl'])
                     if 2 in fed_data.index:
-                        fed_full = int(fed_data.at[2, 'Anzahl'])
+                        # Janssen is counted as partial and full vaccination, but as a single dose
+                        fed_full = int(fed_data.at[2, 'Anzahl']) + \
+                                   int(data.query("Impfdatum <= @date and Impfstoff == 'Janssen' and Impfserie == 1")[['Anzahl']].sum())
                     if 3 in fed_data.index:
                         fed_booster = int(fed_data.at[3, 'Anzahl'])
 
-                    fed_doses = int(d['Anzahl'].sum())
+                    fed_doses = int(data.query("Impfdatum == @date")[['Anzahl']].sum())
 
                     cursor.execute('INSERT INTO covid_vaccinations (district_id, date, vaccinated_partial, '
                                    'vaccinated_full, vaccinated_booster, rate_partial, rate_full, rate_booster, '
@@ -113,4 +114,4 @@ class VaccinationGermanyUpdater(Updater):
                                     fed_doses])
 
             self.connection.commit()
-        return True
+        return new_data
