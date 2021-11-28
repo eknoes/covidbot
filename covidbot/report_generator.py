@@ -115,11 +115,12 @@ class ReportGenerator:
             graphs.append(self.visualization.multi_incidence_graph(districts))
 
         # Add some information regarding vaccinations, if available
-        if country and country.vaccinations and MessageType.VACCINATION_GERMANY and \
+        if country and country.vaccinations and \
                 self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_INCLUDE_VACCINATION):
             message += self.get_vacc_text(country)
-            if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
+            if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_GRAPHICS):
                 graphs.append(self.visualization.vaccination_graph(country.id))
+            if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
                 graphs.append(self.visualization.vaccination_speed_graph(country.id))
 
         # Add some information regarding ICU, if available
