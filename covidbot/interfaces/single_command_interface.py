@@ -165,14 +165,14 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"Insgesamt gibt es {format_noun(icu.total_beds(), FormattableNoun.BEDS)}."
         post = [BotResponse(tweet_text, [self.viz.icu_graph(0)])]
 
-        icu_info = self.data.get_icu_general_info()
+        icu_info = self.data.get_icu_global_facts()
         if icu_info:
             second_tweet = ""
-            if icu_info.get('full'):
-                second_tweet += f"{icu_info.get('full')} Orte haben keine freien Intensivbetten mehr. "
+            if icu_info.districts_full:
+                second_tweet += f"{icu_info.districts_full} Orte haben keine freien Intensivbetten mehr. "
 
-            if icu_info.get('close2full'):
-                second_tweet += f"In {icu_info.get('close2full')} Orten sind mindestens 90% der Intensivbetten belegt."
+            if icu_info.districts_low:
+                second_tweet += f"In {icu_info.districts_low} Orten sind mindestens 90% der Intensivbetten belegt."
 
             if second_tweet:
                 post.append(BotResponse(second_tweet))

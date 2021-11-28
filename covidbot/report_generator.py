@@ -388,7 +388,7 @@ class ReportGenerator:
 
     @staticmethod
     def get_icu_text(district: DistrictData) -> str:
-        return f"<b>🏥 Intensivbetten</b>\n" \
+        message = f"<b>🏥 Intensivbetten</b>\n" \
                f"{format_float(district.icu_data.percent_occupied())}% " \
                f"({format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
                f"{format_data_trend(district.icu_data.occupied_beds_trend)} " \
@@ -398,8 +398,15 @@ class ReportGenerator:
                f"{format_data_trend(district.icu_data.occupied_covid_trend)} " \
                f" liegen Patient:innen" \
                f" mit COVID-19, davon müssen {format_noun(district.icu_data.covid_ventilated, FormattableNoun.PERSONS)}" \
-               f" ({format_float(district.icu_data.percent_ventilated())}%) invasiv beatmet werden. " \
-               f"Insgesamt gibt es {format_noun(district.icu_data.total_beds(), FormattableNoun.BEDS)} in {district.name}.\n\n"
+               f" ({format_float(district.icu_data.percent_ventilated())}%) invasiv beatmet werden."
+
+        if district.icu_data.facts is not None:
+            message += f"\n\n{district.icu_data.facts.districts_full} Orte haben keine freien Intensivbetten mehr, in " \
+                       f"{district.icu_data.facts.districts_low} Orten sind mindestens 90% der Intensivbetten belegt."
+
+        message += f" Insgesamt gibt es {format_noun(district.icu_data.total_beds(), FormattableNoun.BEDS)} in {district.name}.\n\n"
+
+        return message
 
     @staticmethod
     def get_hospital_text(district: DistrictData) -> str:

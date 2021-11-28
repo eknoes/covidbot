@@ -7,7 +7,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot.covid_data.WorkingDayChecker import WorkingDayChecker
 from covidbot.covid_data.models import District, VaccinationData, RValueData, DistrictData, ICUData, \
-    RuleData, IncidenceIntervalData, DistrictFacts, Hospitalization, HospitalizationAgeGroup
+    RuleData, IncidenceIntervalData, DistrictFacts, Hospitalization, HospitalizationAgeGroup, ICUFacts
 from covidbot.metrics import LOCATION_DB_LOOKUP
 from covidbot.utils import get_trend
 
@@ -269,6 +269,9 @@ UNION
                     result.occupied_beds_trend = get_trend(row['occupied'], result.occupied_beds)
                     result.occupied_covid_trend = get_trend(row['occupied_covid'], result.occupied_covid)
 
+                if district_id == 0:
+                    result.facts = self.get_icu_global_facts()
+
                 return result
 
     def get_r_value_data(self, district_id: int) -> Optional[RValueData]:
@@ -314,27 +317,27 @@ UNION
     def get_country_data(self) -> DistrictData:
         return self.get_district_data(0)
 
-    def get_icu_general_info(self) -> Dict:
+    def get_icu_global_facts(self) -> ICUFacts:
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT MAX(date) as current FROM icu_beds')
             current_date = cursor.fetchone()['current']
 
-            result = {'full': None, 'close2full': None}
+            full, close2full = 0, 0
             # TODO: Use districts table to identify non-aggregated values
             cursor.execute('SELECT COUNT(*) as num_full FROM icu_beds WHERE date=%s AND clear=0 AND district_id > 16',
                            [current_date])
             record = cursor.fetchone()
             if record:
-                result['full'] = record['num_full']
+                full = record['num_full']
 
             cursor.execute(
                 'SELECT COUNT(*) as num_close FROM icu_beds WHERE date=%s AND (occupied / (clear + occupied)) > 0.9 AND district_id > 16',
                 [current_date])
             record = cursor.fetchone()
             if record:
-                result['close2full'] = record['num_close']
+                close2full = record['num_close']
 
-            return result
+            return ICUFacts(full, close2full)
 
     def get_last_update_cases(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:

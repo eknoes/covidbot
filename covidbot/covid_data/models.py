@@ -40,6 +40,12 @@ class RValueData:
 
 
 @dataclass
+class ICUFacts:
+    districts_full: int
+    districts_low: int
+
+
+@dataclass
 class ICUData:
     date: date
     clear_beds: int
@@ -49,6 +55,7 @@ class ICUData:
     last_update: datetime
     occupied_beds_trend: Optional[TrendValue] = None
     occupied_covid_trend: Optional[TrendValue] = None
+    facts: Optional[ICUFacts] = None
 
     def total_beds(self) -> int:
         return self.clear_beds + self.occupied_beds
