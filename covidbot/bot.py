@@ -886,7 +886,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                             BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
                             BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
                             BotUserSettings.REPORT_SLEEP_MODE, BotUserSettings.REPORT_WEEKLY]:
-                if BotUserSettings.command_key(setting).lower() != user_input[0].lower():
+                if user_input[0].lower() not in BotUserSettings.command_key(setting):
                     continue
 
                 if len(user_input) >= 2:
@@ -903,7 +903,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                         return self.settingsHandler("", user_id) + [
                             BotResponse(f"{BotUserSettings.title(setting)} wurde {word}geschaltet.")]
 
-                command_without_args = f'einstellung {BotUserSettings.command_key(setting)}'
+                command_without_args = f'einstellung {BotUserSettings.command_key(setting)[0]}'
 
                 if self.user_manager.get_user_setting(user_id, setting):
                     option = "aus"
@@ -942,7 +942,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                     choice = "ein"
                     current = "❎"
 
-                command = f"einstellung {BotUserSettings.command_key(setting)} {choice}"
+                command = f"einstellung {BotUserSettings.command_key(setting)[0]} {choice}"
                 choices.append(UserChoice(f"{BotUserSettings.title(setting)} {choice}schalten", '/' + command,
                                           f"Sende {self.command_formatter(command)}, um {BotUserSettings.title(setting)} "
                                           f"{choice}zuschalten"))
@@ -954,7 +954,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             return [BotResponse(message, choices=choices)]
 
     def graphicSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
-        return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_GRAPHICS) + ' ' + user_input,
+        return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_GRAPHICS)[0] + ' ' + user_input,
                                     user_id)
 
     def sleepModeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:

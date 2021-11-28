@@ -1,5 +1,6 @@
 from __future__ import annotations
 from enum import Enum
+from typing import List
 
 
 class BotUserSettings(Enum):
@@ -75,20 +76,20 @@ class BotUserSettings(Enum):
             return "Mit dieser Option bekommst du deinen persönlichen Bericht nur montags"
 
     @staticmethod
-    def command_key(setting: BotUserSettings) -> str:
+    def command_key(setting: BotUserSettings) -> List[str]:
         if setting == BotUserSettings.REPORT_GRAPHICS:
-            return "grafik"
+            return ["grafik"]
         elif setting == BotUserSettings.REPORT_INCLUDE_ICU:
-            return "intensiv"
+            return ["intensiv"]
         elif setting == BotUserSettings.REPORT_INCLUDE_VACCINATION:
-            return "impfung"
+            return ["impfung"]
         elif setting == BotUserSettings.REPORT_EXTENSIVE_GRAPHICS:
-            return "plus-grafik"
+            return ["plus-grafik"]
         elif setting == BotUserSettings.FORMATTING:
-            return "formatierung"
+            return ["formatierung"]
         elif setting == BotUserSettings.REPORT_ALL_INFECTION_GRAPHS:
-            return "neuinfektion-grafik"
+            return ["neuinfektion-grafik"]
         elif setting == BotUserSettings.REPORT_SLEEP_MODE:
-            return "pause"
+            return ["pause"]
         elif setting == BotUserSettings.REPORT_WEEKLY:
-            return "woechentlich"
+            return ["woechentlich", "wöchentlich"]
