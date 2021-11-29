@@ -51,8 +51,6 @@ class VaccinationGermanyUpdater(Updater):
                 cursor.execute("SELECT population FROM counties WHERE rs=0")
                 fed_population = cursor.fetchone()[0]
 
-                cursor.execute("TRUNCATE covid_vaccinations")
-
                 for date in date_range(start_date=min_date + timedelta(days=1), end_date=max_date + timedelta(days=1)):
                     current_data = data.query("Impfdatum <= @date").groupby(['BundeslandId_Impfort', 'Impfserie', 'Impfstoff']).sum()
                     if current_data.empty:
