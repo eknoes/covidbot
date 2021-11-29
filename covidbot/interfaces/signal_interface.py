@@ -14,7 +14,7 @@ import semaphore
 from semaphore import ChatContext
 from semaphore.exceptions import SignaldError, InternalError, InvalidRequestError, \
     RateLimitError, NoSuchAccountError, NoSendPermissionError, UnknownGroupError, \
-    InvalidRecipientError
+    InvalidRecipientError, UnknownError
 
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
@@ -157,8 +157,11 @@ class SignalInterface(MessengerInterface):
                         self.log.warning(f"We cant send to {userid}, disabling user: {e.message}")
                         self.bot.disable_user(userid)
                         break
+                    except UnknownError as e:
+                        self.log.error(f"Unknown Signald Error {e.error_type}: {e.error}")
+                        raise e
                     except SignaldError as e:
-                        self.log.error(f"Unknown Signald Error: {e.IDENTIFIER}")
+                        self.log.error(f"Unknown Signald Error {e}")
                         raise e
 
                 if success:
