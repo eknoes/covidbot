@@ -91,10 +91,12 @@ class MessengerBotSetup:
         data_conn = get_connection(self.config, autocommit=True)
         user_conn = get_connection(self.config, autocommit=True)
         user_monitor_conn = get_connection(self.config, autocommit=True)
+        data_monitor_conn = get_connection(self.config, autocommit=True)
 
         self.connections.append(data_conn)
         self.connections.append(user_conn)
         self.connections.append(user_monitor_conn)
+        self.connections.append(data_monitor_conn)
 
         data = CovidData(data_conn)
         visualization = Visualization(data_conn, self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
@@ -104,7 +106,7 @@ class MessengerBotSetup:
 
         # Setup database monitoring
         user_monitor = UserManager(self.name, user_monitor_conn)
-        monitor_data = CovidData(user_monitor_conn)
+        monitor_data = CovidData(data_monitor_conn)
         monitor_bot = Bot(user_monitor, monitor_data, None, None)
         REPORTS_AVAILABLE.labels(platform=self.name).set_function(monitor_bot.num_user_messages_available)
 
