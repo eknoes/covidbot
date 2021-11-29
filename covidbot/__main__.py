@@ -105,7 +105,6 @@ class MessengerBotSetup:
 
         # Setup database monitoring
         monitor_data = MonitorMetrics(monitor_conn)
-        REPORTS_AVAILABLE.labels(platform=self.name).set_function(lambda: monitor_data.get_unsent_reports_number(self.name))
         AVERAGE_SUBSCRIPTION_COUNT.set_function(monitor_data.get_average_subscriptions)
 
         USER_COUNT.labels(platform="threema").set_function(lambda: monitor_data.get_user_number("threema"))

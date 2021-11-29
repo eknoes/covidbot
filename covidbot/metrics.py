@@ -24,10 +24,6 @@ USER_COUNT = Gauge('bot_total_user', 'Number of Bot users', ['platform'])
 AVERAGE_SUBSCRIPTION_COUNT = Gauge('bot_avg_subscriptions',
                                    'Average No. of subscriptions')
 
-# Report statistics
-REPORTS_AVAILABLE = Gauge('bot_reports_available',
-                          'Number of reports that need to be sent', ['platform'])
-
 # Visualization related
 CREATED_GRAPHS = Counter('bot_viz_created_graph_count', 'Number of created graphs',
                          ['type'])
@@ -90,51 +86,6 @@ class MonitorMetrics:
             self.log.exception(f"OperationalError: {e.msg}", exc_info=e)
             self.connection.reconnect()
             return self.get_user_number(name)
-
-    def get_unsent_reports_number(self, platform: str) -> int:
-        num = 0
-        try:
-            with self.connection.cursor(dictionary=True) as cursor:
-                last_updates = {'cases-germany': None, 'icu-germany': None,
-                                'vaccinations-germany': None}
-
-                cursor.execute(
-                    "SELECT MAX(last_update) as updated FROM covid_data WHERE rs=0")
-                last_updates['cases-germany'] = cursor.fetchone()['updated']
-
-                cursor.execute(
-                    "SELECT MAX(last_update) as updated FROM covid_vaccinations WHERE district_id=0")
-                last_updates['vaccinations-germany'] = cursor.fetchone()['updated']
-
-                cursor.execute(
-                    "SELECT MAX(updated) as updated FROM icu_beds WHERE district_id=0")
-                last_updates['icu-germany'] = cursor.fetchone()['updated']
-
-                cursor.execute("""SELECT bot_user.user_id, rs.report as report, sr.sent_report as sent, bus.value as weekly FROM bot_user
-    JOIN report_subscriptions rs on bot_user.user_id = rs.user_id
-    LEFT JOIN bot_user_sent_reports sr on bot_user.user_id = sr.user_id AND rs.report = sr.report
-    LEFT JOIN bot_user_settings bus on bot_user.user_id = bus.user_id AND bus.setting = "report_weekly"
-WHERE activated=1 AND platform=%s AND (sr.sent_report = (SELECT MAX(sent_report) FROM bot_user_sent_reports
-      WHERE user_id = bot_user.user_id AND report = rs.report) OR sr.sent_report IS NULL)""", [platform])
-
-                for row in cursor.fetchall():
-                    if last_updates[row['report']] is None:
-                        continue
-
-                    if row['sent'] is None or row['sent'] < last_updates[row['report']]:
-                        if row['weekly'] and last_updates[row['report']].weekday() != 0:
-                            continue
-                        num += 1
-
-                cursor.execute("""SELECT COUNT(id) as unsent_messages FROM user_responses
-JOIN bot_user bu on bu.user_id = user_responses.receiver_id AND bu.platform=%s AND activated=1
-WHERE sent IS NULL""", [platform])
-                return num + cursor.fetchone()['unsent_messages']
-
-        except OperationalError as e:
-            self.log.exception(f"OperationalError: {e.msg}", exc_info=e)
-            self.connection.reconnect()
-            return self.get_unsent_reports_number(platform)
 
     def get_average_subscriptions(self) -> float:
         try:
