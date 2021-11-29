@@ -103,7 +103,13 @@ class MessengerBotSetup:
                   has_location_feature=location_feature)
 
         # Setup database monitoring
-        user_monitor = UserManager("monitor", user_monitor_conn)
+        user_monitor = UserManager(self.name, user_monitor_conn)
+        monitor_data = CovidData(user_monitor_conn)
+        monitor_bot = Bot(user_monitor, monitor_data, None, None)
+        REPORTS_AVAILABLE.labels(platform=self.name).set_function(monitor_bot.num_user_messages_available)
+
+        AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_monitor.get_mean_subscriptions())
+
         USER_COUNT.labels(platform="threema").set_function(lambda: user_monitor.get_user_number("threema"))
         USER_COUNT.labels(platform="telegram").set_function(lambda: user_monitor.get_user_number("telegram"))
         USER_COUNT.labels(platform="signal").set_function(lambda: user_monitor.get_user_number("signal"))
@@ -116,11 +122,6 @@ class MessengerBotSetup:
             lambda: user_monitor.get_social_network_user_number("twitter"))
         USER_COUNT.labels(platform="mastodon").set_function(
             lambda: user_monitor.get_social_network_user_number("mastodon"))
-
-        # Setup report monitoring
-        REPORTS_AVAILABLE.labels(platform=self.name).set_function(bot.num_user_messages_available)
-
-        AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_monitor.get_mean_subscriptions())
 
         # Return specific interface
         if self.name == "threema":
