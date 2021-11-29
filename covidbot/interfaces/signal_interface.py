@@ -193,8 +193,8 @@ class SignalInterface(MessengerInterface):
             float: new backoff time
         """
         if not failed:
-            # Minimum 1s sleep
-            if current_backoff > 1.25:
+            # Minimum 0.1s sleep
+            if current_backoff > 0.125:
                 new_backoff = 0.8 * current_backoff
             else:
                 new_backoff = current_backoff
