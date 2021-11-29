@@ -12,12 +12,10 @@ import prometheus_client
 from mysql.connector import connect, MySQLConnection
 from prometheus_client import Info
 
-from covidbot.covid_data import CovidData, Visualization, RKIHistoryUpdater
-from covidbot.interfaces.facebook_interface import FacebookInterface
-from covidbot.interfaces.messenger_interface import MessengerInterface
-from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT, REPORTS_AVAILABLE, \
-    MonitorMetrics
 from covidbot.bot import Bot
+from covidbot.covid_data import CovidData, Visualization
+from covidbot.interfaces.messenger_interface import MessengerInterface
+from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT, MonitorMetrics
 from covidbot.user_manager import UserManager
 
 LOGGING_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
