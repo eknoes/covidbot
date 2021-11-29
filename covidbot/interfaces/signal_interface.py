@@ -12,6 +12,9 @@ from typing import Dict, List, Optional
 import prometheus_async.aio
 import semaphore
 from semaphore import ChatContext
+from semaphore.exceptions import SignaldError, InternalError, InvalidRequestError, \
+    RateLimitError, NoSuchAccountError, NoSendPermissionError, UnknownGroupError, \
+    InvalidRecipientError
 
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import RECV_MESSAGE_COUNT, SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, \
@@ -43,7 +46,7 @@ class SignalInterface(MessengerInterface):
 
     async def run_async(self):
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
-                                 profile_picture=self.profile_picture) as bot:
+                                 profile_picture=self.profile_picture, raise_errors=True) as bot:
             # We do not really use the underlying bot framework, but just use our own Pure-Text Handler
             bot.register_handler(re.compile(""), self.message_handler)
             bot.set_exception_handler(self.exception_callback)
@@ -112,36 +115,53 @@ class SignalInterface(MessengerInterface):
             return
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
-                                 profile_picture=self.profile_picture) as bot:
+                                 profile_picture=self.profile_picture, raise_errors=True) as bot:
             backoff_time = random.uniform(2, 6)
             message_counter = 0
-            err_counter = 0
             for report_type, userid, message in self.bot.get_available_user_messages():
                 self.log.info(f"Try to send report {message_counter}")
                 disable_unicode = not self.bot.get_user_setting(userid, BotUserSettings.FORMATTING)
                 for elem in message:
-                    success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode),
-                                                     attachments=elem.images)
-                    if not success:
+                    success = False
+                    rate_limited = False
+                    try:
+                        success = await bot.send_message(userid, adapt_text(elem.message, just_strip=disable_unicode),
+                                                         attachments=elem.images)
+                    except InternalError as e:
+                        if "org.whispersystems.signalservice.api.push.exceptions.RateLimitException" in e.exceptions:
+                            rate_limited = True
+                            break
+                        else:
+                            raise e
+                    except RateLimitError as e:
+                        self.log.error(f"Invalid Send Request: {e.message}")
+                        rate_limited = True
                         break
-
-                    if elem.images and len(elem.images) > 2:
-                        backoff_time += len(elem.images) - 2
-                    backoff_time = self.backoff_timer(backoff_time, not success, userid)
+                    except NoSuchAccountError as e:
+                        self.log.warning(
+                            f"Account does not exist anymore, delete it: {e.account}")
+                        self.bot.delete_user(userid)
+                        break
+                    except UnknownGroupError:
+                        self.log.warning(
+                            f"Group does not exist anymore, delete it: {userid}")
+                        self.bot.delete_user(userid)
+                        break
+                    except (NoSendPermissionError, InvalidRecipientError) as e:
+                        self.log.warning(f"We cant send to {userid}, disabling user: {e.message}")
+                        self.bot.disable_user(userid)
+                        break
+                    except SignaldError as e:
+                        self.log.error(f"Unknown Signald Error: {e.IDENTIFIER}")
+                        raise e
 
                 if success:
-                    err_counter = 0
                     self.log.warning(f"({message_counter}) Sent daily report to {userid}")
                     self.bot.confirm_message_send(report_type, userid)
                 else:
-                    err_counter += 1
-                    self.log.error(
-                        f"({message_counter}) Error sending daily report to {userid}")
-                    # Disable user, hacky workaround for https://github.com/eknoes/covidbot/issues/103
-                    self.bot.disable_user(userid)
-                    if err_counter > 3:
-                        raise Exception("Can't send reports on signal")
+                    self.log.error(f"({message_counter}) Error sending daily report to {userid}")
 
+                self.backoff_timer(backoff_time, rate_limited)
                 message_counter += 1
 
     async def send_message_to_users(self, message: str, users: List[str]) -> None:
@@ -157,34 +177,31 @@ class SignalInterface(MessengerInterface):
         message = UserHintService.format_commands(message, self.bot.command_formatter)
 
         async with semaphore.Bot(self.phone_number, socket_path=self.socket, profile_name=self.profile_name,
-                                 profile_picture=self.profile_picture) as bot:
-            backoff_time = random.uniform(0.5, 2)
+                                 profile_picture=self.profile_picture, raise_errors=True) as bot:
             for user in users:
                 disable_unicode = not self.bot.get_user_setting(user, BotUserSettings.FORMATTING)
-                success = await bot.send_message(user, adapt_text(str(message), just_strip=disable_unicode))
-                backoff_time = self.backoff_timer(backoff_time, not success, user)
+                await bot.send_message(user, adapt_text(str(message), just_strip=disable_unicode))
 
-    def backoff_timer(self, current_backoff: float, failed: bool, user_id: str) -> float:
+    def backoff_timer(self, current_backoff: float, failed: bool) -> float:
         """
         Sleeps and calculates the new backoff time, depending whether sending the message failed or not
         Args:
             current_backoff: current backoff time in seconds
-            failed: True if sending the message led to an error
-            user_id: ID of the receiver
+            failed: True if we ran into a rate limit
 
         Returns:
             float: new backoff time
         """
         if not failed:
-            self.log.info(f"Sent message to {user_id}")
-            if current_backoff > 2:
-                new_backoff = 0.7 * current_backoff
+            # Minimum 1s sleep
+            if current_backoff > 1.25:
+                new_backoff = 0.8 * current_backoff
             else:
                 new_backoff = current_backoff
         else:
-            self.log.error(f"Error sending message to {user_id}")
-            new_backoff = 2*current_backoff
+            new_backoff = 3*current_backoff
             self.log.warning(f"New backoff time: {new_backoff}s")
+
         self.log.info(f"Sleeping {new_backoff}s to avoid server limitations")
         time.sleep(new_backoff)
         return new_backoff
