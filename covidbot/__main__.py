@@ -15,7 +15,8 @@ from prometheus_client import Info
 from covidbot.covid_data import CovidData, Visualization, RKIHistoryUpdater
 from covidbot.interfaces.facebook_interface import FacebookInterface
 from covidbot.interfaces.messenger_interface import MessengerInterface
-from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT, REPORTS_AVAILABLE
+from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT, REPORTS_AVAILABLE, \
+    MonitorMetrics
 from covidbot.bot import Bot
 from covidbot.user_manager import UserManager
 
@@ -90,13 +91,11 @@ class MessengerBotSetup:
         # Setup CovidData, Bot and UserManager
         data_conn = get_connection(self.config, autocommit=True)
         user_conn = get_connection(self.config, autocommit=True)
-        user_monitor_conn = get_connection(self.config, autocommit=True)
-        data_monitor_conn = get_connection(self.config, autocommit=True)
+        monitor_conn = get_connection(self.config, autocommit=True)
 
         self.connections.append(data_conn)
         self.connections.append(user_conn)
-        self.connections.append(user_monitor_conn)
-        self.connections.append(data_monitor_conn)
+        self.connections.append(monitor_conn)
 
         data = CovidData(data_conn)
         visualization = Visualization(data_conn, self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
@@ -105,25 +104,22 @@ class MessengerBotSetup:
                   has_location_feature=location_feature)
 
         # Setup database monitoring
-        user_monitor = UserManager(self.name, user_monitor_conn)
-        monitor_data = CovidData(data_monitor_conn)
-        monitor_bot = Bot(user_monitor, monitor_data, None, None)
-        REPORTS_AVAILABLE.labels(platform=self.name).set_function(monitor_bot.num_user_messages_available)
+        monitor_data = MonitorMetrics(monitor_conn)
+        REPORTS_AVAILABLE.labels(platform=self.name).set_function(lambda: monitor_data.get_unsent_reports_number(self.name))
+        AVERAGE_SUBSCRIPTION_COUNT.set_function(monitor_data.get_average_subscriptions)
 
-        AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_monitor.get_mean_subscriptions())
-
-        USER_COUNT.labels(platform="threema").set_function(lambda: user_monitor.get_user_number("threema"))
-        USER_COUNT.labels(platform="telegram").set_function(lambda: user_monitor.get_user_number("telegram"))
-        USER_COUNT.labels(platform="signal").set_function(lambda: user_monitor.get_user_number("signal"))
-        USER_COUNT.labels(platform="messenger").set_function(lambda: user_monitor.get_user_number("messenger"))
+        USER_COUNT.labels(platform="threema").set_function(lambda: monitor_data.get_user_number("threema"))
+        USER_COUNT.labels(platform="telegram").set_function(lambda: monitor_data.get_user_number("telegram"))
+        USER_COUNT.labels(platform="signal").set_function(lambda: monitor_data.get_user_number("signal"))
+        USER_COUNT.labels(platform="messenger").set_function(lambda: monitor_data.get_user_number("messenger"))
         USER_COUNT.labels(platform="facebook").set_function(
-            lambda: user_monitor.get_social_network_user_number("facebook"))
+            lambda: monitor_data.get_social_network_user_number("facebook"))
         USER_COUNT.labels(platform="instagram").set_function(
-            lambda: user_monitor.get_social_network_user_number("instagram"))
+            lambda: monitor_data.get_social_network_user_number("instagram"))
         USER_COUNT.labels(platform="twitter").set_function(
-            lambda: user_monitor.get_social_network_user_number("twitter"))
+            lambda: monitor_data.get_social_network_user_number("twitter"))
         USER_COUNT.labels(platform="mastodon").set_function(
-            lambda: user_monitor.get_social_network_user_number("mastodon"))
+            lambda: monitor_data.get_social_network_user_number("mastodon"))
 
         # Return specific interface
         if self.name == "threema":
