@@ -1030,6 +1030,22 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                 return True
         return False
 
+    def num_user_messages_available(self) -> int:
+        """
+        Checks whether there are messages for specific users available
+        :rtype: bool
+        :return: True if messages are available
+        """
+        num = 0
+        for user in self.user_manager.get_all_user(with_subscriptions=True):
+            for t in self.report_generator.get_available_reports(user):
+                num += 1
+
+            if self.user_manager.get_user_messages(user.id):
+                num += 1
+        return num
+
+
     def parseLocationInput(self, location_query: str, set_feedback=None, help_command="Befehl") -> Union[
         List[BotResponse], District]:
         if not location_query:

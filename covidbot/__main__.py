@@ -15,7 +15,7 @@ from prometheus_client import Info
 from covidbot.covid_data import CovidData, Visualization, RKIHistoryUpdater
 from covidbot.interfaces.facebook_interface import FacebookInterface
 from covidbot.interfaces.messenger_interface import MessengerInterface
-from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT
+from covidbot.metrics import USER_COUNT, AVERAGE_SUBSCRIPTION_COUNT, REPORTS_AVAILABLE
 from covidbot.bot import Bot
 from covidbot.user_manager import UserManager
 
@@ -116,6 +116,9 @@ class MessengerBotSetup:
             lambda: user_monitor.get_social_network_user_number("twitter"))
         USER_COUNT.labels(platform="mastodon").set_function(
             lambda: user_monitor.get_social_network_user_number("mastodon"))
+
+        # Setup report monitoring
+        REPORTS_AVAILABLE.labels(platform=self.name).set_function(bot.num_user_messages_available)
 
         AVERAGE_SUBSCRIPTION_COUNT.set_function(lambda: user_monitor.get_mean_subscriptions())
 

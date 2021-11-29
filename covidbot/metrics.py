@@ -16,6 +16,9 @@ SINGLE_COMMAND_RESPONSE_TIME = Summary('bot_response_time_single', 'Response tim
 USER_COUNT = Gauge('bot_total_user', 'Number of Bot users', ['platform'])
 AVERAGE_SUBSCRIPTION_COUNT = Gauge('bot_avg_subscriptions', 'Average No. of subscriptions')
 
+# Report statistics
+REPORTS_AVAILABLE = Gauge('bot_reports_available', 'Number of reports that need to be sent', ['platform'])
+
 # Visualization related
 CREATED_GRAPHS = Counter('bot_viz_created_graph_count', 'Number of created graphs', ['type'])
 CACHED_GRAPHS = Counter('bot_viz_cached_graph_count', 'Number of created graphs', ['type'])
