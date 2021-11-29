@@ -351,7 +351,7 @@ UNION
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.execute('SELECT last_update FROM covid_vaccinations WHERE date=(SELECT MAX(date) FROM covid_vaccinations) LIMIT 1')
             result = cursor.fetchone()
-            if not result:
+            if result is None:
                 return None
             return result['last_update']
 
