@@ -131,6 +131,12 @@ class SignalInterface(MessengerInterface):
                         if "org.whispersystems.signalservice.api.push.exceptions.RateLimitException" in e.exceptions:
                             rate_limited = True
                             break
+                        elif "org.whispersystems.signalservice.api.push.exceptions.UnregisteredUserException" in e.exceptions \
+                                or "org.whispersystems.signalservice.api.push.exceptions.NotFoundException" in e.exceptions:
+                            self.log.warning(
+                                f"Account does not exist anymore, delete it: {userid}")
+                            self.bot.delete_user(userid)
+                            break
                         else:
                             raise e
                     except RateLimitError as e:
@@ -161,7 +167,7 @@ class SignalInterface(MessengerInterface):
                 else:
                     self.log.error(f"({message_counter}) Error sending daily report to {userid}")
 
-                self.backoff_timer(backoff_time, rate_limited)
+                backoff_time = self.backoff_timer(backoff_time, rate_limited)
                 message_counter += 1
 
     async def send_message_to_users(self, message: str, users: List[str]) -> None:
