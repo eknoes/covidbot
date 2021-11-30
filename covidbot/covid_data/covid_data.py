@@ -383,7 +383,7 @@ class CovidDatabaseCreator:
             # Raw Infection Data
             cursor.execute(
                 'CREATE TABLE IF NOT EXISTS covid_data (id INTEGER PRIMARY KEY AUTO_INCREMENT, rs INTEGER, date DATE NULL DEFAULT NULL,'
-                'total_cases INT, incidence FLOAT, total_deaths INT, last_update DATETIME DEFAULT NOW(), '
+                'total_cases INT, incidence DOUBLE, total_deaths INT, last_update DATETIME DEFAULT NOW(), '
                 'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
 
             # Vaccination Data
