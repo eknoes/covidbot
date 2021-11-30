@@ -9,6 +9,59 @@ from covidbot.covid_data.updater.updater import Updater
 from covidbot.covid_data.updater.utils import clean_district_name
 
 
+class RKIKeyDataUpdater(Updater):
+    RKI_DATA = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/rki_key_data_hubv/FeatureServer/0/query?where=1%3D1&objectIds=&time=&resultType=none&outFields=*&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token="
+    RKI_STATUS = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/rki_data_status_v/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
+    log = logging.getLogger(__name__)
+
+    def update(self) -> bool:
+        last_update = self.get_last_update()
+
+        # Do not fetch if data is from today
+        if last_update == date.today():
+            return False
+
+        # Check RKI Status
+        response = self.get_resource(self.RKI_STATUS)
+        if not response:
+            return False
+
+        response = json.loads(response)
+        if response['features'][0]['attributes']['Status'] != "OK":
+            return False
+
+        online_date = date.fromtimestamp(response['features'][0]['attributes']['Datum'] / 1000)
+        if last_update is not None and online_date <= last_update:
+            return False
+
+        response = self.get_resource(self.RKI_DATA)
+        if response:
+            self.log.debug("Got RKI Data, checking if new")
+            response_data = json.loads(response)
+
+            covid_data = []
+            for item in response_data['features']:
+                district = item['attributes']
+                covid_data.append((district['AdmUnitId'], online_date, district['AnzFall'], district['Inz7T'], district['AnzTodesfall']))
+
+            with self.connection.cursor(dictionary=True) as cursor:
+                cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
+                 VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
+            self.connection.commit()
+
+            if last_update is None or last_update < self.get_last_update():
+                logging.info(f"Received new data, data is now from {self.get_last_update()}")
+                return True
+        return False
+
+    def get_last_update(self) -> Optional[datetime]:
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT MAX(date) FROM covid_data")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
+
 class RKIUpdater(Updater):
     RKI_LK_CSV = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&returnGeodetic=false&outFields=RS%2C+cases%2C+county%2C+BEZ%2C+EWZ%2C+BL%2C+BL_ID%2C+cases7_per_100k%2C+deaths%2C+cases7_bl_per_100k%2C+last_update&returnGeometry=false&returnCentroid=false&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pjson&token="
     log = logging.getLogger(__name__)
@@ -133,7 +186,7 @@ class RKIUpdater(Updater):
                     'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
                     'SET population=pop_sum.pop WHERE rs=pop_sum.id')
                 # Calculate Incidence
-                cursor.execute('UPDATE covid_data, '
+                '''cursor.execute('UPDATE covid_data, '
                                '(SELECT c.parent as rs, d.date, SUM(c.population * d.incidence) / SUM(c.population) '
                                'as incidence FROM covid_data as d '
                                'LEFT JOIN counties c on c.rs = d.rs '
@@ -141,7 +194,7 @@ class RKIUpdater(Updater):
                                'GROUP BY date, c.parent) as incidence '
                                'SET covid_data.incidence = incidence.incidence '
                                'WHERE covid_data.incidence IS NULL AND covid_data.date = incidence.date '
-                               'AND covid_data.rs = incidence.rs')
+                               'AND covid_data.rs = incidence.rs')'''
 
 
 class RKIHistoryUpdater(RKIUpdater):

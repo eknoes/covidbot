@@ -1,6 +1,6 @@
 from .covid_data import CovidData
 from .models import DistrictData, TrendValue, RValueData, VaccinationData
-from .updater.cases import RKIUpdater, RKIHistoryUpdater
+from .updater.cases import RKIKeyDataUpdater, RKIHistoryUpdater
 from .updater.icu import ICUGermanyUpdater, ICUGermanyHistoryUpdater
 from .updater.rules import RulesGermanyUpdater
 from .updater.rvalue import RValueGermanyUpdater

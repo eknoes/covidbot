@@ -328,9 +328,9 @@ def main():
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
             from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, RValueGermanyUpdater, \
-                RKIUpdater, ICUGermanyUpdater, \
+                RKIKeyDataUpdater, ICUGermanyUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, HospitalisationRKIUpdater
-            for updater in [RKIUpdater(conn), ICUGermanyHistoryUpdater(conn),
+            for updater in [RKIKeyDataUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyUpdater(conn), RulesGermanyUpdater(conn),
                             RValueGermanyUpdater(conn), ICUGermanyUpdater(conn), HospitalisationRKIUpdater(conn)]:
                 try:

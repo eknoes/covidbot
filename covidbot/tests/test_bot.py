@@ -4,7 +4,7 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import CovidData, RKIUpdater, VaccinationGermanyUpdater, \
+from covidbot.covid_data import CovidData, RKIKeyDataUpdater, VaccinationGermanyUpdater, \
     RValueGermanyUpdater, \
     Visualization, DistrictData, HospitalisationRKIUpdater
 from covidbot.bot import Bot
@@ -30,7 +30,7 @@ class TestBot(TestCase):
             cursor.execute("DROP TABLE IF EXISTS counties;")
 
         # Update Data
-        RKIUpdater(cls.conn).update()
+        RKIKeyDataUpdater(cls.conn).update()
         VaccinationGermanyUpdater(cls.conn).update()
         RValueGermanyUpdater(cls.conn).update()
         HospitalisationRKIUpdater(cls.conn).update()

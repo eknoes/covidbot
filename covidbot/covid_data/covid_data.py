@@ -135,7 +135,7 @@ UNION
             if not record:
                 return None
 
-            result = DistrictData(name=record['county_name'], id=district_id, incidence=record['incidence'],
+            result = DistrictData(name=record['county_name'], id=district_id, incidence=float(record['incidence']),
                                   parent=record['parent'], type=record['type'],
                                   total_cases=record['total_cases'], total_deaths=record['total_deaths'],
                                   new_cases=record['new_cases'], new_deaths=record['new_deaths'],
@@ -148,7 +148,7 @@ UNION
 
             for record in cursor.fetchall():
                 comparison_data = DistrictData(name=record['county_name'], id=district_id,
-                                               incidence=record['incidence'],
+                                               incidence=float(record['incidence']),
                                                type=record['type'], total_cases=record['total_cases'],
                                                total_deaths=record['total_deaths'], new_cases=record['new_cases'],
                                                new_deaths=record['new_deaths'], date=record['date'])
@@ -383,7 +383,7 @@ class CovidDatabaseCreator:
             # Raw Infection Data
             cursor.execute(
                 'CREATE TABLE IF NOT EXISTS covid_data (id INTEGER PRIMARY KEY AUTO_INCREMENT, rs INTEGER, date DATE NULL DEFAULT NULL,'
-                'total_cases INT, incidence DOUBLE, total_deaths INT, last_update DATETIME DEFAULT NOW(), '
+                'total_cases INT, incidence DECIMAL(7,2), total_deaths INT, last_update DATETIME DEFAULT NOW(), '
                 'FOREIGN KEY(rs) REFERENCES counties(rs), UNIQUE(rs, date))')
 
             # Vaccination Data
