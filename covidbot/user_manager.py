@@ -62,7 +62,7 @@ class UserManager(object):
                            '(id INT AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(20), message_id BIGINT, '
                            'UNIQUE(platform, message_id))')
             cursor.execute(
-                'CREATE TABLE IF NOT EXISTS platform_statistics (id INTEGER AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(100), user INTEGER, date DATETIME)')
+                'CREATE TABLE IF NOT EXISTS platform_statistics (id INTEGER AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(100), user INTEGER, date DATE, UNIQUE(platform, date))')
             cursor.execute(
                 'CREATE TABLE IF NOT EXISTS bot_user_settings (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER '
                 'NOT NULL, setting VARCHAR(100), value TINYINT(1), UNIQUE(user_id, setting), FOREIGN KEY(user_id) '
@@ -282,7 +282,7 @@ class UserManager(object):
 
     def get_total_user_number(self) -> int:
         with self.connection.cursor() as cursor:
-            cursor.execute('SELECT SUM(user) FROM platform_statistics')
+            cursor.execute('SELECT SUM(user) FROM platform_statistics WHERE date=CURRENT_DATE()')
             row = cursor.fetchone()
             if not row or not row[0]:
                 return 0 + self.get_messenger_user_number()
@@ -414,14 +414,14 @@ class UserManager(object):
 
     def set_platform_user_number(self, number_of_users: int):
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('INSERT INTO platform_statistics (platform, user, date) VALUE (%s, %s, CURRENT_TIMESTAMP()) ON DUPLICATE '
+            cursor.execute('INSERT INTO platform_statistics (platform, user, date) VALUE (%s, %s, CURRENT_DATE()) ON DUPLICATE '
                            'KEY UPDATE user=%s', [self.platform, number_of_users, number_of_users])
         self.connection.commit()
 
     def get_social_network_user_number(self, network: str):
         try:
             with self.connection.cursor(dictionary=True) as cursor:
-                cursor.execute('SELECT user FROM platform_statistics WHERE platform=%s LIMIT 1', [network])
+                cursor.execute('SELECT user FROM platform_statistics WHERE platform=%s ORDER BY date DESC LIMIT 1', [network])
                 rows = cursor.fetchall()
                 if rows:
                     return rows[0]['user']
