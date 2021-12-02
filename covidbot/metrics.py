@@ -61,11 +61,11 @@ class MonitorMetrics:
         try:
             with self.connection.cursor(dictionary=True) as cursor:
                 cursor.execute(
-                    'SELECT followers FROM platform_statistics WHERE platform=%s LIMIT 1',
+                    'SELECT user FROM platform_statistics WHERE platform=%s LIMIT 1',
                     [name])
                 rows = cursor.fetchall()
                 if rows:
-                    return rows[0]['followers']
+                    return rows[0]['user']
                 return 0
         except OperationalError as e:
             self.log.exception(f"OperationalError: {e.msg}", exc_info=e)
