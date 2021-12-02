@@ -352,7 +352,7 @@ class UserManager(object):
 
     def get_users_per_network(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT * FROM platform_statistics ORDER BY user DESC")
+            cursor.execute("SELECT * FROM platform_statistics WHERE date=CURRENT_DATE() ORDER BY user DESC")
             results = []
             for row in cursor.fetchall():
                 results.append((str(row['platform']).capitalize(), row['user']))
