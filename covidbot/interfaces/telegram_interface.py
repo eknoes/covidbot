@@ -60,7 +60,7 @@ class TelegramInterface(MessengerInterface):
     def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
         self.dev_chat_id = dev_chat_id
         self.bot = bot
-        self.updater = Updater(api_key, defaults=Defaults(timeout=5))
+        self.updater = Updater(api_key, defaults=Defaults(timeout=10))
 
     def run(self):
         # Adapt messages for text-handling
