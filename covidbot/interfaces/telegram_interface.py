@@ -12,7 +12,8 @@ import ujson as json
 from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, ChatAction, \
     InputMediaPhoto
 from telegram.error import BadRequest, TelegramError, Unauthorized, ChatMigrated
-from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
+from telegram.ext import Updater, CallbackContext, MessageHandler, Filters, \
+    CallbackQueryHandler, Defaults
 
 from covidbot.interfaces.messenger_interface import MessengerInterface
 from covidbot.metrics import SENT_IMAGES_COUNT, SENT_MESSAGE_COUNT, BOT_RESPONSE_TIME, RECV_MESSAGE_COUNT, \
@@ -59,7 +60,7 @@ class TelegramInterface(MessengerInterface):
     def __init__(self, bot: Bot, api_key: str, dev_chat_id: int):
         self.dev_chat_id = dev_chat_id
         self.bot = bot
-        self.updater = Updater(api_key)
+        self.updater = Updater(api_key, defaults=Defaults(timeout=5))
 
     def run(self):
         # Adapt messages for text-handling

@@ -135,6 +135,10 @@ UNION
             if not record:
                 return None
 
+            incidence = record['incidence']
+            if incidence is not None:
+                incidence = float(incidence)
+
             result = DistrictData(name=record['county_name'], id=district_id, incidence=float(record['incidence']),
                                   parent=record['parent'], type=record['type'],
                                   total_cases=record['total_cases'], total_deaths=record['total_deaths'],
@@ -147,8 +151,12 @@ UNION
                 [district_id, result.date, result.date])
 
             for record in cursor.fetchall():
+                incidence = record['incidence']
+                if incidence is not None:
+                    incidence = float(incidence)
+
                 comparison_data = DistrictData(name=record['county_name'], id=district_id,
-                                               incidence=float(record['incidence']),
+                                               incidence=incidence,
                                                type=record['type'], total_cases=record['total_cases'],
                                                total_deaths=record['total_deaths'], new_cases=record['new_cases'],
                                                new_deaths=record['new_deaths'], date=record['date'])
