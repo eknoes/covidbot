@@ -41,7 +41,6 @@ class CovidDataTest(TestCase):
                     cursor.execute(stmt)
 
             updater = RKIKeyDataUpdater(self.conn)
-            updater.calculate_aggregated_values(date.fromisoformat("2021-01-16"))
 
     def tearDown(self) -> None:
         del self.data
