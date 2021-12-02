@@ -46,7 +46,7 @@ class TwitterInterface(SingleCommandInterface):
         response = self.twitter.request('users/show', {'user_id': 1367862514579542017})
         if response.status_code == 200:
             number = response.json()['followers_count']
-            self.user_manager.set_social_network_user_number(number)
+            self.user_manager.set_platform_user_number(number)
 
     def write_message(self, messages: List[BotResponse], reply_obj: Optional[object] = None) -> bool:
         if reply_obj and type(reply_obj) != int:

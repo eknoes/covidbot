@@ -35,7 +35,7 @@ class FacebookInterface(SingleCommandInterface):
                                     f"https://graph.facebook.com/{self.page_id}?fields=followers_count&access_token={self.access_token}")
         if response.status_code == 200:
             number = response.json()['followers_count']
-            self.user_manager.set_social_network_user_number(number)
+            self.user_manager.set_platform_user_number(number)
         else:
             self.log.error(f"Facebook API returned {response.status_code}: {response.text}")
 

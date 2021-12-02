@@ -62,7 +62,7 @@ class UserManager(object):
                            '(id INT AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(20), message_id BIGINT, '
                            'UNIQUE(platform, message_id))')
             cursor.execute(
-                'CREATE TABLE IF NOT EXISTS platform_statistics (platform VARCHAR(100) PRIMARY KEY, followers INTEGER)')
+                'CREATE TABLE IF NOT EXISTS platform_statistics (id INTEGER AUTO_INCREMENT PRIMARY KEY, platform VARCHAR(100), user INTEGER, date DATETIME)')
             cursor.execute(
                 'CREATE TABLE IF NOT EXISTS bot_user_settings (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER '
                 'NOT NULL, setting VARCHAR(100), value TINYINT(1), UNIQUE(user_id, setting), FOREIGN KEY(user_id) '
@@ -282,7 +282,7 @@ class UserManager(object):
 
     def get_total_user_number(self) -> int:
         with self.connection.cursor() as cursor:
-            cursor.execute('SELECT SUM(followers) FROM platform_statistics')
+            cursor.execute('SELECT SUM(user) FROM platform_statistics')
             row = cursor.fetchone()
             if not row or not row[0]:
                 return 0 + self.get_messenger_user_number()
@@ -352,10 +352,10 @@ class UserManager(object):
 
     def get_users_per_network(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT * FROM platform_statistics ORDER BY followers DESC")
+            cursor.execute("SELECT * FROM platform_statistics ORDER BY user DESC")
             results = []
             for row in cursor.fetchall():
-                results.append((str(row['platform']).capitalize(), row['followers']))
+                results.append((str(row['platform']).capitalize(), row['user']))
             return results
 
     def add_user_message(self, recipient_id: int, message: str):
@@ -412,19 +412,19 @@ class UserManager(object):
                            [self.platform, message_id])
         self.connection.commit()
 
-    def set_social_network_user_number(self, number_of_users: int):
+    def set_platform_user_number(self, number_of_users: int):
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('INSERT INTO platform_statistics (platform, followers) VALUE (%s, %s) ON DUPLICATE '
-                           'KEY UPDATE followers=%s', [self.platform, number_of_users, number_of_users])
+            cursor.execute('INSERT INTO platform_statistics (platform, user, date) VALUE (%s, %s, CURRENT_TIMESTAMP()) ON DUPLICATE '
+                           'KEY UPDATE user=%s', [self.platform, number_of_users, number_of_users])
         self.connection.commit()
 
     def get_social_network_user_number(self, network: str):
         try:
             with self.connection.cursor(dictionary=True) as cursor:
-                cursor.execute('SELECT followers FROM platform_statistics WHERE platform=%s LIMIT 1', [network])
+                cursor.execute('SELECT user FROM platform_statistics WHERE platform=%s LIMIT 1', [network])
                 rows = cursor.fetchall()
                 if rows:
-                    return rows[0]['followers']
+                    return rows[0]['user']
                 return 0
         except OperationalError as e:
             self.log.exception(f"OperationalError: {e.msg}", exc_info=e)

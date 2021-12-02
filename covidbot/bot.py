@@ -995,6 +995,10 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         :rtype: Optional[list[Tuple[str, str]]]
         :return: List of (userid, message)
         """
+
+        # Set current statistics
+        self.user_manager.set_platform_user_number(self.user_manager.get_user_number(self.user_manager.platform))
+
         for user in self.user_manager.get_all_user(with_subscriptions=True):
             for t in self.report_generator.get_available_reports(user):
                 yield t, user.platform_id, self.report_generator.generate_report(user, t)
