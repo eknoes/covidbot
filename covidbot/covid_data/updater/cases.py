@@ -76,7 +76,7 @@ class RKIDistrictsUpdater(Updater):
     def update(self) -> bool:
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT COUNT(rs) FROM counties")
-            if cursor.fetchone()[0] != 0:
+            if cursor.fetchone()[0] == 429:
                 return False
 
         response = self.get_resource(self.RKI_LK_CSV, force=True)
@@ -110,7 +110,14 @@ class RKIDistrictsUpdater(Updater):
                                'VALUES (%s, %s, %s, %s, %s) '
                                'ON DUPLICATE KEY UPDATE population=VALUES(population)',
                                rs_data)
-
+            # Calculate Population
+            for i in range(0, 2):
+                cursor.execute(
+                    'UPDATE counties, (SELECT ncounties.rs as id, SUM(counties.population) as pop FROM counties\n'
+                    '    LEFT JOIN counties ncounties ON ncounties.rs = counties.parent\n'
+                    'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
+                    'SET population=pop_sum.pop WHERE rs=pop_sum.id')
+        self.connection.commit()
         self.log.debug("Finished inserting county data")
 
 
@@ -169,12 +176,6 @@ class RKIHistoryUpdater(Updater):
                                   date=new.new_date, total_cases=new.new_cases, total_deaths=new.new_deaths, 
                                   last_update=new.last_update''',
                                args)
-                # Calculate Population
-                cursor.execute(
-                    'UPDATE counties, (SELECT ncounties.rs as id, SUM(counties.population) as pop FROM counties\n'
-                    '    LEFT JOIN counties ncounties ON ncounties.rs = counties.parent\n'
-                    'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
-                    'SET population=pop_sum.pop WHERE rs=pop_sum.id')
                 # Calculate Incidence
                 cursor.execute('UPDATE covid_data, '
                                '(SELECT c.parent as rs, d.date, SUM(c.population * d.incidence) / SUM(c.population) '

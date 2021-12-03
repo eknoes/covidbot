@@ -4,7 +4,8 @@ from unittest import TestCase
 from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
-from covidbot.covid_data import CovidData, DistrictData, TrendValue, RKIKeyDataUpdater
+from covidbot.covid_data import CovidData, DistrictData, TrendValue, RKIKeyDataUpdater, \
+    RKIHistoryUpdater
 
 
 class CovidDataTest(TestCase):
@@ -40,7 +41,7 @@ class CovidDataTest(TestCase):
                 for stmt in f.readlines():
                     cursor.execute(stmt)
 
-            updater = RKIKeyDataUpdater(self.conn)
+            updater = RKIHistoryUpdater(self.conn).calculate_aggregated_values()
 
     def tearDown(self) -> None:
         del self.data
