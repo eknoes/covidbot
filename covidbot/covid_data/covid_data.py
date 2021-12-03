@@ -139,7 +139,7 @@ UNION
             if incidence is not None:
                 incidence = float(incidence)
 
-            result = DistrictData(name=record['county_name'], id=district_id, incidence=float(record['incidence']),
+            result = DistrictData(name=record['county_name'], id=district_id, incidence=incidence,
                                   parent=record['parent'], type=record['type'],
                                   total_cases=record['total_cases'], total_deaths=record['total_deaths'],
                                   new_cases=record['new_cases'], new_deaths=record['new_deaths'],
@@ -377,6 +377,12 @@ class CovidDatabaseCreator:
         log = logging.getLogger(str(self.__class__))
         log.debug("Creating Tables")
         with connection.cursor(dictionary=False) as cursor:
+            # Check collation
+            cursor.execute('SELECT @@character_set_database, @@collation_database')
+            query = cursor.fetchone()
+            if query is None or not (query[0] == "utf8mb4" and query[1] == "utf8mb4_unicode_ci"):
+                cursor.execute('ALTER DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci')
+
             cursor.execute('CREATE TABLE IF NOT EXISTS counties '
                            '(rs INTEGER PRIMARY KEY, county_name VARCHAR(255), type VARCHAR(30),'
                            'population INTEGER NULL DEFAULT NULL, parent INTEGER, '
