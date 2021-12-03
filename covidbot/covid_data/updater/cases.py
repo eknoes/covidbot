@@ -12,9 +12,13 @@ from covidbot.covid_data.updater.utils import clean_district_name
 class RKIKeyDataUpdater(Updater):
     RKI_DATA = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/rki_key_data_hubv/FeatureServer/0/query?where=1%3D1&objectIds=&time=&resultType=none&outFields=*&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token="
     RKI_STATUS = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/rki_data_status_v/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
+
     log = logging.getLogger(__name__)
 
     def update(self) -> bool:
+        # First check that districts exist
+        RKIDistrictsUpdater(self.connection).update()
+
         last_update = self.get_last_update()
 
         # Do not fetch if data is from today
@@ -62,97 +66,83 @@ class RKIKeyDataUpdater(Updater):
                 return row[0]
 
 
-class RKIUpdater(Updater):
+class RKIDistrictsUpdater(Updater):
     RKI_LK_CSV = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&returnGeodetic=false&outFields=RS%2C+cases%2C+county%2C+BEZ%2C+EWZ%2C+BL%2C+BL_ID%2C+cases7_per_100k%2C+deaths%2C+cases7_bl_per_100k%2C+last_update&returnGeometry=false&returnCentroid=false&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pjson&token="
     log = logging.getLogger(__name__)
 
     def get_last_update(self) -> Optional[datetime]:
-        with self.connection.cursor() as cursor:
-            cursor.execute("SELECT MAX(date) FROM covid_data")
-            row = cursor.fetchone()
-            if row:
-                return row[0]
+        return None
 
     def update(self) -> bool:
-        last_update = self.get_last_update()
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(rs) FROM counties")
+            if cursor.fetchone()[0] != 0:
+                return False
 
-        # Do not fetch if data is from today
-        if last_update == date.today():
-            return False
-
-        response = self.get_resource(self.RKI_LK_CSV)
+        response = self.get_resource(self.RKI_LK_CSV, force=True)
         if response:
-            self.log.debug("Got RKI Data, checking if new")
             response_data = json.loads(response)
-            self.add_data(response_data['features'])
-            if last_update is None or last_update < self.get_last_update():
-                logging.info(f"Received new data, data is now from {self.get_last_update()}")
-                return True
+            self.parse_data(response_data['features'])
+            return True
         return False
 
-    def add_data(self, json_data: Dict) -> None:
-        covid_data = []
+    def parse_data(self, json_data: Dict) -> None:
         rs_data = []
         added_bl = set()
         last_update = self.get_last_update()
-        now = datetime.now().date()
-        new_updated = None
         for feature in json_data:
             row = feature['attributes']
 
-            # RKI sometimes has empty date strings
-            if row['last_update'] != "":
-                new_updated = datetime.strptime(row['last_update'], "%d.%m.%Y, %H:%M Uhr").date()
-            elif new_updated is None:
-                continue
-
-            if last_update and new_updated <= last_update or now < new_updated:
-                # Do not take data from future, important for testing
-                continue
-
             # Gather Bundesland data
             if row['BL_ID'] not in added_bl:
-                covid_data.append(
-                    (int(row['BL_ID']), new_updated, None, float(row['cases7_bl_per_100k']),
-                     None))
                 rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', None, 0))
                 added_bl.add(row['BL_ID'])
 
-            covid_data.append((int(row['RS']), new_updated, int(row['cases']), float(row['cases7_per_100k']),
-                               int(row['deaths'])))
             rs_data.append((int(row['RS']), clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
                             row['BEZ'], int(row['EWZ']), int(row['BL_ID'])))
 
-        if not covid_data or not rs_data:
+        if not rs_data:
             return
 
-        self.log.debug("Insert new data into counties and covid_data")
+        self.log.debug("Insert new data into counties")
         with self.connection.cursor(dictionary=True) as cursor:
             cursor.executemany('INSERT INTO counties (rs, county_name, type, population, parent) '
                                'VALUES (%s, %s, %s, %s, %s) '
                                'ON DUPLICATE KEY UPDATE population=VALUES(population)',
                                rs_data)
-            cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
-             VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
 
-        if not last_update or last_update < self.get_last_update():
-            # Only update aggregated data if new data is available
-            self.calculate_aggregated_values(new_updated)
+        self.log.debug("Finished inserting county data")
 
-        # Check for Plausibility, as Dataset has been wrong sometimes
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT new_cases, new_deaths FROM covid_data_calculated '
-                           'WHERE rs=%s ORDER BY date DESC LIMIT 1', [self.get_district_id("Deutschland")])
-            germany = cursor.fetchone()
-            if germany['new_cases'] and (germany['new_cases'] <= 0 or germany['new_cases'] >= 1000000) \
-                    or germany['new_deaths'] and germany['new_deaths'] <= 0:
-                self.log.error("Data is looking weird! Rolling back data update!")
-                self.connection.rollback()
-                raise ValueError(
-                    f"COVID-19 {germany['new_cases']} new cases and {germany['new_deaths']} deaths are not plausible. Aborting!")
-            else:
-                self.connection.commit()
-        self.log.debug("Finished inserting new data")
+
+class RKIHistoryUpdater(Updater):
+    DEATHS_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/deaths-rki-by-ags.csv"
+    CASES_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/cases-rki-by-ags.csv"
+    INCIDENCE_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/more-data/7di-rki-by-ags.csv"
+    max_delta = 1
+    min_delta = 60
+    log = logging.getLogger(__name__)
+
+    def get_last_update(self) -> Optional[datetime]:
+        with self.connection.cursor() as cursor:
+            cursor.execute("SELECT last_update FROM covid_data WHERE date = SUBDATE(CURRENT_DATE, 8) AND rs=0 LIMIT 1")
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+
+    def update(self) -> bool:
+        updated = False
+        if self.update_cases():
+            self.log.info("New case data available")
+            updated = True
+
+        if self.update_deaths():
+            self.log.info("New deaths data available")
+            updated = True
+
+        if self.update_incidences():
+            self.log.info("New incidence data available")
+            updated = True
+        return updated
 
     def calculate_aggregated_values(self, new_updated: Optional[date] = None):
         self.log.debug("Calculating aggregated values")
@@ -186,7 +176,7 @@ class RKIUpdater(Updater):
                     'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
                     'SET population=pop_sum.pop WHERE rs=pop_sum.id')
                 # Calculate Incidence
-                '''cursor.execute('UPDATE covid_data, '
+                cursor.execute('UPDATE covid_data, '
                                '(SELECT c.parent as rs, d.date, SUM(c.population * d.incidence) / SUM(c.population) '
                                'as incidence FROM covid_data as d '
                                'LEFT JOIN counties c on c.rs = d.rs '
@@ -194,37 +184,7 @@ class RKIUpdater(Updater):
                                'GROUP BY date, c.parent) as incidence '
                                'SET covid_data.incidence = incidence.incidence '
                                'WHERE covid_data.incidence IS NULL AND covid_data.date = incidence.date '
-                               'AND covid_data.rs = incidence.rs')'''
-
-
-class RKIHistoryUpdater(RKIUpdater):
-    DEATHS_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/deaths-rki-by-ags.csv"
-    CASES_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/cases-rki-by-ags.csv"
-    INCIDENCE_URL = "https://raw.githubusercontent.com/jgehrcke/covid-19-germany-gae/master/more-data/7di-rki-by-ags.csv"
-    max_delta = 1
-    min_delta = 60
-
-    def get_last_update(self) -> Optional[datetime]:
-        with self.connection.cursor() as cursor:
-            cursor.execute("SELECT last_update FROM covid_data WHERE date = SUBDATE(CURRENT_DATE, 8) AND rs=0 LIMIT 1")
-            row = cursor.fetchone()
-            if row:
-                return row[0]
-
-    def update(self) -> bool:
-        updated = False
-        if self.update_cases():
-            self.log.info("New case data available")
-            updated = True
-
-        if self.update_deaths():
-            self.log.info("New deaths data available")
-            updated = True
-
-        if self.update_incidences():
-            self.log.info("New incidence data available")
-            updated = True
-        return updated
+                               'AND covid_data.rs = incidence.rs')
 
     def update_cases(self) -> bool:
         cases = self.get_resource(self.CASES_URL, True)
