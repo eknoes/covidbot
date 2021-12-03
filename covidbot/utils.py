@@ -252,7 +252,7 @@ def message_type_desc(item: MessageType) -> str:
 
 
 def get_trend(prev_value: Optional[Union[int, float]], current_value: Optional[Union[int, float]]) -> Optional[TrendValue]:
-    if not prev_value or not current_value:
+    if prev_value is None or current_value is None:
         return None
     elif prev_value < 0.99 * current_value:
         return TrendValue.UP

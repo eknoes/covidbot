@@ -1,12 +1,12 @@
 import csv
 import logging
 from datetime import datetime, date, timedelta
-from typing import Optional, Dict
+from typing import Optional
 
 import ujson as json
 
+from covidbot.covid_data.updater.districts import RKIDistrictsUpdater
 from covidbot.covid_data.updater.updater import Updater
-from covidbot.covid_data.updater.utils import clean_district_name
 
 
 class RKIKeyDataUpdater(Updater):
@@ -64,61 +64,6 @@ class RKIKeyDataUpdater(Updater):
             row = cursor.fetchone()
             if row:
                 return row[0]
-
-
-class RKIDistrictsUpdater(Updater):
-    RKI_LK_CSV = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&returnGeodetic=false&outFields=RS%2C+cases%2C+county%2C+BEZ%2C+EWZ%2C+BL%2C+BL_ID%2C+cases7_per_100k%2C+deaths%2C+cases7_bl_per_100k%2C+last_update&returnGeometry=false&returnCentroid=false&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pjson&token="
-    log = logging.getLogger(__name__)
-
-    def get_last_update(self) -> Optional[datetime]:
-        return None
-
-    def update(self) -> bool:
-        with self.connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(rs) FROM counties")
-            if cursor.fetchone()[0] == 429:
-                return False
-
-        response = self.get_resource(self.RKI_LK_CSV, force=True)
-        if response:
-            response_data = json.loads(response)
-            self.parse_data(response_data['features'])
-            return True
-        return False
-
-    def parse_data(self, json_data: Dict) -> None:
-        rs_data = []
-        added_bl = set()
-        last_update = self.get_last_update()
-        for feature in json_data:
-            row = feature['attributes']
-
-            # Gather Bundesland data
-            if row['BL_ID'] not in added_bl:
-                rs_data.append((int(row['BL_ID']), row['BL'], 'Bundesland', None, 0))
-                added_bl.add(row['BL_ID'])
-
-            rs_data.append((int(row['RS']), clean_district_name(row['county']) + " (" + row['BEZ'] + ")",
-                            row['BEZ'], int(row['EWZ']), int(row['BL_ID'])))
-
-        if not rs_data:
-            return
-
-        self.log.debug("Insert new data into counties")
-        with self.connection.cursor(dictionary=True) as cursor:
-            cursor.executemany('INSERT INTO counties (rs, county_name, type, population, parent) '
-                               'VALUES (%s, %s, %s, %s, %s) '
-                               'ON DUPLICATE KEY UPDATE population=VALUES(population)',
-                               rs_data)
-            # Calculate Population
-            for i in range(0, 2):
-                cursor.execute(
-                    'UPDATE counties, (SELECT ncounties.rs as id, SUM(counties.population) as pop FROM counties\n'
-                    '    LEFT JOIN counties ncounties ON ncounties.rs = counties.parent\n'
-                    'WHERE counties.parent IS NOT NULL GROUP BY counties.parent) as pop_sum\n'
-                    'SET population=pop_sum.pop WHERE rs=pop_sum.id')
-        self.connection.commit()
-        self.log.debug("Finished inserting county data")
 
 
 class RKIHistoryUpdater(Updater):
