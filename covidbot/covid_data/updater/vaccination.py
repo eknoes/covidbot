@@ -6,6 +6,7 @@ from typing import Optional
 import numpy
 import pandas as pd
 
+from covidbot.covid_data.updater.districts import RKIDistrictsUpdater
 from covidbot.covid_data.updater.updater import Updater
 from covidbot.utils import date_range
 
@@ -32,6 +33,9 @@ class VaccinationGermanyUpdater(Updater):
 
         if last_update and datetime.now() - last_update < timedelta(hours=12):
             return False
+
+        # Make sure population exists
+        RKIDistrictsUpdater(self.connection).update()
 
         response = self.get_resource(self.URL)
         if response:

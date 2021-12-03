@@ -427,4 +427,5 @@ values  (0, 'Deutschland', 'Staat', null, 83197001),
         (16074, 'Saale-Holzland-Kreis (Landkreis)', 'Landkreis', 16, 82816),
         (16075, 'Saale-Orla-Kreis (Landkreis)', 'Landkreis', 16, 79632),
         (16076, 'Greiz (Landkreis)', 'Landkreis', 16, 96668),
-        (16077, 'Altenburger Land (Landkreis)', 'Landkreis', 16, 88356);
+        (16077, 'Altenburger Land (Landkreis)', 'Landkreis', 16, 88356)
+        ON DUPLICATE KEY UPDATE counties.population=VALUES(population)
