@@ -285,8 +285,8 @@ class UserManager(object):
             cursor.execute('SELECT SUM(user) FROM platform_statistics WHERE date=CURRENT_DATE()')
             row = cursor.fetchone()
             if not row or not row[0]:
-                return 0 + self.get_messenger_user_number()
-            return row[0] + self.get_messenger_user_number()
+                return 0
+            return row[0]
 
     def get_user_number(self, platform: str) -> int:
         try:
@@ -341,18 +341,19 @@ class UserManager(object):
 
     def get_users_per_messenger(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(user_id) as c, platform FROM bot_user "
+            cursor.execute("SELECT * FROM platform_statistics "
                            "WHERE platform NOT IN ('interactive', 'twitter', 'mastodon', 'instagram', 'facebook') "
-                           "AND activated=1 "
-                           "GROUP BY platform ORDER BY c DESC")
+                           " AND date=CURRENT_DATE() ORDER BY user DESC")
             results = []
             for row in cursor.fetchall():
-                results.append((str(row['platform']).capitalize(), row['c']))
+                results.append((str(row['platform']).capitalize(), row['user']))
             return results
 
     def get_users_per_network(self) -> List[Tuple[str, int]]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT * FROM platform_statistics WHERE date=CURRENT_DATE() ORDER BY user DESC")
+            cursor.execute("SELECT * FROM platform_statistics "
+                           "WHERE platform IN ('twitter', 'mastodon', 'instagram', 'facebook') "
+                           " AND date=CURRENT_DATE() ORDER BY user DESC")
             results = []
             for row in cursor.fetchall():
                 results.append((str(row['platform']).capitalize(), row['user']))

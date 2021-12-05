@@ -819,7 +819,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         message = "Aktuell nutzen {total_user} Personen diesen Bot, davon "
         platforms = self.user_manager.get_users_per_messenger()
         platforms.sort(key=lambda p: p[1], reverse=True)
-        messenger_strings = [f"{c} über {m}" for m, c in platforms]
+        messenger_strings = [f"{format_int(c)} über {m}" for m, c in platforms]
         message += ", ".join(messenger_strings[:-1])
         if messenger_strings[-1:]:
             message += f" und {messenger_strings[-1:][0]}. "
@@ -828,7 +828,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         platforms = self.user_manager.get_users_per_network()
         platforms.sort(key=lambda p: p[1], reverse=True)
-        messenger_strings = [f"{c} Follower auf {m}" for m, c in platforms]
+        messenger_strings = [f"{format_int(c)} Follower auf {m}" for m, c in platforms]
         message += "Außerdem sind "
         message += ", ".join(messenger_strings[:-1])
         if messenger_strings[-1:]:
@@ -847,7 +847,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             i += 1
         message += "\nIm Durchschnitt hat ein:e Nutzer:in {mean} Orte abonniert, " \
                    "die höchste Anzahl an Abos liegt bei {most_subs}."
-        message = message.format(total_user=self.user_manager.get_total_user_number(),
+        message = message.format(total_user=format_int(self.user_manager.get_total_user_number()),
                                  mean=format_float(self.user_manager.get_mean_subscriptions()),
                                  most_subs=self.user_manager.get_most_subscriptions())
 
