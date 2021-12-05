@@ -211,9 +211,7 @@ class Visualization:
         CREATED_GRAPHS.labels(type='botuser').inc()
 
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT COUNT(b.user_id) as count, bot_date FROM "
-                           "(SELECT DISTINCT date(created) as bot_date FROM bot_user) as dates "
-                           "LEFT JOIN bot_user b ON date(b.created) <= bot_date GROUP BY bot_date ORDER BY bot_date")
+            cursor.execute("SELECT date, SUM(user) as count FROM platform_statistics GROUP BY date")
 
             y_data = []
             x_data = []
@@ -222,21 +220,21 @@ class Visualization:
             for row in cursor.fetchall():
                 if not current:
                     # noinspection PyUnusedLocal
-                    current = row['bot_date']
+                    current = row['date']
                 else:
-                    while row['bot_date'] != current + datetime.timedelta(days=1):
+                    while row['date'] != current + datetime.timedelta(days=1):
                         current += datetime.timedelta(days=1)
                         y_data.append(y_data[-1])
                         x_data.append(current)
-                current = row['bot_date']
+                current = row['date']
                 y_data.append(row['count'])
-                x_data.append(row['bot_date'])
+                x_data.append(row['date'])
 
             while x_data[-1] != today:
                 y_data.append(y_data[-1])
                 x_data.append(x_data[-1] + datetime.timedelta(days=1))
 
-            fig, ax1 = self.setup_plot(None, f"Nutzer:innen des Covidbots (über Messenger)", "Anzahl")
+            fig, ax1 = self.setup_plot(None, f"Nutzer:innen des Covidbots", "Anzahl")
             # Plot data
             plt.xticks(x_data, rotation='30', ha='right')
             ax1.fill_between(x_data, y_data, color="#1fa2de", zorder=3)
