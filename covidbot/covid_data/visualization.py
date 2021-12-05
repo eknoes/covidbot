@@ -230,9 +230,10 @@ class Visualization:
                 y_data.append(row['count'])
                 x_data.append(row['date'])
 
-            while x_data[-1] != today:
-                y_data.append(y_data[-1])
-                x_data.append(x_data[-1] + datetime.timedelta(days=1))
+            if x_data is not None:
+                while x_data[-1] != today:
+                    y_data.append(y_data[-1])
+                    x_data.append(x_data[-1] + datetime.timedelta(days=1))
 
             fig, ax1 = self.setup_plot(None, f"Nutzer:innen des Covidbots", "Anzahl")
             # Plot data
