@@ -230,7 +230,7 @@ class Visualization:
                 y_data.append(row['count'])
                 x_data.append(row['date'])
 
-            if x_data is not None:
+            if x_data:
                 while x_data[-1] != today:
                     y_data.append(y_data[-1])
                     x_data.append(x_data[-1] + datetime.timedelta(days=1))
