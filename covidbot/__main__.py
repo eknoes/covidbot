@@ -32,7 +32,8 @@ def get_connection(cfg, autocommit=False) -> MySQLConnection:
                          user=cfg['DATABASE'].get('USER'),
                          password=cfg['DATABASE'].get('PASSWORD'),
                          port=cfg['DATABASE'].get('PORT'),
-                         host=cfg['DATABASE'].get('HOST', 'localhost'), autocommit=autocommit)
+                         host=cfg['DATABASE'].get('HOST', 'localhost'),
+                         autocommit=autocommit)
     return connection
 
 
@@ -41,20 +42,23 @@ class MessengerBotSetup:
     name: str
     config: configparser.ConfigParser
 
-    def __init__(self, name: str, config_dict, loglvl=logging.INFO, setup_logs=True, monitoring=True):
+    def __init__(self, name: str, config_dict, loglvl=logging.INFO, setup_logs=True,
+                 monitoring=True):
         if setup_logs:
             # Setup Logging
             logs_dir = config_dict["GENERAL"].get("LOGS_DIR", fallback="")
 
-            logging.basicConfig(format=LOGGING_FORMAT, level=loglvl, filename=os.path.join(logs_dir, f"{name}-bot.log"))
+            logging.basicConfig(format=LOGGING_FORMAT, level=loglvl,
+                                filename=os.path.join(logs_dir, f"{name}-bot.log"))
 
             # Log also to stdout
             stream_log_handler = logging.StreamHandler()
             stream_log_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
             logging.getLogger().addHandler(stream_log_handler)
 
-        if name not in ["signal", "threema", "telegram", "interactive", "twitter", "mastodon", "instagram",
-                        "messenger", "facebook", "feedback"]:
+        if name not in ["signal", "threema", "telegram", "interactive", "twitter",
+                        "mastodon", "instagram",
+                        "messenger", "facebook", "feedback", "matrix"]:
             raise ValueError(f"Invalid messenger interface was requested: {name}")
 
         self.name = name
@@ -73,7 +77,7 @@ class MessengerBotSetup:
         # Do not activate user on Threema automatically
         users_activated = True
         location_feature = True
-        if self.name == "threema" or self.name == "messenger":
+        if self.name == "threema" or self.name == "messenger" or self.name == "matrix":
             location_feature = False
 
         if self.name == "telegram":
@@ -96,8 +100,10 @@ class MessengerBotSetup:
         self.connections.append(monitor_conn)
 
         data = CovidData(data_conn)
-        visualization = Visualization(data_conn, self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
-        user_manager = UserManager(self.name, user_conn, activated_default=users_activated)
+        visualization = Visualization(data_conn,
+                                      self.config['GENERAL'].get('CACHE_DIR', 'graphics'))
+        user_manager = UserManager(self.name, user_conn,
+                                   activated_default=users_activated)
         bot = Bot(user_manager, data, visualization, command_formatter=command_format,
                   has_location_feature=location_feature)
 
@@ -105,10 +111,16 @@ class MessengerBotSetup:
         monitor_data = MonitorMetrics(monitor_conn)
         AVERAGE_SUBSCRIPTION_COUNT.set_function(monitor_data.get_average_subscriptions)
 
-        USER_COUNT.labels(platform="threema").set_function(lambda: monitor_data.get_user_number("threema"))
-        USER_COUNT.labels(platform="telegram").set_function(lambda: monitor_data.get_user_number("telegram"))
-        USER_COUNT.labels(platform="signal").set_function(lambda: monitor_data.get_user_number("signal"))
-        USER_COUNT.labels(platform="messenger").set_function(lambda: monitor_data.get_user_number("messenger"))
+        USER_COUNT.labels(platform="threema").set_function(
+            lambda: monitor_data.get_user_number("threema"))
+        USER_COUNT.labels(platform="matrix").set_function(
+            lambda: monitor_data.get_user_number("matrix"))
+        USER_COUNT.labels(platform="telegram").set_function(
+            lambda: monitor_data.get_user_number("telegram"))
+        USER_COUNT.labels(platform="signal").set_function(
+            lambda: monitor_data.get_user_number("signal"))
+        USER_COUNT.labels(platform="messenger").set_function(
+            lambda: monitor_data.get_user_number("messenger"))
         USER_COUNT.labels(platform="facebook").set_function(
             lambda: monitor_data.get_social_network_user_number("facebook"))
         USER_COUNT.labels(platform="instagram").set_function(
@@ -123,18 +135,29 @@ class MessengerBotSetup:
             if not self.config.has_section("THREEMA"):
                 raise ValueError("THREEMA is not configured")
             from covidbot.interfaces.threema_interface import ThreemaInterface
-            return ThreemaInterface(self.config['THREEMA'].get('ID'), self.config['THREEMA'].get('SECRET'),
+            return ThreemaInterface(self.config['THREEMA'].get('ID'),
+                                    self.config['THREEMA'].get('SECRET'),
                                     self.config['THREEMA'].get('PRIVATE_KEY'),
                                     self.config['THREEMA'].get('CALLBACK_PATH'),
                                     bot, dev_chat=self.config['THREEMA'].get('DEV_CHAT'))
 
+        if self.name == "matrix":
+            if not self.config.has_section("MATRIX"):
+                raise ValueError("MATRIX is not configured")
+            from covidbot.interfaces.matrix_interface import MatrixInterface
+            return MatrixInterface(bot, self.config['MATRIX'].get('HOMESERVER'),
+                                   self.config['MATRIX'].get('USERNAME'),
+                                   self.config['MATRIX'].get('ACCESS_TOKEN'),
+                                   self.config['MATRIX'].get('DEVICE_ID'))
         if self.name == "messenger":
             if not self.config.has_section("MESSENGER"):
                 raise ValueError("MESSENGER is not configured")
             from covidbot.interfaces.fbmessenger_interface import FBMessengerInterface
-            return FBMessengerInterface(bot, self.config['MESSENGER'].get('PAGE_ACCESS_TOKEN'),
+            return FBMessengerInterface(bot,
+                                        self.config['MESSENGER'].get('PAGE_ACCESS_TOKEN'),
                                         self.config['MESSENGER'].get('VERIFY'),
-                                        self.config['MESSENGER'].getint('PORT', fallback=8080),
+                                        self.config['MESSENGER'].getint('PORT',
+                                                                        fallback=8080),
                                         self.config['INSTAGRAM'].get('WEB_DIR'),
                                         self.config['INSTAGRAM'].get('PUBLIC_URL'))
 
@@ -151,7 +174,8 @@ class MessengerBotSetup:
                 raise ValueError("TELEGRAM is not configured")
             from covidbot.interfaces.telegram_interface import TelegramInterface
             return TelegramInterface(bot, api_key=self.config['TELEGRAM'].get('API_KEY'),
-                                     dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"))
+                                     dev_chat_id=self.config['TELEGRAM'].getint(
+                                         "DEV_CHAT"))
 
         if self.name == "interactive":
             from covidbot.bot import InteractiveInterface
@@ -160,14 +184,16 @@ class MessengerBotSetup:
         if self.name == "feedback":
             from covidbot.feedback_notifier import FeedbackNotifier
             return FeedbackNotifier(api_key=self.config['TELEGRAM'].get('API_KEY'),
-                                    dev_chat_id=self.config['TELEGRAM'].getint("DEV_CHAT"),
+                                    dev_chat_id=self.config['TELEGRAM'].getint(
+                                        "DEV_CHAT"),
                                     user_manager=user_manager)
 
         if self.name == "twitter":
             if not self.config.has_section("TWITTER"):
                 raise ValueError("TWITTER is not configured")
             from covidbot.interfaces.twitter_interface import TwitterInterface
-            return TwitterInterface(self.config['TWITTER'].get('API_KEY'), self.config['TWITTER'].get('API_SECRET'),
+            return TwitterInterface(self.config['TWITTER'].get('API_KEY'),
+                                    self.config['TWITTER'].get('API_SECRET'),
                                     self.config['TWITTER'].get('ACCESS_TOKEN'),
                                     self.config['TWITTER'].get('ACCESS_SECRET'),
                                     user_manager, data, visualization,
@@ -193,8 +219,9 @@ class MessengerBotSetup:
                                       self.config['INSTAGRAM'].get('WEB_DIR'),
                                       self.config['INSTAGRAM'].get('PUBLIC_URL'),
                                       user_manager, data, visualization,
-                                      no_write=self.config['INSTAGRAM'].getboolean('DEBUG',
-                                                                                   fallback=False))
+                                      no_write=self.config['INSTAGRAM'].getboolean(
+                                          'DEBUG',
+                                          fallback=False))
 
         if self.name == "facebook":
             if not self.config.has_section("FACEBOOK"):
@@ -215,14 +242,19 @@ class MessengerBotSetup:
 
 async def sendUpdates(messenger_iface: str, config: configparser):
     try:
-        with MessengerBotSetup(messenger_iface, config, setup_logs=False, monitoring=False) as iface:
+        with MessengerBotSetup(messenger_iface, config, setup_logs=False,
+                               monitoring=False) as iface:
             await iface.send_unconfirmed_reports()
             logging.info(f"Checked for daily reports on {messenger_iface}")
     except Exception as e:
-        logging.error(f"Got exception while sending daily reports for {messenger_iface}:\n{e}", exc_info=e)
-        with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-            asyncio.run(await telegram.send_message_to_users(f"Exception happened while sending reports via {messenger_iface}, see logs for more details:"
-                                                             f"{e}", [config["TELEGRAM"].get("DEV_CHAT")]))
+        logging.error(
+            f"Got exception while sending daily reports for {messenger_iface}:\n{e}",
+            exc_info=e)
+        with MessengerBotSetup("telegram", config, setup_logs=False,
+                               monitoring=False) as telegram:
+            asyncio.run(await telegram.send_message_to_users(
+                f"Exception happened while sending reports via {messenger_iface}, see logs for more details:"
+                f"{e}", [config["TELEGRAM"].get("DEV_CHAT")]))
 
 
 async def send_all(message: str, recipients: List[int], config_dict):
@@ -246,7 +278,9 @@ async def send_all(message: str, recipients: List[int], config_dict):
 
     user_manager = UserManager("message-sender", get_connection(config_dict))
     if not recipients:
-        recipients = map(lambda x: x.id, filter(lambda x: x.activated == 1 , user_manager.get_all_user(all_platforms=True)))
+        recipients = map(lambda x: x.id, filter(lambda x: x.activated == 1,
+                                                user_manager.get_all_user(
+                                                    all_platforms=True)))
 
     for r in recipients:
         user_manager.add_user_message(r, message)
@@ -262,26 +296,38 @@ def main():
     # Parse Arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--verbose', '-v', action='count', default=0)
-    parser.add_argument('--config', '-c', action='store', default='config.ini', metavar='CONFIG_FILE')
+    parser.add_argument('--config', '-c', action='store', default='config.ini',
+                        metavar='CONFIG_FILE')
 
-    parser.add_argument('--platform', choices=['threema', 'telegram', 'signal', 'interactive', 'twitter', 'mastodon',
-                                               'messenger'],
+    parser.add_argument('--platform',
+                        choices=['threema', 'telegram', 'signal', 'interactive',
+                                 'twitter', 'mastodon',
+                                 'messenger', 'matrix'],
                         nargs=1,
                         help='Platform that should be used', type=str, action='store')
-    parser.add_argument('--check-updates', help='Run platform independent jobs, such as checking for new data',
+    parser.add_argument('--check-updates',
+                        help='Run platform independent jobs, such as checking for new data',
                         action='store_true')
     parser.add_argument('--archive-update', help='Fetch all covid data',
                         action='store_true')
-    parser.add_argument('--daily-report', help='Send daily reports if available, requires --platform',
+    parser.add_argument('--daily-report',
+                        help='Send daily reports if available, requires --platform',
                         action='store_true')
-    parser.add_argument('--message-user', help='Send a message to users', action='store_true')
-    parser.add_argument('--file', help='Message, requires --message-user', metavar='MESSAGE_FILE', action='store')
-    parser.add_argument('--all', help='Send to all users, mutually exclusive with --specific', action='store_true')
-    parser.add_argument('--specific', help='Send to a list of users, mutually exclusive with --all', metavar='USER',
+    parser.add_argument('--message-user', help='Send a message to users',
+                        action='store_true')
+    parser.add_argument('--file', help='Message, requires --message-user',
+                        metavar='MESSAGE_FILE', action='store')
+    parser.add_argument('--all',
+                        help='Send to all users, mutually exclusive with --specific',
+                        action='store_true')
+    parser.add_argument('--specific',
+                        help='Send to a list of users, mutually exclusive with --all',
+                        metavar='USER',
                         action='store', nargs="+", type=str)
 
     # Just for testing
-    parser.add_argument('--graphic-test', help='Generate graphic for testing', action='store_true')
+    parser.add_argument('--graphic-test', help='Generate graphic for testing',
+                        action='store_true')
     args = parser.parse_args()
     if args.platform:
         args.platform = args.platform[0]
@@ -293,7 +339,8 @@ def main():
     else:
         logging_level = logging.INFO
 
-    if not args.platform and not (args.check_updates or args.message_user or args.graphic_test or args.archive_update):
+    if not args.platform and not (
+            args.check_updates or args.message_user or args.graphic_test or args.archive_update):
         print("Exactly one platform has to be set, e.g. --platform telegram")
         exit(1)
 
@@ -302,7 +349,8 @@ def main():
         exit(1)
 
     if args.message_user and not (args.specific or args.all):
-        print("--message-user has to be combined with either --specific USER1 USER2 ... or --all")
+        print(
+            "--message-user has to be combined with either --specific USER1 USER2 ... or --all")
         exit(1)
 
     if args.all and args.specific:
@@ -316,7 +364,8 @@ def main():
 
     if args.check_updates:
         # Setup Logging
-        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, "updater.log"))
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level,
+                            filename=os.path.join(logs_dir, "updater.log"))
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
@@ -327,27 +376,34 @@ def main():
 
         logging.info("### Start Data Update ###")
         with get_connection(config, autocommit=False) as conn:
-            from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, RValueGermanyUpdater, \
+            from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, \
+                RValueGermanyUpdater, \
                 RKIKeyDataUpdater, ICUGermanyUpdater, \
                 RulesGermanyUpdater, ICUGermanyHistoryUpdater, HospitalisationRKIUpdater
             for updater in [RKIKeyDataUpdater(conn), ICUGermanyHistoryUpdater(conn),
                             VaccinationGermanyUpdater(conn), RulesGermanyUpdater(conn),
-                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn), HospitalisationRKIUpdater(conn)]:
+                            RValueGermanyUpdater(conn), ICUGermanyUpdater(conn),
+                            HospitalisationRKIUpdater(conn)]:
                 try:
                     if updater.update():
                         logging.warning(f"Got new data from {updater.__class__.__name__}")
-                        with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
+                        with MessengerBotSetup("telegram", config, setup_logs=False,
+                                               monitoring=False) as telegram:
                             asyncio.run(
-                                telegram.send_message_to_users(f"Got new data from {updater.__class__.__name__}",
-                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
+                                telegram.send_message_to_users(
+                                    f"Got new data from {updater.__class__.__name__}",
+                                    [config["TELEGRAM"].get("DEV_CHAT")]))
                 except Exception as error:
                     # Data did not make it through plausibility check
-                    logging.exception(f"Exception happened on Data Update with {updater.__class__.__name__}: {error}",
-                                      exc_info=error)
-                    with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                        asyncio.run(telegram.send_message_to_users(f"Exception happened on Data Update with "
-                                                                   f"{updater.__class__.__name__}: {error}",
-                                                                   [config["TELEGRAM"].get("DEV_CHAT")]))
+                    logging.exception(
+                        f"Exception happened on Data Update with {updater.__class__.__name__}: {error}",
+                        exc_info=error)
+                    with MessengerBotSetup("telegram", config, setup_logs=False,
+                                           monitoring=False) as telegram:
+                        asyncio.run(telegram.send_message_to_users(
+                            f"Exception happened on Data Update with "
+                            f"{updater.__class__.__name__}: {error}",
+                            [config["TELEGRAM"].get("DEV_CHAT")]))
 
         # Check Tweets & Co
         platforms = ["feedback"]
@@ -361,22 +417,27 @@ def main():
             platforms.append("facebook")
 
         for platform in platforms:
-            with MessengerBotSetup(platform, config, setup_logs=False, monitoring=False) as iface:
+            with MessengerBotSetup(platform, config, setup_logs=False,
+                                   monitoring=False) as iface:
                 try:
                     asyncio.run(iface.send_unconfirmed_reports())
                 except Exception as error:
-                    logging.exception(f"Exception happened on sending reports to social media with {iface.__class__.__name__}: {error}",
-                                      exc_info=error)
-                    with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                        asyncio.run(telegram.send_message_to_users(f"Exception happened on on sending reports to social "
-                                                                   f"media with "
-                                                                   f"{iface.__class__.__name__}: {error}",
-                                                                   [config["TELEGRAM"].get("DEV_CHAT")]))
+                    logging.exception(
+                        f"Exception happened on sending reports to social media with {iface.__class__.__name__}: {error}",
+                        exc_info=error)
+                    with MessengerBotSetup("telegram", config, setup_logs=False,
+                                           monitoring=False) as telegram:
+                        asyncio.run(telegram.send_message_to_users(
+                            f"Exception happened on on sending reports to social "
+                            f"media with "
+                            f"{iface.__class__.__name__}: {error}",
+                            [config["TELEGRAM"].get("DEV_CHAT")]))
 
     elif args.daily_report:
         # Setup Logging
         logging.basicConfig(format=LOGGING_FORMAT, level=logging_level,
-                            filename=os.path.join(logs_dir, f"reports-{args.platform}.log"))
+                            filename=os.path.join(logs_dir,
+                                                  f"reports-{args.platform}.log"))
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
@@ -413,17 +474,22 @@ def main():
             try:
                 interface.run()
             except Exception as e:
-                logging.exception(f"Exception while running {args.platform} client", exc_info=e)
-                with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                    asyncio.run(telegram.send_message_to_users(f"Exception happened while running {args.platform} bot:"
-                                                               f"{e}", [config["TELEGRAM"].get("DEV_CHAT")]))
+                logging.exception(f"Exception while running {args.platform} client",
+                                  exc_info=e)
+                with MessengerBotSetup("telegram", config, setup_logs=False,
+                                       monitoring=False) as telegram:
+                    asyncio.run(telegram.send_message_to_users(
+                        f"Exception happened while running {args.platform} bot:"
+                        f"{e}", [config["TELEGRAM"].get("DEV_CHAT")]))
                 raise e
     elif args.graphic_test:
-        vis = Visualization(get_connection(config), abspath("graphics/"), disable_cache=True)
+        vis = Visualization(get_connection(config), abspath("graphics/"),
+                            disable_cache=True)
         vis.vaccination_graph(0)
     elif args.archive_update:
         # Setup Logging
-        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level, filename=os.path.join(logs_dir, "updater.log"))
+        logging.basicConfig(format=LOGGING_FORMAT, level=logging_level,
+                            filename=os.path.join(logs_dir, "updater.log"))
 
         # Log also to stdout
         stream_handler = logging.StreamHandler()
@@ -438,19 +504,25 @@ def main():
 
             try:
                 if RKIHistoryUpdater(conn).update():
-                    logging.warning(f"Got new data from {RKIHistoryUpdater.__class__.__name__}")
-                    with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
+                    logging.warning(
+                        f"Got new data from {RKIHistoryUpdater.__class__.__name__}")
+                    with MessengerBotSetup("telegram", config, setup_logs=False,
+                                           monitoring=False) as telegram:
                         asyncio.run(
-                            telegram.send_message_to_users(f"Got new data from {RKIHistoryUpdater.__class__.__name__}",
-                                                           [config["TELEGRAM"].get("DEV_CHAT")]))
+                            telegram.send_message_to_users(
+                                f"Got new data from {RKIHistoryUpdater.__class__.__name__}",
+                                [config["TELEGRAM"].get("DEV_CHAT")]))
             except Exception as error:
                 # Data did not make it through plausibility check
-                logging.exception(f"Exception happened on Data Update with {RKIHistoryUpdater.__class__.__name__}: {error}",
-                                  exc_info=error)
-                with MessengerBotSetup("telegram", config, setup_logs=False, monitoring=False) as telegram:
-                    asyncio.run(telegram.send_message_to_users(f"Exception happened on Data Update with "
-                                                               f"{RKIHistoryUpdater.__class__.__name__}: {error}",
-                                                               [config["TELEGRAM"].get("DEV_CHAT")]))
+                logging.exception(
+                    f"Exception happened on Data Update with {RKIHistoryUpdater.__class__.__name__}: {error}",
+                    exc_info=error)
+                with MessengerBotSetup("telegram", config, setup_logs=False,
+                                       monitoring=False) as telegram:
+                    asyncio.run(telegram.send_message_to_users(
+                        f"Exception happened on Data Update with "
+                        f"{RKIHistoryUpdater.__class__.__name__}: {error}",
+                        [config["TELEGRAM"].get("DEV_CHAT")]))
 
 
 if __name__ == "__main__":
