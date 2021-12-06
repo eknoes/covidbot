@@ -148,7 +148,8 @@ class MessengerBotSetup:
             return MatrixInterface(bot, self.config['MATRIX'].get('HOMESERVER'),
                                    self.config['MATRIX'].get('USERNAME'),
                                    self.config['MATRIX'].get('ACCESS_TOKEN'),
-                                   self.config['MATRIX'].get('DEVICE_ID'))
+                                   self.config['MATRIX'].get('DEVICE_ID'),
+                                   self.config['MATRIX'].get('DATA_LOCATION'))
         if self.name == "messenger":
             if not self.config.has_section("MESSENGER"):
                 raise ValueError("MESSENGER is not configured")

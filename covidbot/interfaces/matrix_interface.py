@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import logging
+import os
 from typing import List, Union
 
 import nio
@@ -22,10 +23,15 @@ class MatrixInterface(MessengerInterface):
 
     log = logging.getLogger(__name__)
 
-    def __init__(self, bot: Bot, home_server: str, username: str, access_token: str, device_id: str):
+    def __init__(self, bot: Bot, home_server: str, username: str, access_token: str,
+                 device_id: str, store_filepath: str):
+
+        if not os.path.exists(store_filepath):
+            os.makedirs(store_filepath)
+
         self.username = f"@{username}:{home_server[home_server.find('//')+2:]}"
 
-        self.matrix = AsyncClient(home_server, username, device_id, store_path=".",
+        self.matrix = AsyncClient(home_server, self.username, device_id, store_path=store_filepath,
                                   config=AsyncClientConfig(encryption_enabled=True,
                                                            store=SqliteStore,
                                                            store_name="matrix.db",
@@ -39,7 +45,7 @@ class MatrixInterface(MessengerInterface):
         self.matrix.add_event_callback(self.room_event, RoomMemberEvent)
         self.matrix.add_event_callback(self.other_event, Event)
 
-        self.matrix.load_store()
+        self.matrix.restore_login(self.username, device_id, access_token)
         self.bot = bot
 
         self.log.level = logging.DEBUG
