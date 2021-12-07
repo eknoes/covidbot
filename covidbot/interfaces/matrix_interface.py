@@ -9,7 +9,7 @@ from PIL import Image
 from nio import AsyncClient, AsyncClientConfig, RoomMessageText, MatrixRoom, MegolmEvent, \
     InviteMemberEvent, RoomMemberEvent, RoomKeyRequestResponse, \
     JoinError, RoomKeyRequestError, UploadResponse, ErrorResponse, ProfileSetAvatarError, \
-    ProfileSetDisplayNameError
+    ProfileSetDisplayNameError, RoomLeaveResponse
 from nio.store import SqliteStore
 
 from covidbot.bot import Bot
@@ -102,6 +102,12 @@ class MatrixInterface(MessengerInterface):
 
     async def room_event(self, room: MatrixRoom, event: RoomMemberEvent):
         self.log.debug(f"Got RoomEvent: {event}")
+        if event.membership == "leave" and event.state_key != self.matrix.user_id:
+            if room.member_count == 1:
+                resp = await self.matrix.room_leave(room.room_id)
+                self.log.debug(f"Left room: {resp}")
+                if isinstance(resp, RoomLeaveResponse):
+                    self.bot.delete_user(room.room_id)
 
     @prometheus_async.aio.time(BOT_RESPONSE_TIME)
     async def handle_message(self, room: MatrixRoom, event: RoomMessageText):
