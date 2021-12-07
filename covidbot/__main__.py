@@ -149,7 +149,9 @@ class MessengerBotSetup:
                                    self.config['MATRIX'].get('USERNAME'),
                                    self.config['MATRIX'].get('ACCESS_TOKEN'),
                                    self.config['MATRIX'].get('DEVICE_ID'),
-                                   self.config['MATRIX'].get('DATA_LOCATION'))
+                                   self.config['MATRIX'].get('DATA_LOCATION'),
+                                   self.config['GENERAL'].get('WEB_DIR'),
+                                   self.config['GENERAL'].get('PUBLIC_URL'))
         if self.name == "messenger":
             if not self.config.has_section("MESSENGER"):
                 raise ValueError("MESSENGER is not configured")
@@ -159,8 +161,8 @@ class MessengerBotSetup:
                                         self.config['MESSENGER'].get('VERIFY'),
                                         self.config['MESSENGER'].getint('PORT',
                                                                         fallback=8080),
-                                        self.config['INSTAGRAM'].get('WEB_DIR'),
-                                        self.config['INSTAGRAM'].get('PUBLIC_URL'))
+                                        self.config['GENERAL'].get('WEB_DIR'),
+                                        self.config['GENERAL'].get('PUBLIC_URL'))
 
         if self.name == "signal":
             if not self.config.has_section("SIGNAL"):
@@ -217,8 +219,8 @@ class MessengerBotSetup:
             from covidbot.interfaces.instagram_interface import InstagramInterface
             return InstagramInterface(self.config['INSTAGRAM'].get('ACCOUNT_ID'),
                                       self.config['INSTAGRAM'].get('ACCESS_TOKEN'),
-                                      self.config['INSTAGRAM'].get('WEB_DIR'),
-                                      self.config['INSTAGRAM'].get('PUBLIC_URL'),
+                                      self.config['GENERAL'].get('WEB_DIR'),
+                                      self.config['GENERAL'].get('PUBLIC_URL'),
                                       user_manager, data, visualization,
                                       no_write=self.config['INSTAGRAM'].getboolean(
                                           'DEBUG',
@@ -230,8 +232,8 @@ class MessengerBotSetup:
             from covidbot.interfaces.facebook_interface import FacebookInterface
             return FacebookInterface(self.config['FACEBOOK'].get('PAGE_ID'),
                                      self.config['FACEBOOK'].get('PAGE_ACCESS_TOKEN'),
-                                     self.config['FACEBOOK'].get('WEB_DIR'),
-                                     self.config['FACEBOOK'].get('PUBLIC_URL'),
+                                     self.config['GENERAL'].get('WEB_DIR'),
+                                     self.config['GENERAL'].get('PUBLIC_URL'),
                                      user_manager, data, visualization,
                                      no_write=self.config['FACEBOOK'].getboolean('DEBUG',
                                                                                  fallback=False))
