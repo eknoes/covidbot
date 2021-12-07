@@ -34,14 +34,16 @@ class MatrixInterface(MessengerInterface):
 
     public_url: str
     web_dir: str
+    debug: bool
 
     def __init__(self, bot: Bot, home_server: str, username: str, access_token: str,
                  device_id: str, store_filepath: str, web_dir: str, public_url: str,
-                 display_name: str, avatar_path: str):
+                 display_name: str, avatar_path: str, debug: bool = False):
 
         if not os.path.exists(store_filepath):
             os.makedirs(store_filepath)
 
+        self.debug = debug
         self.public_url = public_url
         self.web_dir = web_dir
 
@@ -129,6 +131,9 @@ class MatrixInterface(MessengerInterface):
         #        for device in devices[user]:
         #            self.matrix.verify_device(devices[user][device])
         #            self.log.debug(f"Verified {device} of {user}")
+
+        if self.debug:
+            return
 
         for message in responses:
             if message.images:
