@@ -113,6 +113,8 @@ class MatrixInterface(MessengerInterface):
                 self.log.debug(f"Left room: {resp}")
                 if isinstance(resp, RoomLeaveResponse):
                     self.bot.delete_user(room.room_id)
+        elif event.membership == "leave" and event.state_key == self.matrix.user_id:
+            self.log.info(f"Got kicked from {room.name}: {event.content['reason']}")
 
     @prometheus_async.aio.time(BOT_RESPONSE_TIME)
     async def handle_message(self, room: MatrixRoom, event: RoomMessageText):
