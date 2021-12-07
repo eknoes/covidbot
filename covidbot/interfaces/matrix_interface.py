@@ -95,10 +95,15 @@ class MatrixInterface(MessengerInterface):
         if isinstance(resp, JoinError):
             self.log.error(
                 f"Can't Join {room.room_id} ({room.encrypted}): {JoinError.message}")
+            return
 
         await self.matrix.sync()
-
         self.log.debug(f"Joined room {room.name}")
+
+        await self.send_response(room.room_id, self.bot.handle_input('Start', room.room_id))
+
+        if room.member_count > 2:
+            await self.send_response(room.room_id, [BotResponse("Noch ein Hinweis: Da wir hier nicht zu zweit sind reagiere ich nur auf mentions!")])
 
     async def room_event(self, room: MatrixRoom, event: RoomMemberEvent):
         self.log.debug(f"Got RoomEvent: {event}")
