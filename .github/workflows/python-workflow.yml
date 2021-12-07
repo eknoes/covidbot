@@ -13,7 +13,6 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        sudo apt-get install libolm-dev python3-dev
         python -m pip install --upgrade pip
         python -m pip install flake8
     - name: Lint with flake8
@@ -41,6 +40,7 @@ jobs:
         mysql root password: 'covid_bot'
     - name: Install dependencies
       run: |
+        sudo apt-get install libolm-dev
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Test with unittest
