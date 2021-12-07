@@ -151,7 +151,9 @@ class MessengerBotSetup:
                                    self.config['MATRIX'].get('DEVICE_ID'),
                                    self.config['MATRIX'].get('DATA_LOCATION'),
                                    self.config['GENERAL'].get('WEB_DIR'),
-                                   self.config['GENERAL'].get('PUBLIC_URL'))
+                                   self.config['GENERAL'].get('PUBLIC_URL'),
+                                   self.config['GENERAL'].get('DISPLAY_NAME'),
+                                   self.config['GENERAL'].get('AVATAR_PATH'))
         if self.name == "messenger":
             if not self.config.has_section("MESSENGER"):
                 raise ValueError("MESSENGER is not configured")
