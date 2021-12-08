@@ -70,7 +70,7 @@ class ICUGermanyHistoryUpdater(Updater):
 
     def update(self) -> bool:
         last_update = self.get_last_update()
-        if last_update is not None and last_update.date() == date(2020, 4, 24):
+        if last_update is not None and last_update == date(2020, 4, 24):
             return False
 
         new_data = False
