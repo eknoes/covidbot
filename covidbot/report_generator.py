@@ -317,7 +317,7 @@ class ReportGenerator:
 
         if show_icu and district.icu_data:
             message += "\n• {percent_occupied}% ({beds_occupied}){occupied_trend} belegt, in " \
-                       "{percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen, {clear_beds} frei" \
+                       "{percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen, {clear_beds} frei (nur Erwachsene)" \
                 .format(beds_occupied=format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS),
                         percent_occupied=format_float(district.icu_data.percent_occupied()),
                         occupied_trend=format_data_trend(district.icu_data.occupied_beds_trend),
@@ -345,7 +345,7 @@ class ReportGenerator:
 
         message += "\n• {percent_covid}% ({beds_covid}){covid_trend} Covid19-Patient:innen" \
                    "\n• Davon {percent_ventilated}% ({beds_ventilated}) beatmet" \
-                   "\n• {clear_beds} frei" \
+                   "\n• {clear_beds} für Erwachsene frei" \
             .format(beds_covid=format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS),
                     percent_covid=format_float(district.icu_data.percent_covid()),
                     covid_trend=format_data_trend(district.icu_data.occupied_covid_trend),
@@ -397,7 +397,7 @@ class ReportGenerator:
                f"{format_float(district.icu_data.percent_occupied())}% " \
                f"({format_noun(district.icu_data.occupied_beds, FormattableNoun.BEDS)})" \
                f"{format_data_trend(district.icu_data.occupied_beds_trend)} " \
-               f"der Intensivbetten sind aktuell belegt. " \
+               f"der Intensivbetten für Erwachsene sind aktuell belegt. " \
                f"In {format_noun(district.icu_data.occupied_covid, FormattableNoun.BEDS)} " \
                f"({format_float(district.icu_data.percent_covid())}%)" \
                f"{format_data_trend(district.icu_data.occupied_covid_trend)} " \
@@ -406,10 +406,10 @@ class ReportGenerator:
                f" ({format_float(district.icu_data.percent_ventilated())}%) invasiv beatmet werden."
 
         if district.icu_data.facts is not None:
-            message += f"\n\n{district.icu_data.facts.districts_full} Orte haben keine freien Intensivbetten mehr, in " \
+            message += f"\n\n{district.icu_data.facts.districts_full} Orte haben keine freien Intensivbetten für Erwachsene mehr, in " \
                        f"{district.icu_data.facts.districts_low} Orten sind mindestens 90% der Intensivbetten belegt."
 
-        message += f" Insgesamt gibt es {format_noun(district.icu_data.total_beds(), FormattableNoun.BEDS)} in {district.name}.\n\n"
+        message += f" Insgesamt gibt es {format_noun(district.icu_data.total_beds(), FormattableNoun.BEDS)} für Erwachsene in {district.name}.\n\n"
 
         return message
 

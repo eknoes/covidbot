@@ -162,17 +162,17 @@ class SingleCommandInterface(MessengerInterface, ABC):
                      f"In {format_noun(icu.occupied_covid, FormattableNoun.BEDS)} " \
                      f"({format_float(icu.percent_covid())}%) liegen Patient:innen" \
                      f" mit #COVID19, davon werden {format_int(icu.covid_ventilated)} beatmet. " \
-                     f"Insgesamt gibt es {format_noun(icu.total_beds(), FormattableNoun.BEDS)}."
+                     f"Insgesamt gibt es {format_noun(icu.total_beds(), FormattableNoun.BEDS)} für Erwachsene."
         post = [BotResponse(tweet_text, [self.viz.icu_graph(0)])]
 
         icu_info = self.data.get_icu_global_facts()
         if icu_info:
             second_tweet = ""
             if icu_info.districts_full:
-                second_tweet += f"{icu_info.districts_full} Orte haben keine freien Intensivbetten mehr. "
+                second_tweet += f"{icu_info.districts_full} Orte haben keine freien Intensivbetten für Erwachsene mehr. "
 
             if icu_info.districts_low:
-                second_tweet += f"In {icu_info.districts_low} Orten sind mindestens 90% der Intensivbetten belegt."
+                second_tweet += f"In {icu_info.districts_low} Orten sind mindestens 90% der Intensivbetten für Erwachsene belegt."
 
             if second_tweet:
                 post.append(BotResponse(second_tweet))

@@ -34,7 +34,7 @@ class ICUGermanyUpdater(Updater):
                 # Berlin is here AGS = 11000
                 if row['gemeindeschluessel'] == '11000':
                     row['gemeindeschluessel'] = '11'
-                results.append((row['gemeindeschluessel'], row['daten_stand'], row['betten_frei'], row['betten_belegt'],
+                results.append((row['gemeindeschluessel'], row['daten_stand'], row['betten_frei_nur_erwachsen'], row['betten_belegt_nur_erwachsen'],
                                 row['faelle_covid_aktuell'], row['faelle_covid_aktuell_invasiv_beatmet']))
 
             with self.connection.cursor() as cursor:
@@ -103,7 +103,7 @@ class ICUGermanyHistoryUpdater(Updater):
                 else:
                     num_covid = None
 
-                row_contents = [row[key_district_id], row['date'], row['betten_frei'], row['betten_belegt'],
+                row_contents = [row[key_district_id], row['date'], row['betten_frei_nur_erwachsen'], row['betten_belegt_nur_erwachsen'],
                                 num_covid, num_ventilated]
                 results.append(row_contents)
 
