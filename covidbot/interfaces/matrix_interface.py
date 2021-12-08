@@ -9,7 +9,7 @@ from PIL import Image
 from nio import AsyncClient, AsyncClientConfig, RoomMessageText, MatrixRoom, MegolmEvent, \
     InviteMemberEvent, RoomMemberEvent, RoomKeyRequestResponse, \
     JoinError, RoomKeyRequestError, UploadResponse, ErrorResponse, ProfileSetAvatarError, \
-    ProfileSetDisplayNameError, RoomLeaveResponse
+    ProfileSetDisplayNameError, RoomLeaveResponse, LocalProtocolError
 from nio.store import SqliteStore
 
 from covidbot.bot import Bot
@@ -251,9 +251,18 @@ class MatrixInterface(MessengerInterface):
             await self.matrix.sync(full_state=True)
 
         for report, userid, message in unconfirmed_reports:
-            await self.send_response(userid, message)
-            self.bot.confirm_message_send(report, userid)
-            self.log.warning(f"Sent report to {userid}")
+            if not userid in self.matrix.rooms:
+                self.log.error(f"Room {userid} does not exist")
+                self.bot.disable_user(userid)
+                continue
+
+            try:
+                await self.send_response(userid, message)
+            except LocalProtocolError as e:
+                self.log.warning(f"Error while sending report to {userid}: {e}")
+            else:
+                self.bot.confirm_message_send(report, userid)
+                self.log.warning(f"Sent report to {userid}")
 
         await self.matrix.close()
 
