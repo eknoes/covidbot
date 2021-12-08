@@ -63,7 +63,7 @@ class ICUGermanyHistoryUpdater(Updater):
 
     def get_last_update(self) -> Optional[datetime]:
         with self.connection.cursor() as cursor:
-            cursor.execute("SELECT MIN(updated) FROM icu_beds")
+            cursor.execute("SELECT MIN(date) FROM icu_beds")
             row = cursor.fetchone()
             if row:
                 return row[0]
