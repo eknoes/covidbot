@@ -47,7 +47,7 @@ class HospitalisationRKIUpdater(Updater):
                                    [updated, district_id, row['Altersgruppe']])
                     data_id = cursor.fetchone()
                     if data_id:
-                        cursor.execute("UPDATE hospitalisation SET number=%s, incidence=%s WHERE id=%s", [row['7T_Hospitalisierung_Faelle'], row['7T_Hospitalisierung_Inzidenz'], data_id[0]])
+                        cursor.execute("UPDATE hospitalisation SET number=%s, incidence=%s, updated=CURRENT_TIMESTAMP() WHERE id=%s", [row['7T_Hospitalisierung_Faelle'], row['7T_Hospitalisierung_Inzidenz'], data_id[0]])
                         continue
 
                     new_data = True

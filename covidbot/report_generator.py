@@ -302,8 +302,9 @@ class ReportGenerator:
                                 FormattableNoun.WORKING_DAYS),
                             threshold=format_int(district.incidence_interval_data.upper_threshold))
 
-        message += "\n• {new_cases}, {new_deaths} seit gestern" \
+        message += "\n• {new_cases}{cases_trend}, {new_deaths} seit gestern" \
             .format(new_cases=format_noun(district.new_cases, FormattableNoun.NEW_INFECTIONS),
+                    cases_trend=format_data_trend(district.cases_trend),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
         if district.hospitalisation:
             message += "\n• {cases} Krankenhauseinweisungen in den letzten 7 Tagen".format(cases=format_int(district.hospitalisation.cases))
