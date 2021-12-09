@@ -49,8 +49,10 @@ class ICUFacts:
 class ICUData:
     date: date
     clear_beds: int
+    clear_beds_children: int
     occupied_beds: int
     occupied_covid: int
+    occupied_beds_children: int
     covid_ventilated: int
     last_update: datetime
     occupied_beds_trend: Optional[TrendValue] = None

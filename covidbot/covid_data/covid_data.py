@@ -261,12 +261,14 @@ UNION
 
     def get_icu_data(self, district_id: int) -> Optional[ICUData]:
         with self.connection.cursor(dictionary=True) as cursor:
-            cursor.execute('SELECT date, clear, occupied, occupied_covid, covid_ventilated, updated FROM icu_beds '
+            cursor.execute('SELECT date, clear, occupied, occupied_covid, clear_children, occupied_children, covid_ventilated, updated FROM icu_beds '
                            'WHERE district_id=%s ORDER BY date DESC LIMIT 1', [district_id])
             row = cursor.fetchone()
             if row:
                 result = ICUData(date=row['date'], clear_beds=row['clear'], occupied_beds=row['occupied'],
                                  occupied_covid=row['occupied_covid'],
+                                 occupied_beds_children=row['occupied_children'],
+                                 clear_beds_children=row['clear_children'],
                                  covid_ventilated=row['covid_ventilated'], last_update=row['updated'])
 
                 cursor.execute('SELECT occupied, occupied_covid FROM icu_beds '
@@ -414,7 +416,9 @@ class CovidDatabaseCreator:
             # Intensive care information
             cursor.execute('CREATE TABLE IF NOT EXISTS icu_beds (id INTEGER PRIMARY KEY AUTO_INCREMENT,'
                            'district_id INTEGER, date DATE, clear INTEGER, occupied INTEGER,'
-                           'occupied_covid INTEGER, covid_ventilated INTEGER, updated DATETIME DEFAULT NOW(),'
+                           'occupied_covid INTEGER, covid_ventilated INTEGER,'
+                           'clear_children INTEGER, occupied_children INTEGER, '
+                           'updated DATETIME DEFAULT NOW(),'
                            'FOREIGN KEY(district_id) REFERENCES counties(rs), UNIQUE(district_id, date))')
 
             # Hospitalisation information

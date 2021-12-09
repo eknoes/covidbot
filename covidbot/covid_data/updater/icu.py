@@ -1,6 +1,5 @@
 import csv
 import logging
-import re
 from datetime import datetime, timedelta, date
 from typing import Optional
 
@@ -35,19 +34,19 @@ class ICUGermanyUpdater(Updater):
                 if row['gemeindeschluessel'] == '11000':
                     row['gemeindeschluessel'] = '11'
                 results.append((row['gemeindeschluessel'], row['daten_stand'], row['betten_frei_nur_erwachsen'], row['betten_belegt_nur_erwachsen'],
-                                row['faelle_covid_aktuell'], row['faelle_covid_aktuell_invasiv_beatmet']))
+                                row['faelle_covid_aktuell'], row['faelle_covid_aktuell_invasiv_beatmet'],  int(row['betten_frei']) - int(row['betten_frei_nur_erwachsen']), int(row['betten_belegt']) - int(row['betten_belegt_nur_erwachsen'])))
 
             with self.connection.cursor() as cursor:
                 for row in results:
                     cursor.execute("INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
-                                   " covid_ventilated) VALUES (%s, %s, %s, %s, %s, %s)", row)
+                                   " covid_ventilated, occupied_children, clear_children) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", row)
 
                 # Calculate aggregated values for states
                 for i in range(2):
                     cursor.execute(
-                        "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid, covid_ventilated, updated) "
+                        "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid, covid_ventilated, occupied_children, clear_children, updated) "
                         "SELECT c.parent, date, SUM(clear), SUM(occupied), SUM(occupied_covid), "
-                        "SUM(covid_ventilated), updated FROM icu_beds "
+                        "SUM(covid_ventilated), SUM(occupied_children), SUM(clear_children), updated FROM icu_beds "
                         "INNER JOIN counties c on c.rs = icu_beds.district_id "
                         "GROUP BY c.parent, date "
                         "HAVING (COUNT(c.parent) = (SELECT COUNT(*) FROM counties WHERE parent=c.parent) OR c.parent > 0) AND parent IS NOT NULL")
@@ -104,19 +103,19 @@ class ICUGermanyHistoryUpdater(Updater):
                     num_covid = None
 
                 row_contents = [row[key_district_id], row['date'], row['betten_frei_nur_erwachsen'], row['betten_belegt_nur_erwachsen'],
-                                num_covid, num_ventilated]
+                                num_covid, num_ventilated, int(row['betten_frei']) - int(row['betten_frei_nur_erwachsen']), int(row['betten_belegt']) - int(row['betten_belegt_nur_erwachsen'])]
                 results.append(row_contents)
 
             cursor.executemany(
                 "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid,"
-                " covid_ventilated) VALUES (%s, %s, %s, %s, %s, %s)", results)
+                " covid_ventilated, clear_children, occupied_children) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", results)
 
             # Calculate aggregated values for states
             for i in range(2):
                 cursor.execute(
-                    "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid, covid_ventilated, updated) "
+                    "INSERT IGNORE INTO icu_beds (district_id, date, clear, occupied, occupied_covid, covid_ventilated, occupied_children, clear_children, updated) "
                     "SELECT c.parent, date, SUM(clear), SUM(occupied), SUM(occupied_covid), "
-                    "SUM(covid_ventilated), updated FROM icu_beds "
+                    "SUM(covid_ventilated), SUM(occupied_children), SUM(clear_children), updated FROM icu_beds "
                     "INNER JOIN counties c on c.rs = icu_beds.district_id "
                     "GROUP BY c.parent, date "
                     "HAVING (COUNT(c.parent) = (SELECT COUNT(*) FROM counties WHERE parent=c.parent) OR c.parent > 0) AND parent IS NOT NULL")
