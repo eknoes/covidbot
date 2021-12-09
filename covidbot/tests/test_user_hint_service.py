@@ -3,7 +3,7 @@ from unittest import TestCase
 from covidbot.user_hint_service import UserHintService
 
 
-class TestUpdater(TestCase):
+class TestUserHints(TestCase):
     def test_user_hints(self):
         formatter = lambda x: f"/{x}"
 
