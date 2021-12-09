@@ -51,6 +51,13 @@ class RKIKeyDataUpdater(Updater):
             with self.connection.cursor(dictionary=True) as cursor:
                 cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
                  VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE rs=rs''', covid_data)
+
+                # Plausibility check
+                cursor.execute("SELECT * FROM covid_data_calculated WHERE county_name LIKE '%Deutschland%' ORDER BY date DESC LIMIT 1")
+                row = cursor.fetchone()
+                if row['new_cases'] <= 0 or row['new_deaths'] <= 0:
+                    self.connection.rollback()
+                    raise ValueError("Invalid Data")
             self.connection.commit()
 
             if last_update is None or last_update < self.get_last_update():
