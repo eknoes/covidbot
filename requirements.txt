@@ -1,4 +1,4 @@
-aiohttp==3.8.1
+aiohttp<3.8.0
 aiohttp_jinja2==1.5
 matrix-nio[e2e]==0.18.7
 matplotlib==3.5.0
