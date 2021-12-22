@@ -353,6 +353,8 @@ class Visualization:
         max_y = None
         for district in district_ids:
             district_name, current_date, x_data, y_data = self._get_covid_data("incidence", district, duration)
+            if not x_data or not y_data:
+                raise ValueError(f"Could not get data for {district}")
             data.append({'name': district_name, 'x': x_data, 'y': y_data, 'date': current_date,
                          'linestyle': line_styles[i % len(line_styles)],
                          'linecolor': line_colors[i % len(line_colors)]})
