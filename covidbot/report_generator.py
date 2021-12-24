@@ -14,6 +14,7 @@ class ReportGenerator:
     visualization: Visualization
     covid_data: CovidData
     user_hints: UserHintService
+    log = logging.getLogger(__name__)
 
     def __init__(self, user_manager: UserManager, covid_data: CovidData, visualization: Visualization,
                  user_hints: UserHintService,
@@ -79,7 +80,11 @@ class ReportGenerator:
         graphs = []
         subscriptions = []
         for district_id in user.subscriptions:
-            subscriptions.append(self.covid_data.get_district_data(district_id))
+            base_data = self.covid_data.get_district_data(district_id)
+            if base_data is not None:
+                subscriptions.append(base_data)
+            else:
+                self.log.warn(f"No base data for {district_id}")
         subscriptions = self.sort_districts(subscriptions)
 
         message = "<b>Corona-Bericht vom {date}</b>\n\n".format(date=subscriptions[0].date.strftime("%d.%m.%Y"))
