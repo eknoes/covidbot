@@ -16,7 +16,7 @@ class RKIDistrictsUpdater(Updater):
         with self.connection.cursor() as cursor:
             cursor.execute("SELECT COUNT(rs), COUNT(population) FROM counties")
             record = cursor.fetchone()
-            if record[0] == 429 and record[1] == 429:
+            if record[0] == 428 and record[1] == 428:
                 return False
 
         with self.connection.cursor(dictionary=True) as cursor:
