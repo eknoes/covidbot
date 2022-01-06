@@ -424,7 +424,7 @@ class ReportGenerator:
     def get_hospital_text(district: DistrictData) -> str:
         text = "<b>🤒 Hospitalisierungen in {name}</b>\n" \
                "In den letzten 7 Tagen wurden {count} Personen mit COVID-19 ins Krankenhaus eingewiesen. Die " \
-               "Hospitalisierungsinzidenz, also die Krankenhauseinweisungen pro 100.000 Einwohner:innen in den letzten 7 Tagen" \
+               "Hospitalisierungsinzidenz, also die Krankenhauseinweisungen pro 100.000 Einwohner:innen in den letzten 7 Tagen " \
                "beträgt somit {incidence}.\n\n".format(name=district.name, count=format_int(district.hospitalisation.cases),
                                                        incidence=format_float(district.hospitalisation.incidence))
 
