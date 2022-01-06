@@ -168,6 +168,10 @@ class RKIHistoryUpdater(Updater):
                     district_id = field
                     if district_id == '11000':
                         district_id = '11'
+
+                    if district_id == '16056':
+                        continue
+
                     cases_num = int(row[field])
                     cursor.execute('INSERT INTO covid_data (rs, date, total_cases) VALUE (%s, %s, %s) '
                                    'ON DUPLICATE KEY UPDATE covid_data.total_cases=%s, covid_data.last_update=CURRENT_TIMESTAMP()',
@@ -206,6 +210,10 @@ class RKIHistoryUpdater(Updater):
                     district_id = field
                     if district_id == '11000':
                         district_id = '11'
+
+                    if district_id == '16056':
+                        continue
+
                     deaths_num = int(row[field])
                     cursor.execute('INSERT INTO covid_data (rs, date, total_deaths) VALUE (%s, %s, %s) '
                                    'ON DUPLICATE KEY UPDATE covid_data.total_deaths=%s, covid_data.last_update=CURRENT_TIMESTAMP()',
@@ -249,6 +257,9 @@ class RKIHistoryUpdater(Updater):
 
                     if district_id == 'germany':
                         district_id = '0'
+
+                    if district_id == '16056':
+                        continue
 
                     incidence = float(row[field])
 
