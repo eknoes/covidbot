@@ -335,7 +335,7 @@ class ReportGenerator:
 
         if show_vaccinations and district.vaccinations:
             message += "\n• {no_doses} Neuimpfungen, {vacc_partial}% min. eine, {vacc_full}% beide Impfungen und " \
-                       "{vacc_booster}% Auffrischungsimpfungen erhalten erhalten" \
+                       "{vacc_booster}% Auffrischungsimpfungen erhalten" \
                 .format(no_doses=format_int(district.vaccinations.doses_diff),
                         vacc_partial=format_float(district.vaccinations.partial_rate * 100),
                         vacc_full=format_float(district.vaccinations.full_rate * 100),
