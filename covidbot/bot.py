@@ -386,12 +386,6 @@ class Bot(object):
                 f"Leider kann für {location.name} keine Impfübersicht generiert werden, da keine Daten vorliegen.")]
 
         message = self.report_generator.get_vacc_text(location, show_name=True)
-        message += "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
-                   "Verabreichte Zweitimpfdosen: {vacc_full}\n" \
-                   "Verabreichte Auffrischungsimpfungen: {vacc_booster}\n\n" \
-            .format(vacc_partial=format_int(location.vaccinations.vaccinated_partial),
-                    vacc_full=format_int(location.vaccinations.vaccinated_full),
-                    vacc_booster=format_int(location.vaccinations.vaccinated_booster))
 
         if location.id == 0:
             children_data = self.covid_data.get_children_data(location.id)
