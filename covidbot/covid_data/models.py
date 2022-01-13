@@ -42,8 +42,9 @@ class RValueData:
 @dataclass
 class ICUFacts:
     districts_full: int
+    districts_full_trend: Optional[TrendValue]
     districts_low: int
-
+    districts_low_trend: Optional[TrendValue]
 
 @dataclass
 class ICUData:

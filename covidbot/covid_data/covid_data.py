@@ -332,22 +332,31 @@ UNION
             cursor.execute('SELECT MAX(date) as current FROM icu_beds')
             current_date = cursor.fetchone()['current']
 
-            full, close2full = 0, 0
+            old_full, full, old_close2full, close2full = 0, 0, 0, 0
             # TODO: Use districts table to identify non-aggregated values
-            cursor.execute('SELECT COUNT(*) as num_full FROM icu_beds WHERE date=%s AND clear=0 AND district_id > 16',
-                           [current_date])
-            record = cursor.fetchone()
-            if record:
-                full = record['num_full']
+            cursor.execute('SELECT COUNT(*) as num_full, date FROM icu_beds WHERE (date=%s or date=SUBDATE(%s, 1)) AND clear=0 AND district_id > 16 GROUP BY date',
+                           [current_date, current_date])
+
+            for row in cursor.fetchall():
+                if row['date'] == current_date:
+                    full = row['num_full']
+                else:
+                    old_full = row['num_full']
+
+            full_trend = get_trend(old_full, full)
 
             cursor.execute(
-                'SELECT COUNT(*) as num_close FROM icu_beds WHERE date=%s AND (occupied / (clear + occupied)) > 0.9 AND district_id > 16',
-                [current_date])
-            record = cursor.fetchone()
-            if record:
-                close2full = record['num_close']
+                'SELECT COUNT(*) as num_close, date FROM icu_beds WHERE (date=%s or date=SUBDATE(%s, 1)) AND (occupied / (clear + occupied)) > 0.9 AND district_id > 16 GROUP BY date',
+                [current_date, current_date])
 
-            return ICUFacts(full, close2full)
+            for row in cursor.fetchall():
+                if row['date'] == current_date:
+                    close2full = row['num_close']
+                else:
+                    old_close2full = row['num_close']
+
+            close2full_trend = get_trend(old_close2full, close2full)
+            return ICUFacts(full, full_trend, close2full, close2full_trend)
 
     def get_last_update_cases(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:
