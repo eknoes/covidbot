@@ -34,7 +34,7 @@ class CovidDataTest(TestCase):
         RKIKeyDataUpdater(self.conn).update()
         history = RKIHistoryUpdater(self.conn)
         history.max_delta = 0
-        history.min_delta = 8
+        history.min_delta = 10
         history.update()
         self.conn.commit()
 
