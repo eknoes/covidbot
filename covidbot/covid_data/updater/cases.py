@@ -160,7 +160,7 @@ class RKIHistoryUpdater(Updater):
                         updated = updated + timedelta(days=1)
                         self.log.info(f"Got historic case data for {updated}")
                         delta = (date.today() - updated)
-                        if not (self.max_delta <= delta.days <= self.min_delta):
+                        if not (self.max_delta < delta.days < self.min_delta):
                             self.log.info(f"Skip {updated}")
                             break
                         continue
@@ -202,7 +202,7 @@ class RKIHistoryUpdater(Updater):
                         updated = updated + timedelta(days=1)
                         self.log.info(f"Got historic deaths data for {updated}")
                         delta = (date.today() - updated)
-                        if not (self.max_delta <= delta.days <= self.min_delta):
+                        if not (self.max_delta < delta.days < self.min_delta):
                             self.log.info(f"Skip {updated}")
                             break
                         continue
@@ -246,7 +246,7 @@ class RKIHistoryUpdater(Updater):
                         self.log.info(f"Got historic incidence data for {updated}")
 
                         delta = (date.today() - updated)
-                        if not (self.max_delta <= delta.days <= self.min_delta):
+                        if not (self.max_delta < delta.days < self.min_delta):
                             self.log.info(f"Skip {updated}")
                             break
                         continue
