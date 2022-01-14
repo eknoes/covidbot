@@ -33,8 +33,8 @@ class CovidDataTest(TestCase):
             cursor.execute("DELETE FROM counties ORDER BY parent DESC;")
         RKIKeyDataUpdater(self.conn).update()
         history = RKIHistoryUpdater(self.conn)
-        history.min_delta = 8
         history.max_delta = 0
+        history.min_delta = 10
         history.update()
         self.conn.commit()
 

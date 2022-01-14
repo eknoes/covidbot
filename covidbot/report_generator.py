@@ -413,8 +413,8 @@ class ReportGenerator:
                f" ({format_float(district.icu_data.percent_ventilated())}%) invasiv beatmet werden."
 
         if district.icu_data.facts is not None:
-            message += f"\n\n{district.icu_data.facts.districts_full} Orte haben keine freien Intensivbetten für Erwachsene mehr, in " \
-                       f"{district.icu_data.facts.districts_low} Orten sind mindestens 90% der Intensivbetten belegt."
+            message += f"\n\n{district.icu_data.facts.districts_full}{format_data_trend(district.icu_data.facts.districts_full_trend)} Orte haben keine freien Intensivbetten für Erwachsene mehr, in " \
+                       f"{district.icu_data.facts.districts_low}{format_data_trend(district.icu_data.facts.districts_low_trend)} Orten sind mindestens 90% der Intensivbetten belegt."
 
         message += f" Insgesamt gibt es {format_noun(district.icu_data.total_beds(), FormattableNoun.BEDS)} für Erwachsene in {district.name}.\n\n"
 
