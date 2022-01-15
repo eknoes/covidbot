@@ -130,7 +130,7 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
     def get_vaccination_shortpost(self, vacc: VaccinationData) -> List[BotResponse]:
         responses = [BotResponse(
-            f"💉 Das {self.bmg_name} hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht.\n\n"
+            f"💉 Das {self.rki_name} hat die Impfdaten für den {vacc.date.strftime('%d. %B %Y')} veröffentlicht.\n\n"
             f"{format_float(vacc.partial_rate * 100)}% der Bevölkerung haben mindestens eine #Impfung erhalten, "
             f"{format_float(vacc.full_rate * 100)}% sind vollständig erstimmunisiert. "
             f"{format_float(vacc.booster_rate * 100)}% haben eine Auffrischungsimpfung erhalten. #COVID19",
