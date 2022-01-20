@@ -167,12 +167,13 @@ class SingleCommandInterface(MessengerInterface, ABC):
 
         icu_info = self.data.get_icu_global_facts()
         if icu_info:
-            second_tweet = ""
+            second_tweet = f"Insgesamt stehen in {icu_info.districts_total} Orten Intensivbetten zur Verfügung. "
+
             if icu_info.districts_full:
-                second_tweet += f"{icu_info.districts_full} Orte haben keine freien Intensivbetten für Erwachsene mehr. "
+                second_tweet += f"Davon haben {icu_info.districts_full} Orte keine freien Intensivbetten mehr für Erwachsene. "
 
             if icu_info.districts_low:
-                second_tweet += f"In {icu_info.districts_low} Orten sind mindestens 90% der Intensivbetten für Erwachsene belegt."
+                second_tweet += f"In weiteren {icu_info.districts_low} Orten sind mindestens 90% der Intensivbetten für Erwachsene belegt."
 
             if second_tweet:
                 post.append(BotResponse(second_tweet))

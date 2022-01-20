@@ -332,31 +332,24 @@ UNION
             cursor.execute('SELECT MAX(date) as current FROM icu_beds')
             current_date = cursor.fetchone()['current']
 
-            old_full, full, old_close2full, close2full = 0, 0, 0, 0
+            num_total, old_full, full, old_crowded, crowded = 0, 0, 0, 0, 0
             # TODO: Use districts table to identify non-aggregated values
-            cursor.execute('SELECT COUNT(*) as num_full, date FROM icu_beds WHERE (date=%s or date=SUBDATE(%s, 1)) AND clear=0 AND district_id > 16 GROUP BY date',
+            cursor.execute('SELECT SUM(clear=0) as num_full, SUM((occupied / (clear + occupied)) > 0.9) as num_crowded, COUNT(*) as num_total, date FROM icu_beds WHERE (date=%s or date=SUBDATE(%s, 1)) AND district_id > 16 GROUP BY date',
                            [current_date, current_date])
 
             for row in cursor.fetchall():
+                num_total = row['num_total']
                 if row['date'] == current_date:
                     full = row['num_full']
+                    crowded = row['num_crowded']
                 else:
                     old_full = row['num_full']
+                    old_crowded = row['num_crowded']
 
             full_trend = get_trend(old_full, full)
+            crowded_trend = get_trend(old_crowded, crowded)
 
-            cursor.execute(
-                'SELECT COUNT(*) as num_close, date FROM icu_beds WHERE (date=%s or date=SUBDATE(%s, 1)) AND (occupied / (clear + occupied)) > 0.9 AND district_id > 16 GROUP BY date',
-                [current_date, current_date])
-
-            for row in cursor.fetchall():
-                if row['date'] == current_date:
-                    close2full = row['num_close']
-                else:
-                    old_close2full = row['num_close']
-
-            close2full_trend = get_trend(old_close2full, close2full)
-            return ICUFacts(full, full_trend, close2full, close2full_trend)
+            return ICUFacts(num_total, full, full_trend, crowded, crowded_trend)
 
     def get_last_update_cases(self) -> Optional[datetime]:
         with self.connection.cursor(dictionary=True) as cursor:
