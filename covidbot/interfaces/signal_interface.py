@@ -191,6 +191,9 @@ class SignalInterface(MessengerInterface):
                                 f"Account does not exist anymore, delete it: {userid}")
                             self.bot.delete_user(userid)
                             break
+                        elif "org.whispersystems.signalservice.api.push.exceptions.ProofRequiredException" in e.exceptions:
+                            self.log.warning(f"ProofRequired for {userid}")
+                            break
                         else:
                             raise e
                     except RateLimitError as e:
