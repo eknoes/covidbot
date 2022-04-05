@@ -37,7 +37,7 @@ class RulesGermanyUpdater(Updater):
                         self.log.warning(f"Could not get ID of {bl['Bundesland']}")
                         continue
 
-                    text = bl['allgemein']['Kontaktbeschränkungen']['text']
+                    text = bl['Überblick']
                     text = adapt_text(text, just_strip=True)
                     link = f'https://tourismus-wegweiser.de/detail/?bl={bl["Kürzel"]}'
 
