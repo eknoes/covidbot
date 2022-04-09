@@ -78,6 +78,7 @@ class Bot(object):
         self.handler_list.append(Handler("löschmich", self.deleteMeHandler, False))
         self.handler_list.append(Handler("stop", self.deleteMeHandler, False))
         self.handler_list.append(Handler("stopp", self.deleteMeHandler, False))
+        self.handler_list.append(Handler("abbestellen", self.deleteMeHandler, False))
         self.handler_list.append(Handler("debug", self.debugHandler, False))
         self.handler_list.append(Handler("einstellungen", self.settingsHandler, True))
         self.handler_list.append(Handler("einstellung", self.settingsHandler, True))
