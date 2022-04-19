@@ -304,6 +304,7 @@ class TelegramInterface(MessengerInterface):
                 self.log.warning(f"Sent report to {userid}!")
             else:
                 self.log.error(f"Error sending report to {userid}")
+                self.bot.disable_user(userid)
 
     async def send_message_to_users(self, message: str, users: List[Union[str, int]]):
         if not users:
