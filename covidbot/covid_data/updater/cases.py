@@ -55,7 +55,7 @@ class RKIKeyDataUpdater(Updater):
                 # Plausibility check
                 cursor.execute("SELECT * FROM covid_data_calculated WHERE county_name LIKE '%Deutschland%' ORDER BY date DESC LIMIT 1")
                 row = cursor.fetchone()
-                if (row['new_cases'] is not None and row['new_cases'] <= 0) or (row['new_deaths'] is not None and row['new_deaths'] <= 0):
+                if (row['new_cases'] is not None and row['new_cases'] < 0) or (row['new_deaths'] is not None and row['new_deaths'] < 0):
                     self.connection.rollback()
                     raise ValueError("Invalid Data")
             self.connection.commit()
