@@ -38,6 +38,8 @@ class RKIKeyDataUpdater(Updater):
         if last_update is not None and online_date <= last_update:
             return False
 
+        self.log.warning(f"RKIDEBUG: New Data, Timestamp_txt: {response['features'][0]['attributes']['Timestamp_txt']}")
+
         response = self.get_resource(self.RKI_DATA)
         if response:
             self.log.debug("Got RKI Data, checking if new")
@@ -47,6 +49,8 @@ class RKIKeyDataUpdater(Updater):
             for item in response_data['features']:
                 district = item['attributes']
                 covid_data.append((district['AdmUnitId'], online_date, district['AnzFall'], district['Inz7T'], district['AnzTodesfall']))
+                if district['AdmUnitId'] == 0:
+                    logging.warning(f"RKIDEBUG: Inz7T: {district['Inz7T']}, AnzFall: {district['AnzFall']}")
 
             with self.connection.cursor(dictionary=True) as cursor:
                 cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
@@ -55,7 +59,7 @@ class RKIKeyDataUpdater(Updater):
                 # Plausibility check
                 cursor.execute("SELECT * FROM covid_data_calculated WHERE county_name LIKE '%Deutschland%' ORDER BY date DESC LIMIT 1")
                 row = cursor.fetchone()
-                if (row['new_cases'] is not None and row['new_cases'] < 0) or (row['new_deaths'] is not None and row['new_deaths'] < 0):
+                if (row['new_cases'] is not None and row['new_cases'] <= 0) or (row['new_deaths'] is not None and row['new_deaths'] < 0):
                     self.connection.rollback()
                     raise ValueError("Invalid Data")
             self.connection.commit()
