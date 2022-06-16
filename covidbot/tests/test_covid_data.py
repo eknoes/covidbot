@@ -4,7 +4,7 @@ from mysql.connector import MySQLConnection
 
 from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import CovidData, RKIKeyDataUpdater, RKIHistoryUpdater, \
-    RulesGermanyUpdater, ICUGermanyUpdater, VaccinationGermanyUpdater, \
+    ICUGermanyUpdater, VaccinationGermanyUpdater, \
     RValueGermanyUpdater, HospitalisationRKIUpdater, ICUGermanyHistoryUpdater
 
 
@@ -34,7 +34,7 @@ class CovidDataTest(TestCase):
 
         for updater in [RValueGermanyUpdater, VaccinationGermanyUpdater,
                         ICUGermanyUpdater,
-                        ICUGermanyHistoryUpdater, RulesGermanyUpdater,
+                        ICUGermanyHistoryUpdater,
                         HospitalisationRKIUpdater]:
             updater(cls.conn).update()
 
