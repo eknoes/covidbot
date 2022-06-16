@@ -6,9 +6,7 @@ from covidbot.__main__ import parse_config, get_connection
 from covidbot.covid_data import RKIKeyDataUpdater, RValueGermanyUpdater, \
     VaccinationGermanyUpdater, HospitalisationRKIUpdater, ICUGermanyHistoryUpdater, \
     RKIHistoryUpdater
-from covidbot.covid_data import clean_district_name, ICUGermanyUpdater, \
-    RulesGermanyUpdater
-
+from covidbot.covid_data import clean_district_name, ICUGermanyUpdater
 
 class TestUpdater(TestCase):
     conn: MySQLConnection
@@ -33,7 +31,7 @@ class TestUpdater(TestCase):
 
         for updater_class in [RKIKeyDataUpdater, RKIHistoryUpdater, RValueGermanyUpdater,
                               VaccinationGermanyUpdater, ICUGermanyUpdater,
-                              ICUGermanyHistoryUpdater, RulesGermanyUpdater,
+                              ICUGermanyHistoryUpdater,
                               HospitalisationRKIUpdater]:
             updater = updater_class(self.conn)
             self.assertTrue(updater.update(), f"{updater_class.__name__} should update")

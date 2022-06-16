@@ -385,9 +385,9 @@ def main():
             from covidbot.covid_data import CovidData, VaccinationGermanyUpdater, \
                 RValueGermanyUpdater, \
                 RKIKeyDataUpdater, ICUGermanyUpdater, \
-                RulesGermanyUpdater, ICUGermanyHistoryUpdater, HospitalisationRKIUpdater
+                ICUGermanyHistoryUpdater, HospitalisationRKIUpdater
             for updater in [RKIKeyDataUpdater(conn), ICUGermanyHistoryUpdater(conn),
-                            VaccinationGermanyUpdater(conn), RulesGermanyUpdater(conn),
+                            VaccinationGermanyUpdater(conn),
                             RValueGermanyUpdater(conn), ICUGermanyUpdater(conn),
                             HospitalisationRKIUpdater(conn)]:
                 try:

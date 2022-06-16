@@ -15,7 +15,8 @@ from covidbot.report_generator import ReportGenerator
 from covidbot.settings import BotUserSettings
 from covidbot.user_hint_service import UserHintService
 from covidbot.user_manager import UserManager, BotUser
-from covidbot.utils import adapt_text, format_float, format_int, format_noun, FormattableNoun, \
+from covidbot.utils import adapt_text, format_float, format_int, format_noun, \
+    FormattableNoun, \
     format_data_trend, MessageType, message_type_name, message_type_desc
 
 
@@ -46,8 +47,10 @@ class Bot(object):
     log = logging.getLogger(__name__)
     report_generator: ReportGenerator
 
-    def __init__(self, user_manager: UserManager, covid_data: CovidData, visualization: Visualization,
-                 command_formatter: Callable[[str], str], has_location_feature: bool = False):
+    def __init__(self, user_manager: UserManager, covid_data: CovidData,
+                 visualization: Visualization,
+                 command_formatter: Callable[[str], str],
+                 has_location_feature: bool = False):
         self.user_manager = user_manager
         self.covid_data = covid_data
         self.visualization = visualization
@@ -55,7 +58,8 @@ class Bot(object):
         self.command_formatter = command_formatter
         self.user_hints = UserHintService(self.command_formatter)
 
-        self.report_generator = ReportGenerator(user_manager, covid_data, visualization, self.user_hints,
+        self.report_generator = ReportGenerator(user_manager, covid_data, visualization,
+                                                self.user_hints,
                                                 command_formatter)
 
         self.handler_list.append(Handler("start", self.startHandler, True))
@@ -84,8 +88,10 @@ class Bot(object):
         self.handler_list.append(Handler("einstellungen", self.settingsHandler, True))
         self.handler_list.append(Handler("einstellung", self.settingsHandler, True))
         self.handler_list.append(Handler("grafik", self.graphicSettingsHandler, True))
-        self.handler_list.append(Handler("hospitalisierungen", self.hospitalRateHandler, True))
-        self.handler_list.append(Handler("hospitalisierung", self.hospitalRateHandler, True))
+        self.handler_list.append(
+            Handler("hospitalisierungen", self.hospitalRateHandler, True))
+        self.handler_list.append(
+            Handler("hospitalisierung", self.hospitalRateHandler, True))
         self.handler_list.append(Handler("sleep", self.sleepModeHandler, False))
         self.handler_list.append(Handler("daswaralles", self.thatsItHandler, False))
         self.handler_list.append(Handler("noop", lambda x, y: None, False))
@@ -101,8 +107,10 @@ class Bot(object):
     def change_platform_id(self, old_platform_id: str, new_platform_id: str) -> bool:
         return self.user_manager.change_platform_id(old_platform_id, new_platform_id)
 
-    def get_user_setting(self, user_identification: Union[int, str], setting: BotUserSettings) -> bool:
-        user_id = self.user_manager.get_user_id(user_identification, create_if_not_exists=False)
+    def get_user_setting(self, user_identification: Union[int, str],
+                         setting: BotUserSettings) -> bool:
+        user_id = self.user_manager.get_user_id(user_identification,
+                                                create_if_not_exists=False)
         return self.user_manager.get_user_setting(user_id, setting)
 
     def disable_user(self, user_identification: Union[int, str]):
@@ -116,7 +124,8 @@ class Bot(object):
     def handle_input(self, user_input: str, platform_id: str) -> List[BotResponse]:
         user_id = self.user_manager.get_user_id(platform_id, create_if_not_exists=False)
         if not user_id:
-            user_id = self.user_manager.get_user_id(platform_id, create_if_not_exists=True)
+            user_id = self.user_manager.get_user_id(platform_id,
+                                                    create_if_not_exists=True)
             if user_input.lower().find("start") == -1:
                 user_input = "start"
 
@@ -127,13 +136,16 @@ class Bot(object):
         if user_id and user_id in self.chat_states.keys():
             state = self.chat_states[user_id]
             if state[0] == ChatBotState.WAITING_FOR_COMMAND:
-                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche", "regeln", "impfungen",
+                if user_input.strip().lower() in ["abo", "daten", "beende", "lösche",
+                                                  "regeln", "impfungen",
                                                   "historie"]:
                     user_input += " " + str(state[1])
                 del self.chat_states[user_id]
             elif state[0] == ChatBotState.WAITING_FOR_IS_FEEDBACK:
                 if user_input.lower().strip() == "ja":
-                    self.user_manager.add_feedback(user_id, state[1].replace("<", "&lt;").replace(">", "&gt;"))
+                    self.user_manager.add_feedback(user_id,
+                                                   state[1].replace("<", "&lt;").replace(
+                                                       ">", "&gt;"))
                     del self.chat_states[user_id]
                     BOT_COMMAND_COUNT.labels('send_feedback').inc()
                     return [BotResponse("Danke für dein wertvolles Feedback!")]
@@ -141,9 +153,11 @@ class Bot(object):
                     del self.chat_states[user_id]
 
                     if user_input.strip().lower()[:4] == "nein":
-                        return [BotResponse("Alles klar, deine Nachricht wird nicht weitergeleitet.")]
+                        return [BotResponse(
+                            "Alles klar, deine Nachricht wird nicht weitergeleitet.")]
             elif state[0] == ChatBotState.NOT_ACTIVATED:
-                if self.user_manager.get_user(user_id) and self.user_manager.get_user(user_id).activated:
+                if self.user_manager.get_user(user_id) and self.user_manager.get_user(
+                        user_id).activated:
                     del self.chat_states[user_id]
                 else:
                     return []
@@ -169,7 +183,8 @@ class Bot(object):
             if handler.command == user_input[:len(handler.command)].lower():
                 # If no args should be given, check if input has no args. Otherwise it might be handled by
                 # the direct message handler
-                if not handler.has_args and not len(user_input.strip()) == len(handler.command):
+                if not handler.has_args and not len(user_input.strip()) == len(
+                        handler.command):
                     continue
 
                 text_in = user_input[len(handler.command):].strip()
@@ -196,29 +211,33 @@ class Bot(object):
         if len(districts) > 1:
             choices = self.generate_districts_choices(districts)
             choices.append(self.get_abort_userchoice())
-            return [BotResponse("Die Daten für die folgenden Orte und Regionen sind für deinen Standort verfügbar",
-                                choices=choices)]
+            return [BotResponse(
+                "Die Daten für die folgenden Orte und Regionen sind für deinen Standort verfügbar",
+                choices=choices)]
         return self.handle_input(str(districts[0].id), user_id)
 
     def startHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('start').inc()
         if user_input == "los":
-            return [BotResponse("Du kannst mir jederzeit einen Ortsnamen zusenden: Danach kannst du dich entscheiden, "
-                                "ob du diesen abonnieren willst, oder nur einmalig aktuelle Daten oder Regeln angezeigt"
-                                " bekommen möchtest."),
-                    BotResponse("Für welchen Ort interessierst du dich?")]
+            return [BotResponse(
+                "Du kannst mir jederzeit einen Ortsnamen zusenden: Danach kannst du dich entscheiden, "
+                "ob du diesen abonnieren willst, oder nur einmalig aktuelle Daten oder Regeln angezeigt"
+                " bekommen möchtest."),
+                BotResponse("Für welchen Ort interessierst du dich?")]
         message = (f'Hallo,\n'
                    f'über diesen Bot kannst Du Dir die vom Robert-Koch-Institut (RKI) bereitgestellten '
                    f'COVID-19-Daten anzeigen lassen und sie dauerhaft kostenlos abonnieren. Du erhältst dann jeden '
                    f'Morgen eine Zusammenfassung der Lage in deinen abonnierten Orten!')
 
-        choices = [UserChoice("Loslegen", "/start los", "Sende einfach den Namen eines Ortes, den du abonnieren "
-                                                        "möchtest oder zu dem du Informationen suchst",
+        choices = [UserChoice("Loslegen", "/start los",
+                              "Sende einfach den Namen eines Ortes, den du abonnieren "
+                              "möchtest oder zu dem du Informationen suchst",
                               alt_help="Ich funktioniere über Befehle, die du mir als Nachricht zusendest. "
                                        "Du kannst mir jederzeit einen Ort oder bspw. \"Hilfe\" zusenden. Weitere "
                                        "Aktionen werden dir unter den jeweiligen Nachrichten angezeigt."),
-                   UserChoice("Infos zur Benutzung", "/hilfe", "Du kannst jederzeit \"Hilfe\" an den Bot senden, um "
-                                                               "Informationen zur Benutzung angezeigt zu bekommen")]
+                   UserChoice("Infos zur Benutzung", "/hilfe",
+                              "Du kannst jederzeit \"Hilfe\" an den Bot senden, um "
+                              "Informationen zur Benutzung angezeigt zu bekommen")]
         # Add subscription for Germany on start
         self.user_manager.add_subscription(user_id, 0)
         self.user_manager.add_report_subscription(user_id, MessageType.CASES_GERMANY)
@@ -226,13 +245,15 @@ class Bot(object):
 
     @staticmethod
     def feedbackHandler(user_input: str, user_id: int) -> List[BotResponse]:
-        return [BotResponse('Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
-                            'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!')]
+        return [BotResponse(
+            'Wir freuen uns über deine Anregungen, Lob & Kritik! Sende dem Bot einfach eine '
+            'Nachricht, du wirst dann gefragt ob diese an uns weitergeleitet werden darf!')]
 
     @staticmethod
     def thatsItHandler(user_input: str, user_id: int) -> List[BotResponse]:
-        return [BotResponse('Alles klar! Wenn du weitere Informationen brauchst kannst du mir jederzeit einen Ort '
-                            'oder "Hilfe" senden. Bis später 👋')]
+        return [BotResponse(
+            'Alles klar! Wenn du weitere Informationen brauchst kannst du mir jederzeit einen Ort '
+            'oder "Hilfe" senden. Bis später 👋')]
 
     def helpHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('help').inc()
@@ -269,8 +290,9 @@ class Bot(object):
                        ' Hilfe anzeigen. Wenn du uns weiterempfehlen möchtest, kannst du einfach den Link unserer ' \
                        'Website teilen: https://covidbot.d-64.org\n\n' \
                        'Diesen Text erhältst du immer, wenn du "Hilfe" als Nachricht an den Bot schickst.'
-            choices = [UserChoice('Weitere Informationen', '/hilfe lang', 'Schreibe "Hilfe Lang", um alle Informationen'
-                                                                          ' zur Benutzung zu erhalten')]
+            choices = [UserChoice('Weitere Informationen', '/hilfe lang',
+                                  'Schreibe "Hilfe Lang", um alle Informationen'
+                                  ' zur Benutzung zu erhalten')]
         else:
             message += ('<b>🔎 Orte finden</b>\n'
                         'Schicke einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten '
@@ -322,19 +344,23 @@ class Bot(object):
                         abo_command=self.command_formatter('Abo'),
                         hospital_command=self.command_formatter('Hospitalisierung'),
                         privacy_command=self.command_formatter('Datenschutz'),
-                        help_command=self.command_formatter('Hilfe'), info_command=self.command_formatter('Info'),
+                        help_command=self.command_formatter('Hilfe'),
+                        info_command=self.command_formatter('Info'),
                         vacc_command=self.command_formatter('Impfungen'),
                         deleteme_command=self.command_formatter('Loeschmich'),
                         abo_example=self.command_formatter('Abo ORT'),
                         beende_example=self.command_formatter('Beende ORT'),
                         berichte_command=self.command_formatter('Berichte'))
-            choices = [UserChoice('Weniger Informationen', '/hilfe', 'Schreibe "Hilfe", um den Kurzüberblick über die '
-                                                                     'Funktionen zu erhalten')]
+            choices = [UserChoice('Weniger Informationen', '/hilfe',
+                                  'Schreibe "Hilfe", um den Kurzüberblick über die '
+                                  'Funktionen zu erhalten')]
 
-        choices.append(UserChoice('Berichte', '/berichte', 'Schreibe "Berichte", um deine verschiedenen Berichte zu '
-                                                           'verwalten'))
-        choices.append(UserChoice('Einstellungen', '/einstellungen', 'Schreibe "Einstellungen", um deine '
-                                                                     'Einstellungen zu ändern'))
+        choices.append(UserChoice('Berichte', '/berichte',
+                                  'Schreibe "Berichte", um deine verschiedenen Berichte zu '
+                                  'verwalten'))
+        choices.append(UserChoice('Einstellungen', '/einstellungen',
+                                  'Schreibe "Einstellungen", um deine '
+                                  'Einstellungen zu ändern'))
         choices.append(self.get_default_userchoice())
         return [BotResponse(message, choices=choices)]
 
@@ -402,8 +428,10 @@ class Bot(object):
             for child in children_data:
                 message += "• {rate_partial}% / {rate_full}% / {rate_booster}% ({district})\n" \
                     .format(district=child.name,
-                            rate_partial=format_float(child.vaccinations.partial_rate * 100),
-                            rate_booster=format_float(child.vaccinations.booster_rate * 100),
+                            rate_partial=format_float(
+                                child.vaccinations.partial_rate * 100),
+                            rate_booster=format_float(
+                                child.vaccinations.booster_rate * 100),
                             rate_full=format_float(child.vaccinations.full_rate * 100))
             message += "\n\n"
         else:
@@ -413,7 +441,8 @@ class Bot(object):
                    ' im <a href="https://impfdashboard.de/">Impfdashboard</a>. ' \
                    'Sende {info_command} um eine Erläuterung der Daten zu erhalten.</i>' \
             .format(info_command=self.command_formatter("Info"),
-                    earliest_vacc_date=earliest_data.vaccinations.date.strftime("%d.%m.%Y"))
+                    earliest_vacc_date=earliest_data.vaccinations.date.strftime(
+                        "%d.%m.%Y"))
         graphs = [self.visualization.vaccination_graph(location.id)]
 
         if location.id == 0:
@@ -425,7 +454,8 @@ class Bot(object):
         BOT_COMMAND_COUNT.labels('hospital-rate').inc()
 
         if user_input:
-            location = self.parseLocationInput(user_input, help_command="Hospitalisierungen")
+            location = self.parseLocationInput(user_input,
+                                               help_command="Hospitalisierungen")
             if location and type(location) != District:
                 return location
             location = self.covid_data.get_district_data(location.id)
@@ -447,33 +477,40 @@ class Bot(object):
         # Remove graphic, as it is misleading
         return [BotResponse(message)]
 
-    def subscribeReportHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
+    def subscribeReportHandler(self, user_input: str, user_id: int) -> Union[
+        BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('report-types').inc()
         responses = []
         if user_input:
             user = self.user_manager.get_user(user_id, with_subscriptions=True)
-            for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
+            for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY,
+                         MessageType.VACCINATION_GERMANY]:
                 if user_input.capitalize() == message_type_name(item)[:len(user_input)]:
                     if item not in user.subscribed_reports:
                         if self.user_manager.add_report_subscription(user_id, item):
                             self.user_manager.add_sent_report(user_id, item)
-                            responses.append(BotResponse(f"Du erhältst nun Berichte für {message_type_name(item)}."))
+                            responses.append(BotResponse(
+                                f"Du erhältst nun Berichte für {message_type_name(item)}."))
                     else:
                         if self.user_manager.rm_report_subscription(user_id, item):
                             responses.append(
-                                BotResponse(f"Du erhältst nun keine Berichte mehr zu {message_type_name(item)}."))
+                                BotResponse(
+                                    f"Du erhältst nun keine Berichte mehr zu {message_type_name(item)}."))
 
         user = self.user_manager.get_user(user_id, True)
-        response = BotResponse("Du hast {report_count} abonniert. Jeder Bericht enthält individuelle "
-                               "Grafiken und ist an deine abonnierten Orte angepasst. Du erhältst deine "
-                               "personalisierten Berichte einmal am Tag: Direkt, wenn neue Daten verfügbar sind. "
-                               "Sobald du den Impf- oder Intensivbericht aktiviert hast, werden dir diese Daten nicht "
-                               "mehr im Infektionsbericht angezeigt. Dies kannst du danach aber in den Einstellungen "
-                               "ändern!"
-                               .format(report_count=format_noun(len(user.subscribed_reports), FormattableNoun.REPORT)))
+        response = BotResponse(
+            "Du hast {report_count} abonniert. Jeder Bericht enthält individuelle "
+            "Grafiken und ist an deine abonnierten Orte angepasst. Du erhältst deine "
+            "personalisierten Berichte einmal am Tag: Direkt, wenn neue Daten verfügbar sind. "
+            "Sobald du den Impf- oder Intensivbericht aktiviert hast, werden dir diese Daten nicht "
+            "mehr im Infektionsbericht angezeigt. Dies kannst du danach aber in den Einstellungen "
+            "ändern!"
+            .format(report_count=format_noun(len(user.subscribed_reports),
+                                             FormattableNoun.REPORT)))
 
         choices = []
-        for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY, MessageType.VACCINATION_GERMANY]:
+        for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY,
+                     MessageType.VACCINATION_GERMANY]:
             if item in user.subscribed_reports:
                 cmd = "/berichte"
                 label_verb = "abbestellen"
@@ -490,14 +527,16 @@ class Bot(object):
                                       f'{cmd} {message_type_name(item)}',
                                       f'Schreibe {self.command_formatter(f"{cmd[1:].capitalize()} {message_type_name(item)}")} um '
                                       f'den Bericht zu {message_type_name(item)} {text_verb}'))
-        choices.append(UserChoice('Einstellungen', '/einstellungen', 'Schreibe "Einstellungen", um deine '
-                                                                     'Einstellungen zu ändern'))
+        choices.append(UserChoice('Einstellungen', '/einstellungen',
+                                  'Schreibe "Einstellungen", um deine '
+                                  'Einstellungen zu ändern'))
         choices.append(self.get_default_userchoice())
         response.choices = choices
         responses.append(response)
         return responses
 
-    def subscribeHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
+    def subscribeHandler(self, user_input: str, user_id: int) -> Union[
+        BotResponse, List[BotResponse]]:
         BOT_COMMAND_COUNT.labels('subscribe').inc()
 
         # Show overview if no arguments given
@@ -511,7 +550,8 @@ class Bot(object):
             else:
                 districts = list(map(self.covid_data.get_district, user.subscriptions))
                 message = "Du hast aktuell {abo_count} abonniert." \
-                    .format(abo_count=format_noun(len(user.subscriptions), FormattableNoun.DISTRICT))
+                    .format(abo_count=format_noun(len(user.subscriptions),
+                                                  FormattableNoun.DISTRICT))
 
             response = BotResponse(message)
 
@@ -539,12 +579,15 @@ class Bot(object):
                         f"erfährst du über den {self.command_formatter('Hilfe')} Befehl.\n"
                         f"Danke, dass du unseren Bot benutzt!")
                     choices.append(
-                        UserChoice("Hilfe anzeigen", '/hilfe', f'Schreibe "Hilfe", um mehr Informationen zur '
-                                                               f'Benutzung zu bekommen'))
-                    choices.append(UserChoice("Berichte verwalten", '/berichte', f'Schreibe "Berichte", deine '
-                                                                                 f'täglichen Berichte zu verwalten'))
+                        UserChoice("Hilfe anzeigen", '/hilfe',
+                                   f'Schreibe "Hilfe", um mehr Informationen zur '
+                                   f'Benutzung zu bekommen'))
+                    choices.append(UserChoice("Berichte verwalten", '/berichte',
+                                              f'Schreibe "Berichte", deine '
+                                              f'täglichen Berichte zu verwalten'))
                     choices.append(self.get_default_userchoice())
-                    return [BotResponse(message.format(name=location.name), choices=choices)]
+                    return [
+                        BotResponse(message.format(name=location.name), choices=choices)]
             else:
                 message = "Du hast {name} bereits abonniert."
 
@@ -570,7 +613,12 @@ class Bot(object):
             return [BotResponse(message.format(name=location.name))]
         return location
 
-    def rulesHandler(self, user_input: str, user_id: int) -> Union[BotResponse, List[BotResponse]]:
+    def rulesHandler(self, user_input: str, user_id: int) -> Union[
+        BotResponse, List[BotResponse]]:
+        return BotResponse(
+            f"Seit dem 31.5. wird der Tourismus-Wegweiser, von dem wir unsere Regeldaten bezogen haben,"
+            f"nicht mehr aktualisiert. Aus diesem Grund wird dieser Befehl nicht mehr unterstützt.")
+
         BOT_COMMAND_COUNT.labels('rules').inc()
 
         location = self.parseLocationInput(user_input, help_command="Regeln")
@@ -593,9 +641,10 @@ class Bot(object):
                           f"keine Gewähr übernehmen. Für weitere Informationen siehe unten.</i>\n\n" \
                           f"{rules.text}\n\nDetails zu den aktuellen Regeln sowie Links zu den FAQs und den Verordnungen deines Bundeslandes findest du " \
                           f"<a href='{rules.link}'>hier</a>.\n\n"
-                message += (f'Regeln vom {rules.date.strftime("%d.%m.%Y")}. Informationen vom '
-                            f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweiser</a> des Kompetenzzentrum Tourismus des Bundes, lizenziert unter'
-                            f' CC BY 4.0.')
+                message += (
+                    f'Regeln vom {rules.date.strftime("%d.%m.%Y")}. Informationen vom '
+                    f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweiser</a> des Kompetenzzentrum Tourismus des Bundes, lizenziert unter'
+                    f' CC BY 4.0.')
             else:
                 message = f"Regeln sind für {current_data.name} leider nicht verfügbar. Momentan können Regeln nur für " \
                           f"Bundesländer abgerufen werden."
@@ -654,12 +703,14 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             if current_data.incidence_interval_data:
                 if current_data.incidence_interval_data.lower_threshold_days is not None:
                     message += " Die Inzidenz ist damit seit {days} ({working_days}) über {threshold}." \
-                        .format(days=format_noun(current_data.incidence_interval_data.lower_threshold_days,
-                                                 FormattableNoun.DAYS),
-                                working_days=format_noun(
-                                    current_data.incidence_interval_data.lower_threshold_working_days,
-                                    FormattableNoun.WORKING_DAYS),
-                                threshold=format_int(current_data.incidence_interval_data.lower_threshold))
+                        .format(days=format_noun(
+                        current_data.incidence_interval_data.lower_threshold_days,
+                        FormattableNoun.DAYS),
+                        working_days=format_noun(
+                            current_data.incidence_interval_data.lower_threshold_working_days,
+                            FormattableNoun.WORKING_DAYS),
+                        threshold=format_int(
+                            current_data.incidence_interval_data.lower_threshold))
 
                 if current_data.incidence_interval_data.upper_threshold_days is not None:
                     if current_data.incidence_interval_data.lower_threshold_days is not None:
@@ -668,12 +719,14 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                         message += " Die Inzidenz ist damit "
 
                     message += "seit {days} ({working_days}) unter {threshold}." \
-                        .format(days=format_noun(current_data.incidence_interval_data.upper_threshold_days,
-                                                 FormattableNoun.DAYS),
-                                working_days=format_noun(
-                                    current_data.incidence_interval_data.upper_threshold_working_days,
-                                    FormattableNoun.WORKING_DAYS),
-                                threshold=format_int(current_data.incidence_interval_data.upper_threshold))
+                        .format(days=format_noun(
+                        current_data.incidence_interval_data.upper_threshold_days,
+                        FormattableNoun.DAYS),
+                        working_days=format_noun(
+                            current_data.incidence_interval_data.upper_threshold_working_days,
+                            FormattableNoun.WORKING_DAYS),
+                        threshold=format_int(
+                            current_data.incidence_interval_data.upper_threshold))
 
         if current_data.r_value:
             message += " Der 7-Tage-R-Wert liegt bei {r_value}{r_trend}." \
@@ -687,28 +740,33 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         message = message.format(district_name=current_data.name,
                                  incidence=format_float(current_data.incidence),
-                                 incidence_trend=format_data_trend(current_data.incidence_trend),
+                                 incidence_trend=format_data_trend(
+                                     current_data.incidence_trend),
                                  new_cases=format_int(current_data.new_cases),
-                                 new_cases_trend=format_data_trend(current_data.cases_trend),
+                                 new_cases_trend=format_data_trend(
+                                     current_data.cases_trend),
                                  total_cases=format_int(current_data.total_cases),
                                  new_deaths=format_int(current_data.new_deaths),
-                                 new_deaths_trend=format_data_trend(current_data.deaths_trend),
+                                 new_deaths_trend=format_data_trend(
+                                     current_data.deaths_trend),
                                  total_deaths=format_int(current_data.total_deaths))
 
         hospitalization_district = current_data
         if not hospitalization_district.hospitalisation and current_data.parent:
-            hospitalization_district = self.covid_data.get_district_data(current_data.parent)
+            hospitalization_district = self.covid_data.get_district_data(
+                current_data.parent)
 
         if hospitalization_district.hospitalisation:
             message += self.report_generator.get_hospital_text(hospitalization_district)
             message += "\n\n"
             # Remove graphic, as it is misleading
-            #graphics.append(self.visualization.hospitalization_graph(hospitalization_district.id))
+            # graphics.append(self.visualization.hospitalization_graph(hospitalization_district.id))
 
         if current_data.icu_data:
             message += self.report_generator.get_icu_text(current_data)
-            sources.append(f'Intensivbettenauslastung vom {current_data.icu_data.date.strftime("%d.%m.%Y")}. '
-                           f'Daten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.')
+            sources.append(
+                f'Intensivbettenauslastung vom {current_data.icu_data.date.strftime("%d.%m.%Y")}. '
+                f'Daten vom <a href="https://intensivregister.de">DIVI-Intensivregister</a>.')
             graphics.append(self.visualization.icu_graph(current_data.id))
 
         related_vaccinations = None
@@ -729,24 +787,27 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                        "Verabreichte Erstimpfdosen: {vacc_partial}\n" \
                        "Verabreichte Zweitimpfdosen: {vacc_full}\n" \
                        "Verabreichte Auffrischungsimpfungen: {vacc_booster}\n\n" \
-                .format(rate_partial=format_float(related_vaccinations.partial_rate * 100),
-                        rate_full=format_float(related_vaccinations.full_rate * 100),
-                        rate_booster=format_float(related_vaccinations.booster_rate * 100),
-                        vacc_partial=format_int(related_vaccinations.vaccinated_partial),
-                        vacc_full=format_int(related_vaccinations.vaccinated_full),
-                        vacc_booster=format_int(related_vaccinations.vaccinated_booster),
-                        vacc_date=related_vaccinations.date.strftime("%d.%m.%Y"))
-            sources.append(f'Impfdaten vom {related_vaccinations.date.strftime("%d.%m.%Y")}. '
-                           f'Daten vom Bundesministerium für Gesundheit, mehr Informationen im '
-                           f'<a href="https://impfdashboard.de/">Impfdashboard</a>.')
+                .format(
+                rate_partial=format_float(related_vaccinations.partial_rate * 100),
+                rate_full=format_float(related_vaccinations.full_rate * 100),
+                rate_booster=format_float(related_vaccinations.booster_rate * 100),
+                vacc_partial=format_int(related_vaccinations.vaccinated_partial),
+                vacc_full=format_int(related_vaccinations.vaccinated_full),
+                vacc_booster=format_int(related_vaccinations.vaccinated_booster),
+                vacc_date=related_vaccinations.date.strftime("%d.%m.%Y"))
+            sources.append(
+                f'Impfdaten vom {related_vaccinations.date.strftime("%d.%m.%Y")}. '
+                f'Daten vom Bundesministerium für Gesundheit, mehr Informationen im '
+                f'<a href="https://impfdashboard.de/">Impfdashboard</a>.')
 
         if current_data.rules:
             message += "<b>👆 Regeln</b>\n" \
                        f"{current_data.rules.text}\n\nDetails zu den aktuellen Regeln und Öffnungen findest du " \
                        f"<a href='{current_data.rules.link}'>hier</a>.\n\n"
-            sources.append(f'Regeln vom {current_data.rules.date.strftime("%d.%m.%Y")}. Daten vom '
-                           f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweisers</a>, sind lizenziert unter'
-                           f' CC BY 4.0.')
+            sources.append(
+                f'Regeln vom {current_data.rules.date.strftime("%d.%m.%Y")}. Daten vom '
+                f'<a href="https://tourismus-wegweiser.de">Tourismus-Wegweisers</a>, sind lizenziert unter'
+                f' CC BY 4.0.')
         elif current_data.parent:
             parent_district = self.covid_data.get_district_data(current_data.parent)
             if parent_district and parent_district.rules:
@@ -756,7 +817,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         message += "\n\n".join(sources)
         message += '\nSende {info_command} um eine Erläuterung ' \
                    'der Daten zu erhalten.' \
-            .format(info_command=self.command_formatter("Info"), date=current_data.date.strftime("%d.%m.%Y"))
+            .format(info_command=self.command_formatter("Info"),
+                    date=current_data.date.strftime("%d.%m.%Y"))
 
         return [BotResponse(message, graphics)]
 
@@ -765,9 +827,11 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         user = self.user_manager.get_user(user_id, with_subscriptions=True)
 
         if user_input:
-            if user_input.lower() == message_type_name(MessageType.ICU_GERMANY)[:len(user_input)].lower():
+            if user_input.lower() == message_type_name(MessageType.ICU_GERMANY)[
+                                     :len(user_input)].lower():
                 return self.report_generator.generate_icu_report(user)
-            elif user_input.lower() == message_type_name(MessageType.VACCINATION_GERMANY)[:len(user_input)].lower():
+            elif user_input.lower() == message_type_name(MessageType.VACCINATION_GERMANY)[
+                                       :len(user_input)].lower():
                 return self.report_generator.generate_vaccination_report(user)
 
         return self.report_generator.generate_infection_report(user)
@@ -792,7 +856,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         choices.append(UserChoice("Daten anzeigen", f'/daten {location.id}',
                                   'Schreibe "Daten", um die aktuellen Daten zu erhalten'))
-        choices.append(UserChoice("Hospitalisierungen anzeigen", f'/hospitalisierungen {location.id}',
+        choices.append(UserChoice("Hospitalisierungen anzeigen",
+                                  f'/hospitalisierungen {location.id}',
                                   'Schreibe "Hospitalisierungen", um einen Überblick über die Krankenhauseinweisungen '
                                   'zu erhalten'))
         choices.append(UserChoice('Regeln anzeigen', f'/regeln {location.id}',
@@ -808,7 +873,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
     @staticmethod
     def get_error_message() -> BotResponse:
-        return BotResponse("Leider ist ein unvorhergesehener Fehler aufgetreten. Bitte versuche es erneut.")
+        return BotResponse(
+            "Leider ist ein unvorhergesehener Fehler aufgetreten. Bitte versuche es erneut.")
 
     def statHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('statistic').inc()
@@ -843,9 +909,10 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             i += 1
         message += "\nIm Durchschnitt hat ein:e Nutzer:in {mean} Orte abonniert, " \
                    "die höchste Anzahl an Abos liegt bei {most_subs}."
-        message = message.format(total_user=format_int(self.user_manager.get_total_user_number()),
-                                 mean=format_float(self.user_manager.get_mean_subscriptions()),
-                                 most_subs=self.user_manager.get_most_subscriptions())
+        message = message.format(
+            total_user=format_int(self.user_manager.get_total_user_number()),
+            mean=format_float(self.user_manager.get_mean_subscriptions()),
+            most_subs=self.user_manager.get_most_subscriptions())
 
         message += "\n\nInformationen zur Nutzung des Bots auf anderen Plattformen findest du unter " \
                    "https://covidbot.d-64.org!"
@@ -863,7 +930,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         user = self.user_manager.get_user(user_id, with_subscriptions=True)
 
         if not user:
-            return [BotResponse("Für dich sind aktuell keine Debug informationen verfügbar.")]
+            return [
+                BotResponse("Für dich sind aktuell keine Debug informationen verfügbar.")]
 
         return [BotResponse(f"<b>Debug Informationen</b>\n"
                             f"platform_id: {user.platform_id}\n"
@@ -878,10 +946,13 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
         if user_input:
             user_input = user_input.split()
-            for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
+            for setting in [BotUserSettings.REPORT_INCLUDE_ICU,
+                            BotUserSettings.REPORT_INCLUDE_VACCINATION,
+                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS,
+                            BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
                             BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
-                            BotUserSettings.REPORT_SLEEP_MODE, BotUserSettings.REPORT_WEEKLY]:
+                            BotUserSettings.REPORT_SLEEP_MODE,
+                            BotUserSettings.REPORT_WEEKLY]:
                 if user_input[0].lower() not in BotUserSettings.command_key(setting):
                     continue
 
@@ -897,7 +968,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                     if user_choice is not None and word:
                         self.user_manager.set_user_setting(user_id, setting, user_choice)
                         return self.settingsHandler("", user_id) + [
-                            BotResponse(f"{BotUserSettings.title(setting)} wurde {word}geschaltet.")]
+                            BotResponse(
+                                f"{BotUserSettings.title(setting)} wurde {word}geschaltet.")]
 
                 command_without_args = f'einstellung {BotUserSettings.command_key(setting)[0]}'
 
@@ -914,9 +986,12 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                                f'Sende zum {option}schalten {self.command_formatter(command_without_args + f" {option}")}')]
 
                 return [BotResponse(f"<b>{BotUserSettings.title(setting)}:</b> {current}"
-                                    f"\n{BotUserSettings.description(setting)}", choices=choice)]
+                                    f"\n{BotUserSettings.description(setting)}",
+                                    choices=choice)]
 
-            return [BotResponse("Ich verstehe deine Eingabe leider nicht.")] + self.settingsHandler("", user_id)
+            return [BotResponse(
+                "Ich verstehe deine Eingabe leider nicht.")] + self.settingsHandler("",
+                                                                                    user_id)
         else:
             message = "<b>Einstellungen</b>\n"
             message += "Mit den folgenden Einstellungen kannst du deinen Bericht konfigurieren: " \
@@ -927,10 +1002,13 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
 
             choices = []
 
-            for setting in [BotUserSettings.REPORT_INCLUDE_ICU, BotUserSettings.REPORT_INCLUDE_VACCINATION,
-                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS, BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
+            for setting in [BotUserSettings.REPORT_INCLUDE_ICU,
+                            BotUserSettings.REPORT_INCLUDE_VACCINATION,
+                            BotUserSettings.REPORT_EXTENSIVE_GRAPHICS,
+                            BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
                             BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
-                            BotUserSettings.REPORT_SLEEP_MODE, BotUserSettings.REPORT_WEEKLY]:
+                            BotUserSettings.REPORT_SLEEP_MODE,
+                            BotUserSettings.REPORT_WEEKLY]:
                 if self.user_manager.get_user_setting(user_id, setting):
                     choice = "aus"
                     current = "✅"
@@ -939,40 +1017,51 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                     current = "❎"
 
                 command = f"einstellung {BotUserSettings.command_key(setting)[0]} {choice}"
-                choices.append(UserChoice(f"{BotUserSettings.title(setting)} {choice}schalten", '/' + command,
-                                          f"Sende {self.command_formatter(command)}, um {BotUserSettings.title(setting)} "
-                                          f"{choice}zuschalten"))
+                choices.append(
+                    UserChoice(f"{BotUserSettings.title(setting)} {choice}schalten",
+                               '/' + command,
+                               f"Sende {self.command_formatter(command)}, um {BotUserSettings.title(setting)} "
+                               f"{choice}zuschalten"))
                 message += f"<b>{BotUserSettings.title(setting)}: {current}</b>\n" \
                            f"{BotUserSettings.description(setting)}\n\n"
-            choices.append(UserChoice("Berichte verwalten", '/berichte', f'Schreibe "Berichte", deine '
-                                                                         f'täglichen Berichte zu verwalten'))
+            choices.append(UserChoice("Berichte verwalten", '/berichte',
+                                      f'Schreibe "Berichte", deine '
+                                      f'täglichen Berichte zu verwalten'))
             choices.append(self.get_default_userchoice())
             return [BotResponse(message, choices=choices)]
 
     def graphicSettingsHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
-        return self.settingsHandler(BotUserSettings.command_key(BotUserSettings.REPORT_GRAPHICS)[0] + ' ' + user_input,
-                                    user_id)
+        return self.settingsHandler(
+            BotUserSettings.command_key(BotUserSettings.REPORT_GRAPHICS)[
+                0] + ' ' + user_input,
+            user_id)
 
     def sleepModeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
-        new_status = not self.user_manager.get_user_setting(user_id, BotUserSettings.REPORT_SLEEP_MODE)
-        self.user_manager.set_user_setting(user_id, BotUserSettings.REPORT_SLEEP_MODE, new_status)
+        new_status = not self.user_manager.get_user_setting(user_id,
+                                                            BotUserSettings.REPORT_SLEEP_MODE)
+        self.user_manager.set_user_setting(user_id, BotUserSettings.REPORT_SLEEP_MODE,
+                                           new_status)
 
         if new_status:
             verb = "eingeschaltet"
         else:
             verb = "ausgeschaltet"
 
-        return [BotResponse(f"Der Sleep-Modus wurde {verb}. Im Sleep Modus wird dein Bericht pausiert, solange die "
-                            f"Inzidenz in allen deinen Orten unter 10 liegt.")]
+        return [BotResponse(
+            f"Der Sleep-Modus wurde {verb}. Im Sleep Modus wird dein Bericht pausiert, solange die "
+            f"Inzidenz in allen deinen Orten unter 10 liegt.")]
 
     def deleteMeHandler(self, user_input: str, user_id: int) -> List[BotResponse]:
         BOT_COMMAND_COUNT.labels('delete_me').inc()
         self.chat_states[user_id] = (ChatBotState.WAITING_FOR_DELETE_ME, None)
-        choices = [UserChoice("Ja", "Ja", "Sende \"Ja\", um alle deine bei uns gespeicherten Daten von dir zu "
-                                          "löschen"),
-                   UserChoice("Abbrechen", "/noop", "Sende eine andere Nachricht, um keine Daten von dir zu löschen")]
-        return [BotResponse("Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten"
-                            " löschen?", choices=choices)]
+        choices = [UserChoice("Ja", "Ja",
+                              "Sende \"Ja\", um alle deine bei uns gespeicherten Daten von dir zu "
+                              "löschen"),
+                   UserChoice("Abbrechen", "/noop",
+                              "Sende eine andere Nachricht, um keine Daten von dir zu löschen")]
+        return [BotResponse(
+            "Möchtest du den täglichen Bericht abbestellen und alle von dir bei uns gespeicherten Daten"
+            " löschen?", choices=choices)]
 
     @staticmethod
     def format_district_data(district: DistrictData) -> str:
@@ -980,7 +1069,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             .format(name=district.name,
                     incidence=format_float(district.incidence),
                     incidence_trend=format_data_trend(district.incidence_trend),
-                    new_cases=format_noun(district.new_cases, FormattableNoun.NEW_INFECTIONS),
+                    new_cases=format_noun(district.new_cases,
+                                          FormattableNoun.NEW_INFECTIONS),
                     new_deaths=format_noun(district.new_deaths, FormattableNoun.DEATHS))
 
     def get_available_user_messages(self) -> Generator[
@@ -991,7 +1081,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         :rtype: Optional[list[Tuple[str, str]]]
         :return: List of (userid, message)
         """
-        self.user_manager.set_platform_user_number(self.user_manager.get_user_number(self.user_manager.platform))
+        self.user_manager.set_platform_user_number(
+            self.user_manager.get_user_number(self.user_manager.platform))
 
         for user in self.user_manager.get_all_user(with_subscriptions=True):
             for t in self.report_generator.get_available_reports(user):
@@ -1004,7 +1095,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
             if messages:
                 responses = []
                 for m in messages:
-                    responses.append(BotResponse(UserHintService.format_commands(m, self.command_formatter)))
+                    responses.append(BotResponse(
+                        UserHintService.format_commands(m, self.command_formatter)))
                 yield MessageType.USER_MESSAGE, user.platform_id, responses
 
     def confirm_message_send(self, report_type: MessageType, user_id: Union[str, int]):
@@ -1021,7 +1113,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         :return: True if messages are available
         """
         # Set current statistics
-        self.user_manager.set_platform_user_number(self.user_manager.get_user_number(self.user_manager.platform))
+        self.user_manager.set_platform_user_number(
+            self.user_manager.get_user_number(self.user_manager.platform))
 
         for user in self.user_manager.get_all_user(with_subscriptions=True):
             for t in self.report_generator.get_available_reports(user):
@@ -1046,8 +1139,8 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                 num += 1
         return num
 
-
-    def parseLocationInput(self, location_query: str, set_feedback=None, help_command="Befehl") -> Union[
+    def parseLocationInput(self, location_query: str, set_feedback=None,
+                           help_command="Befehl") -> Union[
         List[BotResponse], District]:
         if not location_query:
             return [BotResponse(
@@ -1056,12 +1149,15 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
         response, locations = self.find_district_id(location_query)
         if not locations:
             if set_feedback != 0:
-                self.chat_states[set_feedback] = (ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
+                self.chat_states[set_feedback] = (
+                    ChatBotState.WAITING_FOR_IS_FEEDBACK, location_query)
                 response.message += " Wenn du nicht nach einem Ort gesucht hast, sondern uns Feedback zukommen möchtest, " \
                                     "kannst du diese Nachricht an die Entwickler weiterleiten."
-                response.choices = [UserChoice("Feedback weiterleiten", "Ja", "Sende \"Ja\", um deine Nachricht als "
-                                                                              "Feedback weiterzuleiten"),
-                                    UserChoice("Abbrechen", "/noop", "Sende \"Nein\", um abzubrechen")]
+                response.choices = [UserChoice("Feedback weiterleiten", "Ja",
+                                               "Sende \"Ja\", um deine Nachricht als "
+                                               "Feedback weiterzuleiten"),
+                                    UserChoice("Abbrechen", "/noop",
+                                               "Sende \"Nein\", um abzubrechen")]
             return [response]
 
         elif len(locations) == 1:
@@ -1075,14 +1171,17 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
     def generate_districts_choices(districts: List[District]) -> List[UserChoice]:
         choices = []
         for location in districts:
-            choices.append(UserChoice(location.name, str(location.id), f'{location.name}\t{location.id}',
+            choices.append(UserChoice(location.name, str(location.id),
+                                      f'{location.name}\t{location.id}',
                                       alt_help=f"Anstatt des kompletten Namens kannst du auch die Nummer hinter dem jeweiligen Ort schreiben, also "
                                                f"bspw. {location.id} für {location.name}."))
         return choices
 
-    def find_district_id(self, district_query: str) -> Tuple[Optional[BotResponse], Optional[List[District]]]:
+    def find_district_id(self, district_query: str) -> Tuple[
+        Optional[BotResponse], Optional[List[District]]]:
         if not district_query:
-            return BotResponse('Dieser Befehl benötigt eine Ortsangabe, sende "(Befehl) (Ort)"'), None
+            return BotResponse(
+                'Dieser Befehl benötigt eine Ortsangabe, sende "(Befehl) (Ort)"'), None
 
         possible_district = self.covid_data.search_district_by_name(district_query)
         online_match = False
@@ -1166,7 +1265,8 @@ class InteractiveInterface(MessengerInterface):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    async def send_message_to_users(self, message: str, users: List[Union[str, int]], append_report=False):
+    async def send_message_to_users(self, message: str, users: List[Union[str, int]],
+                                    append_report=False):
         print("Sending messages is not implemented for interactive interface")
 
     def send_unconfirmed_reports(self) -> None:

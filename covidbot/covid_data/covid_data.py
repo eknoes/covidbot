@@ -122,7 +122,7 @@ UNION
         result.vaccinations = self.get_vaccination_data(district_id)
         result.icu_data = self.get_icu_data(district_id)
         result.r_value = self.get_r_value_data(district_id)
-        result.rules = self.get_rules_data(district_id)
+        #result.rules = self.get_rules_data(district_id)
         result.hospitalisation = self.get_hospitalisation_data(district_id)
         return result
 
