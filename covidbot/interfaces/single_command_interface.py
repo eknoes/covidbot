@@ -74,6 +74,9 @@ class SingleCommandInterface(MessengerInterface, ABC):
         if self.user_manager.get_user(self.user_id).created.date() == datetime.date.today():
             return
 
+        if not self.user_manager.get_user(self.user_id).activated:
+            return
+
         # Infections
         last_update = self.user_manager.get_last_updates(self.user_id, MessageType.CASES_GERMANY)
         if not last_update or last_update.date() < germany.date:
@@ -224,6 +227,10 @@ class SingleCommandInterface(MessengerInterface, ABC):
         running = True
 
         while running:
+            if not self.user_manager.get_user(self.user_id).activated:
+                time.sleep(60)
+                continue
+
             for mention in self.get_mentions():
                 chat_id = mention.chat_id
 
