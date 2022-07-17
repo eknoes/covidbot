@@ -12,7 +12,7 @@ class BotUserSettings(Enum):
     FORMATTING = "disable_fake_format"
     REPORT_SLEEP_MODE = "report_sleep_mode"
     REPORT_WEEKLY = "report_weekly"
-    DISABLE_SUNDAY = "disable_sunday"
+    SUNDAY_REPORT = "disable_sunday"
 
     @staticmethod
     def default(setting: BotUserSettings) -> bool:
@@ -32,8 +32,8 @@ class BotUserSettings(Enum):
             return False
         elif setting == BotUserSettings.REPORT_WEEKLY:
             return False
-        elif setting == BotUserSettings.DISABLE_SUNDAY:
-            return True
+        elif setting == BotUserSettings.SUNDAY_REPORT:
+            return False
 
     @staticmethod
     def title(setting: BotUserSettings) -> str:
@@ -53,8 +53,8 @@ class BotUserSettings(Enum):
             return "Bericht Pausieren"
         elif setting == BotUserSettings.REPORT_WEEKLY:
             return "Wöchentlicher Bericht"
-        elif setting == BotUserSettings.DISABLE_SUNDAY:
-            return "Sonntagsbericht deaktivieren"
+        elif setting == BotUserSettings.SUNDAY_REPORT:
+            return "Sonntagsbericht"
 
     @staticmethod
     def description(setting: BotUserSettings) -> str:
@@ -79,8 +79,8 @@ class BotUserSettings(Enum):
             return "Pausiere den Bericht, solange die 7-Tage-Inzidenz in allen von dir abonnierten Orte unter 10 liegt."
         elif setting == BotUserSettings.REPORT_WEEKLY:
             return "Mit dieser Option bekommst du deinen persönlichen Bericht nur montags"
-        elif setting == BotUserSettings.DISABLE_SUNDAY:
-            return "Da am Sonntag in der Regel keine Infektionszahlen gemeldet werden, kann der Infektionsbericht für diesen Tag deaktiviert werden."
+        elif setting == BotUserSettings.SUNDAY_REPORT:
+            return "Da am Sonntag in der Regel keine Infektionszahlen gemeldet werden, kann der Infektionsbericht für diesen Tag ausgeschaltet werden."
 
     @staticmethod
     def command_key(setting: BotUserSettings) -> List[str]:
@@ -100,5 +100,5 @@ class BotUserSettings(Enum):
             return ["pause"]
         elif setting == BotUserSettings.REPORT_WEEKLY:
             return ["woechentlich", "wöchentlich"]
-        elif setting == BotUserSettings.DISABLE_SUNDAY:
+        elif setting == BotUserSettings.SUNDAY_REPORT:
             return ["sonntag"]
