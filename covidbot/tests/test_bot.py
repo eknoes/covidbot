@@ -8,6 +8,7 @@ from covidbot.covid_data import CovidData, RKIKeyDataUpdater, VaccinationGermany
     RValueGermanyUpdater, \
     Visualization, DistrictData, HospitalisationRKIUpdater
 from covidbot.bot import Bot
+from covidbot.settings import BotUserSettings
 from covidbot.user_manager import UserManager
 
 
@@ -75,9 +76,11 @@ class TestBot(TestCase):
         with self.conn.cursor() as cursor:
             for uid in [uid1, uid2]:
                 cursor.execute('UPDATE bot_user SET created=%s WHERE user_id=%s',
-                               [datetime.now() - timedelta(days=2), uid])
+                               [datetime.now() - timedelta(days=4), uid])
                 cursor.execute('TRUNCATE bot_user_sent_reports')
 
+        self.user_manager.set_user_setting(uid1, BotUserSettings.SUNDAY_REPORT, True)
+        self.user_manager.set_user_setting(uid2, BotUserSettings.SUNDAY_REPORT, True)
         update = self.interface.get_available_user_messages()
         i = 0
         for report, uid, reports in update:
