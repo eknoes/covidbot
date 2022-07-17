@@ -952,6 +952,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                             BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
                             BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
                             BotUserSettings.REPORT_SLEEP_MODE,
+                            BotUserSettings.DISABLE_SUNDAY,
                             BotUserSettings.REPORT_WEEKLY]:
                 if user_input[0].lower() not in BotUserSettings.command_key(setting):
                     continue
@@ -1008,6 +1009,7 @@ Weitere Informationen findest Du im <a href="https://corona.rki.de/">Dashboard d
                             BotUserSettings.REPORT_ALL_INFECTION_GRAPHS,
                             BotUserSettings.REPORT_GRAPHICS, BotUserSettings.FORMATTING,
                             BotUserSettings.REPORT_SLEEP_MODE,
+                            BotUserSettings.DISABLE_SUNDAY,
                             BotUserSettings.REPORT_WEEKLY]:
                 if self.user_manager.get_user_setting(user_id, setting):
                     choice = "aus"

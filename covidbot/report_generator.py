@@ -49,6 +49,10 @@ class ReportGenerator:
                 if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_WEEKLY) and last_data_update.weekday() != 0:
                     continue
 
+                # No reports on sunday as it is usually 0
+                if report_type == MessageType.CASES_GERMANY and last_data_update.weekday() == 6 and self.user_manager.get_user_setting(user.id, BotUserSettings.DISABLE_SUNDAY):
+                    continue
+
                 if report_type == MessageType.CASES_GERMANY and self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_SLEEP_MODE):
                     send_report = False
                     for district in user.subscriptions:
