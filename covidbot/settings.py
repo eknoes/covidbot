@@ -78,7 +78,7 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.REPORT_SLEEP_MODE:
             return "Pausiere den Bericht, solange die 7-Tage-Inzidenz in allen von dir abonnierten Orte unter 10 liegt."
         elif setting == BotUserSettings.REPORT_WEEKLY:
-            return "Mit dieser Option bekommst du deinen persönlichen Bericht nur montags"
+            return "Mit dieser Option bekommst du deinen persönlichen Bericht nur am Dienstag"
         elif setting == BotUserSettings.SUNDAY_REPORT:
             return "Da am Sonntag in der Regel keine Infektionszahlen gemeldet werden, kann der Infektionsbericht für diesen Tag ausgeschaltet werden."
 

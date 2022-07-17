@@ -46,7 +46,7 @@ class ReportGenerator:
                 continue
 
             if not last_user_update or last_user_update < last_data_update:
-                if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_WEEKLY) and last_data_update.weekday() != 0:
+                if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_WEEKLY) and last_data_update.weekday() != 1:
                     continue
 
                 # No reports on sunday as it is usually 0
