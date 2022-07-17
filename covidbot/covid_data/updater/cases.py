@@ -50,7 +50,7 @@ class RKIKeyDataUpdater(Updater):
                 district = item['attributes']
                 covid_data.append((district['AdmUnitId'], online_date, district['AnzFall'], district['Inz7T'], district['AnzTodesfall']))
                 if district['AdmUnitId'] == 0:
-                    logging.warning(f"RKIDEBUG: Inz7T: {district['Inz7T']}, AnzFall: {district['AnzFall']}")
+                    self.log.warning(f"RKIDEBUG: Inz7T: {district['Inz7T']}, AnzFall: {district['AnzFall']}")
 
             with self.connection.cursor(dictionary=True) as cursor:
                 cursor.executemany('''INSERT INTO covid_data (rs, date, total_cases, incidence, total_deaths)
@@ -59,7 +59,7 @@ class RKIKeyDataUpdater(Updater):
                 # Plausibility check
                 cursor.execute("SELECT * FROM covid_data_calculated WHERE county_name LIKE '%Deutschland%' ORDER BY date DESC LIMIT 1")
                 row = cursor.fetchone()
-                if (row['new_cases'] is not None and row['new_cases'] < 0) or (row['new_deaths'] is not None and row['new_deaths'] < 0):
+                if (row['new_cases'] is not None and row['new_cases'] < 0) or (row['new_deaths'] is not None and row['new_deaths'] < 0) or (row['new_cases'] == 0 and online_date.weekday() not in [0, 6]):
                     self.connection.rollback()
                     raise ValueError(f"Invalid Data: {row['new_cases']} reported cases, {row['new_deaths']} reported deaths")
             self.connection.commit()
