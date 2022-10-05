@@ -50,3 +50,4 @@ date;message
 2022-07-19;<b>📅 Wöchentlicher Bericht:</b> Sende {Einstellungen} an den Bot, dann kannst du unter Anderem einstellen, dass du den Bericht nur am Dienstag erhalten möchtest!
 2022-07-23;<b>⁉️ Zahlen am Sonntag:</b> Sonntags werden nur noch von wenigen Ämtern die Infektionszahlen übermittelt, sodass das RKI diese nicht einließt. Aus diesem Grund senden wir sonntags keinen Bericht mehr. Dies kann aber über {Einstellungen} geändert werden!
 2022-07-30;<b>⁉️ Zahlen am Sonntag:</b> Sonntags werden nur noch von wenigen Ämtern die Infektionszahlen übermittelt, sodass das RKI diese nicht einließt. Aus diesem Grund senden wir sonntags keinen Bericht mehr. Dies kann aber über {Einstellungen} geändert werden!
+2022-10-05;<b>⚠ Korrektur:<b> Der Bericht heute morgen enthielt leider einen Fehler, wir bitten um Entschuldigung.
