@@ -5,6 +5,7 @@ from typing import Optional
 
 import ujson as json
 
+from covidbot.covid_data.WorkingDayChecker import WorkingDayChecker
 from covidbot.covid_data.updater.districts import RKIDistrictsUpdater
 from covidbot.covid_data.updater.updater import Updater
 
@@ -59,7 +60,7 @@ class RKIKeyDataUpdater(Updater):
                 # Plausibility check
                 cursor.execute("SELECT * FROM covid_data_calculated WHERE county_name LIKE '%Deutschland%' ORDER BY date DESC LIMIT 1")
                 row = cursor.fetchone()
-                if (row['new_cases'] is not None and row['new_cases'] < 0) or (row['new_deaths'] is not None and row['new_deaths'] < 0) or (row['new_cases'] == 0 and online_date.weekday() not in [0, 6]):
+                if (row['new_cases'] is not None and row['new_cases'] < 0) or (row['new_deaths'] is not None and row['new_deaths'] < 0) or (row['new_cases'] == 0 and online_date.weekday() not in [0, 6] and not WorkingDayChecker().check_holiday(online_date)):
                     self.connection.rollback()
                     raise ValueError(f"Invalid Data: {row['new_cases']} reported cases, {row['new_deaths']} reported deaths")
             self.connection.commit()
