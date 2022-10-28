@@ -180,7 +180,7 @@ class SignalInterface(MessengerInterface):
                     try:
                         success = await bot.send_message(userid, adapt_text(elem.message,
                                                                             just_strip=disable_unicode),
-                                                         attachments=elem.images)
+                                                         attachments=[self.get_attachment(attachment) for attachment in elem.images])
                     except InternalError as e:
                         if "org.whispersystems.signalservice.api.push.exceptions.RateLimitException" in e.exceptions:
                             rate_limited = True
