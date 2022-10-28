@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 
 import prometheus_async.aio
 import semaphore
-from semaphore import ChatContext
+from semaphore import ChatContext, Attachment
 from semaphore.exceptions import SignaldError, InternalError, InvalidRequestError, \
     RateLimitError, NoSuchAccountError, NoSendPermissionError, UnknownGroupError, \
     InvalidRecipientError, UnknownError
@@ -151,11 +151,11 @@ class SignalInterface(MessengerInterface):
             FAILED_MESSAGE_COUNT.inc()
 
     @staticmethod
-    def get_attachment(filename: str) -> Dict:
+    def get_attachment(filename: str) -> Attachment:
         """
         Returns an attachement dict to send an image with signald, containing a file path to the graphic
         """
-        return {"filename": filename, "width": "1600", "height": "1000"}
+        return Attachment(filename, width=1600, height=1000)
 
     async def send_unconfirmed_reports(self) -> None:
         """
