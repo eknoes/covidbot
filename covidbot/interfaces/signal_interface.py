@@ -216,7 +216,7 @@ class SignalInterface(MessengerInterface):
                         self.bot.disable_user(userid)
                         break
                     except UnknownError as e:
-                        if e.IDENTIFIER == "ProofRequiredError":
+                        if e.error_type == "ProofRequiredError":
                             break
 
                         self.log.error(f"Unknown Signald Error {e.error_type}: {e.error}")
