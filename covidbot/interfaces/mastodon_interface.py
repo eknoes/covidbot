@@ -29,7 +29,7 @@ class MastodonInterface(SingleCommandInterface):
         self.update_follower_number()
 
     def update_follower_number(self):
-        info = self.mastodon.account(323011)
+        info = self.mastodon.me()
         number = info['followers_count']
         self.user_manager.set_platform_user_number(number)
 
