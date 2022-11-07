@@ -152,7 +152,7 @@ class TelegramInterface(MessengerInterface):
                     else:
                         files = []
                         if len(response.images) > 10:
-                            self.log.warning(f"Can't send {len(response.images)} on Telegram")
+                            self.log.warning(f"Can't send {len(response.images)} images on Telegram, cutting down to 10")
                             response.images = response.images[:10]
 
                         for photo in response.images:
@@ -183,13 +183,19 @@ class TelegramInterface(MessengerInterface):
         except BadRequest as e:
             success = False
             BOT_SEND_MESSAGE_ERRORS.labels(platform='telegram', error='bad-request').inc()
+            self.log.warning(
+                f"Bad Request on sending Telegram message to {chat_id}: {e.message}",
+                exc_info=e)
             if e.message == "Have no rights to send a message":
                 self.bot.disable_user(chat_id)
             elif e.message == "Chat not found":
                 self.bot.delete_user(chat_id)
+            elif e.message.startswith("Can't parse entities"):
+                for response in responses:
+                    self.log.warning(response.message)
+                self.message_developer(f"Can't parse entities happened, please take a look at the logfiles to identify the relevant messages!")
             else:
-                self.log.warning(f"Bad Request on sending Telegram message to {chat_id}: {e.message}", exc_info=e)
-                self.message_developer(f"Unhandled error while sending Telegram message: {e.message}")
+                self.message_developer(f"Bad Request while sending Telegram message: {e.message}")
         except Unauthorized:
             success = False
             self.bot.delete_user(chat_id)
@@ -301,7 +307,7 @@ class TelegramInterface(MessengerInterface):
             if sent_msg is True:
                 self.bot.confirm_message_send(report_type, userid)
                 sliding_flood_window.append(time.perf_counter())
-                self.log.warning(f"Sent report to {userid}!")
+                self.log.info(f"Sent report to {userid}!")
             else:
                 self.log.error(f"Error sending report to {userid}")
                 self.bot.disable_user(userid)
