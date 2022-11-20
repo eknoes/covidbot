@@ -54,7 +54,7 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.REPORT_WEEKLY:
             return "Wöchentlicher Bericht"
         elif setting == BotUserSettings.SUNDAY_REPORT:
-            return "Sonntagsbericht"
+            return "Sonntags- & Montagsbericht"
 
     @staticmethod
     def description(setting: BotUserSettings) -> str:
@@ -80,7 +80,7 @@ class BotUserSettings(Enum):
         elif setting == BotUserSettings.REPORT_WEEKLY:
             return "Mit dieser Option bekommst du deinen persönlichen Bericht nur am Dienstag"
         elif setting == BotUserSettings.SUNDAY_REPORT:
-            return "Da am Sonntag in der Regel keine Infektionszahlen gemeldet werden, kann der Infektionsbericht für diesen Tag ausgeschaltet werden."
+            return "Da am Sonntag und Montag in der Regel keine Infektionszahlen gemeldet werden, kann der Infektionsbericht für diesen Tag ausgeschaltet werden."
 
     @staticmethod
     def command_key(setting: BotUserSettings) -> List[str]:
