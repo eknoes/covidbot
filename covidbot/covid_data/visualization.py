@@ -314,7 +314,10 @@ class Visualization:
 
             ax1.legend(loc="upper left")
 
-            # One tick every 7 days for easier comparison
+            # Fix scale, so its always 100%
+            ax1.set_ylim(0, population)
+
+
             if len(x_data) < 120:
                 formatter = mdates.DateFormatter("%a, %d.%m.")
                 ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=x_data[-1].weekday()))
@@ -323,6 +326,15 @@ class Visualization:
                 self.set_quarterly_formatter(ax1)
             ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 
+            # Adapt left ticks to match percentages on the right
+            ticks = []
+            labels = []
+            for i in range(0, 6):
+                ticks.append(population * (i * 20/100))
+                labels.append(f"{round(population * (i * 20/100) / 1_000_000)} Mio.")
+            ax1.set_yticks(ticks, labels)
+
+            # Percentage on the right
             secaxy = ax1.secondary_yaxis('right', functions=(lambda x: x / population * 100, lambda x: x * population / 100))
             secaxy.set_ylabel('Anteil der Bevölkerung')
             for direction in ["left", "right", "bottom", "top"]:
