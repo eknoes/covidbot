@@ -320,7 +320,7 @@ class Visualization:
                 ax1.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=x_data[-1].weekday()))
                 ax1.xaxis.set_major_formatter(formatter)
             else:
-                self.set_monthly_formatter(ax1)
+                self.set_quarterly_formatter(ax1)
             ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
 
             secaxy = ax1.secondary_yaxis('right', functions=(lambda x: x / population * 100, lambda x: x * population / 100))
@@ -482,7 +482,7 @@ class Visualization:
         ax1.set_ylim(bottom=0, top=100)
 
         # Add a label every 7 days
-        self.set_monthly_formatter(ax1)
+        self.set_quarterly_formatter(ax1)
         ax1.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter())
 
         # Save to file
@@ -593,6 +593,14 @@ class Visualization:
         ax1.xaxis.set_major_locator(mdates.MonthLocator())
         ax1.xaxis.set_major_formatter(formatter)
         ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
+
+    def set_quarterly_formatter(self, ax1):
+        # One tick every 3 months for easier comparison
+        formatter = mdates.DateFormatter("%m/%y")
+        ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+        ax1.xaxis.set_major_formatter(formatter)
+        ax1.yaxis.set_major_formatter(self.tick_formatter_german_numbers)
+        ax1.xaxis.set_minor_locator(mdates.MonthLocator())
 
     # noinspection PyUnusedLocal
     @staticmethod
