@@ -239,7 +239,7 @@ class MatrixInterface(MessengerInterface):
                     self.log.error(f"Can't set avatar: {resp}")
                 else:
                     self.log.debug(f"Set avatar to {url}")
-        await self.matrix.sync_forever(timeout=300)
+        await self.matrix.sync_forever(timeout=300, loop_sleep_time=3)
 
     def run(self):
         asyncio.get_event_loop().run_until_complete(self.async_run())
