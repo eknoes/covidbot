@@ -16,7 +16,7 @@ semaphore-bot==0.15.0
 Mastodon.py==1.5.2
 Shapely==1.8.0
 TwitterAPI==2.7.9.1
-threema.gateway==5.0.0
+threema.gateway==7.0.1
 tornado==6.1
 ujson==5.4.0
 urllib3==1.26.7
