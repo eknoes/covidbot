@@ -111,6 +111,8 @@ class TwitterInterface(SingleCommandInterface):
         API_RESPONSE_CODE.labels(platform='twitter', code=response.status_code).inc()
 
     def get_mentions(self) -> Iterable[SingleArgumentRequest]:
+        return [] # Workaround: We do not reply anymore to single tweets on twitter
+
         try:
             with API_RESPONSE_TIME.labels(platform='twitter').time():
                 response = self.twitter.request(f"statuses/mentions_timeline", params={'tweet_mode': 'extended',
