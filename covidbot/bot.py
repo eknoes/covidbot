@@ -240,7 +240,8 @@ class Bot(object):
                               "Informationen zur Benutzung angezeigt zu bekommen")]
         # Add subscription for Germany on start
         self.user_manager.add_subscription(user_id, 0)
-        self.user_manager.add_report_subscription(user_id, MessageType.CASES_GERMANY)
+        # Turn off automatic report by default
+        # self.user_manager.add_report_subscription(user_id, MessageType.CASES_GERMANY)
         return [BotResponse(message, choices=choices)]
 
     @staticmethod
@@ -266,6 +267,8 @@ class Bot(object):
                   'über diesen Bot kannst Du Dir relevante Daten zur COVID-19-Pandemie anzeigen lassen ' \
                   'und sie dauerhaft abonnieren.\n\n'
 
+        message += f"<i>⚠️ Hinweis: Aufgrund der abnehmenden Relevanz der Daten sind einige Datenquellen nicht mehr verfügbar. Auch der automatisierte Bericht ist standardmäßig deaktiviert, lässt sich aber über den Befehl {self.command_formatter('Berichte')} wieder aktivieren.</i>\n\n"
+
         if short_help:
             message += 'Schicke mir einfach eine Nachricht mit dem Ort, für den Du Informationen erhalten ' \
                        'möchtest. '
@@ -276,8 +279,8 @@ class Bot(object):
                        'aktuellen Daten anzuzeigen oder gültige Regeln abzurufen.\n\n'
             message += '<b>🔔 Berichte</b>\n' \
                        'Wenn du Orte abonnierst erhältst du am Morgen einen täglichen Bericht mit den ' \
-                       'aktuellen Infektionsdaten in all deinen Orten. Zusätzlich kannst du auch Berichte zu ' \
-                       'Impfungen und zur Intensivbettenlage abonnieren.\n\n' \
+                       'aktuellen Infektionsdaten in all deinen Orten. Zusätzlich kannst du auch Berichte ' \
+                       'zur Intensivbettenlage abonnieren.\n\n' \
                        '<b>😴 Pausieren</b>\n' \
                        f'Sende {self.command_formatter("sleep")} an den Bot, um deine Berichte zu pausieren, solange ' \
                        f'die Inzidenz in deinen Orten unter 10 liegt.\n\n' \
@@ -302,14 +305,14 @@ class Bot(object):
                 message += ' Du kannst auch einen Standort senden.'
 
             message += ('\n\n'
-                        '<b>🔔 Täglicher Bericht</b>\n'
+                        '<b>🔔 Bericht</b>\n'
                         'Sendest du "Starte Abo", wird der von gewählte Ort in deinem '
-                        'morgendlichen Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
+                        'Tagesbericht aufgeführt. Hast du den Ort bereits abonniert, wird dir '
                         'stattdessen angeboten, das Abo wieder zu beenden. Alternativ kannst du auch {abo_example} oder '
                         '{beende_example} senden.\n'
                         'Du kannst beliebig viele Orte abonnieren!\n\n'
                         '<b>📖 Weitere Berichte</b>\n'
-                        'Du kannst separat auch die Intensivbettenlage oder Impflage abonnieren. Du bekommst dann einen'
+                        'Du kannst separat auch die Intensivbettenlage abonnieren. Du bekommst dann einen'
                         'zusätzlichen Bericht, wenn diese Daten erscheinen. Sende {berichte_command} um diese zu '
                         'verwalten.\n\n'
                         '<b>📈 Einmalig Informationen erhalten</b>\n'
@@ -483,8 +486,8 @@ class Bot(object):
         responses = []
         if user_input:
             user = self.user_manager.get_user(user_id, with_subscriptions=True)
-            for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY,
-                         MessageType.VACCINATION_GERMANY]:
+            for item in [MessageType.CASES_GERMANY, MessageType.ICU_GERMANY]:
+                # Impfungen werden nicht mehr aktualisiert MessageType.VACCINATION_GERMANY]:
                 if user_input.capitalize() == message_type_name(item)[:len(user_input)]:
                     if item not in user.subscribed_reports:
                         if self.user_manager.add_report_subscription(user_id, item):

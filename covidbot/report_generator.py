@@ -127,14 +127,15 @@ class ReportGenerator:
                 districts[0] = 0
             graphs.append(self.visualization.multi_incidence_graph(districts))
 
-        # Add some information regarding vaccinations, if available
-        if country and country.vaccinations and \
-                self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_INCLUDE_VACCINATION):
-            message += self.get_vacc_text(country)
-            if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_GRAPHICS):
-                graphs.append(self.visualization.vaccination_graph(country.id))
-            if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
-                graphs.append(self.visualization.vaccination_speed_graph(country.id))
+        # Add some information regarding vaccinations, if available:
+        # Data is not refreshed anymore
+        if False and country and country.vaccinations and \
+               self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_INCLUDE_VACCINATION):
+           message += self.get_vacc_text(country)
+           if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_GRAPHICS):
+               graphs.append(self.visualization.vaccination_graph(country.id))
+           if self.user_manager.get_user_setting(user.id, BotUserSettings.REPORT_EXTENSIVE_GRAPHICS):
+               graphs.append(self.visualization.vaccination_speed_graph(country.id))
 
         # Add some information regarding ICU, if available
         if country and country.icu_data and self.user_manager.get_user_setting(user.id,
@@ -237,6 +238,8 @@ class ReportGenerator:
         subscriptions = self.sort_districts(subscriptions)
         message = "<b>Impfbericht zum {date}</b>\n\n".format(date=subscriptions[0].vaccinations.date.strftime("%d.%m.%Y"))
 
+        message += "<i>⚠️ Hinweis: Seit dem 08.04.2023 werden die Impfdaten nicht mehr aktualisiert!</i>\n"
+
         # Short introduction overview for first country subscribed to
         countries = list(filter(lambda d: d.type == "Staat", subscriptions))
         for c in countries:
@@ -337,7 +340,8 @@ class ReportGenerator:
                         percent_covid=format_float(district.icu_data.percent_covid()),
                         covid_trend=format_data_trend(district.icu_data.occupied_covid_trend))
 
-        if show_vaccinations and district.vaccinations:
+        # Impfdaten werden nicht mehr aktualisiert
+        if False and show_vaccinations and district.vaccinations:
             message += "\n• {no_doses} Neuimpfungen, {vacc_partial}% min. eine, {vacc_full}% beide Impfungen und " \
                        "{vacc_booster}% Auffrischungsimpfungen erhalten" \
                 .format(no_doses=format_int(district.vaccinations.doses_diff),
@@ -445,6 +449,7 @@ class ReportGenerator:
         if show_name:
             name = " (" + district.name + ")"
         return f"<b>💉 Impfdaten{name}</b>\n" \
+               f"<i>⚠️ Hinweis: Seit dem 08.04.2023 werden die Impfdaten nicht mehr aktualisiert!</i>\n" \
                "Am {date} wurden {doses} Dosen verimpft. So haben {vacc_partial} ({rate_partial}%) Personen in " \
                "{name} mindestens eine Impfdosis erhalten, {vacc_full} ({rate_full}%) Menschen sind bereits " \
                "vollständig geimpft, {vacc_booster} ({rate_booster}%) Menschen haben eine Auffrischungsimpfung erhalten. " \
