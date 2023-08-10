@@ -1,12 +1,14 @@
-# Der Covidbot ist im Standby
+# Der Covidbot ist ~~im Standby~~ Abgeschaltet!
 Die Pandemie flaut ab, die [RKI-Zahlen verlieren an Aussagekraft](https://www.mdr.de/nachrichten/deutschland/gesellschaft/corona-keine-rki-zahlen-mehr-100.html).
 Andere Datenquellen, die unser Bot nutzt, werden eingestellt.
 Wenn wir dem Bot auf dem Laufenden halten wollen, bedeutet das mehr Arbeit als wir an Kapazität zur Verfügung stellen können (und derzeit wollen).
 
-Aufgrund dessen versetzen wir unseren Covidbot in einen *Standby*-Modus.
-Das heißt:
-* Standardmäßig werden keine automatischen Berichte mehr versendet (Dies lässt sich über den Befehl "Berichte" wieder aktivieren)
-* Datenquellen, die wegfallen (bspw. die Impfdaten) werden nicht durch neue Quellen ersetzt
+~~Aufgrund dessen versetzen wir unseren Covidbot in einen *Standby*-Modus.
+Das heißt:~~
+* ~~Standardmäßig werden keine automatischen Berichte mehr versendet (Dies lässt sich über den Befehl "Berichte" wieder aktivieren)~~
+* ~~Datenquellen, die wegfallen (bspw. die Impfdaten) werden nicht durch neue Quellen ersetzt~~
+
+Da mittlerweile noch mehr Quellen weggefallen sind, haben wir uns dazu entschieden den Bot abzuschalten.
 
 Falls sich die Lage wieder verschärfen sollte, können wir den Bot allerdings jederzeit reaktivieren.
 

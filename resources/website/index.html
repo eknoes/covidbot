@@ -23,167 +23,17 @@
     <div id="hero">
         <img alt="Messaging Text Bubble with text and chart in front of 3 Covid19 Virus" src="logo.png">
         <h1>Der D64 Covidbot</h1>
-        <p>Ein Bot zu Deinen Diensten: Unser Covidbot versorgt Dich einmal am Tag mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir ausgew&auml;hlten Orte.</p>
-        <p>Abonniere ihn einfach in Deinem Lieblingsmessenger, indem Du den Telegram-Bot startest oder bei Signal oder Threema eine Nachricht mit "Start" schickst, nachdem Du den Bot als Kontakt hinzugef&uuml;gt hast.</p>
+        <p>Ein Bot zu Deinen Diensten: Unser Covidbot hat Dich einmal am Tag mit den aktuellen Infektions-, Todes- und Impfzahlen der von Dir ausgew&auml;hlten Orte versorgt. Mitte August 2023 haben wir das Projekt beendet und den Bot abgeschaltet.</p>
     </div>
     <div id="main-content">
         <br>
-        <p class="buttons">
-            <button onclick="window.location.href='https://t.me/CovidInzidenzBot'">
-                <a href="https://t.me/CovidInzidenzBot">Telegram</a></button>
-            <button onclick="window.location.href='https://threema.id/*COVINFO?text=Start'">
-                <a href="https://threema.id/*COVINFO?text=Start">Threema</a></button>
-            <button onclick="window.location.href='https://m.me/D64Covidbot'" ><a href="https://m.me/D64Covidbot">FB Messenger</a></button>
-            <button onclick="window.location.href='https://matrix.to/#/@d64_covidbot:matrix.org'" ><a href="https://matrix.to/#/@d64_covidbot:matrix.org">Matrix</a></button>
-            <button onclick="window.location.href='tel:+4915792453845'" ><a href="tel:+4915792453845">Signal (Beta)*</a></button>
-            <!--<button class="disabled"><a>Signal (Beta)*</a></button>-->
-        </p>
-        <p>
-            <strong>iOS Nutzer:innen</strong> können den Signal-Button gedrückt halten, damit ein Menü erscheint, um den Bot zu den eigenen Kontakten hinzuzufügen.
-        </p>
-        <h3>Signal Status</h3>
-        <!--<p><strong>&#9888;&#65039; Derzeit haben wir auf Signal technische Probleme (<a href="#signal-probleme">Status Verlauf</a>) &#9888;&#65039;</strong></p>-->
-        <p><strong>*Signal (Beta):</strong> Für Signal befindet sich der Covidbot noch in einer Testphase, insbesondere was den Versand der täglichen Abonnements angeht. Weitere Informationen hierzu findest du
-            <a href="#faq_signal">in unserem FAQ</a>. Mit dem Befehl "Bericht" kannst du jederzeit deinen personalisierten Bericht abrufen - unabh&auml;ngig davon, ob er am Vormittag automatisiert zugestellt wurde.</p>
-        <br>
-        <h3>Ohne personalisierte Abofunktion</h3>
-        <p>Unser Covidbot ist auch auf Twitter, Mastodon und Instagram vertreten, dort gibt es die neuesten bundesweiten Zahlen direkt in deine Timeline. Informationen zu den eigenen Orten gibt es auf Twitter und Mastodon allerdings nur als Antwort auf ein Mention mit der Stadt, die dich interessiert (bspw. <code>@D64_Covidbot Hannover</code>). Auf Instagram bieten wir aufgrund der eingeschränkten Programmierschnittstelle leider keine personalisierten Funktionen an.</p>
-        <p class="buttons">
-            <button onclick="window.location.href='https://chaos.social/@D64_Covidbot'">
-                <a rel="me" href="https://chaos.social/@D64_Covidbot">Mastodon</a></button>
-            <button onclick="window.location.href='https://twitter.com/D64_Covidbot'">
-                <a href="https://twitter.com/D64_Covidbot">Twitter</a></button>
-            <button onclick="window.location.href='https://www.instagram.com/d64_covidbot/'">
-                <a href="https://www.instagram.com/d64_covidbot/">Instagram</a></button>
-        </p>
-        <h2 id="faq">Fragen und Antworten (FAQ)</h2>
-        <h3 id="faq_allgemein">Allgemein</h3>
-        <h4 id="faq-wie">Wie starte ich den Bot?</h4>
-        <p>Du kannst einfach eine Nachricht mit dem Stadt-/Landkreis, Bundesland oder einem Standort (nicht bei Threema) an den Bot senden. Dann erhältst du eine Liste mit möglichen Orten oder Aktionen, bspw. "Daten" für die aktuellen Daten oder "Abo" um diesen zu deinem täglichen Abonnement hinzuzufügen.</p>
-        <h4 id="faq-wann">Wann erhalte ich meinen täglichen Bericht?</h4>
-        <p>Wir versenden den Bericht, sobald die Infektionsdaten vom Robert-Koch-Institut (RKI) veröffentlicht wurden. Regelmäßig ist das zwischen 05 und 06 Uhr morgens der Fall. Solltest du um 09 Uhr noch keinen Bericht erhalten haben, ist vielleicht ein Fehler aufgetreten.
-            <a href="#kontakt">Schick uns dann gerne eine Nachricht!</a></p>
-        <h4 id="faq-berichte-und-daten">Welche Art von Berichten gibt es?</h4>
-        <p>Grundsätzlich erhältst du einmal am Tag einen Überblicksbericht (täglichen Bericht) über alle von dir abonnierten Orte sowie die Zahlen für ganz Deutschland. Möchtest du weitere, detailliertere Informationen zu einem bestimmten Ort abrufen, wähle "Daten" aus, nachdem du den Ort an den Bot geschickt hast. Dieser Detailbericht ist unabhängig von den von dir abonnierten Orten.</p>
-	<h4 id="faq-tendenz">Was zeigen die Pfeile hinter den Zahlen an?</h4>
-	<p>Die Pfeile dienen der Visualisierung des Verlaufs des Wertes, geben also eine Tendenz an. Neuinfektionen und Todesfälle werden mit dem Wert von vor einer Woche verglichen, weil die Gesundheitsämter je nach Wochentag unterschiedlich aktiv melden. Durchschnittswerte wie die 7-Tages-Inzidenz oder der R-Wert vergleichen wir dagegen mit dem letzten verfügbaren Wert, in der Regel also mit gestern.</p>
-        <h4 id="faq-quellen">Woher stammen die verschiedenen Informationen?&nbsp;Handelt es sich um seriöse Quellen?</h4>
-        <p>Wir beziehen unsere Daten ausschließlich von offiziellen Stellen bzw. deren Kooperationspartnern:</p>
-        <ul>
-            <li>Neuinfektionen,
-                <a href="https://opendata.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0.csv" target="_blank">Robert-Koch-Institut</a><br>
-            </li>
-            <li>Impfdaten für Deutschland,
-                <a href="https://impfdashboard.de/daten" target="_blank">Impfdashboard des&nbsp;Bundesministeriums für Gesundheit (BMG)</a>
-            </li>
-            <li>Impfdaten für Deutschland und die Bundesländer,
-                <a href="https://services.arcgis.com/OLiydejKCZTGhvWg/ArcGIS/rest/services/Impftabelle_mit_Zweitimpfungen/FeatureServer/0">Esri</a>
-            </li>
-            <li>R-Wert,
-                <a href="https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Projekte_RKI/Nowcasting_Zahlen_csv.csv" target="_blank">Robert-Koch-Institut</a><br>
-            </li>
-            <li>Daten über die Intensivbettenbelegung,
-                <a href="https://www.intensivregister.de/#/aktuelle-lage/reports" target="_blank">DIVI-Intensivregister</a><br>
-            </li>
-            <li>Überblick über die aktuell geltenden Regeln,
-                <a href="https://tourismus-wegweiser.de/" target="_blank">Tourismus-Wegweiser des Kompetenzzentrum Tourismus des Bundes </a><br>
-            </li>
-        </ul>
-        <p>Projekte wie dieser Bot sind nur möglich, wenn öffentliche
-            Stellen Ihre Daten frei - als Open Data - zur Verfügung stellen. Wir sind der Meinung, dass alle Daten, die öffentlichen Institutionen zur Verfügung stehen, grundsätzlich frei für alle abrufbar und verwendbar sein sollten.</p>
-        <h4 id="faq-bedeutung">Was bedeuten die verschiedenen Informationen?</h4>
-        <p>
-            <strong>Infektionszahlen</strong><br>Die 7-Tage Inzidenz ist die Anzahl der COVID-19-Infektionen in den vergangenen 7 Tagen je 100.000 Einwohner:innen. Im Gegensatz zu den Neuinfektionszahlen und Todesfällen lässt sich dieser Wert gut täglich vergleichen. Das liegt daran, dass es ein Wert ist, der sich auf die letzten 7 Tage bezieht und so nicht den tagesabhängigen Schwankungen unterliegt. Die Neuinfektionszahlen und die Todesfälle lassen sich dahingegen am besten mit den Zahlen von vor einer Woche vergleichen, da diese auf Grund des Meldeverzugs tagesabhängigen Schwankungen unterliegen. So werden bspw. am Wochenende weniger Zahlen gemeldet.<br>Mehr Informationen zur Bedeutung der Infektionszahlen findest du im
-            <a href="https://www.rki.de/SharedDocs/FAQ/NCOV2019/gesamt.html" target="_blank">Informationsportal des RKI</a>.<strong><br>Impfzahlen</strong><br>Je nach Impfstoff werden für eine vollständige Immunisierung ein oder zwei Impfungen benötigt. Wir unterscheiden daher zwischen Erstimpfungen und vollständig Erstimmunisierten. Wer einen Impfstoff erhalten hat, der nur einmal verabreicht werden muss, gilt unmittelbar auch als vollständig erstimmunisiert. Andere erst nach Erhalt der zweiten Impfung. Die Anzahl der Erstimpfungen beinhaltet auch die Menschen, die bereits vollständig immunisiert sind.<br>Mehr Informationen zu den Impfungen findest du im
-            <a href="https://www.zusammengegencorona.de/impfen" target="_blank">Informationsportal der Bundesregierung</a>.<strong><br>R-Wert</strong><br>Wir verwenden den 7-Tage-R-Wert des RKI. Dieser beschreibt die Anzahl an Menschen, die von einer infizierten Person angesteckt werden. Dieser Wert ist eine Schätzung und wird aus den geschätzten Infektionszahlen der letzten Tage berechnet.<br>Mehr Informationen zum R-Wert stellt bspw.
-            <a href="https://www.tagesschau.de/faktenfinder/r-wert-101.html" target="_blank">die Tagesschau</a> zur Verfügung.
-        </p>
-        <h4  id="faq-andere-zahlen">Auf der Webseite meiner Stadt/dem ZDF/meiner Lokalzeitung werden anderen Daten angezeigt, wie kann das sein?</h4>
-        <p>Wir rufen einmal am Tag die Daten vom Robert-Koch-Institut (RKI) ab. Dem RKI werden die Daten von den Gesundheitsämtern übermittelt. Teilweise zeigen die Webseiten der lokalen Gesundheitsämter oder Lokalzeitungen aktuellere Daten an, weil sie mehrfach am Tag aktualisiert werden. Teilweise werden auch andere Quellen verwendet, so zeigt
-            <a href="https://www.zdf.de/nachrichten/politik/coronavirus-inzidenz-landkreise-100.html" target="_blank">ZDF heute</a> bspw. nicht die Daten vom RKI an, sondern von
-            <a href="http://www.risklayer-explorer.com/event/100/detail" target="_blank"></a><em><a href="http://www.risklayer-explorer.com/event/100/detail" target="_blank">Risklayer/CEDIM (KIT)</a>.
-            </em>Unseren Daten sollten aber stets mit denen
-            <a href="https://www.tagesschau.de/inland/coronavirus-karte-deutschland-101.html" target="_blank">der Tagesschau</a> und des
-            <a href="https://corona.rki.de/" target="_blank">COVID-19-Dashboards des RKI</a> übereinstimmen.</p>
-        <h4 id="faq-massnahmen">Ich habe einen Fehler in den aktuell geltenden Regeln für meinen Ort gefunden!</h4>
-        <p>Wir beziehen einen die aktuell geltenden Kontaktbeschränkungen automatisch vom <a href="https://tourismus-wegweiser.de/" target="_blank">Tourismus-Wegweiser des Kompetenzzentrum Tourismus des Bundes </a>. Wir werten dort das Feld "Kontaktbeschränkungen" des jeweiligen Bundeslandes aus. Bitte mache selbst das Team des Tourismus-Wegweisers <a href="mailto:kontakt@kompetenzzentrum-tourismus.de?cc=erik.tuchtfeld@d-64.org&subject=Fehler%20in%20der%20aktuellen%20Regelungen&body=Liebes%20Team%20des%20Kompetenzzentrum%20Tourismus%2C%0A%0Azun%C3%A4chst%20einmal%20vielen%20Dank%20f%C3%BCr%20den%20Service%20des%20Tourismus-Wegweisers!%0A%0AMir%20ist%20folgender%20Fehler%20aufgefallen%3A%0A%0AXXX%0ABITTE%20BESCHREIBE%20HIER%20DEN%20FEHLER%20M%C3%96GLICHST%20KONKRET.%20VERGISS%20NICHT%2C%20DAS%20BETREFFENDE%20BUNDESLAND%20ANZUGEBEN.%0AXXX%0A%0AMit%20freundlichen%20Gr%C3%BC%C3%9Fen%0A%0A">über diesen Link auf den Fehler aufmerksam</a>, dann erhalten wir die Mail in Kopie und behalten einen Überblick über die Qualität unserer Datenquellen.</p>
-        <h4 id="faq-vorschlag">Ich fände es gut, wenn der Bot noch xyz könnte!</h4>
-        <p>Wir finden das wahrscheinlich auch gut, hatten diese Idee aber noch nicht.
-            <a href="#kontakt">Schick sie uns gerne!</a><br></p>
-        <h3 id="faq_signal">Signal</h3>
-        <h4>Der Chat verbraucht mit den vielen Grafiken so viel Speicherplatz, kann ich dies begrenzen?</h4>
-        <p>Ja, Signal bietet eine Funktion an, mit der Nachrichten in einem Chat nach einem fest definierten Zeitraum (bis zu einer Woche) gelöscht werden. <a target="_blank" href="https://support.signal.org/hc/de/articles/360007320771">Hier ist beschrieben</a>, wie du diese Funktion aktivieren kannst.</p>
-        <h4>Was heißt "Beta"-Status?</h4>
-        <p>Leider bietet Signal, anders als Threema oder Telegram, keine offizielle Schnittstelle für Bots an. Deshalb mussten wir ein bisschen basteln. Das funktioniert recht gut, aber noch nicht immer, deshalb befindet sich unser Bot für Signal noch in einer Testphase. Hier kann es ab und zu mal etwas ruckeln.</p>
-        <h4>Ich habe heute Morgen keinen Bericht erhalten, funktioniert alles?</h4>
-        <p>Wenn du bis 09 Uhr morgens keinen Bericht erhalten hast, gibt es wahrscheinlich ein technisches Problem. Leider ist es gut möglich, dass der Bot den Bericht an einige verschickt hat, an andere aber nicht. Ohne deine Hilfe wissen wir aber leider nicht, ob ein:e Nutzer:in diesen erhalten hat.
-            <a href="#kontakt">Bitte schreib uns deshalb!</a> Sollte es größere Probleme geben, werden wir hier auf der Seite Informationen dazu veröffentlichen.
-        </p>
-        <h4 id="signal-probleme">Bekannte Störungen beim Covidbot auf Signal</h4>
-        <ul>
-            	<li>03. April 2022, 01:00 Uhr: Der Versand der täglichen Berichte funktioniert wieder.</li>
-		<li>29. März 2022, 03:00 Uhr: Es können derzeit keine täglichen Berichte versendet werden. Das manuelle Anfordern von Berichten oder einzelnen Daten funktioniert jedoch.</li>
-        </ul>
-
-        <h3 id="faq_threema">Threema</h3>
-        <h4>Ich möchte gerne<strong></strong> den Kontakt verifizieren, kann ich das tun?</h4>
-        <p>Klar, scanne einfach diesen QR-Code:</p>
-        <p>
-            <a href="threema-verification.png"><img alt="QR-Code zur Threema Verifizierung" src="threema-verification.png" width="250px"></a>
-        </p>
-        <h2 id="befehle">Befehle</h2>
-        <p>Unser Bot wird über
-            <em>Befehle</em> gesteuert. Wir haben versucht, sie möglichst intuitiv zu gestalten. Solltest Du trotzdem einmal nicht weiterkommen (oder möchtest auf besondere Funktionen zurückgreifen), findest du hier eine Übersicht aller möglichen Befehle, die du einfach als Nachricht an den Bot schicken kannst. Die Groß- und Kleinschreibung spielt bei den Befehlen keine Rolle.
-        </p>
-        <p>Damit die Befehle anschaulicher sind, geben wir als jeweiligen Ort immer
-            <em>Hannover</em> an. Du kannst den Befehl aber natürlich mit dem Ort ausführen, der für Dich von Bedeutung ist.<br>
-        </p>
-        <ul>
-            <li><code>Hilfe</code> bzw. <code>Start</code>: Überblick über die Befehle</li>
-            <li><code>Daten Hannover</code>: Aktuelle Daten für den Ort, hier Hannover als Beispiel, mit generierter Neuinfektionsgrafik</li>
-            <li><code>Regeln Hannover</code>: Aktuelle Regeln für das Bundesland, in dem sich der Ort befindet, hier Hannover als Beispiel für Niedersachsen.</li>
-            <li><code>Abo Hannover</code>: Abonniert tägliche Daten für den Ort, hier Hannover als Beispiel</li>
-            <li><code>Abo</code>: Zeigt eine Liste deiner Abos an</li>
-            <li><code>Beende Hannover</code>: Beendet das Abonnement für den Ort, hier Hannover als Beispiel</li>
-            <li><code>Bericht</code>: Zeigt deinen aktuellen Bericht für alle von dir abonnierten Orte an</li>
-            <li><code>Impfungen</code>: Zeigt die Impfdaten für Deutschland an, sowie eine Imfübersicht für alle Bundesländer</li>
-			<li><code>Info</code>: Liefert Hintergrundinformationen zu den Daten<br></li>
-            <li><code>Statistik</code>: Zeigt die Nutzungsstatistik an</li>
-            <li><code>Datenschutz</code>: Zeigt die
-                <a href="https://github.com/eknoes/covid-bot/wiki/Datenschutz">Datenschutzerklärung</a> an
-            </li>
-            <li>
-                <code>Loeschmich</code>: Löscht alle Daten, die von dir auf dem Server gespeichert sind (siehe hierzu auch die <a href="https://github.com/eknoes/covid-bot/wiki/Datenschutz">Datenschutzerklärung</a>). Hiernach erhältst du keinerlei Berichte mehr, bis du dich erneut anmeldest.
-            </li>
-        </ul>
-        <p>Bei Telegram erhältst du eine Übersicht aller möglichen Befehle, wenn du einen Schrägstrich (/) eingibst. Klicke dann einfach auf den Befehl, den du auslösen möchtest.</p>
-        <h2 id="kontakt">Feedback und Kontakt</h2>
-        <p>Du kannst uns auf verschiedenen Wegen kontaktieren. Am Einfachsten ist es für uns, wenn du Fehler oder Anregungen als
-            <a href="https://github.com/eknoes/covid-bot/issues" target="_blank"><b>Issue auf Github</b></a> einträgst. Sofern du dort nicht registriert, kannst du auch gerne die
-            <b>Feedbackfunktion des Bots</b> nutzen. Schicke ihm einfach eine Nachricht, daraufhin wirst du gefragt, ob du sie als Feedback schicken möchtest. Wenn du das tust, bekommen wir sie. Außerdem sind wir natürlich auch
-            <a href="mailto:Erik%20Tuchtfeld%20%3Cerik.tuchtfeld%40d-64.org%3E?subject=Nachricht%20zum%20Covidbot">per Mail</a> erreichbar.</p>
-        <h2 id="credits">Danksagungen</h2>
-        <p>Ein Dank geht an unsere Entwickler <a href="https://twitter.com/soenke_hu" target="_blank">Sönke Huster</a>,
-            <a href="https://twitter.com/etuchtfeld/" target="_blank">Erik Tuchtfeld</a> und
-            <a href="https://github.com/eknoes/covid-bot/graphs/contributors" target="_blank">alle anderen, die zu unserem Bot beigetragen</a>, ihn fleißig getestet und so stetig verbessert haben.<br>
-        </p>
-        <p>Die Informationen über die Corona-Infektionen werden von der offiziellen Schnittstelle des RKI für
-            <a href="https://hub.arcgis.com/datasets/917fc37a709542548cc3be077a786c17_0" rel="nofollow" target="_blank">Landkreise</a> abgerufen und stehen unter der Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0.<br>
-        </p>
-        <p>Das Coronavirus in unserem Logo stammt von
-            <a href="https://www.iconfinder.com/icons/5729669/coronavirus_flu_influenza_mers_sars_virus_covid-19_corona_corona_virus_icon" target="_blank">Becris .</a> und ist
-            <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC BY-SA 3.0</a> lizenziert.
-            Welche Bibliotheken und andere Dienste wir noch verwenden, kannst Du unter
-            <a href="https://github.com/eknoes/covid-bot/wiki/Credits" target="_blank">Credits</a> bei Github einsehen.
-        </p>
-        <p>Die Nutzung von Threema wäre uns nicht möglich ohne die großzügige Unterstützung durch die&nbsp;<a href="https://threema.ch/de" target="_blank">Threema GmbH</a>, die uns die kostenfreie Nutzung
-            <a href="https://gateway.threema.ch/de" target="_blank">ihres Gateways</a> erlaubt.</p>
-        <h2>Entwicklung</h2>
+    <h2>Entwicklung</h2>
         <p>Der Bot ist ein quelloffenes Projekt. Jede:r kann unseren Quellcode
             <a href="https://github.com/eknoes/covid-bot/" target="_blank">auf GitHub</a> überprüfen und weiterentwickeln. Der Bot ist unter der
             <a href="https://github.com/eknoes/covid-bot/blob/main/LICENSE">
             </a><a href="https://github.com/eknoes/covid-bot/blob/main/LICENSE" target="_blank">
                 GPL-3.0&nbsp;</a> lizensiert.</p>
+        <p>Wir sind <a href="mailto:Erik%20Tuchtfeld%20%3Cerik.tuchtfeld%40d-64.org%3E?subject=Nachricht%20zum%20Covidbot">per Mail</a> erreichbar.</p>
     </div>
 </main>
 <footer>
@@ -199,7 +49,7 @@
         </div>
     </div>
     <div id="legal">
-        <span class='copyright'>2022 CC-BY-SA 4.0 D64 &ndash; Zentrum f&uuml;r digitalen Fortschritt e.V. | <a href="https://d-64.org/impressum/">Impressum</a> | <a href="https://github.com/eknoes/covid-bot/wiki/Datenschutz">Datenschutzerkl&auml;rung</a> | <a href="https://d-64.org/kontakt/">Kontakt</a></span>
+        <span class='copyright'>2023 CC-BY-SA 4.0 D64 &ndash; Zentrum f&uuml;r digitalen Fortschritt e.V. | <a href="https://d-64.org/impressum/">Impressum</a> | <a href="https://github.com/eknoes/covid-bot/wiki/Datenschutz">Datenschutzerkl&auml;rung</a> | <a href="https://d-64.org/kontakt/">Kontakt</a></span>
     </div>
 </footer>
 </body>
